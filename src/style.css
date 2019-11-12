@@ -34,6 +34,29 @@ body {
     font-size: 48px;
 }
 
+#mini_info {
+    color: #8ec6d3;
+    cursor: default;
+    text-shadow: #67909C;
+    font-family: 'Fira Mono', monospace;
+    font-size: 24px;
+}
+
+a {
+    color: #8ec6d3;
+    text-shadow: #67909C;
+}
+
+a:visited {
+    color: #8ec6d3;
+    text-shadow: #67909C;
+}
+
+a:hover {
+    color: #8ec6d3;
+    text-shadow: #67909C;
+}
+
 #footer {
     position: fixed;
     bottom: 0;
