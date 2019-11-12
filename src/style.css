@@ -1,0 +1,52 @@
+body {
+    background: #003366;
+    padding-right: 0.3%;
+}
+
+.center {
+    display: table;
+    margin: auto auto auto auto;
+}
+
+.widebox {
+    width: 100%;
+    background: #00274f;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border: 1px solid #001937;
+    border-radius: 20px;
+    text-align: center;
+}
+
+#errorcode {
+    color: #8ec6d3;
+    cursor: default;
+    text-shadow: #67909C;
+    font-family: 'Fira Mono', monospace;
+    font-size: 94px;
+}
+
+#info {
+    color: #8ec6d3;
+    cursor: default;
+    text-shadow: #67909C;
+    font-family: 'Fira Mono', monospace;
+    font-size: 48px;
+}
+
+#footer {
+    position: fixed;
+    bottom: 0;
+    width: 99%;
+    color: #003366;
+    background: #00274f;
+    cursor: default;
+    padding-top: 3px;
+    border-style: solid;
+    border-color: #001937;
+    border-width: 1px;
+    border-bottom-width: 0;
+    border-radius: 2px 2px 0 0;
+    text-align: center;
+    font-family: 'Fira Mono', monospace;
+}
