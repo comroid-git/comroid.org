@@ -18,6 +18,31 @@ body {
     text-align: center;
 }
 
+#donate {
+    position: fixed;
+    bottom: 0;
+    width: 99%;
+    color: #003366;
+    background: #00274f;
+    cursor: default;
+    padding-top: 3px;
+    border-style: solid;
+    border-color: #001937;
+    border-width: 1px;
+    border-bottom-width: 0;
+    border-radius: 16px;
+    text-align: center;
+    font-family: 'Fira Mono', monospace;
+    left: 2%;
+    bottom: 5%;
+    width: max-content;
+    
+    float: right;
+    
+    padding: 10px;
+    background: #00274f;
+}
+
 #error {
     color: #8ec6d3;
     cursor: default;
