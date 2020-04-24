@@ -33,4 +33,5 @@ dependencies {
     implementation 'org.comroid:common-util:1.4.1-SNAPSHOT'
     implementation 'org.comroid:uniform:0.12.1-SNAPSHOT'
     implementation 'org.comroid:dreadpool:0.1.1-SNAPSHOT'
+    implementation 'org.comroid:listnr:0.1.0-SNAPSHOT'
 }
