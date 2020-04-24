@@ -1,0 +1,23 @@
+apply plugin: 'application'
+
+group 'org.comroid'
+version '0.0.0'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenLocal()
+    maven {
+        url "https://maven.jetbrains.space/comroid/repo"
+        credentials.username "Anonymous.User"
+        credentials.password "anonymous"
+    }
+    jcenter()
+}
+
+dependencies {
+    implementation 'org.comroid:common-util:1.4.1-SNAPSHOT'
+    implementation 'org.comroid:uniform:0.12.1-SNAPSHOT'
+    implementation 'org.comroid:dreadpool:0.1.1-SNAPSHOT'
+}
