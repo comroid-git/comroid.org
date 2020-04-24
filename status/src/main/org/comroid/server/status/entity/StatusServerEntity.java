@@ -15,8 +15,11 @@ import org.comroid.varbind.VariableCarrier;
 import static org.comroid.uniform.adapter.json.fastjson.FastJSONLib.fastJsonLib;
 
 public abstract class StatusServerEntity extends VariableCarrier<StatusServer> {
-    public static synchronized UUID nextID() {
-        return UUID.randomUUID();
+    protected StatusServerEntity(
+            Type entityType, StatusServer server, UniObjectNode initialData
+    ) {
+        super(fastJsonLib, initialData, server);
+        this.entityType = entityType;
     }
 
     public final StatusServer getServer() {
@@ -30,13 +33,9 @@ public abstract class StatusServerEntity extends VariableCarrier<StatusServer> {
     public Type getType() {
         return entityType;
     }
-    private final Type entityType;
 
-    protected StatusServerEntity(
-            Type entityType, StatusServer server, UniObjectNode initialData
-    ) {
-        super(fastJsonLib, initialData, server);
-        this.entityType = entityType;
+    public static synchronized UUID nextID() {
+        return UUID.randomUUID();
     }
 
     public interface Bind {
@@ -48,8 +47,6 @@ public abstract class StatusServerEntity extends VariableCarrier<StatusServer> {
         SERVICE,
 
         MESSAGE;
-
-        private final int mask;
 
         Type(Type... extendsTypes) {
             int[] maskParts = IntStream.concat(
@@ -73,6 +70,8 @@ public abstract class StatusServerEntity extends VariableCarrier<StatusServer> {
         public boolean isType(Type other) {
             return BitmaskUtil.isFlagSet(other.mask, mask);
         }
+        private final int mask;
 
     }
+    private final Type entityType;
 }

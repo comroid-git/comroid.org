@@ -1,32 +1,31 @@
 package org.comroid.server.status;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.comroid.common.func.ParamFactory;
 import org.comroid.listnr.Event;
 import org.comroid.listnr.EventType;
 import org.comroid.restless.CommonHeaderNames;
 import org.comroid.restless.HTTPStatusCodes;
 import org.comroid.restless.REST;
 import org.comroid.server.status.entity.StatusServerEntity;
-import org.comroid.server.status.entity.message.StatusUpdateMessage;
 import org.comroid.server.status.entity.service.Service;
-import org.comroid.uniform.node.UniNode;
 import org.comroid.uniform.node.UniObjectNode;
 import org.comroid.varbind.VarCarrier;
 import org.comroid.varbind.VariableCarrier;
 
 import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
 
 import static org.comroid.uniform.adapter.json.fastjson.FastJSONLib.fastJsonLib;
 
 public final class EventContainer {
-    public final  EventType<Hello, UniObjectNode> TYPE_HELLO = statusServer.getEventHub()
-            .createEventType(Hello.class, node -> new Hello.Impl(statusServer, node));
-    private final StatusServer                    statusServer;
-
+    public final  HttpHandler                     CONTEXT_HANDLER;
+    public final  EventType<Hello, UniObjectNode> TYPE_HELLO;
     public EventContainer(StatusServer statusServer) {
         this.statusServer = statusServer;
 
@@ -44,16 +43,6 @@ public final class EventContainer {
             }
         };
         STATUS_UPDATE = httpExchange -> {
-            if (!validateContentType(httpExchange)) {
-                httpExchange.sendResponseHeaders(HTTPStatusCodes.UNSUPPORTED_MEDIA_TYPE, 0);
-                return;
-            }
-
-            final String body = new BufferedReader(new InputStreamReader(httpExchange.getRequestBody())).lines()
-                    .collect(Collectors.joining());
-            final UniNode data = statusServer.getSerializationLibrary()
-                    .createUniNode(body);
-            final StatusUpdateMessage message = new StatusUpdateMessage(statusServer, data.asObjectNode());
 
             switch (REST.Method.valueOf(httpExchange.getRequestMethod())) {
                 case GET:
@@ -77,6 +66,15 @@ public final class EventContainer {
                     return;
             }
         };
+
+        TYPE_HELLO      = statusServer.getEventHub()
+                .createEventType(Hello.class,
+                        new ParamFactory.Abstract<>(node -> new Hello.Impl(this.statusServer, node)),
+                        data -> {
+
+                        }
+                );
+        CONTEXT_HANDLER = new ContextHandler();
     }
 
     private boolean validateContentType(HttpExchange exchange) {
@@ -95,8 +93,6 @@ public final class EventContainer {
 
     interface Hello extends Event<Hello> {
         final class Impl extends Event.Support.Abstract<Hello> implements Hello, VarCarrier.Underlying<StatusServer> {
-            private final VarCarrier<StatusServer> underlyingVarCarrier;
-
             public Impl(StatusServer server, UniObjectNode node) {
                 this.underlyingVarCarrier = new VariableCarrier<>(server.getSerializationLibrary(), node, server);
             }
@@ -105,14 +101,13 @@ public final class EventContainer {
             public VarCarrier<StatusServer> getUnderlyingVarCarrier() {
                 return underlyingVarCarrier;
             }
+            private final VarCarrier<StatusServer> underlyingVarCarrier;
         }
     }
 
     interface StatusUpdate extends Event<StatusUpdate> {
         final class Impl extends Event.Support.Abstract<StatusUpdate>
                 implements StatusUpdate, VarCarrier.Underlying<StatusServer> {
-            private final VarCarrier<StatusServer> underlyingVarCarrier;
-
             public Impl(StatusServer server, UniObjectNode node) {
                 underlyingVarCarrier = new VariableCarrier<>(server.getSerializationLibrary(), node, server);
             }
@@ -121,6 +116,27 @@ public final class EventContainer {
             public VarCarrier<StatusServer> getUnderlyingVarCarrier() {
                 return underlyingVarCarrier;
             }
+            private final VarCarrier<StatusServer> underlyingVarCarrier;
         }
     }
+
+    private final class ContextHandler implements HttpHandler {
+        @Override
+        public void handle(HttpExchange exchange) throws IOException {
+            if (!validateContentType(exchange)) {
+                exchange.sendResponseHeaders(HTTPStatusCodes.UNSUPPORTED_MEDIA_TYPE, 0);
+                return;
+            }
+
+            final String body = new BufferedReader(new InputStreamReader(exchange.getRequestBody())).lines()
+                    .collect(Collectors.joining());
+            final UniObjectNode data = statusServer.getSerializationLibrary()
+                    .createUniNode(body)
+                    .asObjectNode();
+
+            statusServer.getEventHub()
+                    .publish(data);
+        }
+    }
+    private final StatusServer                    statusServer;
 }

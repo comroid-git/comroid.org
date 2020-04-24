@@ -15,14 +15,22 @@ import org.comroid.uniform.cache.BasicCache;
 import org.comroid.uniform.cache.Cache;
 import org.comroid.uniform.node.UniObjectNode;
 
+import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 
 public class StatusServer {
-    public static void main(String[] args) throws IOException {
-        new StatusServer(InetAddress.getLocalHost(), 580);
-    }
+    private StatusServer(InetAddress host, int port) throws IOException {
+        this.server         = HttpServer.create(new InetSocketAddress(host, port), port);
+        this.threadPool     = ThreadPool.fixedSize(THREAD_GROUP, 8);
+        this.eventHub       = new EventHub<>(threadPool);
+        this.eventContainer = new EventContainer(this);
+        this.entityCache    = new BasicCache<>();
 
-    private static final ThreadGroup THREAD_GROUP = new ThreadGroup("comroid Status Server");
+        server.setExecutor(threadPool);
+        server.createContext("/", eventContainer.CONTEXT_HANDLER);
+
+        this.server.start();
+    }
 
     public FastJSONLib getSerializationLibrary() {
         return FastJSONLib.fastJsonLib;
@@ -40,7 +48,7 @@ public class StatusServer {
         return threadPool;
     }
 
-    public final EventHub<UniObjectNode> getEventHub() {
+    public final EventHub<HttpExchange, UniObjectNode> getEventHub() {
         return eventHub;
     }
 
@@ -48,29 +56,19 @@ public class StatusServer {
         return eventContainer;
     }
 
-    private final HttpServer                      server;
-    private final ThreadPool                      threadPool;
-    private final EventHub<UniObjectNode>         eventHub;
-    private final EventContainer                  eventContainer;
-    private final Cache<UUID, StatusServerEntity> entityCache;
-
-    private StatusServer(InetAddress host, int port) throws IOException {
-        this.server         = HttpServer.create(new InetSocketAddress(host, port), port);
-        this.threadPool     = ThreadPool.fixedSize(THREAD_GROUP, 8);
-        this.eventHub       = new EventHub<>(threadPool);
-        this.eventContainer = new EventContainer(this);
-        this.entityCache    = new BasicCache<>();
-
-        server.setExecutor(threadPool);
-        server.createContext("/hello", eventContainer.HELLO);
-        server.createContext("/status", eventContainer.STATUS_UPDATE);
-
-        this.server.start();
-    }
-
     public final Optional<Service> getServiceByID(UUID id) {
         return entityCache.stream(it -> it.equals(id))
                 .findAny()
                 .map(Service.class::cast);
     }
+
+    public static void main(String[] args) throws IOException {
+        new StatusServer(InetAddress.getLocalHost(), 580);
+    }
+    private static final ThreadGroup THREAD_GROUP = new ThreadGroup("comroid Status Server");
+    private final HttpServer                      server;
+    private final ThreadPool                      threadPool;
+    private final EventHub<UniObjectNode>         eventHub;
+    private final EventContainer                  eventContainer;
+    private final Cache<UUID, StatusServerEntity> entityCache;
 }

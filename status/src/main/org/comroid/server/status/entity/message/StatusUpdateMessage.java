@@ -17,6 +17,10 @@ import static org.comroid.varbind.VarBind.Root;
 
 @Location(StatusUpdateMessage.Bind.class)
 public final class StatusUpdateMessage extends StatusServerEntity {
+    public StatusUpdateMessage(StatusServer server, UniObjectNode initialData) {
+        super(Type.MESSAGE, server, initialData);
+    }
+
     public String getAppName() {
         return requireNonNull(Bind.AppName);
     }
@@ -25,14 +29,11 @@ public final class StatusUpdateMessage extends StatusServerEntity {
         return getID();
     }
 
-    public StatusUpdateMessage(StatusServer server, UniObjectNode initialData) {
-        super(Type.MESSAGE, server, initialData);
-    }
-
     public interface Bind extends StatusServerEntity.Bind {
         @Root GroupBind Root = StatusServerEntity.Bind.Root.subGroup("message_status_update");
         VarBind.Uno<String>                     AppName = Root.bind1stage("app_name", UniValueNode.ValueType.STRING);
-        ReBind.Dep<UUID, StatusServer, Service> Service = ID.rebindDependent(Root,
+        ReBind.Dep<UUID, StatusServer, Service> Service = ID.rebindDependent(
+                Root,
                 (id, server) -> server.getServiceByID(id)
                         .orElseThrow(NoSuchElementException::new)
         );
