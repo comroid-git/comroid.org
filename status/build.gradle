@@ -14,9 +14,9 @@ configurations {
 }
 
 sourceSets {
-    web {
-        resources.srcDirs = [file('src/web')]
-    }
+    main.java.srcDirs = [file('src/main')]
+    test.java.srcDirs = [file('src/test')]
+    web.resources.srcDirs = [file('src/web')]
 }
 
 repositories {
