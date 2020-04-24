@@ -31,9 +31,10 @@ public final class StatusUpdateMessage extends StatusServerEntity {
 
     public interface Bind extends StatusServerEntity.Bind {
         @Root GroupBind Root = StatusServerEntity.Bind.Root.subGroup("message_status_update");
-        VarBind.Uno<String>                     AppName
-                = Root.bind1stage("app_name", UniValueNode.ValueType.STRING);
-        ReBind.Dep<UUID, StatusServer, Service> Service
-                = ID.rebindDependent(Root, (id, server) -> server.getServiceByID(id).orElseThrow(NoSuchElementException::new));
+        VarBind.Uno<String>                     AppName = Root.bind1stage("app_name", UniValueNode.ValueType.STRING);
+        ReBind.Dep<UUID, StatusServer, Service> Service = ID.rebindDependent(Root,
+                (id, server) -> server.getServiceByID(id)
+                        .orElseThrow(NoSuchElementException::new)
+        );
     }
 }

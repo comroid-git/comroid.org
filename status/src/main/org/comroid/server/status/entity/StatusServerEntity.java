@@ -27,6 +27,9 @@ public abstract class StatusServerEntity extends VariableCarrier<StatusServer> {
         return requireNonNull(Bind.ID);
     }
 
+    public Type getType() {
+        return entityType;
+    }
     private final Type entityType;
 
     protected StatusServerEntity(
@@ -34,10 +37,6 @@ public abstract class StatusServerEntity extends VariableCarrier<StatusServer> {
     ) {
         super(fastJsonLib, initialData, server);
         this.entityType = entityType;
-    }
-
-    public Type getType() {
-        return entityType;
     }
 
     public interface Bind {
@@ -53,7 +52,8 @@ public abstract class StatusServerEntity extends VariableCarrier<StatusServer> {
         private final int mask;
 
         Type(Type... extendsTypes) {
-            int[] maskParts = IntStream.concat(IntStream.of(BitmaskUtil.nextFlag()),
+            int[] maskParts = IntStream.concat(
+                    IntStream.of(BitmaskUtil.nextFlag()),
                     Arrays.stream(extendsTypes)
                             .mapToInt(Type::getMask)
             )
@@ -66,11 +66,12 @@ public abstract class StatusServerEntity extends VariableCarrier<StatusServer> {
             return mask;
         }
 
-        public boolean isType(Type other) {
-            return BitmaskUtil.isFlagSet(other.mask, mask);
-        }
         public boolean isType(StatusServerEntity other) {
             return isType(other.getType());
+        }
+
+        public boolean isType(Type other) {
+            return BitmaskUtil.isFlagSet(other.mask, mask);
         }
 
     }
