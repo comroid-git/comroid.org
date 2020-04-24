@@ -8,7 +8,9 @@ import java.util.stream.Stream;
 import org.comroid.restless.CommonHeaderNames;
 import org.comroid.restless.HTTPStatusCodes;
 import org.comroid.restless.REST;
+import org.comroid.server.status.entity.StatusServerEntity;
 import org.comroid.server.status.entity.message.StatusUpdateMessage;
+import org.comroid.server.status.entity.service.Service;
 import org.comroid.uniform.node.UniNode;
 
 import com.sun.net.httpserver.HttpExchange;
@@ -50,9 +52,18 @@ public final class EventContainer {
             final StatusUpdateMessage message = new StatusUpdateMessage(statusServer, data.asObjectNode());
 
             switch (REST.Method.valueOf(httpExchange.getRequestMethod())) {
-                case POST:
-                    break;
                 case GET:
+                    Service service = statusServer.getEntityCache()
+                            .getReference(message.getTargetID(), false)
+                            .wrap()
+                            .filter(entity -> entity.getType()
+                                    .isType(StatusServerEntity.Type.MESSAGE))
+                            .map(Service.class::cast)
+                            .orElse(null);
+
+                    if (service == null)
+                    break;
+                case POST:
                     break;
                 case DELETE:
                     break;

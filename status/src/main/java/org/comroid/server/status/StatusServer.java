@@ -3,12 +3,14 @@ package org.comroid.server.status;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.comroid.common.Polyfill;
 import org.comroid.dreadpool.ThreadPool;
 import org.comroid.listnr.EventHub;
 import org.comroid.server.status.entity.StatusServerEntity;
+import org.comroid.server.status.entity.service.Service;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
 import org.comroid.uniform.cache.Cache;
 import org.comroid.uniform.cache.ProvidedCache;
@@ -52,5 +54,15 @@ public class StatusServer {
         server.createContext("/status", event.STATUS_UPDATE);
 
         this.server.start();
+    }
+
+    public final Cache<UUID, StatusServerEntity> getEntityCache() {
+        return entityCache;
+    }
+
+    public final Optional<Service> getServiceByID(UUID id) {
+        return entityCache.stream(it -> it.equals(id))
+                .findAny()
+                .map(Service.class::cast);
     }
 }
