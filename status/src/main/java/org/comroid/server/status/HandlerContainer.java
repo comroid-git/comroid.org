@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.stream.Collectors;
 
+import org.comroid.restless.CommonHeaderNames;
 import org.comroid.restless.HTTPStatusCodes;
 import org.comroid.server.status.entity.message.StatusUpdateMessage;
 import org.comroid.uniform.node.UniNode;
@@ -23,7 +24,8 @@ public final class HandlerContainer {
 
         HELLO         = httpExchange -> {
             httpExchange.getResponseHeaders()
-                    .add("Accept",
+                    .add(
+                            CommonHeaderNames.ACCEPTED_CONTENT_TYPE,
                             statusServer.getSerializationLibrary()
                                     .getMimeType()
                     );
@@ -50,7 +52,7 @@ public final class HandlerContainer {
 
     private boolean validateContentType(HttpExchange exchange) {
         return exchange.getRequestHeaders()
-                .getFirst("Content-Type")
+                .getFirst(CommonHeaderNames.REQUEST_CONTENT_TYPE)
                 .equals(fastJsonLib.getMimeType());
     }
 }
