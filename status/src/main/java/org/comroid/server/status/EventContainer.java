@@ -3,9 +3,11 @@ package org.comroid.server.status;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.comroid.restless.CommonHeaderNames;
 import org.comroid.restless.HTTPStatusCodes;
+import org.comroid.restless.REST;
 import org.comroid.server.status.entity.message.StatusUpdateMessage;
 import org.comroid.uniform.node.UniNode;
 
@@ -24,8 +26,7 @@ public final class EventContainer {
 
         HELLO         = httpExchange -> {
             httpExchange.getResponseHeaders()
-                    .add(
-                            CommonHeaderNames.ACCEPTED_CONTENT_TYPE,
+                    .add(CommonHeaderNames.ACCEPTED_CONTENT_TYPE,
                             statusServer.getSerializationLibrary()
                                     .getMimeType()
                     );
@@ -47,10 +48,30 @@ public final class EventContainer {
             final UniNode data = statusServer.getSerializationLibrary()
                     .createUniNode(body);
             final StatusUpdateMessage message = new StatusUpdateMessage(statusServer, data.asObjectNode());
+
+            switch (REST.Method.valueOf(httpExchange.getRequestMethod())) {
+                case POST:
+                    break;
+                case GET:
+                    break;
+                case DELETE:
+                    break;
+                default:
+                    httpExchange.sendResponseHeaders(HTTPStatusCodes.METHOD_NOT_ALLOWED, 0);
+                    return;
+            }
         };
     }
 
     private boolean validateContentType(HttpExchange exchange) {
+        Stream.of(CommonHeaderNames.ACCEPTED_CONTENT_TYPE, CommonHeaderNames.REQUEST_CONTENT_TYPE)
+                .forEachOrdered(type -> exchange.getResponseHeaders()
+                        .add(
+                                type,
+                                statusServer.getSerializationLibrary()
+                                        .getMimeType()
+                        ));
+
         return exchange.getRequestHeaders()
                 .getFirst(CommonHeaderNames.REQUEST_CONTENT_TYPE)
                 .equals(fastJsonLib.getMimeType());
