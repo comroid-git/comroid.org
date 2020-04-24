@@ -19,6 +19,12 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 
 public class StatusServer {
+    private final        HttpServer                      server;
+    private final        ThreadPool                      threadPool;
+    private final        EventHub<UniObjectNode>         eventHub;
+    private final        EventContainer                  eventContainer;
+    private final        Cache<UUID, StatusServerEntity> entityCache;
+
     private StatusServer(InetAddress host, int port) throws IOException {
         this.server         = HttpServer.create(new InetSocketAddress(host, port), port);
         this.threadPool     = ThreadPool.fixedSize(THREAD_GROUP, 8);
@@ -65,10 +71,5 @@ public class StatusServer {
     public static void main(String[] args) throws IOException {
         new StatusServer(InetAddress.getLocalHost(), 580);
     }
-    private static final ThreadGroup THREAD_GROUP = new ThreadGroup("comroid Status Server");
-    private final HttpServer                      server;
-    private final ThreadPool                      threadPool;
-    private final EventHub<UniObjectNode>         eventHub;
-    private final EventContainer                  eventContainer;
-    private final Cache<UUID, StatusServerEntity> entityCache;
+    private static final ThreadGroup                     THREAD_GROUP = new ThreadGroup("comroid Status Server");
 }

@@ -24,8 +24,10 @@ import com.sun.net.httpserver.HttpHandler;
 import static org.comroid.uniform.adapter.json.fastjson.FastJSONLib.fastJsonLib;
 
 public final class EventContainer {
-    public final  HttpHandler                     CONTEXT_HANDLER;
-    public final  EventType<Hello, UniObjectNode> TYPE_HELLO;
+    public final HttpHandler                     CONTEXT_HANDLER;
+    public final EventType<Hello, UniObjectNode> TYPE_HELLO;
+    private final StatusServer statusServer;
+
     public EventContainer(StatusServer statusServer) {
         this.statusServer = statusServer;
 
@@ -93,6 +95,8 @@ public final class EventContainer {
 
     interface Hello extends Event<Hello> {
         final class Impl extends Event.Support.Abstract<Hello> implements Hello, VarCarrier.Underlying<StatusServer> {
+            private final VarCarrier<StatusServer> underlyingVarCarrier;
+
             public Impl(StatusServer server, UniObjectNode node) {
                 this.underlyingVarCarrier = new VariableCarrier<>(server.getSerializationLibrary(), node, server);
             }
@@ -101,13 +105,14 @@ public final class EventContainer {
             public VarCarrier<StatusServer> getUnderlyingVarCarrier() {
                 return underlyingVarCarrier;
             }
-            private final VarCarrier<StatusServer> underlyingVarCarrier;
         }
     }
 
     interface StatusUpdate extends Event<StatusUpdate> {
         final class Impl extends Event.Support.Abstract<StatusUpdate>
                 implements StatusUpdate, VarCarrier.Underlying<StatusServer> {
+            private final VarCarrier<StatusServer> underlyingVarCarrier;
+
             public Impl(StatusServer server, UniObjectNode node) {
                 underlyingVarCarrier = new VariableCarrier<>(server.getSerializationLibrary(), node, server);
             }
@@ -116,7 +121,6 @@ public final class EventContainer {
             public VarCarrier<StatusServer> getUnderlyingVarCarrier() {
                 return underlyingVarCarrier;
             }
-            private final VarCarrier<StatusServer> underlyingVarCarrier;
         }
     }
 
@@ -138,5 +142,4 @@ public final class EventContainer {
                     .publish(data);
         }
     }
-    private final StatusServer                    statusServer;
 }
