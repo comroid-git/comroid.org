@@ -5,6 +5,8 @@ import java.io.InputStreamReader;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.comroid.listnr.Event;
+import org.comroid.listnr.EventType;
 import org.comroid.restless.CommonHeaderNames;
 import org.comroid.restless.HTTPStatusCodes;
 import org.comroid.restless.REST;
@@ -12,16 +14,18 @@ import org.comroid.server.status.entity.StatusServerEntity;
 import org.comroid.server.status.entity.message.StatusUpdateMessage;
 import org.comroid.server.status.entity.service.Service;
 import org.comroid.uniform.node.UniNode;
+import org.comroid.uniform.node.UniObjectNode;
+import org.comroid.varbind.VarCarrier;
+import org.comroid.varbind.VariableCarrier;
 
 import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 
 import static org.comroid.uniform.adapter.json.fastjson.FastJSONLib.fastJsonLib;
 
 public final class EventContainer {
-    public final  HttpHandler  HELLO;
-    public final  HttpHandler  STATUS_UPDATE;
-    private final StatusServer statusServer;
+    public final  EventType<Hello, UniObjectNode> TYPE_HELLO = statusServer.getEventHub()
+            .createEventType(Hello.class, node -> new Hello.Impl(statusServer, node));
+    private final StatusServer                    statusServer;
 
     public EventContainer(StatusServer statusServer) {
         this.statusServer = statusServer;
@@ -61,8 +65,9 @@ public final class EventContainer {
                             .map(Service.class::cast)
                             .orElse(null);
 
-                    if (service == null)
-                    break;
+                    if (service == null) {
+                        break;
+                    }
                 case POST:
                     break;
                 case DELETE:
@@ -86,5 +91,36 @@ public final class EventContainer {
         return exchange.getRequestHeaders()
                 .getFirst(CommonHeaderNames.REQUEST_CONTENT_TYPE)
                 .equals(fastJsonLib.getMimeType());
+    }
+
+    interface Hello extends Event<Hello> {
+        final class Impl extends Event.Support.Abstract<Hello> implements Hello, VarCarrier.Underlying<StatusServer> {
+            private final VarCarrier<StatusServer> underlyingVarCarrier;
+
+            public Impl(StatusServer server, UniObjectNode node) {
+                this.underlyingVarCarrier = new VariableCarrier<>(server.getSerializationLibrary(), node, server);
+            }
+
+            @Override
+            public VarCarrier<StatusServer> getUnderlyingVarCarrier() {
+                return underlyingVarCarrier;
+            }
+        }
+    }
+
+    interface StatusUpdate extends Event<StatusUpdate> {
+        final class Impl extends Event.Support.Abstract<StatusUpdate>
+                implements StatusUpdate, VarCarrier.Underlying<StatusServer> {
+            private final VarCarrier<StatusServer> underlyingVarCarrier;
+
+            public Impl(StatusServer server, UniObjectNode node) {
+                underlyingVarCarrier = new VariableCarrier<>(server.getSerializationLibrary(), node, server);
+            }
+
+            @Override
+            public VarCarrier<StatusServer> getUnderlyingVarCarrier() {
+                return underlyingVarCarrier;
+            }
+        }
     }
 }
