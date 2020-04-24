@@ -14,12 +14,12 @@ import com.sun.net.httpserver.HttpHandler;
 
 import static org.comroid.uniform.adapter.json.fastjson.FastJSONLib.fastJsonLib;
 
-public final class HandlerContainer {
+public final class EventContainer {
     public final  HttpHandler  HELLO;
     public final  HttpHandler  STATUS_UPDATE;
     private final StatusServer statusServer;
 
-    public HandlerContainer(StatusServer statusServer) {
+    public EventContainer(StatusServer statusServer) {
         this.statusServer = statusServer;
 
         HELLO         = httpExchange -> {
