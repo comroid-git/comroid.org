@@ -19,6 +19,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 
 public class StatusServer {
+    public static final int PORT = 42641;
     private final        HttpServer                      server;
     private final        ThreadPool                      threadPool;
     private final        EventHub<UniObjectNode>         eventHub;
@@ -69,7 +70,7 @@ public class StatusServer {
     }
 
     public static void main(String[] args) throws IOException {
-        new StatusServer(InetAddress.getLocalHost(), 580);
+        new StatusServer(InetAddress.getLocalHost(), PORT);
     }
     private static final ThreadGroup                     THREAD_GROUP = new ThreadGroup("comroid Status Server");
 }
