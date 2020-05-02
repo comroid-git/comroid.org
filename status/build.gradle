@@ -34,4 +34,8 @@ dependencies {
     implementation 'org.comroid:uniform:0.12.1-SNAPSHOT'
     implementation 'org.comroid:dreadpool:0.1.1-SNAPSHOT'
     implementation 'org.comroid:listnr:0.1.0-SNAPSHOT'
+    implementation 'org.javacord:javacord:3.0.5'
+
+    runtimeOnly 'com.google.flogger:flogger-log4j2-backend:0.5.1'
+    runtimeOnly 'org.apache.logging.log4j:log4j-core:2.11.0'
 }
