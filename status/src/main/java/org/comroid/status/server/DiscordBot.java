@@ -9,7 +9,6 @@ import org.comroid.javacord.util.commands.Command;
 import org.comroid.javacord.util.commands.CommandGroup;
 import org.comroid.javacord.util.commands.CommandHandler;
 import org.comroid.javacord.util.ui.embed.DefaultEmbedFactory;
-import org.comroid.status.server.entity.Service;
 
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
@@ -77,10 +76,10 @@ public enum DiscordBot {
 
         @CommandGroup(name = "Status Commands", description = "All commands related to the status server")
         private class Commands {
-            @Command(minimumArguments = 1)
+            @Command(minimumArguments = 1, convertStringResultsToEmbed = true)
             public String status(String[] args) {
                 return server().getServiceByName(args[0])
-                        .map(Service::statusString)
+                        .map(service -> String.format("Service %s is %s", service.getName(), service.getStatus()))
                         .orElseGet(MessageSupplier.format("Service with name %s not found", args[0]));
             }
         }

@@ -1,5 +1,6 @@
 package org.comroid.status;
 
+import java.util.Collection;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -22,9 +23,9 @@ public enum StatusUpdater {
     private final CompletableFuture<REST<StatusUpdater>> restFuture         = CompletableFuture.allOf(httpAdapterFuture,
             seriAdapterFuture
     )
-            .thenApplyAsync(nil -> new REST<>(httpAdapterFuture.join(), seriAdapterFuture.join()));
-    private final CompletableFuture<Container> containerFuture              = restFuture.thenApplyAsync(Container::new)
-            .thenComposeAsync(Container::initialize);
+            .thenApply(nil -> new REST<>(httpAdapterFuture.join(), seriAdapterFuture.join()));
+    private final CompletableFuture<Container> containerFuture              = restFuture.thenApply(Container::new)
+            .thenCompose(Container::initialize);
 
     public final CompletableFuture<?> initialize(HttpAdapter httpAdapter, SerializationAdapter seriLib) {
         if (httpAdapterFuture.isDone() | seriAdapterFuture.isDone()) {
@@ -45,7 +46,11 @@ public enum StatusUpdater {
         return seriAdapterFuture;
     }
 
-    private class Container {
+    public CompletableFuture<? extends Collection<Service>> requestAllServices() {
+        return containerFuture.thenCompose(Container::requestAllServices);
+    }
+
+    class Container {
         private final REST<StatusUpdater> restClient;
         private final Cache<UUID, Entity> cache;
 
@@ -54,11 +59,17 @@ public enum StatusUpdater {
             this.cache      = new BasicCache<>();
         }
 
-        private CompletableFuture<Span<Service>> initialize() {
+        public CompletableFuture<Span<Service>> requestAllServices() {
+            //noinspection unchecked
             return restClient.request(Service.class)
                     .method(REST.Method.GET)
                     .url(Endpoint.LIST_SERVICES.create())
                     .execute$autoCache(Entity.Bind.ID, cache);
+        }
+
+        private CompletableFuture<Container> initialize() {
+            return CompletableFuture.allOf(requestAllServices())
+                    .thenApply(nil -> this);
         }
     }
 }
