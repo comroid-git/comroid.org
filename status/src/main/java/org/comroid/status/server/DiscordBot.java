@@ -1,12 +1,15 @@
-package org.comroid.server.status;
+package org.comroid.status.server;
 
 import java.awt.Color;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
+import org.comroid.common.info.MessageSupplier;
 import org.comroid.javacord.util.commands.Command;
 import org.comroid.javacord.util.commands.CommandGroup;
 import org.comroid.javacord.util.commands.CommandHandler;
 import org.comroid.javacord.util.ui.embed.DefaultEmbedFactory;
+import org.comroid.status.server.entity.Service;
 
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
@@ -15,17 +18,18 @@ import org.javacord.api.entity.message.embed.EmbedBuilder;
 public enum DiscordBot {
     INSTANCE;
 
-    private final CompletableFuture<String>     tokenFuture     = new CompletableFuture<>();
-    private final CompletableFuture<DiscordApi> apiFuture
-                                                                =
+    private final CompletableFuture<StatusServer> serverFuture    = new CompletableFuture<>();
+    private final CompletableFuture<String>       tokenFuture     = new CompletableFuture<>();
+    private final CompletableFuture<DiscordApi>   apiFuture
+                                                                  =
             tokenFuture.thenComposeAsync(token -> new DiscordApiBuilder().setToken(
             token)
             .setWaitForServersOnStartup(true)
             .setTotalShards(1)
             .login());
-    private final CompletableFuture<Container>  containerFuture = apiFuture.thenApplyAsync(Container::new);
+    private final CompletableFuture<Container>    containerFuture = apiFuture.thenApplyAsync(Container::new);
 
-    public synchronized CompletableFuture<?> supplyToken(String token) {
+    public synchronized CompletableFuture<?> supplyToken(StatusServer server, String token) {
         if (tokenFuture.isDone()) {
             throw new IllegalStateException("Duplicate Token supplied");
         }
@@ -39,7 +43,16 @@ public enum DiscordBot {
         return apiFuture;
     }
 
+    private StatusServer server() {
+        try {
+            return serverFuture.get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private class Container {
+        private final Commands       COMMANDS = new Commands();
         private final DiscordApi     api;
         private final CommandHandler cmd;
 
@@ -59,17 +72,17 @@ public enum DiscordBot {
             cmd.useBotMentionAsPrefix               = true;
             cmd.useDefaultHelp(null);
             cmd.withUnknownCommandResponseStatus(true);
-            cmd.registerCommandTarget(Commands.INSTANCE);
+            cmd.registerCommandTarget(COMMANDS);
         }
-    }
 
-    @CommandGroup(name = "Status Commands", description = "All commands related to the status server")
-    private enum Commands {
-        INSTANCE;
-
-        @Command
-        public void status() {
-            // todo
+        @CommandGroup(name = "Status Commands", description = "All commands related to the status server")
+        private class Commands {
+            @Command(minimumArguments = 1)
+            public String status(String[] args) {
+                return server().getServiceByName(args[0])
+                        .map(Service::statusString)
+                        .orElseGet(MessageSupplier.format("Service with name %s not found", args[0]));
+            }
         }
     }
 }

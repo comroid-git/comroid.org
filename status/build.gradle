@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.bundling.Jar
+
 apply plugin: 'application'
 
 group 'org.comroid'
@@ -9,15 +11,19 @@ targetCompatibility = 1.8
 mainClassName = 'org.comroid.server.status.StatusServer'
 
 configurations {
-    main
-    web.extendsFrom main
+    create 'api'
+    create 'web'
+    main.extendsFrom api
 }
 
 sourceSets {
-    main.java.srcDirs = [file('src/main')]
+    main.compileClasspath += api.output
     test.java.srcDirs = [file('src/test')]
+    api.java.srcDirs = [file('src/api/java')]
     web.resources.srcDirs = [file('src/web')]
 }
+
+compileJava.dependsOn 'compileApiJava'
 
 repositories {
     mavenLocal()
@@ -33,11 +39,15 @@ dependencies {
     implementation 'org.comroid:common-util:1.4.1-SNAPSHOT'
     implementation 'org.comroid:uniform:0.12.1-SNAPSHOT'
     implementation 'org.comroid:dreadpool:0.1.1-SNAPSHOT'
-    implementation 'org.comroid:listnr:0.1.0-SNAPSHOT'
     implementation 'org.javacord:javacord:3.0.5'
 
     // Javacord Utilities
     implementation 'org.comroid:javacord-utilities:1.5.+'
+
+    apiImplementation 'org.comroid:common-util:1.4.1-SNAPSHOT'
+    apiImplementation 'org.comroid:uniform:0.12.1-SNAPSHOT'
+
+    implementation project(path: ':', configuration: 'api')
 
     runtimeOnly 'com.google.flogger:flogger-log4j2-backend:0.5.1'
     runtimeOnly 'org.apache.logging.log4j:log4j-core:2.11.0'
