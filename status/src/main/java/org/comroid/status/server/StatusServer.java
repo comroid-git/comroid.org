@@ -19,7 +19,6 @@ import com.sun.net.httpserver.HttpServer;
 public class StatusServer {
     public static final int                               PORT           = 42641; // hardcoded in server, do not change
     public static final ThreadGroup                       THREAD_GROUP   = new ThreadGroup("comroid Status Server");
-    private final       ContextHandler                    contextHandler = new ContextHandler(this);
     private final       HttpServer                        server;
     private final       ThreadPool                        threadPool;
     private final       Cache<UUID, Entity<StatusServer>> entityCache;
@@ -30,7 +29,7 @@ public class StatusServer {
         this.entityCache = new BasicCache<>();
 
         server.setExecutor(threadPool);
-        server.createContext("/", contextHandler);
+        server.createContext("/", exchange -> ContextHandler.handleExchange(this, exchange));
 
         this.server.start();
     }

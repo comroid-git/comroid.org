@@ -1,5 +1,7 @@
 package org.comroid.status.rest;
 
+import java.util.regex.Pattern;
+
 import org.comroid.restless.RestEndpoint;
 import org.comroid.status.StatusServer;
 
@@ -21,4 +23,11 @@ public enum Endpoint implements RestEndpoint {
     public String getUrlExtension() {
         return extension;
     }
+
+    @Override
+    public Pattern getPattern() {
+        return urlPattern;
+    }
+
+    private final Pattern urlPattern;
 }
