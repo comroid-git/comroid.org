@@ -29,7 +29,7 @@ public class StatusServer {
         this.entityCache = new BasicCache<>();
 
         server.setExecutor(threadPool);
-        server.createContext("/", exchange -> ContextHandler.handleExchange(this, exchange));
+        server.createContext("/", exchange -> ContextHandler.sortExchange(this, exchange));
 
         this.server.start();
     }
