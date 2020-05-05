@@ -60,7 +60,7 @@ public enum StatusUpdater implements ServerObject {
         }
 
         public CompletableFuture<Span<Service>> requestAllServices() {
-            return restClient.request(Service.class)
+            return restClient.request(Service.Bind.Root)
                     .method(REST.Method.GET)
                     .url(Endpoint.LIST_SERVICES.url())
                     .execute$autoCache(Entity.Bind.ID, cache);
