@@ -1,8 +1,7 @@
 package org.comroid.status.entity;
 
-import org.comroid.common.Polyfill;
 import org.comroid.common.func.Invocable;
-import org.comroid.status.ServerObject;
+import org.comroid.status.DependenyObject;
 import org.comroid.status.StatusUpdater;
 import org.comroid.uniform.node.UniObjectNode;
 import org.comroid.uniform.node.UniValueNode;
@@ -16,7 +15,7 @@ import org.comroid.varbind.container.DataContainerBase;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Location(Service.Bind.class)
-public interface Service<SPEC extends ServerObject> extends Entity<SPEC> {
+public interface Service extends Entity {
     default AtomicReference<Service.Status> getStatus() {
         return requireNonNull(Bind.StatusRef);
     }
@@ -49,7 +48,7 @@ public interface Service<SPEC extends ServerObject> extends Entity<SPEC> {
 
     interface Bind extends Entity.Bind {
         @RootBind
-        GroupBind<Service<? extends ServerObject>, ServerObject> Root = Entity.Bind.Root.subGroup("service", Invocable.ofConstructor(Basic.class));
+        GroupBind<Service, DependenyObject> Root = Entity.Bind.Root.subGroup("service", Invocable.ofConstructor(Basic.class));
         VarBind.OneStage<String> Name = Root.bind1stage("name", UniValueNode.ValueType.STRING);
         VarBind.TwoStage<Integer, Status> Status = Root.bind2stage(
                 "status",
@@ -59,7 +58,7 @@ public interface Service<SPEC extends ServerObject> extends Entity<SPEC> {
         ReBind.Duo<Service.Status, AtomicReference<Status>> StatusRef = Status.rebindSimple(AtomicReference::new);
     }
 
-    final class Basic extends DataContainerBase<StatusUpdater> implements Service<StatusUpdater> {
+    final class Basic extends DataContainerBase<DependenyObject> implements Service {
         public Basic(StatusUpdater updater, UniObjectNode node) {
             super(node, updater);
         }

@@ -15,12 +15,12 @@ import org.comroid.uniform.SerializationAdapter;
 import org.comroid.uniform.cache.BasicCache;
 import org.comroid.uniform.cache.Cache;
 
-public enum StatusUpdater implements ServerObject {
+public enum StatusUpdater implements DependenyObject {
     instance;
 
     private final CompletableFuture<HttpAdapter> httpAdapterFuture          = new CompletableFuture<>();
     private final CompletableFuture<SerializationAdapter> seriAdapterFuture = new CompletableFuture<>();
-    private final CompletableFuture<REST<StatusUpdater>> restFuture         = CompletableFuture.allOf(httpAdapterFuture,
+    private final CompletableFuture<REST<DependenyObject>> restFuture         = CompletableFuture.allOf(httpAdapterFuture,
             seriAdapterFuture
     )
             .thenApply(nil -> new REST<>(httpAdapterFuture.join(), seriAdapterFuture.join()));
@@ -51,10 +51,10 @@ public enum StatusUpdater implements ServerObject {
     }
 
     class Container {
-        private final REST<StatusUpdater> restClient;
+        private final REST<DependenyObject> restClient;
         private final Cache<UUID, Entity> cache;
 
-        private Container(REST<StatusUpdater> restClient) {
+        private Container(REST<DependenyObject> restClient) {
             this.restClient = restClient;
             this.cache      = new BasicCache<>();
         }

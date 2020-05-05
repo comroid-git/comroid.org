@@ -4,21 +4,20 @@ import com.sun.net.httpserver.HttpServer;
 import org.comroid.common.io.FileHandle;
 import org.comroid.common.ref.Reference;
 import org.comroid.dreadpool.ThreadPool;
-import org.comroid.status.ServerObject;
+import org.comroid.status.DependenyObject;
 import org.comroid.status.entity.Entity;
 import org.comroid.status.entity.Service;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
 import org.comroid.uniform.cache.Cache;
 import org.comroid.uniform.cache.FileCache;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Optional;
 import java.util.UUID;
 
-public class StatusServer implements ServerObject {
+public class StatusServer implements DependenyObject {
     public static final String PATH_BASE = "~/srv_status/"; // server path base
     public static final int PORT = 42641; // hardcoded in server, do not change
     public static final FileHandle CACHE_FILE = new FileHandle(PATH_BASE + "data/cache.json");
@@ -26,7 +25,7 @@ public class StatusServer implements ServerObject {
     public static StatusServer instance;
     private final HttpServer server;
     private final ThreadPool threadPool;
-    private final Cache<UUID, Entity<StatusServer>> entityCache;
+    private final Cache<UUID, Entity> entityCache;
 
     private StatusServer(InetAddress host, int port) throws IOException {
         this.server = HttpServer.create(new InetSocketAddress(host, port), port);
@@ -51,7 +50,7 @@ public class StatusServer implements ServerObject {
         return FastJSONLib.fastJsonLib;
     }
 
-    public final Cache<UUID, Entity<StatusServer>> getEntityCache() {
+    public final Cache<UUID, Entity> getEntityCache() {
         return entityCache;
     }
 

@@ -6,11 +6,6 @@ import org.comroid.uniform.node.UniNode;
 
 public class ResponseBuilder implements Builder<REST.Response> {
     private final REST.Header.List list = new REST.Header.List();
-    private final REST    restClient;
-
-    public ResponseBuilder(REST restClient) {
-        this.restClient = restClient;
-    }
 
     public ResponseBuilder setStatusCode(int statusCode) {
         this.statusCode = statusCode;
@@ -29,7 +24,7 @@ public class ResponseBuilder implements Builder<REST.Response> {
 
     @Override
     public REST.Response build() {
-        return new REST.Response(restClient, statusCode, body) {{
+        return new REST.Response(statusCode, body) {{
             getHeaders().addAll(list);
         }};
     }
