@@ -19,7 +19,7 @@ public interface Entity<SCOPE extends ServerObject> extends DataContainer<SCOPE>
     }
 
     interface Bind {
-        GroupBind<Entity<? super ServerObject>, ? super ServerObject> Root = new GroupBind<>(StatusUpdater.instance.getSerializationAdapter().join(), "entity");
+        GroupBind<Entity<? extends ServerObject>, ServerObject> Root = new GroupBind<>(StatusUpdater.instance.getSerializationAdapter().join(), "entity");
         VarBind.TwoStage<String, UUID> ID = Root.bind2stage("id", UniValueNode.ValueType.STRING, UUID::fromString);
         VarBind.TwoStage<Integer, EntityType> Type = Root.bind2stage("type", UniValueNode.ValueType.INTEGER, EntityType::valueOf);
     }

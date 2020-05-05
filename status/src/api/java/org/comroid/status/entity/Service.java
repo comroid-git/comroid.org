@@ -49,7 +49,7 @@ public interface Service<SPEC extends ServerObject> extends Entity<SPEC> {
 
     interface Bind extends Entity.Bind {
         @RootBind
-        GroupBind<Service<? super ServerObject>, ? super ServerObject> Root = Entity.Bind.Root.subGroup("service", Invocable.ofConstructor(Polyfill.uncheckedCast(Basic.class)));
+        GroupBind<Service<? extends ServerObject>, ServerObject> Root = Entity.Bind.Root.subGroup("service", Invocable.ofConstructor(Basic.class));
         VarBind.OneStage<String> Name = Root.bind1stage("name", UniValueNode.ValueType.STRING);
         VarBind.TwoStage<Integer, Status> Status = Root.bind2stage(
                 "status",
