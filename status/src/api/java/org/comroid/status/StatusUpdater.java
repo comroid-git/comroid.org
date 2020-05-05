@@ -15,7 +15,7 @@ import org.comroid.uniform.SerializationAdapter;
 import org.comroid.uniform.cache.BasicCache;
 import org.comroid.uniform.cache.Cache;
 
-public enum StatusUpdater {
+public enum StatusUpdater implements ServerObject {
     instance;
 
     private final CompletableFuture<HttpAdapter> httpAdapterFuture          = new CompletableFuture<>();

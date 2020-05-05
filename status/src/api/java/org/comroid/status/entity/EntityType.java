@@ -3,6 +3,8 @@ package org.comroid.status.entity;
 import org.comroid.common.ref.IntEnum;
 
 public enum EntityType implements IntEnum {
+    UNKNOWN,
+
     SERVICE;
 
     @Override

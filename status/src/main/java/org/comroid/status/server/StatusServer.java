@@ -1,37 +1,50 @@
 package org.comroid.status.server;
 
+import com.sun.net.httpserver.HttpServer;
+import org.comroid.common.io.FileHandle;
+import org.comroid.common.ref.Reference;
+import org.comroid.dreadpool.ThreadPool;
+import org.comroid.status.ServerObject;
+import org.comroid.status.entity.Entity;
+import org.comroid.status.entity.Service;
+import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
+import org.comroid.uniform.cache.Cache;
+import org.comroid.uniform.cache.FileCache;
+
+import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.comroid.common.ref.Reference;
-import org.comroid.dreadpool.ThreadPool;
-import org.comroid.status.entity.Entity;
-import org.comroid.status.entity.Service;
-import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
-import org.comroid.uniform.cache.BasicCache;
-import org.comroid.uniform.cache.Cache;
-
-import com.sun.net.httpserver.HttpServer;
-
-public class StatusServer {
-    public static final int                               PORT           = 42641; // hardcoded in server, do not change
-    public static final ThreadGroup                       THREAD_GROUP   = new ThreadGroup("comroid Status Server");
-    private final       HttpServer                        server;
-    private final       ThreadPool                        threadPool;
-    private final       Cache<UUID, Entity<StatusServer>> entityCache;
+public class StatusServer implements ServerObject {
+    public static final String PATH_BASE = "~/srv_status/"; // server path base
+    public static final int PORT = 42641; // hardcoded in server, do not change
+    public static final FileHandle CACHE_FILE = new FileHandle(PATH_BASE + "data/cache.json");
+    public static final ThreadGroup THREAD_GROUP = new ThreadGroup("comroid Status Server");
+    public static StatusServer instance;
+    private final HttpServer server;
+    private final ThreadPool threadPool;
+    private final Cache<UUID, Entity<StatusServer>> entityCache;
 
     private StatusServer(InetAddress host, int port) throws IOException {
-        this.server      = HttpServer.create(new InetSocketAddress(host, port), port);
-        this.threadPool  = ThreadPool.fixedSize(THREAD_GROUP, 8);
-        this.entityCache = new BasicCache<>();
+        this.server = HttpServer.create(new InetSocketAddress(host, port), port);
+        this.threadPool = ThreadPool.fixedSize(THREAD_GROUP, 8);
+        this.entityCache = new FileCache<>(getSerializationLibrary(), Entity.Bind.ID, CACHE_FILE, 250, this);
 
         server.setExecutor(threadPool);
         server.createContext("/", exchange -> ContextHandler.sortExchange(this, exchange));
 
         this.server.start();
+    }
+
+    public static void main(String[] args) throws IOException {
+        instance = new StatusServer(InetAddress.getLocalHost(), PORT);
+        DiscordBot.INSTANCE.supplyToken(instance, args[0]);
+
+        Runtime.getRuntime()
+                .addShutdownHook(new Thread(instance::shutdown));
     }
 
     public FastJSONLib getSerializationLibrary() {
@@ -68,16 +81,6 @@ public class StatusServer {
                 .findFirst();
     }
 
-    public static void main(String[] args) throws IOException {
-        instance = new StatusServer(InetAddress.getLocalHost(), PORT);
-        DiscordBot.INSTANCE.supplyToken(instance, args[0]);
-
-        Runtime.getRuntime()
-                .addShutdownHook(new Thread(instance::shutdown));
-    }
-
     private void shutdown() {
     }
-
-    public static StatusServer instance;
 }

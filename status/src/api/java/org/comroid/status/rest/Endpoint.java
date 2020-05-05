@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 
 import org.comroid.common.iter.Operator;
 import org.comroid.restless.RestEndpoint;
-import org.comroid.status.StatusServer;
+import org.comroid.status.ServerObject;
 
 import org.intellij.lang.annotations.Language;
 
@@ -27,7 +27,7 @@ public enum Endpoint implements RestEndpoint {
 
     Endpoint(String extension, @Language("RegExp") String regex, IntUnaryOperator groupFx) {
         this.extension  = extension;
-        this.urlPattern = Pattern.compile(StatusServer.URL_BASE + regex);
+        this.urlPattern = Pattern.compile(ServerObject.URL_BASE + regex);
         this.groupFx    = groupFx;
     }
 
@@ -38,7 +38,7 @@ public enum Endpoint implements RestEndpoint {
 
     @Override
     public String getUrlBase() {
-        return StatusServer.URL_BASE;
+        return ServerObject.URL_BASE;
     }
 
     @Override
