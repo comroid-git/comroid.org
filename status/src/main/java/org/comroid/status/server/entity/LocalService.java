@@ -11,9 +11,9 @@ import org.comroid.varbind.bind.GroupBind;
 import org.comroid.varbind.container.DataContainerBase;
 
 @Location(value = LocalService.class, rootNode = "GROUP")
-public class LocalService extends DataContainerBase<StatusServer> implements Service<StatusServer> {
+public class LocalService extends DataContainerBase<DependenyObject> implements Service {
     @RootBind
-    public static final GroupBind<Service<? extends DependenyObject>, DependenyObject> GROUP = Bind.Root.subGroup("local_service", Invocable.ofConstructor(LocalService.class));
+    public static final GroupBind<Service, DependenyObject> GROUP = Bind.Root.subGroup("local_service", Invocable.ofConstructor(LocalService.class));
 
     public LocalService(StatusServer server, UniObjectNode data) {
         super(data, server);

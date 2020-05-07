@@ -18,14 +18,14 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class StatusServer implements DependenyObject {
-    public static final String PATH_BASE = "~/srv_status/"; // server path base
+    public static final String PATH_BASE = "/home/comroid/srv_status/"; // server path base
     public static final int PORT = 42641; // hardcoded in server, do not change
     public static final FileHandle CACHE_FILE = new FileHandle(PATH_BASE + "data/cache.json");
     public static final ThreadGroup THREAD_GROUP = new ThreadGroup("comroid Status Server");
     public static StatusServer instance;
     private final HttpServer server;
     private final ThreadPool threadPool;
-    private final Cache<UUID, Entity> entityCache;
+    private final FileCache<UUID, Entity, DependenyObject> entityCache;
 
     private StatusServer(InetAddress host, int port) throws IOException {
         this.server = HttpServer.create(new InetSocketAddress(host, port), port);
@@ -42,8 +42,7 @@ public class StatusServer implements DependenyObject {
         instance = new StatusServer(InetAddress.getLocalHost(), PORT);
         DiscordBot.INSTANCE.supplyToken(instance, args[0]);
 
-        Runtime.getRuntime()
-                .addShutdownHook(new Thread(instance::shutdown));
+        Runtime.getRuntime().addShutdownHook(new Thread(instance::shutdown));
     }
 
     public FastJSONLib getSerializationLibrary() {
@@ -81,5 +80,6 @@ public class StatusServer implements DependenyObject {
     }
 
     private void shutdown() {
+        entityCache.disposeThrow();
     }
 }

@@ -1,5 +1,3 @@
-import org.gradle.api.tasks.bundling.Jar
-
 apply plugin: 'application'
 
 group 'org.comroid'
@@ -23,6 +21,16 @@ sourceSets {
     web.resources.srcDirs = [file('src/web')]
 }
 
+task apiJar(type: Jar) {
+    archiveBaseName = 'org.comroid.status.api'
+    from sourceSets.api.output.classesDirs
+}
+
+jar {
+    from sourceSets.api.output.classesDirs
+}
+
+distributions.main.contents.from apiJar
 compileJava.dependsOn 'compileApiJava'
 
 repositories {
