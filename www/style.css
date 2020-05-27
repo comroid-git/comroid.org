@@ -3,7 +3,7 @@ body {
 	margin: 0;
 	font-family: "Fira Sans", sans-serif;
 	font-size: 18px;
-	background-color: #E8F1F2;
+	background-color: #fafbfc;
 	overflow-x: hidden;
 	display: flex;
 	height: 100%;
@@ -132,7 +132,7 @@ h2 {
 
 a {
 	text-decoration: none;
-	color: #d62828;
+	color: #003366;
 }
 
 .separator {
