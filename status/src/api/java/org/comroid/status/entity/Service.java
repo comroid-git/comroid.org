@@ -3,21 +3,18 @@ package org.comroid.status.entity;
 import org.comroid.common.func.Invocable;
 import org.comroid.status.DependenyObject;
 import org.comroid.status.StatusUpdater;
+import org.comroid.uniform.ValueType;
 import org.comroid.uniform.node.UniObjectNode;
-import org.comroid.uniform.node.UniValueNode;
 import org.comroid.varbind.annotation.Location;
 import org.comroid.varbind.annotation.RootBind;
 import org.comroid.varbind.bind.GroupBind;
-import org.comroid.varbind.bind.ReBind;
 import org.comroid.varbind.bind.VarBind;
 import org.comroid.varbind.container.DataContainerBase;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 @Location(Service.Bind.class)
 public interface Service extends Entity {
-    default AtomicReference<Service.Status> getStatus() {
-        return requireNonNull(Bind.StatusRef);
+    default Status getStatus() {
+        return requireNonNull(Bind.Status);
     }
 
     default String getName() {
@@ -49,13 +46,12 @@ public interface Service extends Entity {
     interface Bind extends Entity.Bind {
         @RootBind
         GroupBind<Service, DependenyObject> Root = Entity.Bind.Root.subGroup("service", Invocable.ofConstructor(Basic.class));
-        VarBind.OneStage<String> Name = Root.bind1stage("name", UniValueNode.ValueType.STRING);
+        VarBind.OneStage<String> Name = Root.bind1stage("name", ValueType.STRING);
         VarBind.TwoStage<Integer, Status> Status = Root.bind2stage(
                 "status",
-                UniValueNode.ValueType.INTEGER,
+                ValueType.INTEGER,
                 Service.Status::valueOf
         );
-        ReBind.Duo<Service.Status, AtomicReference<Status>> StatusRef = Status.rebindSimple(AtomicReference::new);
     }
 
     final class Basic extends DataContainerBase<DependenyObject> implements Service {

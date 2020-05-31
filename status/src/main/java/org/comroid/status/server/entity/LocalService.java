@@ -18,4 +18,13 @@ public class LocalService extends DataContainerBase<DependenyObject> implements 
     public LocalService(StatusServer server, UniObjectNode data) {
         super(data, server);
     }
+
+    public void setStatus(Status status) {
+        //todo
+    }
+
+    @Override
+    public Status getStatus() {
+        //todo
+    }
 }

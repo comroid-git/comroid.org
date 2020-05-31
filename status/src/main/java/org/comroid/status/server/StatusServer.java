@@ -1,6 +1,7 @@
 package org.comroid.status.server;
 
 import com.sun.net.httpserver.HttpServer;
+import org.comroid.common.func.Invocable;
 import org.comroid.common.io.FileHandle;
 import org.comroid.common.ref.Reference;
 import org.comroid.dreadpool.ThreadPool;
