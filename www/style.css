@@ -1,100 +1,178 @@
 body {
-    background: #003366;
-    padding-right: 0.3%;
+    padding: 0;
+    margin: 0;
+    font-family: "Fira Sans", sans-serif;
+    font-size: 18px;
+    background-color: #e3e3e3;
+    overflow-x: hidden;
+    display: flex;
+    height: 100%;
+    flex-direction: column;
 }
 
-.center {
-    display: table;
-    margin: auto auto auto auto;
+html {
+    height: 100%;
+    margin: 0;
 }
 
-.widebox {
+header {
     width: 100%;
-    background: #00274f;
-    padding-top: 10px;
-    padding-bottom: 10px;
-    border: 1px solid #001937;
-    border-radius: 20px;
+    height: 100px;
+    padding: 15px;
+    background-color: #003366;
+    font-family: 'Fira Mono', monospace;
+    text-align: center;
+    color: #e3e3e3;
+}
+
+#content {
+    clear: both;
+    height: auto;
+    width: 55%;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    margin: 0 auto;
+}
+
+footer {
+    width: 100%;
+    margin-top: auto;
+    text-align: center;
+    height: auto;
+    background-color: #00274f;
+    padding: 15px;
+    color: #e3e3e3;
+}
+
+/* Navigation der Seite:
+	Realisierung als Flex-Box, um die Navigation nach Implementierung weiterer Seiten problemlos erweitern zu können */
+
+#nav_container {
+    width: 100%;
+    background-color: #00274f;
+    border-top: 2px solid #003366;
+}
+
+nav {
+    width: 60%;
+    margin: 0 auto;
+}
+
+nav ul {
+    display: flex;
+    flex-direction: row;
+    margin: 0;
+    padding: 0;
+}
+
+nav ul li {
+    list-style: none;
+    padding: 10px;
+    flex-grow: 1;
     text-align: center;
 }
 
-#donate {
-    position: fixed;
-    bottom: 0;
-    width: 99%;
+nav ul li:hover {
+    list-style: none;
+    padding: 10px;
+    flex-grow: 1;
+    background-color: #003366;
+    text-align: center;
+}
+
+nav ul li a {
+    font-size: 20px;
+    display: block;
+    text-decoration: none;
+    color: #e3e3e3;
+}
+
+@media only screen and (max-width: 768px) {
+    /* For mobile phones: */
+    nav {
+        width: 100%;
+    }
+
+    nav ul {
+        display: flex;
+        flex-direction: column;
+        margin: 0;
+        padding: 0;
+    }
+
+    #content {
+        clear: both;
+        height: auto;
+        width: 90%;
+        padding: 20px;
+        margin: 0 auto;
+    }
+
+    #discord_widget {
+        width: 100%;
+    }
+}
+
+/* Headlines, Fonts and Styling */
+
+header h1 {
+    font-family: "Fira Mono", monospace;
+    text-shadow: 1px 1px #67909C;
+}
+
+h1 {
+    font-size: 48px;
+    margin: 0px;
+}
+
+h2 {
+    font-size: 32px;
+    margin: 10px 0px;
+}
+
+a {
+    text-decoration: none;
     color: #003366;
-    background: #00274f;
-    cursor: default;
-    padding-top: 3px;
+}
+
+.separator {
+    width: 100%;
+    height: 1px;
+    background-color: black;
+    margin: 25px 0px;
+}
+
+#donate {
+    margin-top: auto;
+    margin: 10px;
+    padding: 10px;
     border-style: solid;
     border-color: #001937;
     border-width: 1px;
     border-bottom-width: 0;
     border-radius: 16px;
-    text-align: center;
-    font-family: 'Fira Mono', monospace;
-    left: 2%;
-    bottom: 5%;
     width: max-content;
-    
-    float: right;
-    
-    padding: 10px;
-    background: #00274f;
+    background-color: #00274f;
 }
 
-#error {
-    color: #8ec6d3;
-    cursor: default;
-    text-shadow: #67909C;
-    font-family: 'Fira Mono', monospace;
-    font-size: 86px;
-}
+/* Positions-Classes:
+	Extra-Klassen, die genutzt werden, um Formulare zu zentrieren */
 
-#info {
-    color: #8ec6d3;
-    cursor: default;
-    text-shadow: #67909C;
-    font-family: 'Fira Mono', monospace;
-    font-size: 48px;
-}
-
-#mini_info {
-    color: #8ec6d3;
-    cursor: default;
-    text-shadow: #67909C;
-    font-family: 'Fira Mono', monospace;
-    font-size: 24px;
-}
-
-a {
-    color: #8ec6d3;
-    text-shadow: #67909C;
-}
-
-a:visited {
-    color: #8ec6d3;
-    text-shadow: #67909C;
-}
-
-a:hover {
-    color: #3a718e;
-    text-shadow: #453C97;
-}
-
-#footer {
-    position: fixed;
-    bottom: 0;
-    width: 99%;
-    color: #003366;
-    background: #00274f;
-    cursor: default;
-    padding-top: 3px;
-    border-style: solid;
-    border-color: #001937;
-    border-width: 1px;
-    border-bottom-width: 0;
-    border-radius: 2px 2px 0 0;
+.center {
     text-align: center;
-    font-family: 'Fira Mono', monospace;
+}
+
+#discord_widget {
+    margin: 0 auto;
+    width: 350px;
+}
+
+.right {
+    float: right;
+    margin: 20px;
+}
+
+.left {
+    float: left;
+    margin: 20px;
 }
