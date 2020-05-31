@@ -1,0 +1,139 @@
+body {
+    padding: 0;
+    margin: 0;
+    font-family: "Fira Mono", monospace;
+    font-size: 18px;
+    background-color: #004d99;
+    color: #e3e3e3;
+    overflow-x: hidden;
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+}
+
+html {
+    height: 100%;
+    margin: 0;
+}
+
+header {
+    width: 100%;
+    height: 100px;
+    padding: 15px;
+    background-color: #003366;
+    font-family: 'Fira Mono', monospace;
+    text-align: center;
+    color: #e3e3e3;
+    border-bottom: 5px solid #00274f;
+}
+
+#head_wrapper {
+	width: 100%;
+	margin-top: 20px;
+	margin-left: 20px;
+	margin-right: 20px;
+	font-size: 26px;
+	padding: 40px 20px;
+	text-align: center;
+	background-color: #003366;
+	border: 1px solid black;
+	border-radius: 20px;
+}
+
+#flex_container {
+	display: flex;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	padding-bottom: 20px;
+}
+
+.cell {
+	width: 20%;
+	margin-top: 20px;
+	margin-left: 20px;
+	margin-right: 20px;
+	text-align: center;
+	padding: 40px 10px;
+	font-size: 26px;
+	background-color: #003366;
+	border: 1px solid black;
+	border-radius: 35px;
+}
+
+.online {
+	color: #adddcf;
+}
+
+.offline {
+	color: #de6868;
+}
+
+.maintenance {
+	color: #f0e0a2;
+}
+
+@media only screen and (max-width: 768px) {
+    /* For mobile phones: */
+    .cell {
+		width: 100%;
+		margin-top: 20px;
+		margin-left: 20px;
+		margin-right: 20px;
+		text-align: center;
+		padding: 40px 10px;
+		font-size: 26px;
+		background-color: #003366;
+		border: 1px solid black;
+		border-radius: 35px;
+	}
+}
+
+/* Headlines, Fonts and Styling */
+
+header h1 {
+    font-family: "Fira Mono", monospace;
+    text-shadow: 1px 1px #67909C;
+}
+
+header a {
+	color: #e3e3e3;
+	cursor: pointer;
+}
+	
+
+h1 {
+    font-size: 48px;
+    margin: 0px;
+}
+
+h2 {
+    font-size: 32px;
+    margin: 10px 0px;
+}
+
+a {
+    text-decoration: none;
+    color: #003366;
+}
+
+/* Positions-Classes:
+	Extra-Klassen, die genutzt werden, um Formulare zu zentrieren */
+
+.center {
+    text-align: center;
+}
+
+#discord_widget {
+    margin: 0 auto;
+    width: 350px;
+}
+
+.right {
+    float: right;
+    margin: 20px;
+}
+
+.left {
+    float: left;
+    margin: 20px;
+}
