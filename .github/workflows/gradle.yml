@@ -6,6 +6,8 @@ name: Pull Request Integrity
 on:
   pull_request:
     branches: [ master ]
+    paths:
+      - 'status/*'
 
 jobs:
   build:
