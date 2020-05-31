@@ -3,7 +3,7 @@ body {
 	margin: 0;
 	font-family: "Fira Sans", sans-serif;
 	font-size: 18px;
-	background-color: #fafbfc;
+	background-color: #e3e3e3;
 	overflow-x: hidden;
 	display: flex;
 	height: 100%;
@@ -22,7 +22,7 @@ header {
 	background-color: #003366;
 	font-family: 'Fira Mono', monospace;
 	text-align: center;
-	color: #fff;
+	color: #e3e3e3;
 }
 
 #content {
@@ -41,7 +41,7 @@ footer {
 	height: auto;
 	background-color: #00274f;
 	padding: 15px;
-	color: white;
+	color: #e3e3e3;
 }
 
 /* Navigation der Seite:
@@ -84,7 +84,7 @@ nav ul li a {
 	font-size: 20px;
     display: block;
 	text-decoration: none;
-	color: #fff;
+	color: #e3e3e3;
 }
 
 @media only screen and (max-width: 768px) {
