@@ -30,12 +30,12 @@ repositories {
 }
 
 dependencies {
-    implementation project(':status-api')
+    implementation parent.project(':status-api')
 
     compileOnly 'org.jetbrains:annotations:19.0.0'
 
-    implementation 'org.comroid:common-util:1.4.1-SNAPSHOT'
-    implementation 'org.comroid:uniform:0.12.1-SNAPSHOT'
+    implementation 'org.comroid:common-util:1.5.0-SNAPSHOT'
+    implementation 'org.comroid:uniform:0.9.0-SNAPSHOT'
     implementation 'org.comroid:dreadpool:0.1.1-SNAPSHOT'
     implementation 'org.javacord:javacord:3.0.5'
 
