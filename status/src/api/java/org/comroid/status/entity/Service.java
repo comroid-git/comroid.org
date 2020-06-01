@@ -71,7 +71,7 @@ public interface Service extends Entity, WrappedFormattable {
     interface Bind extends Entity.Bind {
         @RootBind
         GroupBind<Service, DependenyObject> Root
-                = Entity.Bind.Root.subGroup("service", Invocable.ofConstructor(Polyfill.uncheckedCast(Basic.class)));
+                = Entity.Bind.Root.subGroup("service", Invocable.ofConstructor(Polyfill.<Class<Service>>uncheckedCast(Basic.class)));
         VarBind.OneStage<String> DisplayName
                 = Root.bind1stage("display_name", ValueType.STRING);
         VarBind.TwoStage<Integer, Status> Status

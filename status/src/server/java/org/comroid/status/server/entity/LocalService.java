@@ -9,7 +9,9 @@ import org.comroid.uniform.node.UniObjectNode;
 import org.comroid.varbind.annotation.Location;
 import org.comroid.varbind.annotation.RootBind;
 import org.comroid.varbind.bind.GroupBind;
+import org.comroid.varbind.container.DataContainer;
 import org.comroid.varbind.container.DataContainerBase;
+import org.comroid.varbind.container.DataContainerBuilder;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -18,7 +20,7 @@ public final class LocalService extends DataContainerBase<DependenyObject> imple
     @RootBind
     public static final GroupBind<Service, DependenyObject> GROUP = Bind.Root.subGroup(
             "local_service",
-            Invocable.ofConstructor(Polyfill.uncheckedCast(LocalService.class))
+            Invocable.ofConstructor(Polyfill.<Class<Service>>uncheckedCast(LocalService.class))
     );
     private final AtomicReference<Status> status;
 
@@ -35,5 +37,37 @@ public final class LocalService extends DataContainerBase<DependenyObject> imple
     @Override
     public Status getStatus() {
         return status.get();
+    }
+
+    public static final class Builder extends DataContainerBuilder<Builder, Service, DependenyObject> {
+        public Builder() {
+            super(Polyfill.uncheckedCast(LocalService.class), StatusServer.instance);
+        }
+
+        @Override
+        protected Service mergeVarCarrier(DataContainer<DependenyObject> dataContainer) {
+            return new OfUnderlying(dataContainer);
+        }
+    }
+
+    private static final class OfUnderlying implements Service, DataContainer.Underlying<DependenyObject> {
+        private final DataContainer<DependenyObject> underlying;
+        private final AtomicReference<Status> status;
+
+        @Override
+        public DataContainer<DependenyObject> getUnderlyingVarCarrier() {
+            return underlying;
+        }
+
+        private OfUnderlying(DataContainer<DependenyObject> underlying) {
+            this.underlying = underlying;
+
+            this.status = new AtomicReference<>(underlying.wrap(Bind.Status).orElse(Status.UNKNOWN));
+        }
+
+        @Override
+        public Status getStatus() {
+            return status.get();
+        }
     }
 }

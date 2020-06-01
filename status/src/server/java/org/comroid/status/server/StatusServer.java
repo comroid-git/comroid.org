@@ -72,6 +72,8 @@ public class StatusServer implements DependenyObject {
     public static void main(String[] args) throws IOException {
         logger.at(Level.INFO).log("Starting comroid Status Server...");
         instance = new StatusServer(InetAddress.getByAddress(new byte[]{0, 0, 0, 0}), PORT);
+        DiscordBot.INSTANCE.serverFuture.complete(instance);
+
         logger.at(Level.INFO).log("Status Server running! Booting Discord Bot...");
         DiscordBot.INSTANCE.supplyToken(instance, args[0]);
 
