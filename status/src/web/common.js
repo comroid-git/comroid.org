@@ -1,12 +1,28 @@
 /**
  * Inits the grid of the status page, performs the JSON fetch.
+ * Replace URL with "https://api.status.comroid.org/services_bulk_status" later
  */
 function initGrid() {
-
     fetch('http://my-json-server.typicode.com/padbeda/testing/db')
-        .then(response => response.json())
-        .then(data => createBoxes(data));
+		.then(handleErrors)
+		.then(response => response.json())
+        .then(data => createBoxes(data))
+        .catch(error => {
+			console.error('There has been a problem with your fetch operation:', error);
+		});
+}
 
+/**
+ * Function to handle failed HTTP responses.
+ * 
+ * @param {Object} response The response object of the fetch API
+ */
+function handleErrors(response) {
+    if (!response.ok) {
+		addBox("Status Server", "unknown");
+        throw Error(response.statusText);
+    }
+    return response;
 }
 
 /**
