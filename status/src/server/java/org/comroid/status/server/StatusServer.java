@@ -18,6 +18,8 @@ import org.comroid.varbind.bind.VarBind;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ForkJoinPool;
 import java.util.logging.Level;
 
 public class StatusServer implements DependenyObject {
@@ -28,7 +30,7 @@ public class StatusServer implements DependenyObject {
     public static final int PORT = 42641; // hardcoded in server, do not change
     public static final ThreadGroup THREAD_GROUP = new ThreadGroup("comroid Status Server");
     public static StatusServer instance;
-    private final ThreadPool threadPool;
+    private final ExecutorService threadPool;
     private final FileCache<String, Entity, DependenyObject> entityCache;
     private final REST<StatusServer> rest;
     private final RestServer server;
@@ -41,7 +43,7 @@ public class StatusServer implements DependenyObject {
         return server;
     }
 
-    public final ThreadPool getThreadPool() {
+    public final ExecutorService getThreadPool() {
         return threadPool;
     }
 
@@ -51,8 +53,11 @@ public class StatusServer implements DependenyObject {
 
         logger.at(Level.INFO).log("Initialized Adapters");
 
+        /*
         this.threadPool = ThreadPool.fixedSize(THREAD_GROUP, 8);
         logger.at(Level.INFO).log("ThreadPool created: %s", threadPool);
+         */
+        this.threadPool = ForkJoinPool.commonPool();
 
         this.rest = new REST<>(DependenyObject.Adapters.HTTP_ADAPTER, DependenyObject.Adapters.SERIALIZATION_ADAPTER, threadPool, this);
         logger.at(Level.INFO).log("REST Client created: %s", rest);
@@ -60,7 +65,7 @@ public class StatusServer implements DependenyObject {
         this.entityCache = new FileCache<>(FastJSONLib.fastJsonLib, Entity.Bind.Name, CACHE_FILE, 250, this);
         logger.at(Level.INFO).log("EntityCache created: %s", entityCache);
 
-        this.server = new RestServer(this.rest, host, port, ServerEndpoints.values());
+        this.server = new RestServer(this.rest, DependenyObject.URL_BASE, host, port, ServerEndpoints.values());
         logger.at(Level.INFO).log("Server Started! %s", server);
     }
 
