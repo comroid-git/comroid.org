@@ -19,7 +19,8 @@ html {
 header {
     width: 100%;
     height: 100px;
-    padding: 15px;
+    padding-top: 15px;
+    padding-bottom: 15px;
     background-color: #003366;
     font-family: 'Fira Mono', monospace;
     text-align: center;
@@ -107,7 +108,8 @@ header {
 	header h1 {
 		font-family: "Fira Mono", monospace;
 		text-shadow: 1px 1px #67909C;
-		font-size: 32px;
+		font-size: 28px;
+		font-size: 6vw;
 	}
 }
 
