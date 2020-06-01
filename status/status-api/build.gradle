@@ -1,0 +1,60 @@
+group 'org.comroid'
+version = rootProject.version
+
+apply plugin: 'java-library'
+apply from: 'vars.gradle'
+
+tasks.withType(Javadoc) {
+    source = sourceSets.main.java
+    options.encoding = 'UTF-8'
+}
+
+sourceSets {
+    main.java.srcDirs = [file("$rootDir/src/api/java")]
+    main.resources.srcDirs = [file("$rootDir/src/api/resources")]
+    test.java.srcDirs = [file("$rootDir/src/api-test/java")]
+    test.resources.srcDirs = [file("$rootDir/src/api-test/resources")]
+}
+
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allJava
+
+    try {
+        archiveClassifier.set 'sources'
+    } catch (MissingPropertyException ignored) {
+        classifier = "sources"
+    }
+}
+
+task javadocJar(type: Jar) {
+    dependsOn 'javadoc'
+
+    from javadoc.destinationDir
+
+    try {
+        archiveClassifier.set 'javadoc'
+    } catch (MissingPropertyException ignored) {
+        classifier = "javadoc"
+    }
+}
+
+compileJava.options.encoding = 'UTF-8'
+
+repositories {
+    mavenLocal()
+    maven {
+        url "https://maven.jetbrains.space/comroid/repo"
+        credentials.username "Anonymous.User"
+        credentials.password "anonymous"
+    }
+    jcenter()
+}
+
+dependencies {
+    api 'org.comroid:common-util:1.4.1-SNAPSHOT'
+    api 'org.comroid:uniform:0.12.1-SNAPSHOT'
+
+    implementation 'org.comroid:upd8r:0.1.2-SNAPSHOT'
+}
+
+apply from: 'publishing.gradle'

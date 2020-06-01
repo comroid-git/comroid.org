@@ -1,0 +1,2 @@
+include ':status-api'
+project(':status-api').projectDir = new File(settingsDir, '../status-api')

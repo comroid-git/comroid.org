@@ -1,0 +1,9 @@
+import static java.lang.System.getenv
+
+ext {
+    artifactName = 'status-api'
+    userbase = 'comroid-git'
+
+    projectDescription = 'The API for the comroid Status Server'
+    exportedProjects = rootProject.subprojects.collect { it.name }
+}

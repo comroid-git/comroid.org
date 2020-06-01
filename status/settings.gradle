@@ -1,2 +1,4 @@
 rootProject.name = 'status'
 
+include(':status-api')
+include(':status-server')
