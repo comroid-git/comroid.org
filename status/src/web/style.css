@@ -61,7 +61,7 @@ header {
 }
 
 .online {
-	color: #adddcf;
+	color: #91dca3;
 }
 
 .offline {
@@ -69,6 +69,10 @@ header {
 }
 
 .maintenance {
+	color: #fc9b7a;
+}
+
+.busy {
 	color: #f0e0a2;
 }
 
@@ -86,6 +90,25 @@ header {
 		border: 1px solid black;
 		border-radius: 35px;
 	}
+	
+	#head_wrapper {
+		width: 100%;
+		margin-top: 20px;
+		margin-left: 20px;
+		margin-right: 20px;
+		font-size: 26px;
+		padding: 40px 20px;
+		text-align: center;
+		background-color: #003366;
+		border: 1px solid black;
+		border-radius: 35px;
+	}
+	
+	header h1 {
+		font-family: "Fira Mono", monospace;
+		text-shadow: 1px 1px #67909C;
+		font-size: 32px;
+	}
 }
 
 /* Headlines, Fonts and Styling */
@@ -99,7 +122,10 @@ header a {
 	color: #e3e3e3;
 	cursor: pointer;
 }
-	
+
+#flex_container p {
+	margin: 0;
+}
 
 h1 {
     font-size: 48px;
