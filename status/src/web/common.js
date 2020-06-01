@@ -1,13 +1,13 @@
 /**
  * Inits the grid of the status page, performs the JSON fetch.
- * Replace URL with "https://api.status.comroid.org/services_bulk_status" later
  */
 function initGrid() {
-    fetch('http://my-json-server.typicode.com/padbeda/testing/db')
+    fetch('https://api.status.comroid.org/services_bulk_status')
 		.then(handleErrors)
 		.then(response => response.json())
         .then(data => createBoxes(data))
         .catch(error => {
+			addBox("status-server", "Status Server", "unknown");
 			console.error('There has been a problem with your fetch operation:', error);
 		});
 }
@@ -19,7 +19,6 @@ function initGrid() {
  */
 function handleErrors(response) {
     if (!response.ok) {
-		addBox("Status Server", "unknown");
         throw Error(response.statusText);
     }
     return response;
@@ -33,7 +32,7 @@ function handleErrors(response) {
 function createBoxes(data) {
     for (var i = 0; i < data.results.length; i++) {
         var obj = data.results[i];
-        addBox(obj.display_name, determineStatus(obj.status));
+        addBox(obj.name, obj.display_name, determineStatus(obj.status));
     }
 }
 
@@ -63,13 +62,14 @@ function determineStatus(number) {
 /**
  * Creates a new div inside the flex container.
  *
- * @param {string} display_name The display name parsed of the service
+ * @param {string} name The service name parsed from JSON data
+ * @param {string} display_name The display name parsed from JSON data
  * @param {string} status The current status of the service
  */
-function addBox(display_name, status) {
+function addBox(name, display_name, status) {
     // Create a new box in the status grid
     var newDiv = document.createElement("div");
-    if (display_name == "Status Server") {
+    if (name == "status-server") {
         newDiv.id = "head_wrapper";
     } else {
         newDiv.className = "cell";
