@@ -1,0 +1,47 @@
+apply plugin: 'application'
+
+group 'org.comroid'
+version = rootProject.version
+apply from: 'vars.gradle'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+mainClassName = 'org.comroid.status.server.StatusServer'
+
+configurations {
+    create 'web'
+}
+
+sourceSets {
+    main.java.srcDirs = [file("$rootDir/src/server/java")]
+    main.resources.srcDirs = [file("$rootDir/src/server/resources")]
+    web.resources.srcDirs = [file("$rootDir/src/web")]
+}
+
+repositories {
+    mavenLocal()
+    maven {
+        url "https://maven.jetbrains.space/comroid/repo"
+        credentials.username "Anonymous.User"
+        credentials.password "anonymous"
+    }
+    jcenter()
+}
+
+dependencies {
+    //implementation project(':status-api')
+
+    compileOnly 'org.jetbrains:annotations:19.0.0'
+
+    implementation 'org.comroid:common-util:1.4.1-SNAPSHOT'
+    implementation 'org.comroid:uniform:0.12.1-SNAPSHOT'
+    implementation 'org.comroid:dreadpool:0.1.1-SNAPSHOT'
+    implementation 'org.javacord:javacord:3.0.5'
+
+    // Javacord Utilities
+    implementation 'org.comroid:javacord-utilities:1.5.+'
+
+    runtimeOnly 'com.google.flogger:flogger-log4j2-backend:0.5.1'
+    runtimeOnly 'org.apache.logging.log4j:log4j-core:2.11.0'
+}
