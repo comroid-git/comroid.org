@@ -30,7 +30,7 @@ repositories {
 }
 
 dependencies {
-    implementation parent.project(':status-api')
+    implementation project(':status-api')
 
     compileOnly 'org.jetbrains:annotations:19.0.0'
 
