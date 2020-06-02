@@ -10,7 +10,7 @@ import org.comroid.varbind.annotation.RootBind;
 import org.comroid.varbind.bind.GroupBind;
 import org.comroid.varbind.container.DataContainerBase;
 
-@Location(value = LocalService.class, rootNode = "GROUP")
+@Location(value = LocalService.class, fieldName = "GROUP")
 public class LocalService extends DataContainerBase<DependenyObject> implements Service {
     @RootBind
     public static final GroupBind<Service, DependenyObject> GROUP = Bind.Root.subGroup("local_service", Invocable.ofConstructor(LocalService.class));

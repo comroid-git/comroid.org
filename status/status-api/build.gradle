@@ -51,6 +51,8 @@ repositories {
 }
 
 dependencies {
+    compileOnly 'org.jetbrains:annotations:19.0.0'
+
     api 'org.comroid:common-util:1.5.0-SNAPSHOT'
     api 'org.comroid:uniform:0.9.0-SNAPSHOT'
 }

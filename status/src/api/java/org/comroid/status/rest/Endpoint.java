@@ -4,9 +4,8 @@ import java.util.function.IntUnaryOperator;
 import java.util.regex.Pattern;
 
 import org.comroid.common.iter.Operator;
-import org.comroid.restless.RestEndpoint;
+import org.comroid.restless.endpoint.RestEndpoint;
 import org.comroid.status.DependenyObject;
-
 import org.intellij.lang.annotations.Language;
 
 public enum Endpoint implements RestEndpoint {
@@ -44,10 +43,5 @@ public enum Endpoint implements RestEndpoint {
     @Override
     public Pattern getPattern() {
         return urlPattern;
-    }
-
-    @Override
-    public IntUnaryOperator getGroupFx() {
-        return groupFx;
     }
 }
