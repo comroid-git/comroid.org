@@ -32,10 +32,6 @@ public class StatusServer implements DependenyObject {
     private final REST<StatusServer> rest;
     private final RestServer server;
 
-    public FastJSONLib getSerializationLibrary() {
-        return FastJSONLib.fastJsonLib;
-    }
-
     public final Cache<String, Entity> getEntityCache() {
         return entityCache;
     }
@@ -58,7 +54,7 @@ public class StatusServer implements DependenyObject {
         logger.at(Level.INFO).log("ThreadPool created: %s", threadPool);
         this.rest = new REST<>(DependenyObject.Adapters.HTTP_ADAPTER, DependenyObject.Adapters.SERIALIZATION_ADAPTER, threadPool, this);
         logger.at(Level.INFO).log("REST Client created: %s", rest);
-        this.entityCache = new FileCache<>(getSerializationLibrary(), Entity.Bind.Name, CACHE_FILE, 250, this);
+        this.entityCache = new FileCache<>(Adapters.SERIALIZATION_ADAPTER, Entity.Bind.Name, CACHE_FILE, 250, this);
         logger.at(Level.INFO).log("EntityCache created: %s", entityCache);
         this.server = new RestServer(this.rest, host, port, ServerEndpoints.values());
         logger.at(Level.INFO).log("Server Started! %s", server);
