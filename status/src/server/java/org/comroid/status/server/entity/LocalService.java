@@ -14,7 +14,7 @@ import org.comroid.varbind.container.DataContainerBase;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Location(value = LocalService.class, fieldName = "GROUP")
-public class LocalService extends DataContainerBase<DependenyObject> implements Service {
+public final class LocalService extends DataContainerBase<DependenyObject> implements Service {
     @RootBind
     public static final GroupBind<Service, DependenyObject> GROUP = Bind.Root.subGroup(
             "local_service",
