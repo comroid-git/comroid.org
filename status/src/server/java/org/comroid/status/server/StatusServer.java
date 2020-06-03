@@ -13,6 +13,7 @@ import org.comroid.status.server.rest.ServerEndpoints;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
 import org.comroid.uniform.cache.Cache;
 import org.comroid.uniform.cache.FileCache;
+import org.comroid.varbind.bind.VarBind;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -21,7 +22,7 @@ import java.util.logging.Level;
 
 public class StatusServer implements DependenyObject {
     public static final FluentLogger logger = FluentLogger.forEnclosingClass();
-    public static final FileHandle PATH_BASE = new FileHandle("/home/comroid/srv_status/"); // server path base
+    public static final FileHandle PATH_BASE = new FileHandle("/home/comroid/srv_status/", true); // server path base
     public static final FileHandle DATA_DIR = PATH_BASE.createSubDir("data");
     public static final FileHandle CACHE_FILE = DATA_DIR.createSubFile("cache.json");
     public static final int PORT = 42641; // hardcoded in server, do not change
@@ -52,11 +53,14 @@ public class StatusServer implements DependenyObject {
 
         this.threadPool = ThreadPool.fixedSize(THREAD_GROUP, 8);
         logger.at(Level.INFO).log("ThreadPool created: %s", threadPool);
+
         this.rest = new REST<>(DependenyObject.Adapters.HTTP_ADAPTER, DependenyObject.Adapters.SERIALIZATION_ADAPTER, threadPool, this);
         logger.at(Level.INFO).log("REST Client created: %s", rest);
+
         //todo JVM just dies here
         this.entityCache = new FileCache<>(FastJSONLib.fastJsonLib, Entity.Bind.Name, CACHE_FILE, 250, this);
         logger.at(Level.INFO).log("EntityCache created: %s", entityCache);
+
         this.server = new RestServer(this.rest, host, port, ServerEndpoints.values());
         logger.at(Level.INFO).log("Server Started! %s", server);
     }
