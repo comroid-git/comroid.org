@@ -17,7 +17,7 @@ import org.comroid.uniform.node.UniObjectNode;
 import java.util.Optional;
 
 import static org.comroid.restless.HTTPStatusCodes.NOT_FOUND;
-import static org.comroid.status.DependenyObject.SERIALIZATION_ADAPTER;
+import static org.comroid.status.DependenyObject.Adapters.SERIALIZATION_ADAPTER;
 
 public enum ServerEndpoints implements ServerEndpoint.Underlying {
     LIST_SERVICES(Endpoint.LIST_SERVICES, (data, args) -> {
