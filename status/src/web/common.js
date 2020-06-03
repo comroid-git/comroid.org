@@ -2,7 +2,7 @@
  * Inits the grid of the status page, performs the JSON fetch.
  */
 function initGrid() {
-    fetch('https://api.status.comroid.org/services_bulk_status')
+    fetch('https://api.status.comroid.org/services')
 		.then(handleErrors)
 		.then(response => response.json())
         .then(data => createBoxes(data))
