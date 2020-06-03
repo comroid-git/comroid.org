@@ -2,7 +2,6 @@ package org.comroid.status.server;
 
 import com.google.common.flogger.FluentLogger;
 import org.comroid.common.io.FileHandle;
-import org.comroid.common.ref.Reference;
 import org.comroid.dreadpool.ThreadPool;
 import org.comroid.restless.REST;
 import org.comroid.restless.adapter.okhttp.v3.OkHttp3Adapter;
@@ -22,9 +21,10 @@ import java.util.logging.Level;
 
 public class StatusServer implements DependenyObject {
     public static final FluentLogger logger = FluentLogger.forEnclosingClass();
-    public static final String PATH_BASE = "/home/comroid/srv_status/"; // server path base
+    public static final FileHandle PATH_BASE = new FileHandle("/home/comroid/srv_status/"); // server path base
+    public static final FileHandle DATA_DIR = PATH_BASE.createSubDir("data");
+    public static final FileHandle CACHE_FILE = DATA_DIR.createSubFile("cache.json");
     public static final int PORT = 42641; // hardcoded in server, do not change
-    public static final FileHandle CACHE_FILE = new FileHandle(PATH_BASE + "data/cache.json");
     public static final ThreadGroup THREAD_GROUP = new ThreadGroup("comroid Status Server");
     public static StatusServer instance;
     private final ThreadPool threadPool;
