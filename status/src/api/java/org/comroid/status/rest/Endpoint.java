@@ -1,34 +1,16 @@
 package org.comroid.status.rest;
 
-import java.util.function.IntUnaryOperator;
-import java.util.regex.Pattern;
-
-import org.comroid.common.iter.Operator;
 import org.comroid.restless.endpoint.RestEndpoint;
 import org.comroid.status.DependenyObject;
 import org.intellij.lang.annotations.Language;
 
+import java.util.regex.Pattern;
+
 public enum Endpoint implements RestEndpoint {
-    LIST_SERVICES("services"),
-    GET_SERVICE("sevices/%s",
-            "services/(\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b)",
-            Operator.intOrder(0)
-    );
+    LIST_SERVICES("services");
 
-    private final String           extension;
-    private final Pattern          urlPattern;
-    private final IntUnaryOperator groupFx;
-
-    Endpoint(String extension) {
-        //noinspection LanguageMismatch
-        this(extension, extension, x -> x);
-    }
-
-    Endpoint(String extension, @Language("RegExp") String regex, IntUnaryOperator groupFx) {
-        this.extension  = extension;
-        this.urlPattern = Pattern.compile(DependenyObject.URL_BASE + regex);
-        this.groupFx    = groupFx;
-    }
+    private final String extension;
+    private final Pattern urlPattern;
 
     @Override
     public String getUrlExtension() {
@@ -43,5 +25,15 @@ public enum Endpoint implements RestEndpoint {
     @Override
     public Pattern getPattern() {
         return urlPattern;
+    }
+
+    Endpoint(String extension) {
+        //noinspection LanguageMismatch
+        this(extension, extension);
+    }
+
+    Endpoint(String extension, @Language("RegExp") String regex) {
+        this.extension = extension;
+        this.urlPattern = Pattern.compile(DependenyObject.URL_BASE + regex);
     }
 }

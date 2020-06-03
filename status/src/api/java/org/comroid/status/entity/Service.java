@@ -2,6 +2,8 @@ package org.comroid.status.entity;
 
 import org.comroid.common.Polyfill;
 import org.comroid.common.func.Invocable;
+import org.comroid.common.ref.IntEnum;
+import org.comroid.common.ref.WrappedFormattable;
 import org.comroid.status.DependenyObject;
 import org.comroid.status.StatusUpdater;
 import org.comroid.uniform.ValueType;
@@ -12,26 +14,57 @@ import org.comroid.varbind.bind.GroupBind;
 import org.comroid.varbind.bind.VarBind;
 import org.comroid.varbind.container.DataContainerBase;
 
+import java.util.Arrays;
+
 @Location(Service.Bind.class)
-public interface Service extends Entity {
+public interface Service extends Entity, WrappedFormattable {
+    default String getDisplayName() {
+        return requireNonNull(Bind.DisplayName);
+    }
+
     default Status getStatus() {
         return requireNonNull(Bind.Status);
     }
 
-    enum Status {
-        UNKNOWN,
+    @Override
+    default String getDefaultFormattedName() {
+        return getDisplayName();
+    }
 
-        ONLINE,
-        MAINTENANCE,
-        OFFLINE;
+    @Override
+    default String getAlternateFormattedName() {
+        return getName();
+    }
+
+    enum Status implements IntEnum {
+        UNKNOWN(0),
+
+        OFFLINE(1),
+        MAINTENANCE(2),
+        BUSY(3),
+        ONLINE(4);
+
+        private final int value;
+
+        @Override
+        public int getValue() {
+            return value;
+        }
+
+        Status(int value) {
+            this.value = value;
+        }
 
         public static Status valueOf(int value) {
-            return values()[value];
+            return Arrays.stream(values())
+                    .filter(it -> it.value == value)
+                    .findAny()
+                    .orElse(UNKNOWN);
         }
 
         @Override
         public String toString() {
-            return name().toLowerCase();
+            return name();
         }
     }
 
@@ -39,6 +72,8 @@ public interface Service extends Entity {
         @RootBind
         GroupBind<Service, DependenyObject> Root
                 = Entity.Bind.Root.subGroup("service", Invocable.ofConstructor(Polyfill.uncheckedCast(Basic.class)));
+        VarBind.OneStage<String> DisplayName
+                = Root.bind1stage("display_name", ValueType.STRING);
         VarBind.TwoStage<Integer, Status> Status
                 = Root.bind2stage("status", ValueType.INTEGER, Service.Status::valueOf);
     }
