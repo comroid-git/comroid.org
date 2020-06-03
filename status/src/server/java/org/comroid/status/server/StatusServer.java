@@ -1,5 +1,6 @@
 package org.comroid.status.server;
 
+import com.google.common.flogger.FluentLogger;
 import org.comroid.common.io.FileHandle;
 import org.comroid.common.ref.Reference;
 import org.comroid.dreadpool.ThreadPool;
@@ -19,8 +20,10 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Level;
 
 public class StatusServer implements DependenyObject {
+    public static final FluentLogger logger = FluentLogger.forEnclosingClass();
     public static final String PATH_BASE = "/home/comroid/srv_status/"; // server path base
     public static final int PORT = 42641; // hardcoded in server, do not change
     public static final FileHandle CACHE_FILE = new FileHandle(PATH_BASE + "data/cache.json");
@@ -58,7 +61,10 @@ public class StatusServer implements DependenyObject {
     }
 
     public static void main(String[] args) throws IOException {
-        instance = new StatusServer(InetAddress.getLocalHost(), PORT);
+        logger.at(Level.INFO).log(
+                "Starting comroid Status Server..."
+        );
+        instance = new StatusServer(InetAddress.getByAddress(new byte[]{0,0,0,0}), PORT);
         DiscordBot.INSTANCE.supplyToken(instance, args[0]);
 
         Runtime.getRuntime().addShutdownHook(new Thread(instance::shutdown));
