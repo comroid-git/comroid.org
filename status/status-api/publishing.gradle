@@ -1,11 +1,3 @@
-import java.net.http.HttpClient
-import java.net.http.HttpRequest
-import java.net.http.HttpResponse.BodyHandlers
-
-import static java.lang.System.getenv
-
-final HttpClient client = HttpClient.newBuilder().build()
-
 ext {
     snapshot = project.version.endsWith('SNAPSHOT')
 
