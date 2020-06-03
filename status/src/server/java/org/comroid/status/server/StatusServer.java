@@ -1,19 +1,22 @@
 package org.comroid.status.server;
 
-import com.sun.net.httpserver.HttpServer;
 import org.comroid.common.io.FileHandle;
 import org.comroid.common.ref.Reference;
 import org.comroid.dreadpool.ThreadPool;
+import org.comroid.restless.REST;
+import org.comroid.restless.adapter.jdk.JavaHttpAdapter;
+import org.comroid.restless.adapter.okhttp.v3.OkHttp3Adapter;
+import org.comroid.restless.server.RestServer;
 import org.comroid.status.DependenyObject;
 import org.comroid.status.entity.Entity;
 import org.comroid.status.entity.Service;
+import org.comroid.status.server.rest.ServerEndpoints;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
 import org.comroid.uniform.cache.Cache;
 import org.comroid.uniform.cache.FileCache;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -23,37 +26,20 @@ public class StatusServer implements DependenyObject {
     public static final FileHandle CACHE_FILE = new FileHandle(PATH_BASE + "data/cache.json");
     public static final ThreadGroup THREAD_GROUP = new ThreadGroup("comroid Status Server");
     public static StatusServer instance;
-    private final HttpServer server;
     private final ThreadPool threadPool;
-    private final FileCache<UUID, Entity, DependenyObject> entityCache;
-
-    private StatusServer(InetAddress host, int port) throws IOException {
-        this.server = HttpServer.create(new InetSocketAddress(host, port), port);
-        this.threadPool = ThreadPool.fixedSize(THREAD_GROUP, 8);
-        this.entityCache = new FileCache<>(getSerializationLibrary(), Entity.Bind.ID, CACHE_FILE, 250, this);
-
-        server.setExecutor(threadPool);
-        server.createContext("/", exchange -> ContextHandler.sortExchange(this, exchange));
-
-        this.server.start();
-    }
-
-    public static void main(String[] args) throws IOException {
-        instance = new StatusServer(InetAddress.getLocalHost(), PORT);
-        DiscordBot.INSTANCE.supplyToken(instance, args[0]);
-
-        Runtime.getRuntime().addShutdownHook(new Thread(instance::shutdown));
-    }
+    private final FileCache<String, Entity, DependenyObject> entityCache;
+    private final REST<StatusServer> rest;
+    private final RestServer server;
 
     public FastJSONLib getSerializationLibrary() {
         return FastJSONLib.fastJsonLib;
     }
 
-    public final Cache<UUID, Entity> getEntityCache() {
+    public final Cache<String, Entity> getEntityCache() {
         return entityCache;
     }
 
-    public final HttpServer getServer() {
+    public final RestServer getServer() {
         return server;
     }
 
@@ -61,10 +47,21 @@ public class StatusServer implements DependenyObject {
         return threadPool;
     }
 
-    public final Optional<Service> getServiceByID(UUID id) {
-        return entityCache.stream(it -> it.equals(id))
-                .findAny()
-                .map(Service.class::cast);
+    private StatusServer(InetAddress host, int port) throws IOException {
+        Adapters.HTTP_ADAPTER = new OkHttp3Adapter();
+        Adapters.SERIALIZATION_ADAPTER = FastJSONLib.fastJsonLib;
+
+        this.threadPool = ThreadPool.fixedSize(THREAD_GROUP, 8);
+        this.rest = new REST<>(DependenyObject.Adapters.HTTP_ADAPTER, DependenyObject.Adapters.SERIALIZATION_ADAPTER, threadPool, this);
+        this.entityCache = new FileCache<>(getSerializationLibrary(), Entity.Bind.Name, CACHE_FILE, 250, this);
+        this.server = new RestServer(this.rest, host, port, ServerEndpoints.values());
+    }
+
+    public static void main(String[] args) throws IOException {
+        instance = new StatusServer(InetAddress.getLocalHost(), PORT);
+        DiscordBot.INSTANCE.supplyToken(instance, args[0]);
+
+        Runtime.getRuntime().addShutdownHook(new Thread(instance::shutdown));
     }
 
     public final Optional<Service> getServiceByName(String name) {
