@@ -1,3 +1,5 @@
+import static java.lang.System.getenv
+
 ext {
     snapshot = project.version.endsWith('SNAPSHOT')
 
