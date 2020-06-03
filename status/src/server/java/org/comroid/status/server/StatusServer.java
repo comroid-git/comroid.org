@@ -54,7 +54,8 @@ public class StatusServer implements DependenyObject {
         logger.at(Level.INFO).log("ThreadPool created: %s", threadPool);
         this.rest = new REST<>(DependenyObject.Adapters.HTTP_ADAPTER, DependenyObject.Adapters.SERIALIZATION_ADAPTER, threadPool, this);
         logger.at(Level.INFO).log("REST Client created: %s", rest);
-        this.entityCache = new FileCache<>(Adapters.SERIALIZATION_ADAPTER, Entity.Bind.Name, CACHE_FILE, 250, this);
+        //todo JVM just dies here
+        this.entityCache = new FileCache<>(FastJSONLib.fastJsonLib, Entity.Bind.Name, CACHE_FILE, 250, this);
         logger.at(Level.INFO).log("EntityCache created: %s", entityCache);
         this.server = new RestServer(this.rest, host, port, ServerEndpoints.values());
         logger.at(Level.INFO).log("Server Started! %s", server);
