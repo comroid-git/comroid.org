@@ -11,6 +11,8 @@ import org.comroid.varbind.annotation.RootBind;
 import org.comroid.varbind.bind.GroupBind;
 import org.comroid.varbind.container.DataContainerBase;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 @Location(value = LocalService.class, fieldName = "GROUP")
 public class LocalService extends DataContainerBase<DependenyObject> implements Service {
     @RootBind
@@ -18,9 +20,12 @@ public class LocalService extends DataContainerBase<DependenyObject> implements 
             "local_service",
             Invocable.ofConstructor(Polyfill.uncheckedCast(LocalService.class))
     );
+    private final AtomicReference<Status> status;
 
     public LocalService(StatusServer server, UniObjectNode data) {
         super(data, server);
+
+        this.status = new AtomicReference<>(wrap(Bind.Status).orElse(Status.UNKNOWN));
     }
 
     public void setStatus(Status status) {
