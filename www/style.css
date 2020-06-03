@@ -18,7 +18,8 @@ html {
 header {
     width: 100%;
     height: 100px;
-    padding: 15px;
+    padding-top: 15px;
+    padding-bottom: 15px;
     background-color: #003366;
     font-family: 'Fira Mono', monospace;
     text-align: center;
