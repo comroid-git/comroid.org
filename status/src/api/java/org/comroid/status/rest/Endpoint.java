@@ -4,18 +4,16 @@ import org.comroid.restless.endpoint.RestEndpoint;
 import org.comroid.status.DependenyObject;
 import org.intellij.lang.annotations.Language;
 
-import java.util.regex.Pattern;
-
 public enum Endpoint implements RestEndpoint {
-    LIST_SERVICES("services");
+    LIST_SERVICES("services"),
+
+    SERVICE_STATUS(
+            "service/%s/status",
+            "\\w[\\w\\d-]+"
+    );
 
     private final String extension;
-    private final Pattern urlPattern;
-
-    @Override
-    public String getUrlExtension() {
-        return extension;
-    }
+    private final String[] regexGroups;
 
     @Override
     public String getUrlBase() {
@@ -23,17 +21,17 @@ public enum Endpoint implements RestEndpoint {
     }
 
     @Override
-    public Pattern getPattern() {
-        return urlPattern;
+    public String getUrlExtension() {
+        return extension;
     }
 
-    Endpoint(String extension) {
-        //noinspection LanguageMismatch
-        this(extension, extension);
+    @Override
+    public String[] getRegExpGroups() {
+        return regexGroups;
     }
 
-    Endpoint(String extension, @Language("RegExp") String regex) {
+    Endpoint(String extension, @Language("RegExp") String... regexGroups) {
         this.extension = extension;
-        this.urlPattern = Pattern.compile(DependenyObject.URL_BASE + regex);
+        this.regexGroups = regexGroups;
     }
 }
