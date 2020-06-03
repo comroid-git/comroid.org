@@ -5,9 +5,11 @@ import org.comroid.javacord.util.commands.Command;
 import org.comroid.javacord.util.commands.CommandGroup;
 import org.comroid.javacord.util.commands.CommandHandler;
 import org.comroid.javacord.util.ui.embed.DefaultEmbedFactory;
+import org.comroid.status.entity.Entity;
 import org.comroid.status.entity.Service;
 import org.comroid.status.entity.Service.Status;
 import org.comroid.status.server.entity.LocalService;
+import org.comroid.uniform.cache.Cache;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
@@ -174,7 +176,8 @@ public enum DiscordBot {
                     .with(Service.Bind.DisplayName, args.length >= 2 ? args[1] : args[0])
                     .build();
 
-            server().getEntityCache().set(args[0], service);
+            final Cache<String, Entity> entityCache = server().getEntityCache();
+            entityCache.getReference(args[0], true).set(service);
 
             return String.format("Created new Service: %s '%s'", service.getName(), service.getDisplayName());
         }
