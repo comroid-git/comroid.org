@@ -4,6 +4,8 @@ import org.comroid.common.io.FileHandle;
 import org.comroid.common.ref.Reference;
 import org.comroid.dreadpool.ThreadPool;
 import org.comroid.restless.REST;
+import org.comroid.restless.adapter.jdk.JavaHttpAdapter;
+import org.comroid.restless.adapter.okhttp.v3.OkHttp3Adapter;
 import org.comroid.restless.server.RestServer;
 import org.comroid.status.DependenyObject;
 import org.comroid.status.entity.Entity;
@@ -46,8 +48,11 @@ public class StatusServer implements DependenyObject {
     }
 
     private StatusServer(InetAddress host, int port) throws IOException {
+        Adapters.HTTP_ADAPTER = new OkHttp3Adapter();
+        Adapters.SERIALIZATION_ADAPTER = FastJSONLib.fastJsonLib;
+
         this.threadPool = ThreadPool.fixedSize(THREAD_GROUP, 8);
-        this.rest = new REST<>(DependenyObject.HTTP_ADAPTER, DependenyObject.SERIALIZATION_ADAPTER, this);
+        this.rest = new REST<>(DependenyObject.Adapters.HTTP_ADAPTER, DependenyObject.Adapters.SERIALIZATION_ADAPTER, threadPool, this);
         this.entityCache = new FileCache<>(getSerializationLibrary(), Entity.Bind.Name, CACHE_FILE, 250, this);
         this.server = new RestServer(this.rest, host, port, ServerEndpoints.values());
     }
@@ -57,12 +62,6 @@ public class StatusServer implements DependenyObject {
         DiscordBot.INSTANCE.supplyToken(instance, args[0]);
 
         Runtime.getRuntime().addShutdownHook(new Thread(instance::shutdown));
-    }
-
-    public final Optional<Service> getServiceByID(UUID id) {
-        return entityCache.stream(it -> it.equals(id))
-                .findAny()
-                .map(Service.class::cast);
     }
 
     public final Optional<Service> getServiceByName(String name) {
