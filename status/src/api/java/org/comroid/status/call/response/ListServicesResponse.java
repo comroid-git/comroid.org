@@ -15,7 +15,7 @@ public interface ListServicesResponse extends StatusApiResponse {
 
     interface Bind extends StatusApiResponse.Bind {
         GroupBind<ListServicesResponse, DependenyObject> Root
-                = new GroupBind<>(DependenyObject.SERIALIZATION_ADAPTER, "list_services_response");
+                = new GroupBind<>(DependenyObject.Adapters.SERIALIZATION_ADAPTER, "list_services_response");
         ArrayBind.DependentTwoStage<String, DependenyObject, Service, Span<Service>> Services
                 = Root.listDependent("services", ValueType.STRING, DependenyObject::resolveService, Span::new);
     }

@@ -10,7 +10,7 @@ import org.comroid.varbind.bind.VarBind;
 public interface ServiceStatusResponse extends StatusApiResponse {
     interface Bind extends StatusApiResponse.Bind {
         GroupBind<ServiceStatusResponse, DependenyObject> Root
-                = new GroupBind<>(DependenyObject.SERIALIZATION_ADAPTER, "service_status_response");
+                = new GroupBind<>(DependenyObject.Adapters.SERIALIZATION_ADAPTER, "service_status_response");
         VarBind.DependentTwoStage<String, DependenyObject, org.comroid.status.entity.Service> Service
                 = Root.bindDependent("name", ValueType.STRING, DependenyObject::resolveService);
         VarBind.TwoStage<Integer, Service.Status> Status

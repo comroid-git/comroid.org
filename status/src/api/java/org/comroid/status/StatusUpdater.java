@@ -52,7 +52,7 @@ public enum StatusUpdater implements DependenyObject {
 
     class Container {
         private final REST<DependenyObject> restClient;
-        private final Cache<UUID, Entity> cache;
+        private final Cache<String, Entity> cache;
 
         private Container(REST<DependenyObject> restClient) {
             this.restClient = restClient;
@@ -62,8 +62,8 @@ public enum StatusUpdater implements DependenyObject {
         public CompletableFuture<Span<Service>> requestAllServices() {
             return restClient.request(Service.Bind.Root)
                     .method(REST.Method.GET)
-                    .url(Endpoint.LIST_SERVICES.url())
-                    .execute$autoCache(Entity.Bind.ID, cache);
+                    .endpoint(Endpoint.LIST_SERVICES.complete())
+                    .execute$autoCache(Entity.Bind.Name, cache);
         }
 
         private CompletableFuture<Container> initialize() {

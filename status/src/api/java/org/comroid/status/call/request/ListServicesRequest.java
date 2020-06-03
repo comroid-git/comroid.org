@@ -15,7 +15,7 @@ public interface ListServicesRequest extends StatusApiRequest {
 
     interface Bind extends StatusApiRequest.Bind {
         GroupBind<ListServicesRequest, DependenyObject> Root
-                = new GroupBind<>(DependenyObject.SERIALIZATION_ADAPTER, "list_services_request");
+                = new GroupBind<>(DependenyObject.Adapters.SERIALIZATION_ADAPTER, "list_services_request");
         VarBind.TwoStage<String, Pattern> NameFilter
                 = Root.bind2stage("name_filter", ValueType.STRING, Pattern::compile);
     }

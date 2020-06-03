@@ -7,6 +7,6 @@ import org.comroid.varbind.container.DataContainer;
 public interface StatusApiResponse extends DataContainer<DependenyObject> {
     interface Bind {
         GroupBind<StatusApiResponse, DependenyObject> Root
-                = new GroupBind<>(DependenyObject.SERIALIZATION_ADAPTER, "response");
+                = new GroupBind<>(DependenyObject.Adapters.SERIALIZATION_ADAPTER, "response");
     }
 }
