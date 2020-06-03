@@ -29,11 +29,11 @@ public class LocalService extends DataContainerBase<DependenyObject> implements 
     }
 
     public void setStatus(Status status) {
-        //todo
+        this.status.set(status);
     }
 
     @Override
     public Status getStatus() {
-        //todo
+        return status.get();
     }
 }
