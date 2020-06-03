@@ -5,7 +5,6 @@ import org.comroid.common.io.FileHandle;
 import org.comroid.common.ref.Reference;
 import org.comroid.dreadpool.ThreadPool;
 import org.comroid.restless.REST;
-import org.comroid.restless.adapter.jdk.JavaHttpAdapter;
 import org.comroid.restless.adapter.okhttp.v3.OkHttp3Adapter;
 import org.comroid.restless.server.RestServer;
 import org.comroid.status.DependenyObject;
@@ -19,7 +18,6 @@ import org.comroid.uniform.cache.FileCache;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.logging.Level;
 
 public class StatusServer implements DependenyObject {
@@ -54,31 +52,35 @@ public class StatusServer implements DependenyObject {
         Adapters.HTTP_ADAPTER = new OkHttp3Adapter();
         Adapters.SERIALIZATION_ADAPTER = FastJSONLib.fastJsonLib;
 
+        logger.at(Level.INFO).log("Initialized Adapters");
+
         this.threadPool = ThreadPool.fixedSize(THREAD_GROUP, 8);
+        logger.at(Level.INFO).log("ThreadPool created: %s", threadPool);
         this.rest = new REST<>(DependenyObject.Adapters.HTTP_ADAPTER, DependenyObject.Adapters.SERIALIZATION_ADAPTER, threadPool, this);
+        logger.at(Level.INFO).log("REST Client created: %s", rest);
         this.entityCache = new FileCache<>(getSerializationLibrary(), Entity.Bind.Name, CACHE_FILE, 250, this);
+        logger.at(Level.INFO).log("EntityCache created: %s", entityCache);
         this.server = new RestServer(this.rest, host, port, ServerEndpoints.values());
+        logger.at(Level.INFO).log("Server Started! %s", server);
     }
 
     public static void main(String[] args) throws IOException {
-        logger.at(Level.INFO).log(
-                "Starting comroid Status Server..."
-        );
-        instance = new StatusServer(InetAddress.getByAddress(new byte[]{0,0,0,0}), PORT);
+        logger.at(Level.INFO).log("Starting comroid Status Server...");
+        instance = new StatusServer(InetAddress.getByAddress(new byte[]{0, 0, 0, 0}), PORT);
+        logger.at(Level.INFO).log("Status Server running! Booting Discord Bot...");
         DiscordBot.INSTANCE.supplyToken(instance, args[0]);
 
         Runtime.getRuntime().addShutdownHook(new Thread(instance::shutdown));
+        logger.at(Level.INFO).log("Shutdown Hook registered!");
     }
 
     public final Optional<Service> getServiceByName(String name) {
+        logger.at(Level.INFO).log("Returning Service by name: %s", name);
         return entityCache.stream()
                 .filter(ref -> !ref.isNull())
-                .filter(ref -> ref.process()
-                        .test(Service.class::isInstance))
-                .map(Reference::requireNonNull)
-                .map(Service.class::cast)
-                .filter(service -> service.getName()
-                        .equals(name))
+                .filter(ref -> ref.process().test(Service.class::isInstance))
+                .map(ref -> ref.into(Service.class::cast))
+                .filter(service -> service.getName().equals(name))
                 .findFirst();
     }
 
