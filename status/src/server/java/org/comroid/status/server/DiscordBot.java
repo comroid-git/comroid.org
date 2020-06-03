@@ -1,32 +1,33 @@
 package org.comroid.status.server;
 
-import java.awt.Color;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-
+import com.google.common.flogger.FluentLogger;
 import org.comroid.common.info.MessageSupplier;
 import org.comroid.javacord.util.commands.Command;
 import org.comroid.javacord.util.commands.CommandGroup;
 import org.comroid.javacord.util.commands.CommandHandler;
 import org.comroid.javacord.util.ui.embed.DefaultEmbedFactory;
-
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 
+import java.awt.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+
 public enum DiscordBot {
     INSTANCE;
 
-    private final CompletableFuture<StatusServer> serverFuture    = new CompletableFuture<>();
-    private final CompletableFuture<String>       tokenFuture     = new CompletableFuture<>();
-    private final CompletableFuture<DiscordApi>   apiFuture
-                                                                  =
-            tokenFuture.thenComposeAsync(token -> new DiscordApiBuilder().setToken(
+    public static final FluentLogger logger = FluentLogger.forEnclosingClass();
+
+    private final CompletableFuture<StatusServer> serverFuture = new CompletableFuture<>();
+    private final CompletableFuture<String> tokenFuture = new CompletableFuture<>();
+    private final CompletableFuture<DiscordApi> apiFuture
+            = tokenFuture.thenComposeAsync(token -> new DiscordApiBuilder().setToken(
             token)
             .setWaitForServersOnStartup(true)
             .setTotalShards(1)
             .login());
-    private final CompletableFuture<Container>    containerFuture = apiFuture.thenApplyAsync(Container::new);
+    private final CompletableFuture<Container> containerFuture = apiFuture.thenApplyAsync(Container::new);
 
     public synchronized CompletableFuture<?> supplyToken(StatusServer server, String token) {
         if (tokenFuture.isDone()) {
@@ -51,8 +52,8 @@ public enum DiscordBot {
     }
 
     private class Container {
-        private final Commands       COMMANDS = new Commands();
-        private final DiscordApi     api;
+        private final Commands COMMANDS = new Commands();
+        private final DiscordApi api;
         private final CommandHandler cmd;
 
         private Container(DiscordApi api) {
@@ -66,9 +67,9 @@ public enum DiscordBot {
             this.api = api;
             this.cmd = new CommandHandler(api);
 
-            cmd.prefixes                            = new String[]{ "status!" };
+            cmd.prefixes = new String[]{"status!"};
             cmd.autoDeleteResponseOnCommandDeletion = true;
-            cmd.useBotMentionAsPrefix               = true;
+            cmd.useBotMentionAsPrefix = true;
             cmd.useDefaultHelp(null);
             cmd.withUnknownCommandResponseStatus(true);
             cmd.registerCommandTarget(COMMANDS);
