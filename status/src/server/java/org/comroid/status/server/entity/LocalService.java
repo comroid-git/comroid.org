@@ -2,6 +2,7 @@ package org.comroid.status.server.entity;
 
 import org.comroid.common.Polyfill;
 import org.comroid.common.func.Invocable;
+import org.comroid.common.ref.IntEnum;
 import org.comroid.status.DependenyObject;
 import org.comroid.status.entity.Service;
 import org.comroid.status.server.StatusServer;
@@ -34,6 +35,7 @@ public final class LocalService extends DataContainerBase<DependenyObject> imple
     @Override
     public void setStatus(Status status) {
         this.status.set(status);
+        put(Bind.Status, IntEnum::getValue, status);
     }
 
     @Override
@@ -75,6 +77,7 @@ public final class LocalService extends DataContainerBase<DependenyObject> imple
         @Override
         public void setStatus(Status status) {
             this.status.set(status);
+            put(Bind.Status, IntEnum::getValue, status);
         }
     }
 }
