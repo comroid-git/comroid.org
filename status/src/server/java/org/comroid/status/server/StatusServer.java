@@ -1,7 +1,6 @@
 package org.comroid.status.server;
 
 import com.google.common.flogger.FluentLogger;
-import org.comroid.common.func.Disposable;
 import org.comroid.common.io.FileHandle;
 import org.comroid.restless.REST;
 import org.comroid.restless.adapter.okhttp.v3.OkHttp3Adapter;
