@@ -36,8 +36,8 @@ dependencies {
     compileOnly 'org.jetbrains:annotations:19.0.0'
 
     // usual dependencies
-    implementation 'com.github.comroid-git.common-util:common-util:00ec1074c31fa98af5137af85a52af9d8c0084fe'
-    implementation 'com.github.comroid-git.common-util:uniform:00ec1074c31fa98af5137af85a52af9d8c0084fe'
+    implementation 'com.github.comroid-git.common-util:common-util:d286e64887484bf64474ac10055203a47ac37a0b'
+    implementation 'com.github.comroid-git.common-util:uniform:d286e64887484bf64474ac10055203a47ac37a0b'
 
     // Javacord
     implementation 'org.javacord:javacord:3.0.5'
