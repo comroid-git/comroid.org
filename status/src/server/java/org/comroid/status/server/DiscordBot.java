@@ -20,6 +20,7 @@ import java.awt.*;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 public enum DiscordBot {
@@ -102,7 +103,9 @@ public enum DiscordBot {
                 maximumArguments = 1,
                 convertStringResultsToEmbed = true
         )
-        public String get(String[] args) {
+        public String get(String[] args, User user) {
+            logger.at(Level.INFO).log("User %s requested service: %s", user, args[0]);
+
             return server().getServiceByName(args[0])
                     .map(service -> String.format("Service %s is currently `%s`", service.getDisplayName(), service.getStatus().toString()))
                     .orElse(String.format("No service with the name `%s` could be found", args[0]));
@@ -115,8 +118,9 @@ public enum DiscordBot {
                 maximumArguments = 2,
                 convertStringResultsToEmbed = true
         )
-        public String update(String[] args) {
+        public String update(String[] args, User user) {
             final Status status = Status.valueOf(Integer.parseInt(args[1]));
+            logger.at(Level.INFO).log("User %s update service status: %s -> %s", user, args[0], status);
 
             return server().getServiceByName(args[0])
                     .map(LocalService.class::cast)
@@ -137,7 +141,9 @@ public enum DiscordBot {
                 maximumArguments = 0,
                 convertStringResultsToEmbed = true
         )
-        public Object listServices() {
+        public Object listServices(User user) {
+            logger.at(Level.INFO).log("User %s requested all services", user);
+
             try {
                 final Set<Service> services = server().getEntityCache()
                         .stream()
@@ -171,7 +177,9 @@ public enum DiscordBot {
                 maximumArguments = 2,
                 convertStringResultsToEmbed = true
         )
-        public String createService(String[] args) {
+        public String createService(String[] args, User user) {
+            logger.at(Level.INFO).log("User %s is creating service: %s", user, args[0]);
+
             final Service service = new LocalService.Builder().with(Service.Bind.Name, args[0])
                     .with(Service.Bind.DisplayName, args.length >= 2 ? args[1] : args[0])
                     .build();
