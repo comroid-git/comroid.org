@@ -17,8 +17,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.*;
 import java.util.logging.Level;
 
 public class StatusServer implements DependenyObject, Closeable {
@@ -40,7 +39,7 @@ public class StatusServer implements DependenyObject, Closeable {
             throw new IllegalStateException("Illegal children on LocalService group");
     }
 
-    private final ExecutorService threadPool;
+    private final ScheduledExecutorService threadPool;
     private final FileCache<String, Entity, DependenyObject> entityCache;
     private final REST<StatusServer> rest;
     private final RestServer server;
@@ -53,7 +52,7 @@ public class StatusServer implements DependenyObject, Closeable {
         return server;
     }
 
-    public final ExecutorService getThreadPool() {
+    public final ScheduledExecutorService getThreadPool() {
         return threadPool;
     }
 
@@ -67,7 +66,7 @@ public class StatusServer implements DependenyObject, Closeable {
         this.threadPool = ThreadPool.fixedSize(THREAD_GROUP, 8);
         logger.at(Level.INFO).log("ThreadPool created: %s", threadPool);
          */
-        this.threadPool = ForkJoinPool.commonPool();
+        this.threadPool = Executors.newScheduledThreadPool(4);
 
         this.rest = new REST<>(DependenyObject.Adapters.HTTP_ADAPTER, DependenyObject.Adapters.SERIALIZATION_ADAPTER, threadPool, this);
         logger.at(Level.INFO).log("REST Client created: %s", rest);
@@ -93,7 +92,16 @@ public class StatusServer implements DependenyObject, Closeable {
         DiscordBot.INSTANCE.supplyToken(instance, args[0]);
 
         Runtime.getRuntime().addShutdownHook(new Thread(instance::close));
-        logger.at(Level.INFO).log("Shutdown Hook registered!");
+        instance.threadPool.scheduleAtFixedRate(() -> {
+            try {
+                instance.entityCache.storeData();
+            } catch (IOException e) {
+                logger.at(Level.SEVERE)
+                        .withCause(e)
+                        .log("Could not store data");
+            }
+        }, 5,5, TimeUnit.MINUTES);
+        logger.at(Level.INFO).log("Hooks registered!");
     }
 
     public final Optional<Service> getServiceByName(String name) {
