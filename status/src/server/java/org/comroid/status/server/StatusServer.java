@@ -98,6 +98,11 @@ public class StatusServer implements DependenyObject, Closeable {
     public void close() {
         //todo: Close resources here
 
-        entityCache.disposeThrow();
+        try {
+            entityCache.storeData();
+            entityCache.disposeThrow();
+        } catch (IOException e) {
+            throw new RuntimeException("Could not shut down status server properly", e);
+        }
     }
 }
