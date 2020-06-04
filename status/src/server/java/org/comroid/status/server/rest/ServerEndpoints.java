@@ -24,7 +24,7 @@ public enum ServerEndpoints implements ServerEndpoint.Underlying {
         if (args.length != 0)
             throw new IllegalArgumentException("Invalid argument count");
 
-        final UniArrayNode services = SERIALIZATION_ADAPTER.createUniArrayNode(null);
+        final UniArrayNode services = SERIALIZATION_ADAPTER.createUniArrayNode();
 
         StatusServer.instance
                 .getEntityCache()
@@ -43,12 +43,15 @@ public enum ServerEndpoints implements ServerEndpoint.Underlying {
         if (args.length != 1)
             throw new IllegalArgumentException("Invalid argument count");
 
-        final UniObjectNode status = SERIALIZATION_ADAPTER.createUniObjectNode(null);
+        final UniObjectNode status = SERIALIZATION_ADAPTER.createUniObjectNode();
 
         final Optional<Service> serviceOpt = StatusServer.instance.getServiceByName(args[0]);
 
         if (!serviceOpt.isPresent())
-            return REST.Response.empty(SERIALIZATION_ADAPTER, NOT_FOUND);
+            return new ResponseBuilder()
+                    .setStatusCode(NOT_FOUND)
+                    .setBody(status)
+                    .build();
 
         serviceOpt.ifPresent(service -> {
             status.put("name", ValueType.STRING, service.getName());
