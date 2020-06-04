@@ -94,8 +94,10 @@ public enum DiscordBot {
     public class Commands {
         @Command(shownInHelpCommand = false)
         public void shutdown(User user) {
-            if (user.getId() == 141476933849448448L)
+            if (user.getId() == 141476933849448448L) {
+                StatusServer.instance.close();
                 System.exit(0);
+            }
         }
 
         @Command(
