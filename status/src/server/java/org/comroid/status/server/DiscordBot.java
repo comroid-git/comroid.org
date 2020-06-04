@@ -157,7 +157,7 @@ public enum DiscordBot {
                 if (services.size() == 0)
                     return "No services defined!";
 
-                final EmbedBuilder builder = DefaultEmbedFactory.create(user);
+                final EmbedBuilder builder = DefaultEmbedFactory.create();
 
                 services.forEach(service -> builder.addField(service.getDisplayName(), String.format(
                         "Service Name: `%s`\nStatus: `%s`",
