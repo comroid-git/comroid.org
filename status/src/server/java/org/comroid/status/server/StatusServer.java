@@ -36,7 +36,7 @@ public class StatusServer implements DependenyObject, Closeable {
         logger.at(Level.INFO).log("Preparing classes...");
 
         final long count = LocalService.GROUP.streamAllChildren().count();
-        if (count != 3)
+        if (count < 3)
             throw new IllegalStateException("Illegal children on LocalService group");
     }
 
