@@ -2,16 +2,15 @@ package org.comroid.status.server;
 
 import com.google.common.flogger.FluentLogger;
 import org.comroid.common.io.FileHandle;
-import org.comroid.restless.CommonHeaderNames;
 import org.comroid.restless.REST;
 import org.comroid.restless.adapter.okhttp.v3.OkHttp3Adapter;
 import org.comroid.restless.server.RestServer;
 import org.comroid.status.DependenyObject;
 import org.comroid.status.entity.Entity;
 import org.comroid.status.entity.Service;
+import org.comroid.status.server.entity.LocalService;
 import org.comroid.status.server.rest.ServerEndpoints;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
-import org.comroid.uniform.cache.Cache;
 import org.comroid.uniform.cache.FileCache;
 
 import java.io.Closeable;
@@ -32,12 +31,21 @@ public class StatusServer implements DependenyObject, Closeable {
     public static final int PORT = 42641; // hardcoded in server, do not change
     public static final ThreadGroup THREAD_GROUP = new ThreadGroup("comroid Status Server");
     public static StatusServer instance;
+
+    static {
+        logger.at(Level.INFO).log("Preparing classes...");
+
+        final long count = LocalService.GROUP.streamAllChildren().count();
+        if (count != 3)
+            throw new IllegalStateException("Illegal children on LocalService group");
+    }
+
     private final ExecutorService threadPool;
     private final FileCache<String, Entity, DependenyObject> entityCache;
     private final REST<StatusServer> rest;
     private final RestServer server;
 
-    public final Cache<String, Entity> getEntityCache() {
+    public final FileCache<String, Entity, DependenyObject> getEntityCache() {
         return entityCache;
     }
 
@@ -66,6 +74,10 @@ public class StatusServer implements DependenyObject, Closeable {
 
         this.entityCache = new FileCache<>(FastJSONLib.fastJsonLib, Entity.Bind.Name, CACHE_FILE, 250, this);
         logger.at(Level.INFO).log("EntityCache created: %s", entityCache);
+        logger.at(Level.INFO).log("Loaded %d services",
+                entityCache.stream()
+                        .filter(ref -> ref.test(Service.class::isInstance))
+                        .count());
 
         this.server = new RestServer(this.rest, DependenyObject.URL_BASE, host, port, ServerEndpoints.values());
         server.addCommonHeader("Access-Control-Allow-Origin", "*");
