@@ -45,9 +45,12 @@ dependencies {
     implementation 'org.javacord:javacord:3.0.5'
     implementation 'org.comroid:javacord-utilities:1.5.+'
 
-    runtimeOnly 'com.google.flogger:flogger-log4j2-backend:0.5.1'
+    // logging dependencies
     implementation 'com.google.flogger:flogger:0.5.1'
+    runtimeOnly 'com.google.flogger:flogger-log4j2-backend:0.5.1'
     runtimeOnly 'org.apache.logging.log4j:log4j-core:2.11.0'
+
+    // runtime adapter dependencies
     runtimeOnly 'com.squareup.okhttp3:okhttp:4.5.0'
     runtimeOnly 'com.alibaba:fastjson:1.2.68'
 }
