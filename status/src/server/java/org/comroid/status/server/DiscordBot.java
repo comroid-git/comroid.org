@@ -9,6 +9,7 @@ import org.comroid.status.entity.Entity;
 import org.comroid.status.entity.Service;
 import org.comroid.status.entity.Service.Status;
 import org.comroid.status.server.entity.LocalService;
+import org.comroid.status.server.util.StatusContainer;
 import org.comroid.uniform.cache.Cache;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
@@ -20,6 +21,7 @@ import java.awt.*;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 public enum DiscordBot {
@@ -92,8 +94,10 @@ public enum DiscordBot {
     public class Commands {
         @Command(shownInHelpCommand = false)
         public void shutdown(User user) {
-            if (user.getId() == 141476933849448448L)
+            if (user.getId() == 141476933849448448L) {
+                StatusServer.instance.close();
                 System.exit(0);
+            }
         }
 
         @Command(
@@ -102,7 +106,9 @@ public enum DiscordBot {
                 maximumArguments = 1,
                 convertStringResultsToEmbed = true
         )
-        public String get(String[] args) {
+        public String get(String[] args, User user) {
+            logger.at(Level.INFO).log("User %s requested service: %s", user, args[0]);
+
             return server().getServiceByName(args[0])
                     .map(service -> String.format("Service %s is currently `%s`", service.getDisplayName(), service.getStatus().toString()))
                     .orElse(String.format("No service with the name `%s` could be found", args[0]));
@@ -115,16 +121,17 @@ public enum DiscordBot {
                 maximumArguments = 2,
                 convertStringResultsToEmbed = true
         )
-        public String update(String[] args) {
+        public String update(String[] args, User user) {
             final Status status = Status.valueOf(Integer.parseInt(args[1]));
+            logger.at(Level.INFO).log("User %s update service status: %s -> %s", user, args[0], status);
 
             return server().getServiceByName(args[0])
-                    .map(LocalService.class::cast)
+                    .map(StatusContainer.class::cast)
                     .map(service -> {
                         service.setStatus(status);
                         return String.format(
                                 "Updated status of Service %s to `%s`",
-                                service.getName(),
+                                args[0],
                                 service.getStatus().toString()
                         );
                     })
@@ -137,7 +144,9 @@ public enum DiscordBot {
                 maximumArguments = 0,
                 convertStringResultsToEmbed = true
         )
-        public Object listServices() {
+        public Object listServices(User user) {
+            logger.at(Level.INFO).log("User %s requested all services", user);
+
             try {
                 final Set<Service> services = server().getEntityCache()
                         .stream()
@@ -145,18 +154,18 @@ public enum DiscordBot {
                         .map(ref -> ref.into(Service.class::cast))
                         .collect(Collectors.toSet());
 
-            if (services.size() == 0)
-                return "No services defined!";
+                if (services.size() == 0)
+                    return "No services defined!";
 
-            final EmbedBuilder builder = new EmbedBuilder();
+                final EmbedBuilder builder = DefaultEmbedFactory.create();
 
-            services.forEach(service -> builder.addField(service.getDisplayName(), String.format(
-                    "Service Name: `%s`\nStatus: `%s`",
-                    service.getName(),
-                    service.getStatus().toString()
-            )));
+                services.forEach(service -> builder.addField(service.getDisplayName(), String.format(
+                        "Service Name: `%s`\nStatus: `%s`",
+                        service.getName(),
+                        service.getStatus().toString()
+                )));
 
-            return builder;
+                return builder;
             } catch (Throwable any) {
                 any.printStackTrace();
             }
@@ -171,7 +180,9 @@ public enum DiscordBot {
                 maximumArguments = 2,
                 convertStringResultsToEmbed = true
         )
-        public String createService(String[] args) {
+        public String createService(String[] args, User user) {
+            logger.at(Level.INFO).log("User %s is creating service: %s", user, args[0]);
+
             final Service service = new LocalService.Builder().with(Service.Bind.Name, args[0])
                     .with(Service.Bind.DisplayName, args.length >= 2 ? args[1] : args[0])
                     .build();

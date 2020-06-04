@@ -2,7 +2,7 @@ package org.comroid.status.server;
 
 import com.google.common.flogger.FluentLogger;
 import org.comroid.common.io.FileHandle;
-import org.comroid.dreadpool.ThreadPool;
+import org.comroid.restless.CommonHeaderNames;
 import org.comroid.restless.REST;
 import org.comroid.restless.adapter.okhttp.v3.OkHttp3Adapter;
 import org.comroid.restless.server.RestServer;
@@ -13,8 +13,8 @@ import org.comroid.status.server.rest.ServerEndpoints;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
 import org.comroid.uniform.cache.Cache;
 import org.comroid.uniform.cache.FileCache;
-import org.comroid.varbind.bind.VarBind;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Optional;
@@ -22,7 +22,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ForkJoinPool;
 import java.util.logging.Level;
 
-public class StatusServer implements DependenyObject {
+public class StatusServer implements DependenyObject, Closeable {
+    //http://localhost:42641/services
+
     public static final FluentLogger logger = FluentLogger.forEnclosingClass();
     public static final FileHandle PATH_BASE = new FileHandle("/home/comroid/srv_status/", true); // server path base
     public static final FileHandle DATA_DIR = PATH_BASE.createSubDir("data");
@@ -66,6 +68,7 @@ public class StatusServer implements DependenyObject {
         logger.at(Level.INFO).log("EntityCache created: %s", entityCache);
 
         this.server = new RestServer(this.rest, DependenyObject.URL_BASE, host, port, ServerEndpoints.values());
+        server.addCommonHeader("Access-Control-Allow-Origin", "*");
         logger.at(Level.INFO).log("Server Started! %s", server);
     }
 
@@ -77,7 +80,7 @@ public class StatusServer implements DependenyObject {
         logger.at(Level.INFO).log("Status Server running! Booting Discord Bot...");
         DiscordBot.INSTANCE.supplyToken(instance, args[0]);
 
-        Runtime.getRuntime().addShutdownHook(new Thread(instance::shutdown));
+        Runtime.getRuntime().addShutdownHook(new Thread(instance::close));
         logger.at(Level.INFO).log("Shutdown Hook registered!");
     }
 
@@ -91,7 +94,10 @@ public class StatusServer implements DependenyObject {
                 .findFirst();
     }
 
-    private void shutdown() {
+    @Override
+    public void close() {
+        //todo: Close resources here
+
         entityCache.disposeThrow();
     }
 }
