@@ -18,6 +18,7 @@ import org.javacord.api.entity.permission.PermissionType;
 import org.javacord.api.entity.user.User;
 
 import java.awt.*;
+import java.io.IOException;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -92,11 +93,14 @@ public enum DiscordBot {
             description = "All commands related to the status server"
     )
     public class Commands {
-        @Command(shownInHelpCommand = false)
-        public void shutdown(User user) {
+        @Command(aliases = "store-data", shownInHelpCommand = false)
+        public void storeData(User user) {
             if (user.getId() == 141476933849448448L) {
-                StatusServer.instance.close();
-                System.exit(0);
+                try {
+                    StatusServer.instance.getEntityCache().storeData();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
 
