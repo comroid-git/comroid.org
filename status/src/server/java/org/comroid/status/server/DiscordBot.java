@@ -154,18 +154,18 @@ public enum DiscordBot {
                         .map(ref -> ref.into(Service.class::cast))
                         .collect(Collectors.toSet());
 
-            if (services.size() == 0)
-                return "No services defined!";
+                if (services.size() == 0)
+                    return "No services defined!";
 
-            final EmbedBuilder builder = new EmbedBuilder();
+                final EmbedBuilder builder = DefaultEmbedFactory.create(user);
 
-            services.forEach(service -> builder.addField(service.getDisplayName(), String.format(
-                    "Service Name: `%s`\nStatus: `%s`",
-                    service.getName(),
-                    service.getStatus().toString()
-            )));
+                services.forEach(service -> builder.addField(service.getDisplayName(), String.format(
+                        "Service Name: `%s`\nStatus: `%s`",
+                        service.getName(),
+                        service.getStatus().toString()
+                )));
 
-            return builder;
+                return builder;
             } catch (Throwable any) {
                 any.printStackTrace();
             }
