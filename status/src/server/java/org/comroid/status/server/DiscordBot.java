@@ -9,6 +9,7 @@ import org.comroid.status.entity.Entity;
 import org.comroid.status.entity.Service;
 import org.comroid.status.entity.Service.Status;
 import org.comroid.status.server.entity.LocalService;
+import org.comroid.status.server.util.StatusContainer;
 import org.comroid.uniform.cache.Cache;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
@@ -123,12 +124,12 @@ public enum DiscordBot {
             logger.at(Level.INFO).log("User %s update service status: %s -> %s", user, args[0], status);
 
             return server().getServiceByName(args[0])
-                    .map(LocalService.class::cast)
+                    .map(StatusContainer.class::cast)
                     .map(service -> {
                         service.setStatus(status);
                         return String.format(
                                 "Updated status of Service %s to `%s`",
-                                service.getName(),
+                                args[0],
                                 service.getStatus().toString()
                         );
                     })

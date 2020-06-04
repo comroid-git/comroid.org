@@ -23,6 +23,8 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.logging.Level;
 
 public class StatusServer implements DependenyObject {
+    //localhost:42641/services
+
     public static final FluentLogger logger = FluentLogger.forEnclosingClass();
     public static final FileHandle PATH_BASE = new FileHandle("/home/comroid/srv_status/", true); // server path base
     public static final FileHandle DATA_DIR = PATH_BASE.createSubDir("data");
