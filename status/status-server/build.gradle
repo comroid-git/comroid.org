@@ -35,7 +35,9 @@ dependencies {
 
     compileOnly 'org.jetbrains:annotations:19.0.0'
 
-    implementation 'org.comroid:dreadpool:0.1.1-SNAPSHOT'
+    // usual dependencies
+    implementation 'com.github.comroid-git.common-util:common-util:122e4ac3c3'
+    implementation 'com.github.comroid-git.common-util:uniform:122e4ac3c3'
 
     // Javacord
     implementation 'org.javacord:javacord:3.0.5'
