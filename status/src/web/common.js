@@ -69,6 +69,8 @@ function addBox(name, display_name, status) {
     } else if (status == "4") {
         statusDiv.className = "online";
         statusDiv.innerHTML = "ONLINE";
+    } else {
+        statusDiv.innerHTML = "UNKNOWN";
     }
 
 
