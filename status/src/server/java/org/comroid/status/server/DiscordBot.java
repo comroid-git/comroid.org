@@ -9,7 +9,7 @@ import org.comroid.status.entity.Entity;
 import org.comroid.status.entity.Service;
 import org.comroid.status.entity.Service.Status;
 import org.comroid.status.server.entity.LocalService;
-import org.comroid.status.server.util.StatusContainer;
+import org.comroid.status.server.entity.LocalStoredService;
 import org.comroid.uniform.cache.Cache;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
@@ -130,7 +130,7 @@ public enum DiscordBot {
             logger.at(Level.INFO).log("User %s update service status: %s -> %s", user, args[0], status);
 
             return server().getServiceByName(args[0])
-                    .map(StatusContainer.class::cast)
+                    .map(LocalService.class::cast)
                     .map(service -> {
                         service.setStatus(status);
                         return String.format(
@@ -187,7 +187,7 @@ public enum DiscordBot {
         public String createService(String[] args, User user) {
             logger.at(Level.INFO).log("User %s is creating service: %s", user, args[0]);
 
-            final Service service = new LocalService.Builder().with(Service.Bind.Name, args[0])
+            final Service service = new LocalStoredService.Builder().with(Service.Bind.Name, args[0])
                     .with(Service.Bind.DisplayName, args.length >= 2 ? args[1] : args[0])
                     .build();
 
