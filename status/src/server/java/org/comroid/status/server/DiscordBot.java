@@ -86,7 +86,7 @@ public enum DiscordBot {
                         case OFFLINE:
                             return UserStatus.DO_NOT_DISTURB;
                         case MAINTENANCE:
-                        case BUSY:
+                        case REPORTED_PROBLEMS:
                             return UserStatus.IDLE;
                         case ONLINE:
                             return UserStatus.ONLINE;
