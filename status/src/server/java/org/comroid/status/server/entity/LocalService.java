@@ -13,7 +13,7 @@ public interface LocalService extends Service {
     @RootBind
     GroupBind<Service, DependenyObject> GROUP = Bind.Root.subGroup(
             "local_service",
-            Invocable.ofConstructor(Polyfill.<Class<Service>>uncheckedCast(LocalService.class))
+            Invocable.ofConstructor(Polyfill.<Class<Service>>uncheckedCast(LocalStoredService.class))
     );
 
     @Override
