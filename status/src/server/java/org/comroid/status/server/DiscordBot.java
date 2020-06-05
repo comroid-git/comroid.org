@@ -93,7 +93,7 @@ public enum DiscordBot {
                     }
                     throw new AssertionError();
                 })
-                .findFirst();
+                .findAny();
 
         private Container(DiscordApi api) {
             DefaultEmbedFactory.setEmbedSupplier(() -> new EmbedBuilder().setColor(new Color(0xcf2f2f))
