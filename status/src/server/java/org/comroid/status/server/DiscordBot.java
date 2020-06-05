@@ -130,7 +130,7 @@ public enum DiscordBot {
             logger.at(Level.INFO).log("User %s update service status: %s -> %s", user, args[0], status);
 
             return server().getServiceByName(args[0])
-                    .map(LocalService.class::cast)
+                    .flatMap(service -> service.as(LocalService.class))
                     .map(service -> {
                         service.setStatus(status);
                         return String.format(
