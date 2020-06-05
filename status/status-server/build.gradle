@@ -36,8 +36,8 @@ dependencies {
     compileOnly 'org.jetbrains:annotations:19.0.0'
 
     // usual dependencies
-    implementation 'com.github.comroid-git.common-util:common-util:00ec1074c31fa98af5137af85a52af9d8c0084fe'
-    implementation 'com.github.comroid-git.common-util:uniform:00ec1074c31fa98af5137af85a52af9d8c0084fe'
+    implementation 'com.github.comroid-git.common-util:common-util:c14eec8f555baf299046a0dbb83a39b9513aa446'
+    implementation 'com.github.comroid-git.common-util:uniform:c14eec8f555baf299046a0dbb83a39b9513aa446'
     //implementation 'org.comroid:common-util:1.5.3-SNAPSHOT'
     //implementation 'org.comroid:uniform:0.15.1-SNAPSHOT'
 
