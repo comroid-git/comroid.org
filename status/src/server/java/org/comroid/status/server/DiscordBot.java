@@ -1,6 +1,7 @@
 package org.comroid.status.server;
 
 import com.google.common.flogger.FluentLogger;
+import org.comroid.common.ref.Reference;
 import org.comroid.javacord.util.commands.Command;
 import org.comroid.javacord.util.commands.CommandGroup;
 import org.comroid.javacord.util.commands.CommandHandler;
@@ -16,12 +17,15 @@ import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.permission.PermissionType;
 import org.javacord.api.entity.user.User;
+import org.javacord.api.entity.user.UserStatus;
 
 import java.awt.*;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -84,6 +88,56 @@ public enum DiscordBot {
             cmd.useDefaultHelp(DefaultEmbedFactory.INSTANCE);
             cmd.withUnknownCommandResponseStatus(true);
             cmd.registerCommandTarget(COMMANDS);
+
+            api.getThreadPool()
+                    .getScheduler()
+                    .scheduleAtFixedRate(() -> {
+                        final UserStatus useStatus = StatusServer.instance.getEntityCache()
+                                .stream()
+                                .map(Reference::process)
+                                .filter(ref -> ref.test(Service.class::isInstance))
+                                .map(   ref -> ref.map(Service.class::cast))
+                                .map(   ref -> ref.map(Service::getStatus))
+                                .map(   ref -> ref.filter(status -> status != Status.UNKNOWN))
+                                .sorted(Comparator.comparingInt(
+                                        ref -> ref.into(Status::getValue)))
+                                .map(   ref -> ref.orElse(Status.OFFLINE))
+                                .map(   status -> {
+                                    switch (status) {
+                                        case UNKNOWN:
+                                        case OFFLINE:
+                                            return UserStatus.DO_NOT_DISTURB;
+                                        case MAINTENANCE:
+                                        case BUSY:
+                                            return UserStatus.IDLE;
+                                        case ONLINE:
+                                            return UserStatus.ONLINE;
+                                    }
+                                    throw new AssertionError();
+                                })
+                                .findFirst()
+                                .orElse(UserStatus.ONLINE);
+
+                        String str = "";
+                        switch (useStatus) {
+                            case ONLINE:
+                                str = "All services operating normally";
+                                break;
+                            case IDLE:
+                                str = "Some systems have problems";
+                                break;
+                            case DO_NOT_DISTURB:
+                                str = "Some systems are offline";
+                                break;
+                            case INVISIBLE:
+                            case OFFLINE:
+                                throw new UnsupportedOperationException("Cannot set Bot Status",
+                                        new AssertionError("Invalid useStatus found"));
+                        }
+
+                        api.updateStatus(useStatus);
+                        api.updateActivity(str);
+                    }, 10, 30, TimeUnit.SECONDS);
         }
 
     }
