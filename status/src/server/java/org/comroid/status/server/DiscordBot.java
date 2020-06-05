@@ -70,6 +70,30 @@ public enum DiscordBot {
         private final DiscordBot.Commands COMMANDS = new DiscordBot.Commands();
         private final DiscordApi api;
         private final CommandHandler cmd;
+        private final Reference<UserStatus> userStatusSupplier = StatusServer.instance.getEntityCache()
+                .pipe()
+                .map(Reference::process)
+                .filter(ref -> ref.test(Service.class::isInstance))
+                .map(ref -> ref.map(Service.class::cast))
+                .map(ref -> ref.map(Service::getStatus))
+                .map(ref -> ref.filter(status -> status != Status.UNKNOWN))
+                .sorted(Comparator.comparingInt(
+                        ref -> ref.into(Status::getValue)))
+                .map(ref -> ref.orElse(Status.OFFLINE))
+                .map(status -> {
+                    switch (status) {
+                        case UNKNOWN:
+                        case OFFLINE:
+                            return UserStatus.DO_NOT_DISTURB;
+                        case MAINTENANCE:
+                        case BUSY:
+                            return UserStatus.IDLE;
+                        case ONLINE:
+                            return UserStatus.ONLINE;
+                    }
+                    throw new AssertionError();
+                })
+                .findFirst();
 
         private Container(DiscordApi api) {
             DefaultEmbedFactory.setEmbedSupplier(() -> new EmbedBuilder().setColor(new Color(0xcf2f2f))
@@ -92,31 +116,7 @@ public enum DiscordBot {
             api.getThreadPool()
                     .getScheduler()
                     .scheduleAtFixedRate(() -> {
-                        final UserStatus useStatus = StatusServer.instance.getEntityCache()
-                                .stream()
-                                .map(Reference::process)
-                                .filter(ref -> ref.test(Service.class::isInstance))
-                                .map(   ref -> ref.map(Service.class::cast))
-                                .map(   ref -> ref.map(Service::getStatus))
-                                .map(   ref -> ref.filter(status -> status != Status.UNKNOWN))
-                                .sorted(Comparator.comparingInt(
-                                        ref -> ref.into(Status::getValue)))
-                                .map(   ref -> ref.orElse(Status.OFFLINE))
-                                .map(   status -> {
-                                    switch (status) {
-                                        case UNKNOWN:
-                                        case OFFLINE:
-                                            return UserStatus.DO_NOT_DISTURB;
-                                        case MAINTENANCE:
-                                        case BUSY:
-                                            return UserStatus.IDLE;
-                                        case ONLINE:
-                                            return UserStatus.ONLINE;
-                                    }
-                                    throw new AssertionError();
-                                })
-                                .findFirst()
-                                .orElse(UserStatus.ONLINE);
+                        final UserStatus useStatus = userStatusSupplier.orElse(UserStatus.ONLINE);
 
                         String str = "";
                         switch (useStatus) {
