@@ -51,6 +51,6 @@ dependencies {
     runtimeOnly 'org.apache.logging.log4j:log4j-core:2.11.0'
 
     // runtime adapter dependencies
-    runtimeOnly 'com.squareup.okhttp3:okhttp:4.5.0'
+    runtimeOnly 'com.squareup.okhttp3:okhttp:4.7.2'
     runtimeOnly 'com.alibaba:fastjson:1.2.68'
 }
