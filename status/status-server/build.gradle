@@ -52,5 +52,5 @@ dependencies {
 
     // runtime adapter dependencies
     runtimeOnly 'com.squareup.okhttp3:okhttp:4.7.2'
-    runtimeOnly 'com.alibaba:fastjson:1.2.68'
+    runtimeOnly 'com.alibaba:fastjson:1.2.70'
 }
