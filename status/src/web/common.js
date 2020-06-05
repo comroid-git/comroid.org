@@ -65,7 +65,7 @@ function addBox(name, display_name, status) {
         statusDiv.innerHTML = "MAINTENANCE";
     } else if (status == "3") {
         statusDiv.className = "busy";
-        statusDiv.innerHTML = "BUSY";
+        statusDiv.innerHTML = "REPORTED PROBLEMS";
     } else if (status == "4") {
         statusDiv.className = "online";
         statusDiv.innerHTML = "ONLINE";

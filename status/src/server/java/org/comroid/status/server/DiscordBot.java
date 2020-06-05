@@ -93,7 +93,7 @@ public enum DiscordBot {
                     }
                     throw new AssertionError();
                 })
-                .findFirst();
+                .findAny();
 
         private Container(DiscordApi api) {
             DefaultEmbedFactory.setEmbedSupplier(() -> new EmbedBuilder().setColor(new Color(0xcf2f2f))
@@ -116,7 +116,7 @@ public enum DiscordBot {
             api.getThreadPool()
                     .getScheduler()
                     .scheduleAtFixedRate(() -> {
-                        final UserStatus useStatus = userStatusSupplier.orElse(UserStatus.ONLINE);
+                        final UserStatus useStatus = userStatusSupplier.orElse(UserStatus.DO_NOT_DISTURB);
 
                         String str = "";
                         switch (useStatus) {
@@ -124,10 +124,10 @@ public enum DiscordBot {
                                 str = "All services operating normally";
                                 break;
                             case IDLE:
-                                str = "Some systems have problems";
+                                str = "Some services have problems";
                                 break;
                             case DO_NOT_DISTURB:
-                                str = "Some systems are offline";
+                                str = "Some services are offline";
                                 break;
                             case INVISIBLE:
                             case OFFLINE:
@@ -137,7 +137,7 @@ public enum DiscordBot {
 
                         api.updateStatus(useStatus);
                         api.updateActivity(str);
-                    }, 10, 30, TimeUnit.SECONDS);
+                    }, 5, 30, TimeUnit.SECONDS);
         }
 
     }
