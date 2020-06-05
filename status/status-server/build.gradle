@@ -42,7 +42,7 @@ dependencies {
     implementation 'org.comroid:uniform:0.15.1-SNAPSHOT'
 
     // Javacord
-    implementation 'org.javacord:javacord:3.0.5'
+    implementation 'org.javacord:javacord:3.0.6'
     implementation 'org.comroid:javacord-utilities:1.5.+'
 
     // logging dependencies
