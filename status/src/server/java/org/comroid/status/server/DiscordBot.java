@@ -10,7 +10,7 @@ import org.comroid.status.entity.Entity;
 import org.comroid.status.entity.Service;
 import org.comroid.status.entity.Service.Status;
 import org.comroid.status.server.entity.LocalService;
-import org.comroid.status.server.util.StatusContainer;
+import org.comroid.status.server.entity.LocalStoredService;
 import org.comroid.uniform.cache.Cache;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
@@ -70,6 +70,30 @@ public enum DiscordBot {
         private final DiscordBot.Commands COMMANDS = new DiscordBot.Commands();
         private final DiscordApi api;
         private final CommandHandler cmd;
+        private final Reference<UserStatus> userStatusSupplier = StatusServer.instance.getEntityCache()
+                .pipe()
+                .map(Reference::process)
+                .filter(ref -> ref.test(Service.class::isInstance))
+                .map(ref -> ref.map(Service.class::cast))
+                .map(ref -> ref.map(Service::getStatus))
+                .map(ref -> ref.filter(status -> status != Status.UNKNOWN))
+                .sorted(Comparator.comparingInt(
+                        ref -> ref.into(Status::getValue)))
+                .map(ref -> ref.orElse(Status.OFFLINE))
+                .map(status -> {
+                    switch (status) {
+                        case UNKNOWN:
+                        case OFFLINE:
+                            return UserStatus.DO_NOT_DISTURB;
+                        case MAINTENANCE:
+                        case BUSY:
+                            return UserStatus.IDLE;
+                        case ONLINE:
+                            return UserStatus.ONLINE;
+                    }
+                    throw new AssertionError();
+                })
+                .findFirst();
 
         private Container(DiscordApi api) {
             DefaultEmbedFactory.setEmbedSupplier(() -> new EmbedBuilder().setColor(new Color(0xcf2f2f))
@@ -92,31 +116,7 @@ public enum DiscordBot {
             api.getThreadPool()
                     .getScheduler()
                     .scheduleAtFixedRate(() -> {
-                        final UserStatus useStatus = StatusServer.instance.getEntityCache()
-                                .stream()
-                                .map(Reference::process)
-                                .filter(ref -> ref.test(Service.class::isInstance))
-                                .map(   ref -> ref.map(Service.class::cast))
-                                .map(   ref -> ref.map(Service::getStatus))
-                                .map(   ref -> ref.filter(status -> status != Status.UNKNOWN))
-                                .sorted(Comparator.comparingInt(
-                                        ref -> ref.into(Status::getValue)))
-                                .map(   ref -> ref.orElse(Status.OFFLINE))
-                                .map(   status -> {
-                                    switch (status) {
-                                        case UNKNOWN:
-                                        case OFFLINE:
-                                            return UserStatus.DO_NOT_DISTURB;
-                                        case MAINTENANCE:
-                                        case BUSY:
-                                            return UserStatus.IDLE;
-                                        case ONLINE:
-                                            return UserStatus.ONLINE;
-                                    }
-                                    throw new AssertionError();
-                                })
-                                .findFirst()
-                                .orElse(UserStatus.ONLINE);
+                        final UserStatus useStatus = userStatusSupplier.orElse(UserStatus.ONLINE);
 
                         String str = "";
                         switch (useStatus) {
@@ -184,7 +184,7 @@ public enum DiscordBot {
             logger.at(Level.INFO).log("User %s update service status: %s -> %s", user, args[0], status);
 
             return server().getServiceByName(args[0])
-                    .map(StatusContainer.class::cast)
+                    .flatMap(service -> service.as(LocalService.class))
                     .map(service -> {
                         service.setStatus(status);
                         return String.format(
@@ -241,7 +241,7 @@ public enum DiscordBot {
         public String createService(String[] args, User user) {
             logger.at(Level.INFO).log("User %s is creating service: %s", user, args[0]);
 
-            final Service service = new LocalService.Builder().with(Service.Bind.Name, args[0])
+            final Service service = new LocalStoredService.Builder().with(Service.Bind.Name, args[0])
                     .with(Service.Bind.DisplayName, args.length >= 2 ? args[1] : args[0])
                     .build();
 

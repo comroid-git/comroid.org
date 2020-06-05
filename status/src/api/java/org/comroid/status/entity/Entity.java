@@ -1,13 +1,14 @@
 package org.comroid.status.entity;
 
 import org.comroid.common.ref.Named;
+import org.comroid.common.ref.Specifiable;
 import org.comroid.status.DependenyObject;
 import org.comroid.uniform.ValueType;
 import org.comroid.varbind.bind.GroupBind;
 import org.comroid.varbind.bind.VarBind;
 import org.comroid.varbind.container.DataContainer;
 
-public interface Entity extends DataContainer<DependenyObject>, Named {
+public interface Entity extends DataContainer<DependenyObject>, Named, Specifiable<Entity> {
     default String getName() {
         return requireNonNull(Bind.Name);
     }
