@@ -14,7 +14,7 @@ function initGrid() {
 
 /**
  * Function to handle failed HTTP responses.
- * 
+ *
  * @param {Object} response The response object of the fetch API
  */
 function handleErrors(response) {
@@ -26,36 +26,13 @@ function handleErrors(response) {
 
 /**
  * Creates all boxes for the status page grid.
- * 
+ *
  * @param {Object} data The JSON data delivered by the Fetch API request
  */
 function createBoxes(data) {
-    for (var i = 0; i < data.results.length; i++) {
-        var obj = data.results[i];
-        addBox(obj.name, obj.display_name, determineStatus(obj.status));
-    }
-}
-
-/**
- * Translates the Status Number to a String.
- * A string is required to set the correct CSS classes and texts inside a service box.
- * 
- * @param {Number} number The status number delivered by the Fetch API request
- */
-function determineStatus(number) {
-    switch (number) {
-        case 1:
-            return "offline";
-            break;
-        case 2:
-            return "maintenance";
-            break;
-        case 3:
-            return "busy";
-            break;
-        case 4:
-            return "online";
-            break;
+    for (var i = 0; i < data.length; i++) {
+        var obj = data[i];
+        addBox(obj.name, obj.display_name, obj.status);
     }
 }
 
@@ -79,8 +56,21 @@ function addBox(name, display_name, status) {
     var statusDiv = document.createElement("div");
     var statusText = document.createElement("p");
     statusText.appendChild(document.createTextNode(display_name + ":"));
-    statusDiv.className = status;
-    statusDiv.innerHTML = status.toUpperCase();
+
+    if (status == "1") {
+        statusDiv.className = "offline";
+        statusDiv.innerHTML = "OFFLINE";
+    } else if (status == "2") {
+        statusDiv.className = "maintenance";
+        statusDiv.innerHTML = "MAINTENANCE";
+    } else if (status == "3") {
+        statusDiv.className = "busy";
+        statusDiv.innerHTML = "BUSY";
+    } else if (status == "4") {
+        statusDiv.className = "online";
+        statusDiv.innerHTML = "ONLINE";
+    }
+
 
     // Append text and status div to the box
     newDiv.appendChild(statusText);
