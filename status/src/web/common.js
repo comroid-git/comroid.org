@@ -77,5 +77,13 @@ function addBox(name, display_name, status) {
     newDiv.appendChild(statusDiv);
 
     // Add the box to the flex container
-    document.getElementById('flex_container').appendChild(newDiv);
+    // If the box is for the status server, check if there were already boxes created
+    // If true, create the status server box before the first child node
+    var container = document.getElementById('flex_container');
+    if (name == "status-server" && container.hasChildNodes()) {
+        var child = container.childNodes[1];
+        container.insertBefore(newDiv, child);
+    } else {
+        document.getElementById('flex_container').appendChild(newDiv);
+    }
 }
