@@ -137,7 +137,7 @@ public enum DiscordBot {
 
                         api.updateStatus(useStatus);
                         api.updateActivity(str);
-                    }, 10, 30, TimeUnit.SECONDS);
+                    }, 5, 30, TimeUnit.SECONDS);
         }
 
     }
