@@ -58,8 +58,8 @@ dependencies {
 
     testImplementation 'junit:junit:4.13'
     testImplementation 'org.easymock:easymock:4.1'
-    testRuntimeOnly 'com.squareup.okhttp3:okhttp:4.5.0'
-    testRuntimeOnly 'com.alibaba:fastjson:1.2.68'
+    testRuntimeOnly 'com.squareup.okhttp3:okhttp:4.7.2'
+    testRuntimeOnly 'com.alibaba:fastjson:1.2.70'
 }
 
 apply from: 'publishing.gradle'

@@ -42,7 +42,7 @@ public interface Service extends Entity, WrappedFormattable {
 
         OFFLINE(1),
         MAINTENANCE(2),
-        BUSY(3),
+        REPORTED_PROBLEMS(3),
         ONLINE(4);
 
         private final int value;

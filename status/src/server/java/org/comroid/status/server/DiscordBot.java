@@ -86,7 +86,7 @@ public enum DiscordBot {
                         case OFFLINE:
                             return UserStatus.DO_NOT_DISTURB;
                         case MAINTENANCE:
-                        case BUSY:
+                        case REPORTED_PROBLEMS:
                             return UserStatus.IDLE;
                         case ONLINE:
                             return UserStatus.ONLINE;
@@ -173,14 +173,16 @@ public enum DiscordBot {
         }
 
         @Command(
-                usage = "update <str: service_name> <int: new_status>",
+                usage = "update <str: service_name> <status: new_status>",
                 requiredDiscordPermissions = PermissionType.ADMINISTRATOR,
                 minimumArguments = 2,
                 maximumArguments = 2,
                 convertStringResultsToEmbed = true
         )
         public String update(String[] args, User user) {
-            final Status status = Status.valueOf(Integer.parseInt(args[1]));
+            final Status status = args[1].matches("\\d+")
+                    ? Status.valueOf(Integer.parseInt(args[1]))
+                    : Status.valueOf(args[1].toUpperCase());
             logger.at(Level.INFO).log("User %s update service status: %s -> %s", user, args[0], status);
 
             return server().getServiceByName(args[0])
