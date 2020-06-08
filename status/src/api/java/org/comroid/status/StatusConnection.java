@@ -42,7 +42,7 @@ public class StatusConnection implements DependenyObject {
     public StatusConnection(String serviceName, String token) {
         this.serviceName = serviceName;
         this.token = token;
-        this.rest = new REST<>(Adapters.HTTP_ADAPTER, Adapters.SERIALIZATION_ADAPTER);
+        this.rest = new REST<>(Adapters.HTTP_ADAPTER, Adapters.SERIALIZATION_ADAPTER, this);
         this.serviceCache = new ProvidedCache<>(250, ForkJoinPool.commonPool(), this::requestServiceByName);
         this.ownService = requestServiceByName(serviceName).join();
     }
