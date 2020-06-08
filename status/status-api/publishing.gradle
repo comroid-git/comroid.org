@@ -37,7 +37,9 @@ publishing {
         if (canPublishToSpace) {
             maven {
                 name = 'Space'
-                url = 'https://maven.jetbrains.space/comroid/repo'
+                url = snapshot
+                        ? 'https://maven.jetbrains.space/comroid/snapshot'
+                        : 'https://maven.jetbrains.space/comroid/release'
 
                 credentials {
                     username spaceUsername
