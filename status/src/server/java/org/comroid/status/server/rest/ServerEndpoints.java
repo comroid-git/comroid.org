@@ -2,7 +2,6 @@ package org.comroid.status.server.rest;
 
 import com.sun.net.httpserver.Headers;
 import org.comroid.restless.CommonHeaderNames;
-import org.comroid.restless.HTTPStatusCodes;
 import org.comroid.restless.REST;
 import org.comroid.restless.endpoint.AccessibleEndpoint;
 import org.comroid.restless.server.RestEndpointException;
@@ -14,10 +13,8 @@ import org.comroid.status.server.StatusServer;
 import org.comroid.status.server.TokenCore;
 import org.comroid.status.server.entity.LocalService;
 import org.comroid.status.server.util.ResponseBuilder;
-import org.comroid.uniform.ValueType;
 import org.comroid.uniform.node.UniArrayNode;
 import org.comroid.uniform.node.UniNode;
-import org.comroid.uniform.node.UniObjectNode;
 
 import static org.comroid.restless.HTTPStatusCodes.*;
 
@@ -65,7 +62,7 @@ public enum ServerEndpoints implements ServerEndpoint {
 
             final String token = headers.getFirst(CommonHeaderNames.AUTHORIZATION);
 
-            if (!TokenCore.extractName(token).equals(service.getName()))
+            if (!TokenCore.isValid(token) || !TokenCore.extractName(token).equals(service.getName()))
                 throw new RestEndpointException(UNAUTHORIZED, "Malicious Token used");
 
             if (!service.getToken().equals(token))
