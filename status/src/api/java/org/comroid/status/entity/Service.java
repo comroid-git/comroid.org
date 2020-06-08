@@ -1,9 +1,8 @@
 package org.comroid.status.entity;
 
-import org.comroid.common.Polyfill;
-import org.comroid.common.func.Invocable;
-import org.comroid.common.ref.IntEnum;
-import org.comroid.common.ref.Specifiable;
+import org.comroid.api.IntEnum;
+import org.comroid.api.Invocable;
+import org.comroid.api.Polyfill;
 import org.comroid.common.ref.WrappedFormattable;
 import org.comroid.status.DependenyObject;
 import org.comroid.status.StatusUpdater;

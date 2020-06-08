@@ -1,7 +1,7 @@
 package org.comroid.status.server.entity;
 
-import org.comroid.common.Polyfill;
-import org.comroid.common.ref.IntEnum;
+import org.comroid.api.IntEnum;
+import org.comroid.api.Polyfill;
 import org.comroid.status.DependenyObject;
 import org.comroid.status.entity.Service;
 import org.comroid.status.server.StatusServer;
