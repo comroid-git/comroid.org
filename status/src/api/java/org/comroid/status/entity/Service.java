@@ -16,6 +16,7 @@ import org.comroid.varbind.container.DataContainerBase;
 import org.intellij.lang.annotations.Language;
 
 import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
 
 @Location(Service.Bind.class)
 public interface Service extends Entity, WrappedFormattable {
