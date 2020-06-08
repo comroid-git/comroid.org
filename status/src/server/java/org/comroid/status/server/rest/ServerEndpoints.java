@@ -1,91 +1,79 @@
 package org.comroid.status.server.rest;
 
+import com.sun.net.httpserver.Headers;
 import org.comroid.restless.HTTPStatusCodes;
 import org.comroid.restless.REST;
-import org.comroid.restless.endpoint.RestEndpoint;
-import org.comroid.restless.server.EndpointHandler;
+import org.comroid.restless.endpoint.AccessibleEndpoint;
+import org.comroid.restless.server.RestEndpointException;
 import org.comroid.restless.server.ServerEndpoint;
-import org.comroid.status.DependenyObject;
+import org.comroid.status.DependenyObject.Adapters;
 import org.comroid.status.entity.Service;
 import org.comroid.status.rest.Endpoint;
 import org.comroid.status.server.StatusServer;
 import org.comroid.status.server.util.ResponseBuilder;
 import org.comroid.uniform.ValueType;
 import org.comroid.uniform.node.UniArrayNode;
+import org.comroid.uniform.node.UniNode;
 import org.comroid.uniform.node.UniObjectNode;
 
 import java.util.Optional;
 
 import static org.comroid.restless.HTTPStatusCodes.NOT_FOUND;
-import static org.comroid.status.DependenyObject.Adapters.SERIALIZATION_ADAPTER;
 
-public enum ServerEndpoints implements ServerEndpoint.Underlying {
-    LIST_SERVICES(Endpoint.LIST_SERVICES, (data, args) -> {
-        if (args.length != 0)
-            throw new IllegalArgumentException("Invalid argument count");
+public enum ServerEndpoints implements ServerEndpoint {
+    LIST_SERVICES(Endpoint.LIST_SERVICES) {
+        @Override
+        public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            final UniArrayNode services = Adapters.SERIALIZATION_ADAPTER.createUniArrayNode();
 
-        final UniArrayNode services = SERIALIZATION_ADAPTER.createUniArrayNode();
+            StatusServer.instance
+                    .getEntityCache()
+                    .stream()
+                    .filter(ref -> ref.test(Service.class::isInstance))
+                    .map(ref -> ref.into(Service.class::cast))
+                    .forEach(service -> service.toObjectNode(services.addObject()));
 
-        StatusServer.instance
-                .getEntityCache()
-                .stream()
-                .filter(ref -> ref.test(Service.class::isInstance))
-                .map(ref -> ref.into(Service.class::cast))
-                .forEach(service -> service.toObjectNode(services.addObject()));
-
-        return new ResponseBuilder()
-                .setStatusCode(200)
-                .setBody(services)
-                .build();
-    }, REST.Method.GET),
-
-    SERVICE_STATUS(Endpoint.SERVICE_STATUS, (data, args) -> {
-        if (args.length != 1)
-            throw new IllegalArgumentException("Invalid argument count");
-
-        final UniObjectNode status = SERIALIZATION_ADAPTER.createUniObjectNode();
-
-        final Optional<Service> serviceOpt = StatusServer.instance.getServiceByName(args[0]);
-
-        if (!serviceOpt.isPresent())
             return new ResponseBuilder()
-                    .setStatusCode(NOT_FOUND)
+                    .setStatusCode(200)
+                    .setBody(services)
+                    .build();
+        }
+    },
+
+    SERVICE_STATUS(Endpoint.SERVICE_STATUS) {
+        @Override
+        public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            final UniObjectNode status = Adapters.SERIALIZATION_ADAPTER.createUniObjectNode();
+
+            final Optional<Service> serviceOpt = StatusServer.instance.getServiceByName(urlParams[0]);
+
+            if (!serviceOpt.isPresent())
+                return new ResponseBuilder()
+                        .setStatusCode(NOT_FOUND)
+                        .setBody(status)
+                        .build();
+
+            serviceOpt.ifPresent(service -> {
+                status.put("name", ValueType.STRING, service.getName());
+                status.put("status", ValueType.INTEGER, service.getStatus().getValue());
+            });
+
+            return new ResponseBuilder()
+                    .setStatusCode(200)
                     .setBody(status)
                     .build();
-
-        serviceOpt.ifPresent(service -> {
-            status.put("name", ValueType.STRING, service.getName());
-            status.put("status", ValueType.INTEGER, service.getStatus().getValue());
-        });
-
-        return new ResponseBuilder()
-                .setStatusCode(200)
-                .setBody(status)
-                .build();
-    }, REST.Method.GET);
+        }
+    };
 
     private final Endpoint underlying;
-    private final EndpointHandler handler;
-    private final REST.Method[] allowedMethods;
 
     @Override
-    public RestEndpoint getUnderlyingEndpoint() {
+    public AccessibleEndpoint getEndpointBase() {
         return underlying;
     }
 
-    @Override
-    public EndpointHandler getHandler() {
-        return handler;
-    }
 
-    ServerEndpoints(Endpoint underlying, EndpointHandler handler, REST.Method... allowedMethods) {
+    ServerEndpoints(Endpoint underlying) {
         this.underlying = underlying;
-        this.handler = handler;
-        this.allowedMethods = allowedMethods;
-    }
-
-    @Override
-    public REST.Method[] allowedMethods() {
-        return allowedMethods;
     }
 }
