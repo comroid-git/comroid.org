@@ -44,11 +44,10 @@ public class LocalStoredService extends DataContainerBase<DependenyObject> imple
         this.status = new AtomicReference<>(wrap(Bind.Status).orElse(Status.UNKNOWN));
         this.tokenFile = StatusServer.TOKEN_DIR.createSubFile(getName() + ".token");
 
-        String myToken;
+        this.token = new AtomicReference<>(null);
         if (!tokenFile.exists())
-            myToken = overwriteTokenFile();
-        else myToken = tokenFile.getContent();
-        this.token = new AtomicReference<>(myToken);
+            overwriteTokenFile();
+        else token.set(tokenFile.getContent());
     }
 
     private synchronized String overwriteTokenFile() {
