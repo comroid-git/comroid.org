@@ -16,12 +16,14 @@ import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.permission.PermissionType;
+import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.entity.user.UserStatus;
 
 import java.awt.*;
 import java.io.IOException;
 import java.util.Comparator;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -147,15 +149,12 @@ public enum DiscordBot {
             description = "All commands related to the status server"
     )
     public class Commands {
-        @Command(aliases = "store-data", shownInHelpCommand = false)
-        public void storeData(User user) {
-            if (user.getId() == 141476933849448448L) {
-                try {
-                    StatusServer.instance.getEntityCache().storeData();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+        @Command(
+                aliases = "store-data",
+                requiredDiscordPermissions = PermissionType.ADMINISTRATOR
+        )
+        public void storeData(User user) throws IOException {
+            StatusServer.instance.getEntityCache().storeData();
         }
 
         @Command(
@@ -170,6 +169,30 @@ public enum DiscordBot {
             return server().getServiceByName(args[0])
                     .map(service -> String.format("Service %s is currently `%s`", service.getDisplayName(), service.getStatus().toString()))
                     .orElse(String.format("No service with the name `%s` could be found", args[0]));
+        }
+
+        @Command(
+                aliases = "regen-token",
+                usage = "regen-token <str: service_name>",
+                requiredDiscordPermissions = PermissionType.ADMINISTRATOR,
+                minimumArguments = 1,
+                maximumArguments = 1,
+                convertStringResultsToEmbed = true
+        )
+        public CompletableFuture<String> regenerateToken(String[] args, Server server, User user) {
+            final LocalService service = server().getServiceByName(args[0])
+                    .flatMap(it -> it.as(LocalService.class))
+                    .orElseThrow(() -> new NoSuchElementException(String.format("No Service found with name `%s`", args[0])));
+
+            service.regenerateToken();
+
+            return user.sendMessage(DefaultEmbedFactory.create(server, user)
+                    .addField("Token Regenerated!", String.format(
+                            "New Token for %s: ```%s```",
+                            service,
+                            service.getToken()
+                    )))
+                    .thenApply(nil -> String.format("Token for %s regenerated!", service));
         }
 
         @Command(

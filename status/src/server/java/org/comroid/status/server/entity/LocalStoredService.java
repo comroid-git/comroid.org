@@ -52,7 +52,7 @@ public class LocalStoredService extends DataContainerBase<DependenyObject> imple
     }
 
     private synchronized String overwriteTokenFile() {
-        if (!((tokenFile.exists() || tokenFile.delete()) && tokenFile.validateExists()))
+        if (!((!tokenFile.exists() || tokenFile.delete()) && tokenFile.validateExists()))
             throw new RuntimeException("Could not replace old Token file");
 
         final String newToken = TokenCore.generate(getName());
