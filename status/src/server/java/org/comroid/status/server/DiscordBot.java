@@ -1,11 +1,11 @@
 package org.comroid.status.server;
 
 import com.google.common.flogger.FluentLogger;
-import org.comroid.common.ref.Reference;
 import org.comroid.javacord.util.commands.Command;
 import org.comroid.javacord.util.commands.CommandGroup;
 import org.comroid.javacord.util.commands.CommandHandler;
 import org.comroid.javacord.util.ui.embed.DefaultEmbedFactory;
+import org.comroid.mutatio.ref.Reference;
 import org.comroid.status.entity.Entity;
 import org.comroid.status.entity.Service;
 import org.comroid.status.entity.Service.Status;

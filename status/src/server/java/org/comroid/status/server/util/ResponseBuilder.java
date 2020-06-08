@@ -1,6 +1,6 @@
 package org.comroid.status.server.util;
 
-import org.comroid.common.func.Builder;
+import org.comroid.api.Builder;
 import org.comroid.restless.REST;
 import org.comroid.uniform.node.UniNode;
 

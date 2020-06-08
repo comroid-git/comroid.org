@@ -1,11 +1,6 @@
 package org.comroid.status;
 
-import java.util.Collection;
-import java.util.Objects;
-import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-
-import org.comroid.common.iter.Span;
+import org.comroid.mutatio.span.Span;
 import org.comroid.restless.HttpAdapter;
 import org.comroid.restless.REST;
 import org.comroid.status.entity.Entity;
@@ -15,17 +10,29 @@ import org.comroid.uniform.SerializationAdapter;
 import org.comroid.uniform.cache.BasicCache;
 import org.comroid.uniform.cache.Cache;
 
+import java.util.Collection;
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+
 public enum StatusUpdater implements DependenyObject {
     instance;
 
-    private final CompletableFuture<HttpAdapter> httpAdapterFuture          = new CompletableFuture<>();
+    private final CompletableFuture<HttpAdapter> httpAdapterFuture = new CompletableFuture<>();
     private final CompletableFuture<SerializationAdapter> seriAdapterFuture = new CompletableFuture<>();
-    private final CompletableFuture<REST<DependenyObject>> restFuture         = CompletableFuture.allOf(httpAdapterFuture,
+    private final CompletableFuture<REST<DependenyObject>> restFuture = CompletableFuture.allOf(httpAdapterFuture,
             seriAdapterFuture
     )
             .thenApply(nil -> new REST<>(httpAdapterFuture.join(), seriAdapterFuture.join()));
-    private final CompletableFuture<Container> containerFuture              = restFuture.thenApply(Container::new)
+    private final CompletableFuture<Container> containerFuture = restFuture.thenApply(Container::new)
             .thenCompose(Container::initialize);
+
+    public final CompletableFuture<HttpAdapter> getHttpAdapter() {
+        return httpAdapterFuture;
+    }
+
+    public final CompletableFuture<SerializationAdapter> getSerializationAdapter() {
+        return seriAdapterFuture;
+    }
 
     public final CompletableFuture<?> initialize(HttpAdapter httpAdapter, SerializationAdapter seriLib) {
         if (httpAdapterFuture.isDone() | seriAdapterFuture.isDone()) {
@@ -38,14 +45,6 @@ public enum StatusUpdater implements DependenyObject {
         return containerFuture;
     }
 
-    public final CompletableFuture<HttpAdapter> getHttpAdapter() {
-        return httpAdapterFuture;
-    }
-
-    public final CompletableFuture<SerializationAdapter> getSerializationAdapter() {
-        return seriAdapterFuture;
-    }
-
     public CompletableFuture<? extends Collection<Service>> requestAllServices() {
         return containerFuture.thenCompose(Container::requestAllServices);
     }
@@ -56,7 +55,7 @@ public enum StatusUpdater implements DependenyObject {
 
         private Container(REST<DependenyObject> restClient) {
             this.restClient = restClient;
-            this.cache      = new BasicCache<>();
+            this.cache = new BasicCache<>();
         }
 
         public CompletableFuture<Span<Service>> requestAllServices() {

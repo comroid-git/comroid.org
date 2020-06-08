@@ -41,6 +41,7 @@ task javadocJar(type: Jar) {
 compileJava.options.encoding = 'UTF-8'
 
 repositories {
+    maven { url 'https://www.jitpack.io' }
     mavenLocal()
     maven {
         url "https://maven.jetbrains.space/comroid/repo"
@@ -53,8 +54,12 @@ repositories {
 dependencies {
     compileOnly 'org.jetbrains:annotations:19.0.0'
 
-    api 'org.comroid:common-util:1.5.1'
-    api 'org.comroid:uniform:0.9.0-SNAPSHOT'
+    // usual dependencies
+    implementation 'com.github.comroid-git.common-util:mutatio:de89c13b36803e1287f1144612f133d5fbda44f9'
+    implementation 'com.github.comroid-git.common-util:common-util:de89c13b36803e1287f1144612f133d5fbda44f9'
+    implementation 'com.github.comroid-git.common-util:uniform:de89c13b36803e1287f1144612f133d5fbda44f9'
+    implementation 'com.github.comroid-git.common-util:varbind:de89c13b36803e1287f1144612f133d5fbda44f9'
+    implementation 'com.github.comroid-git.common-util:restless:de89c13b36803e1287f1144612f133d5fbda44f9'
 
     testImplementation 'junit:junit:4.13'
     testImplementation 'org.easymock:easymock:4.1'
