@@ -11,6 +11,7 @@ import org.comroid.status.DependenyObject.Adapters;
 import org.comroid.status.entity.Service;
 import org.comroid.status.rest.Endpoint;
 import org.comroid.status.server.StatusServer;
+import org.comroid.status.server.TokenCore;
 import org.comroid.status.server.entity.LocalService;
 import org.comroid.status.server.util.ResponseBuilder;
 import org.comroid.uniform.ValueType;
@@ -63,6 +64,9 @@ public enum ServerEndpoints implements ServerEndpoint {
                 throw new RestEndpointException(UNAUTHORIZED, "Unauthorized");
 
             final String token = headers.getFirst(CommonHeaderNames.AUTHORIZATION);
+
+            if (!TokenCore.extractName(token).equals(service.getName()))
+                throw new RestEndpointException(UNAUTHORIZED, "Malicious Token used");
 
             if (!service.getToken().equals(token))
                 throw new RestEndpointException(UNAUTHORIZED, "Unauthorized");
