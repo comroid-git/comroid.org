@@ -12,6 +12,7 @@ import org.comroid.status.server.entity.LocalService;
 import org.comroid.status.server.rest.ServerEndpoints;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
 import org.comroid.varbind.FileCache;
+import org.comroid.varbind.FileConfiguration;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -26,6 +27,7 @@ public class StatusServer implements DependenyObject, Closeable {
     public static final FluentLogger logger = FluentLogger.forEnclosingClass();
     public static final FileHandle PATH_BASE = new FileHandle("/home/comroid/srv_status/", true); // server path base
     public static final FileHandle DATA_DIR = PATH_BASE.createSubDir("data");
+    public static final FileHandle TOKEN_DIR = PATH_BASE.createSubDir("token");
     public static final FileHandle CACHE_FILE = DATA_DIR.createSubFile("cache.json");
     public static final int PORT = 42641; // hardcoded in server, do not change
     public static final ThreadGroup THREAD_GROUP = new ThreadGroup("comroid Status Server");
@@ -40,6 +42,7 @@ public class StatusServer implements DependenyObject, Closeable {
     }
 
     private final ScheduledExecutorService threadPool;
+    private final FileConfiguration tokenCache;
     private final FileCache<String, Entity, DependenyObject> entityCache;
     private final REST<StatusServer> rest;
     private final RestServer server;
@@ -70,6 +73,8 @@ public class StatusServer implements DependenyObject, Closeable {
 
         this.rest = new REST<>(DependenyObject.Adapters.HTTP_ADAPTER, DependenyObject.Adapters.SERIALIZATION_ADAPTER, threadPool, this);
         logger.at(Level.INFO).log("REST Client created: %s", rest);
+
+        this.tokenCache = new TokenCache(TOKEN_FILE);
 
         this.entityCache = new FileCache<>(FastJSONLib.fastJsonLib, Entity.Bind.Name, CACHE_FILE, 250, this);
         logger.at(Level.INFO).log("EntityCache created: %s", entityCache);

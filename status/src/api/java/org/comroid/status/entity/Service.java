@@ -5,7 +5,7 @@ import org.comroid.api.Invocable;
 import org.comroid.api.Polyfill;
 import org.comroid.common.ref.WrappedFormattable;
 import org.comroid.status.DependenyObject;
-import org.comroid.status.StatusUpdater;
+import org.comroid.status.StatusConnection;
 import org.comroid.uniform.ValueType;
 import org.comroid.uniform.node.UniObjectNode;
 import org.comroid.varbind.annotation.Location;
@@ -83,8 +83,8 @@ public interface Service extends Entity, WrappedFormattable {
     }
 
     final class Basic extends DataContainerBase<DependenyObject> implements Service {
-        public Basic(StatusUpdater updater, UniObjectNode node) {
-            super(node, updater);
+        public Basic(StatusConnection connection, UniObjectNode node) {
+            super(node, connection);
         }
     }
 }

@@ -20,4 +20,8 @@ public interface LocalService extends Service {
     Status getStatus();
 
     void setStatus(Status status);
+
+    String getToken();
+
+    void regenerateToken();
 }
