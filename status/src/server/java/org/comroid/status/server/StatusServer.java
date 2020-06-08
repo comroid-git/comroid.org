@@ -3,7 +3,7 @@ package org.comroid.status.server;
 import com.google.common.flogger.FluentLogger;
 import org.comroid.common.io.FileHandle;
 import org.comroid.restless.REST;
-import org.comroid.restless.adapter.okhttp.v3.OkHttp3Adapter;
+import org.comroid.restless.adapter.okhttp.v4.OkHttp3Adapter;
 import org.comroid.restless.server.RestServer;
 import org.comroid.status.DependenyObject;
 import org.comroid.status.entity.Entity;
@@ -11,7 +11,7 @@ import org.comroid.status.entity.Service;
 import org.comroid.status.server.entity.LocalService;
 import org.comroid.status.server.rest.ServerEndpoints;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
-import org.comroid.uniform.cache.FileCache;
+import org.comroid.varbind.FileCache;
 
 import java.io.Closeable;
 import java.io.IOException;

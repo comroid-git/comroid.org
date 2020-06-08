@@ -39,6 +39,7 @@ dependencies {
     implementation 'com.github.comroid-git.common-util:mutatio:6aa95ea8667d91c6125655bac9b9f3ecf537d114'
     implementation 'com.github.comroid-git.common-util:common-util:6aa95ea8667d91c6125655bac9b9f3ecf537d114'
     implementation 'com.github.comroid-git.common-util:uniform:6aa95ea8667d91c6125655bac9b9f3ecf537d114'
+    implementation 'com.github.comroid-git.common-util:varbind:6aa95ea8667d91c6125655bac9b9f3ecf537d114'
     implementation 'com.github.comroid-git.common-util:restless:6aa95ea8667d91c6125655bac9b9f3ecf537d114'
 
     // Javacord
