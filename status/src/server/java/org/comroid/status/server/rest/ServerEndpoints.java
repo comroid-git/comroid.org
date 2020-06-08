@@ -1,6 +1,7 @@
 package org.comroid.status.server.rest;
 
 import com.sun.net.httpserver.Headers;
+import org.comroid.restless.CommonHeaderNames;
 import org.comroid.restless.REST;
 import org.comroid.restless.endpoint.AccessibleEndpoint;
 import org.comroid.restless.server.RestEndpointException;
@@ -9,11 +10,13 @@ import org.comroid.status.DependenyObject.Adapters;
 import org.comroid.status.entity.Service;
 import org.comroid.status.rest.Endpoint;
 import org.comroid.status.server.StatusServer;
+import org.comroid.status.server.TokenCore;
+import org.comroid.status.server.entity.LocalService;
 import org.comroid.status.server.util.ResponseBuilder;
 import org.comroid.uniform.node.UniArrayNode;
 import org.comroid.uniform.node.UniNode;
 
-import static org.comroid.restless.HTTPStatusCodes.NOT_FOUND;
+import static org.comroid.restless.HTTPStatusCodes.*;
 
 public enum ServerEndpoints implements ServerEndpoint {
     LIST_SERVICES(Endpoint.LIST_SERVICES, false) {
@@ -45,6 +48,38 @@ public enum ServerEndpoints implements ServerEndpoint {
                             .setBody(node)
                             .build())
                     .orElseThrow(() -> new RestEndpointException(NOT_FOUND, "No service found with name " + urlParams[0]));
+        }
+    },
+    UPDATE_SERVICE_STATUS(Endpoint.UPDATE_SERVICE_STATUS, false) {
+        @Override
+        public REST.Response executePOST(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            final LocalService service = StatusServer.instance.getServiceByName(urlParams[0])
+                    .map(LocalService.class::cast)
+                    .orElseThrow(() -> new RestEndpointException(NOT_FOUND, "No local service found with name " + urlParams[0]));
+
+            if (!headers.containsKey(CommonHeaderNames.AUTHORIZATION))
+                throw new RestEndpointException(UNAUTHORIZED, "Unauthorized");
+
+            final String token = headers.getFirst(CommonHeaderNames.AUTHORIZATION);
+
+            if (!TokenCore.isValid(token) || !TokenCore.extractName(token).equals(service.getName()))
+                throw new RestEndpointException(UNAUTHORIZED, "Malicious Token used");
+
+            if (!service.getToken().equals(token))
+                throw new RestEndpointException(UNAUTHORIZED, "Unauthorized");
+
+            final Service.Status newStatus = body.process("status")
+                    .map(UniNode::asInt)
+                    .map(Service.Status::valueOf)
+                    .wrap()
+                    .orElseThrow(() -> new RestEndpointException(BAD_REQUEST, "No new status defined"));
+
+            service.setStatus(newStatus);
+
+            return new ResponseBuilder()
+                    .setStatusCode(200)
+                    .setBody(service.toObjectNode(body.getSerializationAdapter()))
+                    .build();
         }
     };
 

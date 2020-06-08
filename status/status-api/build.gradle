@@ -55,11 +55,18 @@ dependencies {
     compileOnly 'org.jetbrains:annotations:19.0.0'
 
     // usual dependencies
-    implementation 'com.github.comroid-git.common-util:mutatio:de89c13b36803e1287f1144612f133d5fbda44f9'
-    implementation 'com.github.comroid-git.common-util:common-util:de89c13b36803e1287f1144612f133d5fbda44f9'
-    implementation 'com.github.comroid-git.common-util:uniform:de89c13b36803e1287f1144612f133d5fbda44f9'
-    implementation 'com.github.comroid-git.common-util:varbind:de89c13b36803e1287f1144612f133d5fbda44f9'
-    implementation 'com.github.comroid-git.common-util:restless:de89c13b36803e1287f1144612f133d5fbda44f9'
+    implementation 'com.github.comroid-git.common-util:mutatio:b9b55324e856a2beb46987ec1a21550324e24e35'
+    implementation 'com.github.comroid-git.common-util:common-util:b9b55324e856a2beb46987ec1a21550324e24e35'
+    implementation 'com.github.comroid-git.common-util:uniform:b9b55324e856a2beb46987ec1a21550324e24e35'
+    implementation 'com.github.comroid-git.common-util:varbind:b9b55324e856a2beb46987ec1a21550324e24e35'
+    implementation 'com.github.comroid-git.common-util:restless:b9b55324e856a2beb46987ec1a21550324e24e35'
+    /*
+    implementation 'org.comroid:mutatio:0.10.0-SNAPSHOT'
+    implementation 'org.comroid:common-util:1.5.3-SNAPSHOT'
+    implementation 'org.comroid:uniform:0.15.1-SNAPSHOT'
+    implementation 'org.comroid:varbind:1.0.0-SNAPSHOT'
+    implementation 'org.comroid:restless:0.15.1-SNAPSHOT'
+     */
 
     testImplementation 'junit:junit:4.13'
     testImplementation 'org.easymock:easymock:4.1'

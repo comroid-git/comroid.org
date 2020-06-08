@@ -5,7 +5,7 @@ import org.comroid.api.Invocable;
 import org.comroid.api.Polyfill;
 import org.comroid.common.ref.WrappedFormattable;
 import org.comroid.status.DependenyObject;
-import org.comroid.status.StatusUpdater;
+import org.comroid.status.StatusConnection;
 import org.comroid.uniform.ValueType;
 import org.comroid.uniform.node.UniObjectNode;
 import org.comroid.varbind.annotation.Location;
@@ -13,11 +13,16 @@ import org.comroid.varbind.annotation.RootBind;
 import org.comroid.varbind.bind.GroupBind;
 import org.comroid.varbind.bind.VarBind;
 import org.comroid.varbind.container.DataContainerBase;
+import org.intellij.lang.annotations.Language;
 
 import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
 
 @Location(Service.Bind.class)
 public interface Service extends Entity, WrappedFormattable {
+    @Language("RegExp")
+    String NAME_REGEX = "\\w[\\w\\d-]+";
+
     default String getDisplayName() {
         return requireNonNull(Bind.DisplayName);
     }
@@ -79,8 +84,8 @@ public interface Service extends Entity, WrappedFormattable {
     }
 
     final class Basic extends DataContainerBase<DependenyObject> implements Service {
-        public Basic(StatusUpdater updater, UniObjectNode node) {
-            super(node, updater);
+        public Basic(StatusConnection connection, UniObjectNode node) {
+            super(node, connection);
         }
     }
 }

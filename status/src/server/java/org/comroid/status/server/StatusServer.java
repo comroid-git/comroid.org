@@ -17,7 +17,9 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Optional;
-import java.util.concurrent.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 public class StatusServer implements DependenyObject, Closeable {
@@ -26,6 +28,7 @@ public class StatusServer implements DependenyObject, Closeable {
     public static final FluentLogger logger = FluentLogger.forEnclosingClass();
     public static final FileHandle PATH_BASE = new FileHandle("/home/comroid/srv_status/", true); // server path base
     public static final FileHandle DATA_DIR = PATH_BASE.createSubDir("data");
+    public static final FileHandle TOKEN_DIR = PATH_BASE.createSubDir("token");
     public static final FileHandle CACHE_FILE = DATA_DIR.createSubFile("cache.json");
     public static final int PORT = 42641; // hardcoded in server, do not change
     public static final ThreadGroup THREAD_GROUP = new ThreadGroup("comroid Status Server");
@@ -100,7 +103,7 @@ public class StatusServer implements DependenyObject, Closeable {
                         .withCause(e)
                         .log("Could not store data");
             }
-        }, 5,5, TimeUnit.MINUTES);
+        }, 5, 5, TimeUnit.MINUTES);
         logger.at(Level.INFO).log("Hooks registered!");
     }
 

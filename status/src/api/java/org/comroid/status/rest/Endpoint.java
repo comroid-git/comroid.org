@@ -2,6 +2,7 @@ package org.comroid.status.rest;
 
 import org.comroid.restless.endpoint.AccessibleEndpoint;
 import org.comroid.status.DependenyObject;
+import org.comroid.status.entity.Service;
 import org.intellij.lang.annotations.Language;
 
 public enum Endpoint implements AccessibleEndpoint {
@@ -9,7 +10,11 @@ public enum Endpoint implements AccessibleEndpoint {
 
     SPECIFIC_SERVICE(
             "service/%s",
-            "\\w[\\w\\d-]+"
+            Service.NAME_REGEX
+    ),
+    UPDATE_SERVICE_STATUS(
+            "service/%s/status",
+            Service.NAME_REGEX
     );
 
     private final String extension;
