@@ -1,7 +1,6 @@
 package org.comroid.status.server.rest;
 
 import com.sun.net.httpserver.Headers;
-import org.comroid.restless.HTTPStatusCodes;
 import org.comroid.restless.REST;
 import org.comroid.restless.endpoint.AccessibleEndpoint;
 import org.comroid.restless.server.RestEndpointException;
@@ -11,17 +10,13 @@ import org.comroid.status.entity.Service;
 import org.comroid.status.rest.Endpoint;
 import org.comroid.status.server.StatusServer;
 import org.comroid.status.server.util.ResponseBuilder;
-import org.comroid.uniform.ValueType;
 import org.comroid.uniform.node.UniArrayNode;
 import org.comroid.uniform.node.UniNode;
-import org.comroid.uniform.node.UniObjectNode;
-
-import java.util.Optional;
 
 import static org.comroid.restless.HTTPStatusCodes.NOT_FOUND;
 
 public enum ServerEndpoints implements ServerEndpoint {
-    LIST_SERVICES(Endpoint.LIST_SERVICES) {
+    LIST_SERVICES(Endpoint.LIST_SERVICES, false) {
         @Override
         public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             final UniArrayNode services = Adapters.SERIALIZATION_ADAPTER.createUniArrayNode();
@@ -40,32 +35,21 @@ public enum ServerEndpoints implements ServerEndpoint {
         }
     },
 
-    SERVICE_STATUS(Endpoint.SERVICE_STATUS) {
+    SPECIFIC_SERVICE(Endpoint.SPECIFIC_SERVICE, true) {
         @Override
         public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            final UniObjectNode status = Adapters.SERIALIZATION_ADAPTER.createUniObjectNode();
-
-            final Optional<Service> serviceOpt = StatusServer.instance.getServiceByName(urlParams[0]);
-
-            if (!serviceOpt.isPresent())
-                return new ResponseBuilder()
-                        .setStatusCode(NOT_FOUND)
-                        .setBody(status)
-                        .build();
-
-            serviceOpt.ifPresent(service -> {
-                status.put("name", ValueType.STRING, service.getName());
-                status.put("status", ValueType.INTEGER, service.getStatus().getValue());
-            });
-
-            return new ResponseBuilder()
-                    .setStatusCode(200)
-                    .setBody(status)
-                    .build();
+            return StatusServer.instance.getServiceByName(urlParams[0])
+                    .map(service -> service.toObjectNode(Adapters.SERIALIZATION_ADAPTER))
+                    .map(node -> new ResponseBuilder()
+                            .setStatusCode(200)
+                            .setBody(node)
+                            .build())
+                    .orElseThrow(() -> new RestEndpointException(NOT_FOUND, "No service found with name " + urlParams[0]));
         }
     };
 
     private final Endpoint underlying;
+    private final boolean allowMemberAccess;
 
     @Override
     public AccessibleEndpoint getEndpointBase() {
@@ -73,7 +57,13 @@ public enum ServerEndpoints implements ServerEndpoint {
     }
 
 
-    ServerEndpoints(Endpoint underlying) {
+    ServerEndpoints(Endpoint underlying, boolean allowMemberAccess) {
         this.underlying = underlying;
+        this.allowMemberAccess = allowMemberAccess;
+    }
+
+    @Override
+    public boolean allowMemberAccess() {
+        return allowMemberAccess;
     }
 }
