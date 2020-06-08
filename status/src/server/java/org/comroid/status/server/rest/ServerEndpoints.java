@@ -54,6 +54,7 @@ public enum ServerEndpoints implements ServerEndpoint {
     UPDATE_SERVICE_STATUS(Endpoint.UPDATE_SERVICE_STATUS, false) {
         @Override
         public REST.Response executePOST(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            //todo: Add authorization
             final LocalService service = StatusServer.instance.getServiceByName(urlParams[0])
                     .map(LocalService.class::cast)
                     .orElseThrow(() -> new RestEndpointException(NOT_FOUND, "No local service found with name " + urlParams[0]));
