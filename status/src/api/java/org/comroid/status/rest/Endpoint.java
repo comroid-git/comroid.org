@@ -1,10 +1,10 @@
 package org.comroid.status.rest;
 
-import org.comroid.restless.endpoint.RestEndpoint;
+import org.comroid.restless.endpoint.AccessibleEndpoint;
 import org.comroid.status.DependenyObject;
 import org.intellij.lang.annotations.Language;
 
-public enum Endpoint implements RestEndpoint {
+public enum Endpoint implements AccessibleEndpoint {
     LIST_SERVICES("services"),
 
     SERVICE_STATUS(

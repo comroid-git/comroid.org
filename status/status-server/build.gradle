@@ -36,10 +36,10 @@ dependencies {
     compileOnly 'org.jetbrains:annotations:19.0.0'
 
     // usual dependencies
-    implementation 'com.github.comroid-git.common-util:common-util:5017350b46abd3cc49d00ac4b74db15a017e5d64'
-    implementation 'com.github.comroid-git.common-util:uniform:5017350b46abd3cc49d00ac4b74db15a017e5d64'
-    //implementation 'org.comroid:common-util:1.5.3-SNAPSHOT'
-    //implementation 'org.comroid:uniform:0.15.1-SNAPSHOT'
+    implementation 'com.github.comroid-git.common-util:mutatio:6aa95ea8667d91c6125655bac9b9f3ecf537d114'
+    implementation 'com.github.comroid-git.common-util:common-util:6aa95ea8667d91c6125655bac9b9f3ecf537d114'
+    implementation 'com.github.comroid-git.common-util:uniform:6aa95ea8667d91c6125655bac9b9f3ecf537d114'
+    implementation 'com.github.comroid-git.common-util:restless:6aa95ea8667d91c6125655bac9b9f3ecf537d114'
 
     // Javacord
     implementation 'org.javacord:javacord:3.0.6'
