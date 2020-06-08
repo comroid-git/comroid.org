@@ -13,11 +13,15 @@ import org.comroid.varbind.annotation.RootBind;
 import org.comroid.varbind.bind.GroupBind;
 import org.comroid.varbind.bind.VarBind;
 import org.comroid.varbind.container.DataContainerBase;
+import org.intellij.lang.annotations.Language;
 
 import java.util.Arrays;
 
 @Location(Service.Bind.class)
 public interface Service extends Entity, WrappedFormattable {
+    @Language("RegExp")
+    String NAME_REGEX = "\\w[\\w\\d-]+";
+
     default String getDisplayName() {
         return requireNonNull(Bind.DisplayName);
     }

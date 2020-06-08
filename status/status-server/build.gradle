@@ -36,11 +36,18 @@ dependencies {
     compileOnly 'org.jetbrains:annotations:19.0.0'
 
     // usual dependencies
-    implementation 'com.github.comroid-git.common-util:mutatio:de89c13b36803e1287f1144612f133d5fbda44f9'
-    implementation 'com.github.comroid-git.common-util:common-util:de89c13b36803e1287f1144612f133d5fbda44f9'
-    implementation 'com.github.comroid-git.common-util:uniform:de89c13b36803e1287f1144612f133d5fbda44f9'
-    implementation 'com.github.comroid-git.common-util:varbind:de89c13b36803e1287f1144612f133d5fbda44f9'
-    implementation 'com.github.comroid-git.common-util:restless:de89c13b36803e1287f1144612f133d5fbda44f9'
+    /*
+    implementation 'com.github.comroid-git.common-util:mutatio:b5097af220437b5c048b17d969a4b65227062bce'
+    implementation 'com.github.comroid-git.common-util:common-util:b5097af220437b5c048b17d969a4b65227062bce'
+    implementation 'com.github.comroid-git.common-util:uniform:b5097af220437b5c048b17d969a4b65227062bce'
+    implementation 'com.github.comroid-git.common-util:varbind:b5097af220437b5c048b17d969a4b65227062bce'
+    implementation 'com.github.comroid-git.common-util:restless:b5097af220437b5c048b17d969a4b65227062bce'
+     */
+    implementation 'org.comroid:mutatio:0.10.0-SNAPSHOT'
+    implementation 'org.comroid:common-util:1.5.3-SNAPSHOT'
+    implementation 'org.comroid:uniform:0.15.1-SNAPSHOT'
+    implementation 'org.comroid:varbind:1.0.0-SNAPSHOT'
+    implementation 'org.comroid:restless:0.15.1-SNAPSHOT'
 
     // Javacord
     implementation 'org.javacord:javacord:3.0.6'
