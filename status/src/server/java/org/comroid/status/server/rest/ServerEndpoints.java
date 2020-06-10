@@ -62,9 +62,6 @@ public enum ServerEndpoints implements ServerEndpoint {
 
             final String token = headers.getFirst(CommonHeaderNames.AUTHORIZATION);
 
-            if (token == null)
-                throw new RestEndpointException(UNAUTHORIZED, "No Authorization Header found");
-
             if (!TokenCore.isValid(token) || !TokenCore.extractName(token).equals(service.getName()))
                 throw new RestEndpointException(UNAUTHORIZED, "Malicious Token used");
 
