@@ -54,7 +54,7 @@ public enum ServerEndpoints implements ServerEndpoint {
         @Override
         public REST.Response executePOST(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             final LocalService service = StatusServer.instance.getServiceByName(urlParams[0])
-                    .map(LocalService.class::cast)
+                    .flatMap(it -> it.as(LocalService.class))
                     .orElseThrow(() -> new RestEndpointException(NOT_FOUND, "No local service found with name " + urlParams[0]));
 
             if (!headers.containsKey(CommonHeaderNames.AUTHORIZATION))
