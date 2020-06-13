@@ -89,7 +89,7 @@ nav ul li:hover {
     text-align: center;
 }
 
-nav ul li .nav_button {
+nav ul li .nav-button {
     font-size: 20px;
     display: block;
     text-decoration: none;
