@@ -81,6 +81,7 @@ nav ul li {
 }
 
 nav ul li:hover {
+    cursor: pointer;
     list-style: none;
     padding: 10px;
     flex-grow: 1;
@@ -88,7 +89,7 @@ nav ul li:hover {
     text-align: center;
 }
 
-nav ul li a {
+nav ul li .nav_button {
     font-size: 20px;
     display: block;
     text-decoration: none;

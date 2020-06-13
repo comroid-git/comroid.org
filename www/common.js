@@ -1,7 +1,46 @@
 const hash = window.location.hash.substr(1);
 
+function initNavigation() {
+    var str = '\n' +
+        '    <nav>\n' +
+        '        <ul>\n' +
+        '            <li><a href="./#2"> Home </a></li>\n' +
+        '            <li><a href="https://status.comroid.org"> Status Page </a></li>\n' +
+        '            <li><a href="part/about.html"> About us </a></li>\n' +
+        '            <li><a href="https://github.com/comroid-git" target="_blank"> Projects </a></li>\n' +
+        '        </ul>\n' +
+        '    </nav>';
+
+    const nav = document.createElement('nav')
+    const ul = document.createElement('ul')
+
+    for (key in pages) {
+        const page = pages[key];
+        if (page['skip_nav'])
+            continue;
+
+        const pageLoc = page['path'];
+        const absUrl = pageLoc.startsWith('http');
+        const li = document.createElement('li')
+        const div = document.createElement('div')
+
+        div.className = 'nav_button';
+        div.innerText = page['display_name'];
+        li.onclick = function () {
+            location.href = (isSet(page['id'], hash) && absUrl) ? pageLoc : `./#${page['id']}`;
+            location.reload();
+        };
+
+        li.appendChild(div);
+        ul.appendChild(li);
+    }
+
+    nav.appendChild(ul);
+    document.getElementById('nav_container').appendChild(nav);
+}
+
 function initContent() {
-    console.debug("Hash: "+hash);
+    console.debug("Hash: " + hash);
 
     const contentBox = document.getElementById('content');
     if (hash.length === 0) {
