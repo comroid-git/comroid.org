@@ -10,7 +10,7 @@ function initContent() {
         const homepage = pages['homepage'];
         const homepageContent = resolveContent(homepage);
 
-        insertContent(contentBox, homepageContent, homepage['name'])
+        insertContent(contentBox, homepageContent, homepage['id'])
         return;
     }
 
@@ -23,17 +23,17 @@ function initContent() {
 
     print.forEach(function (page) {
         const content = resolveContent(page);
-        insertContent(wrapper, content, page.name);
+        insertContent(wrapper, content, page['id']);
     });
 }
 
 // content insertion
-function insertContent(parent, content, pageName) {
+function insertContent(parent, content, pageId) {
     const div = document.createElement('div');
 
     //div.parentNode = parent;
     div.className = 'content-container';
-    div.id = `content-container-${pageName}`
+    div.id = `content-container-${pageId}`
     div.innerHTML = content;
 
     parent.appendChild(div);
@@ -88,7 +88,7 @@ function resolveContent(page) {
         xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
 
     if (xmlhttp === undefined)
-        return "Could not request content of " + page['name'];
+        return "Could not request content of " + page['display_name'];
 
     xmlhttp.open('GET', url, false);
     xmlhttp.send(null);
@@ -99,7 +99,7 @@ function resolveContent(page) {
 }
 
 function missingPage(page) {
-    return "Unable to fetch content of " + page['name'];
+    return "Unable to fetch content of " + page['display_name'];
 }
 
 function isSet(flag, inMask) {

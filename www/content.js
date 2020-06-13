@@ -1,13 +1,17 @@
 const pages = {
     'not_found': {
         'id': 1,
-        'name': "404 Not Found",
+        'display_name': "404 Not Found",
         'path': 'part/not-found.html'
     },
 
     'homepage': {
         'id': 2,
-        'name': "comroid Homepage",
+        'display_name': "comroid Homepage",
         'path': 'part/homepage.html'
+    },
+    'statuspage': {
+        'id': 4,
+        'display_name': "comroid Status Page"
     }
 }
