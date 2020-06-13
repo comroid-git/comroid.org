@@ -11,21 +11,19 @@ function initContent() {
     const wrapper = generateContentWrapper(document, pages);
 
     for (page in pages) {
-        resolveContent(page)
-            .then(content => insertContent(wrapper, content, page.name))
-            .catch(function (it) {
-                console.error("something happened: " + it.toString())
-            })
+        const content = resolveContent(page);
+
+        insertContent(wrapper, content, page.name);
     }
 }
 
 // content insertion
-function insertContent(dom, content, pageName) {
-    const div = dom.createElement('div');
+function insertContent(parent, content, pageName) {
+    const div = document.createElement('div');
 
+    div.parentNode = parent;
     div.className = 'content-container';
     div.id = `content-container-${pageName}`
-    div.name = pageName;
     div.innerHTML = content;
 
     return div;
@@ -47,7 +45,7 @@ function generateContentWrapper(dom, pages) {
 function resolveTarget(mask) {
     let yields = [];
 
-    for (page in pages.entries()) {
+    for (page in pages) {
         if (isSet(page.id, mask))
             yields += page;
     }
@@ -59,9 +57,28 @@ function resolveTarget(mask) {
 }
 
 function resolveContent(page) {
-    return $("#result")
-        .load(urlBase + page.path)
-        .then(it => it.data)
+    // based on https://stackoverflow.com/questions/10932226/how-do-i-get-source-code-from-a-webpage
+
+    let url = "~/" + page.path, xmlhttp; //Remember, same domain
+
+    if ("XMLHttpRequest" in window)
+        xmlhttp = new XMLHttpRequest();
+    if ("ActiveXObject" in window)
+        xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
+
+    if (xmlhttp === undefined)
+        return "Could not request content of " + page.name;
+
+    xmlhttp.open('GET', url, true);
+    xmlhttp.onreadystatechange = function () {
+        if (xmlhttp.readyState === 4)
+            console.error(url + ":" + xmlhttp.responseText);
+    };
+    xmlhttp.send(null);
+
+    if (xmlhttp.response.status)
+        return missingPage(page);
+    return xmlhttp.responseText;
 }
 
 function missingPage(page) {

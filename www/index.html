@@ -28,7 +28,7 @@
     <link href="https://fonts.googleapis.com/css?family=Fira+Mono" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Fira+Sans&display=swap" rel="stylesheet">
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 
     <script src="content.js"></script>
     <script src="common.js"></script>
@@ -52,7 +52,9 @@
 </div>
 <div id="content">
     <script>
-        initContent();
+        $(document).ready(function() {
+            initContent();
+        })
     </script>
 </div>
 <div id="donate">
