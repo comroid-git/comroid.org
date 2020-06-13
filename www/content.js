@@ -19,8 +19,7 @@ const pages = {
     'statuspage': {
         'id': 4,
         'display_name': "Status Page",
-        'path': 'https://status.comroid.org',
-        'policy': policy['instant_redir']
+        'path': 'https://status.comroid.org/slim'
     },
     'about': {
         'id': 8,
