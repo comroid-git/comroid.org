@@ -46,7 +46,7 @@ function createBoxes(data) {
 function addBox(name, display_name, status) {
     // Create a new box in the status grid
     var newDiv = document.createElement("div");
-    if (name == "status-server") {
+    if (name === "status-server") {
         newDiv.id = "head_wrapper";
     } else {
         newDiv.className = "cell";
@@ -82,7 +82,7 @@ function addBox(name, display_name, status) {
     // If the box is for the status server, check if there were already boxes created
     // If true, create the status server box before the first child node
     var container = document.getElementById('flex_container');
-    if (name == "status-server" && container.hasChildNodes()) {
+    if (name === "status-server" && container.hasChildNodes()) {
         var child = container.childNodes[1];
         container.insertBefore(newDiv, child);
     } else {
