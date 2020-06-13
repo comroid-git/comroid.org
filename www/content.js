@@ -1,9 +1,14 @@
+const policy = {
+    'skip_nav': 1,
+    'instant_redir': 2
+}
+
 const pages = {
     'not_found': {
         'id': 1,
         'display_name': "404 Not Found",
         'path': 'part/not-found.html',
-        'skip_nav': true
+        'policy': policy['skip_nav']
     },
 
     'homepage': {
@@ -20,5 +25,12 @@ const pages = {
         'id': 8,
         'display_name': "About Us",
         'path': 'part/about.html'
+    },
+
+    'github': {
+        'id': 16,
+        'display_name': "GitHub",
+        'path': 'https://github.com/comroid-git',
+        'policy': policy['instant_redir']
     }
 }

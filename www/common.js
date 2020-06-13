@@ -1,22 +1,14 @@
 const hash = window.location.hash.substr(1);
 
 function initNavigation() {
-    var str = '\n' +
-        '    <nav>\n' +
-        '        <ul>\n' +
-        '            <li><a href="./#2"> Home </a></li>\n' +
-        '            <li><a href="https://status.comroid.org"> Status Page </a></li>\n' +
-        '            <li><a href="part/about.html"> About us </a></li>\n' +
-        '            <li><a href="https://github.com/comroid-git" target="_blank"> Projects </a></li>\n' +
-        '        </ul>\n' +
-        '    </nav>';
-
     const nav = document.createElement('nav')
     const ul = document.createElement('ul')
 
     for (key in pages) {
         const page = pages[key];
-        if (page['skip_nav'])
+        const policy = page.hasOwnProperty('policy') ? page['policy'] : 0;
+
+        if (isSet(policy['skip_nav'], policy))
             continue;
 
         const pageLoc = page['path'];
@@ -26,8 +18,17 @@ function initNavigation() {
 
         div.className = 'nav_button';
         div.innerText = page['display_name'];
+
+        var url;
+        if (isSet(policy['instant_redir'], policy)) {
+            url = pageLoc;
+        } else {
+            url = (isSet(page['id'], hash) && absUrl) ? pageLoc : `./#${page['id']}`;
+        }
+        const targetUrl = url;
+
         li.onclick = function () {
-            location.href = (isSet(page['id'], hash) && absUrl) ? pageLoc : `./#${page['id']}`;
+            location.href = targetUrl;
             location.reload();
         };
 
