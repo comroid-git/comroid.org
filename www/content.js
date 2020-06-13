@@ -2,7 +2,6 @@ const policy = {
     'skip_nav': 1,
     'instant_redir': 2
 }
-
 const pages = {
     'not_found': {
         'id': 1,
@@ -11,12 +10,12 @@ const pages = {
         'policy': policy['skip_nav']
     },
 
-    'homepage': {
+    'home': {
         'id': 2,
         'display_name': "Homepage",
         'path': 'part/homepage.html'
     },
-    'statuspage': {
+    'status': {
         'id': 4,
         'display_name': "Status Page",
         'path': 'https://status.comroid.org/slim'
