@@ -6,9 +6,9 @@ function initNavigation() {
 
     for (key in pages) {
         const page = pages[key];
-        const policy = page.hasOwnProperty('policy') ? page['policy'] : 0;
+        const pagePolicy = getPolicy(page);
 
-        if (isSet(policy['skip_nav'], policy))
+        if (isSet(policy['skip_nav'], pagePolicy))
             continue;
 
         const pageLoc = page['path'];
@@ -19,8 +19,9 @@ function initNavigation() {
         div.className = 'nav_button';
         div.innerText = page['display_name'];
 
-        var url;
-        if (isSet(policy['instant_redir'], policy)) {
+        let url;
+        let instantRedir = isSet(policy['instant_redir'], pagePolicy);
+        if (instantRedir) {
             url = pageLoc;
         } else {
             url = (isSet(page['id'], hash) && absUrl) ? pageLoc : `./#${page['id']}`;
@@ -29,7 +30,8 @@ function initNavigation() {
 
         li.onclick = function () {
             location.href = targetUrl;
-            location.reload();
+            if (!instantRedir)
+                location.reload();
         };
 
         li.appendChild(div);
@@ -38,6 +40,14 @@ function initNavigation() {
 
     nav.appendChild(ul);
     document.getElementById('nav_container').appendChild(nav);
+}
+
+function getPolicy(page) {
+    const x = page['policy'];
+
+    if (x === undefined)
+        return 0;
+    return x;
 }
 
 function initContent() {
