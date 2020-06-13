@@ -187,3 +187,17 @@ a {
     float: left;
     margin: 20px;
 }
+
+/* Wrapper Classes */
+
+.fluent {
+    color: inherit;
+}
+
+.fluent:hover {
+    color: inherit;
+}
+
+.fluent:visited {
+    color: inherit;
+}

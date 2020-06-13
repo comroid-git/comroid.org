@@ -1,7 +1,6 @@
 const hash = window.location.hash.substr(1);
 
 function initNavigation() {
-    const nav = document.createElement('nav')
     const ul = document.createElement('ul')
 
     for (key in pages) {
@@ -24,7 +23,7 @@ function initNavigation() {
         if (instantRedir) {
             url = pageLoc;
         } else {
-            url = (isSet(page['id'], hash) && absUrl) ? pageLoc : `./#${page['id']}`;
+            url = (!isSet(page['id'], hash) && absUrl) ? pageLoc : `./#${page['id']}`;
         }
         const targetUrl = url;
 
@@ -38,8 +37,9 @@ function initNavigation() {
         ul.appendChild(li);
     }
 
-    nav.appendChild(ul);
-    document.getElementById('nav_container').appendChild(nav);
+    document.getElementsByTagName("nav")
+        .item(0)
+        .appendChild(ul);
 }
 
 function getPolicy(page) {

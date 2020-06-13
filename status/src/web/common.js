@@ -1,15 +1,38 @@
+const statusArray = [
+    {
+        'classname': 'offline',
+        'display': 'UNSURE'
+    },
+    {
+        'classname': 'offline',
+        'display': 'OFFLINE'
+    },
+    {
+        'classname': 'maintenance',
+        'display': 'MAINTENANCE'
+    },
+    {
+        'classname': 'busy',
+        'display': 'BUSY'
+    },
+    {
+        'classname': 'online',
+        'display': 'ONLINE'
+    }
+]
+
 /**
  * Inits the grid of the status page, performs the JSON fetch.
  */
 function initGrid() {
     fetch('https://api.status.comroid.org/services')
-		.then(handleErrors)
-		.then(response => response.json())
+        .then(handleErrors)
+        .then(response => response.json())
         .then(data => createBoxes(data))
         .catch(error => {
-			addBox("status-server", "Status Server", "unknown");
-			console.error('There has been a problem with your fetch operation:', error);
-		});
+            addBox("status-server", "Status Server", "unknown");
+            console.error('There has been a problem with your fetch operation:', error);
+        });
 }
 
 /**
@@ -46,7 +69,7 @@ function createBoxes(data) {
 function addBox(name, display_name, status) {
     // Create a new box in the status grid
     var newDiv = document.createElement("div");
-    if (name == "status-server") {
+    if (name === "status-server") {
         newDiv.id = "head_wrapper";
     } else {
         newDiv.className = "cell";
@@ -57,21 +80,10 @@ function addBox(name, display_name, status) {
     var statusText = document.createElement("p");
     statusText.appendChild(document.createTextNode(display_name + ":"));
 
-    if (status == "1") {
-        statusDiv.className = "offline";
-        statusDiv.innerHTML = "OFFLINE";
-    } else if (status == "2") {
-        statusDiv.className = "maintenance";
-        statusDiv.innerHTML = "MAINTENANCE";
-    } else if (status == "3") {
-        statusDiv.className = "busy";
-        statusDiv.innerHTML = "REPORTED PROBLEMS";
-    } else if (status == "4") {
-        statusDiv.className = "online";
-        statusDiv.innerHTML = "ONLINE";
-    } else {
-        statusDiv.innerHTML = "UNKNOWN";
-    }
+    const enm = statusArray[status];
+
+    statusDiv.className = enm['classname'];
+    statusDiv.innerHTML = enm['display'];
 
 
     // Append text and status div to the box
@@ -82,7 +94,7 @@ function addBox(name, display_name, status) {
     // If the box is for the status server, check if there were already boxes created
     // If true, create the status server box before the first child node
     var container = document.getElementById('flex_container');
-    if (name == "status-server" && container.hasChildNodes()) {
+    if (name === "status-server" && container.hasChildNodes()) {
         var child = container.childNodes[1];
         container.insertBefore(newDiv, child);
     } else {
