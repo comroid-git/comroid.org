@@ -23,7 +23,7 @@ function initNavigation() {
         if (instantRedir) {
             url = pageLoc;
         } else {
-            url = (isSet(page['id'], hash) && absUrl) ? pageLoc : `./#${page['id']}`;
+            url = (key === hash && absUrl) ? pageLoc : `./#${key}`;
         }
         const targetUrl = url;
 
@@ -42,34 +42,26 @@ function initNavigation() {
         .appendChild(ul);
 }
 
+function initContent() {
+    console.debug("Hash: " + hash);
+
+    const contentBox = document.getElementById('content');
+    if (hash.length === 0) {
+        const homepage = pages['home'];
+        insertFrame(contentBox, homepage['path'], homepage['id'])
+        return;
+    }
+
+    const print = resolveTarget();
+    insertFrame(contentBox, print['path'], print['id']);
+}
+
 function getPolicy(page) {
     const x = page['policy'];
 
     if (x === undefined)
         return 0;
     return x;
-}
-
-function initContent() {
-    console.debug("Hash: " + hash);
-
-    const contentBox = document.getElementById('content');
-    if (hash.length === 0) {
-        const homepage = pages['homepage'];
-        insertFrame(contentBox, homepage['path'], homepage['id'])
-        return;
-    }
-
-    const print = resolveTarget(hash);
-    if (print.length < 1) {
-        console.error("No pages could be found")
-        return;
-    }
-
-    const wrapper = generateContentWrapper(contentBox, print);
-    print.forEach(function (page) {
-        insertFrame(wrapper, page['path'], page['id']);
-    });
 }
 
 // content insertion
@@ -84,39 +76,16 @@ function insertFrame(parent, url, pageId) {
     return frame;
 }
 
-function generateContentWrapper(parent, pages) {
-    if (pages.length === 1)
-        return parent;
-
-    const wrapper = document.createElement('div')
-    wrapper.id = 'content-wrapper';
-
-    // todo add select buttons
-
-    parent.appendChild(wrapper);
-    return wrapper;
-}
-
 // content resolving
-function resolveTarget(mask) {
-    console.debug(`Resolving Content for mask: ${mask}`)
-
-    let yields = [];
-
+function resolveTarget() {
     for (key in pages) {
         const page = pages[key];
 
-        if (isSet(page.id, mask))
-            yields.push(page);
+        if (key === hash)
+            return page;
     }
 
-    const length = yields.length;
-    if (length === 0)
-        yields.push(pages['not_found']);
-
-    console.debug(`Found ${length} page${length === 1 ? '' : 's'}`)
-
-    return yields;
+    return pages['not_found'];
 }
 
 function isSet(flag, inMask) {
