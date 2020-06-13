@@ -1,0 +1,40 @@
+html {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    padding: 0;
+    margin: 0 auto;
+    font-family: "Fira Sans", sans-serif;
+    font-size: 18px;
+    background-color: #e3e3e3;
+    overflow-x: hidden;
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    clear: both;
+    width: 55%;
+}
+
+/* Positions-Classes:
+	Extra-Klassen, die genutzt werden, um Formulare zu zentrieren */
+
+.center {
+    text-align: center;
+}
+
+#discord_widget {
+    margin: 0 auto;
+    width: 350px;
+}
+
+.right {
+    float: right;
+    margin: 20px;
+}
+
+.left {
+    float: left;
+    margin: 20px;
+}
