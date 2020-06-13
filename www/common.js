@@ -119,32 +119,6 @@ function resolveTarget(mask) {
     return yields;
 }
 
-function resolveContent(page) {
-    // based on https://stackoverflow.com/questions/10932226/how-do-i-get-source-code-from-a-webpage
-
-    // todo find current url and always go to root dir
-    let url = "./" + page['path'], xmlhttp; //Remember, same domain
-
-    if ("XMLHttpRequest" in window)
-        xmlhttp = new XMLHttpRequest();
-    if ("ActiveXObject" in window)
-        xmlhttp = new ActiveXObject("Msxml2.XMLHTTP");
-
-    if (xmlhttp === undefined)
-        return "Could not request content of " + page['display_name'];
-
-    xmlhttp.open('GET', url, false);
-    xmlhttp.send(null);
-
-    if (xmlhttp.response.status)
-        return missingPage(page);
-    return xmlhttp.responseText;
-}
-
-function missingPage(page) {
-    return "Unable to fetch content of " + page['display_name'];
-}
-
 function isSet(flag, inMask) {
     return (inMask & flag) !== 0;
 }
