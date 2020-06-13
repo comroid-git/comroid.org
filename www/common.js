@@ -1,16 +1,27 @@
-const urlBase = 'https://comroid.org/'
+const hash = window.location.hash.substr(1);
 
 function initContent() {
-    const pages = resolveTarget(window.location.hash);
+    const contentBox = document.getElementById('content');
+    const print = resolveTarget(hash);
 
-    if (pages.length < 1) {
+    console.debug("Hash: "+hash);
+
+    if (hash.length === 0) {
+        const homepage = pages['homepage'];
+        const homepageContent = resolveContent(homepage);
+
+        insertContent(contentBox, homepageContent, homepage['name'])
+        return;
+    }
+
+    if (print.length < 1) {
         console.error("No pages could be found")
         return;
     }
 
-    const wrapper = generateContentWrapper(document.getElementById('content'), pages);
+    const wrapper = generateContentWrapper(contentBox, print);
 
-    pages.forEach(function (page) {
+    print.forEach(function (page) {
         const content = resolveContent(page);
         insertContent(wrapper, content, page.name);
     });
@@ -45,15 +56,22 @@ function generateContentWrapper(parent, pages) {
 
 // content resolving
 function resolveTarget(mask) {
+    console.debug(`Resolving Content for mask: ${mask}`)
+
     let yields = [];
 
-    for (page in pages) {
+    for (key in pages) {
+        const page = pages[key];
+
         if (isSet(page.id, mask))
             yields.push(page);
     }
 
-    if (yields === undefined || yields.length === 0)
-        yields.push(pages[0]);
+    const length = yields.length;
+    if (length === 0)
+        yields.push(pages['not_found']);
+
+    console.debug(`Found ${length} page${length === 1 ? '' : 's'}`)
 
     return yields;
 }
@@ -61,6 +79,7 @@ function resolveTarget(mask) {
 function resolveContent(page) {
     // based on https://stackoverflow.com/questions/10932226/how-do-i-get-source-code-from-a-webpage
 
+    // todo find current url and always go to root dir
     let url = "./" + page['path'], xmlhttp; //Remember, same domain
 
     if ("XMLHttpRequest" in window)
