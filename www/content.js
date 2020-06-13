@@ -19,7 +19,7 @@ const pages = {
     'statuspage': {
         'id': 4,
         'display_name': "Status Page",
-        'path': 'https://status.comroid.org/slim' // todo: implement slim version of status page
+        'path': 'https://status.comroid.org' // todo: implement slim version of status page
     },
     'about': {
         'id': 8,
