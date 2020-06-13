@@ -197,3 +197,7 @@ a {
 .fluent:hover {
     color: inherit;
 }
+
+.fluent:visited {
+    color: inherit;
+}
