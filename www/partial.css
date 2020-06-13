@@ -1,0 +1,83 @@
+html {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    padding: 0;
+    margin: 0 auto;
+    font-family: "Fira Sans", sans-serif;
+    font-size: 18px;
+    background-color: #e3e3e3;
+    overflow-x: hidden;
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    clear: both;
+    width: 55%;
+}
+
+@media only screen and (max-width: 768px) {
+    #content {
+        clear: both;
+        height: auto;
+        width: 90%;
+        padding: 20px;
+        margin: 0 auto;
+    }
+
+    #discord_widget {
+        width: 100%;
+    }
+}
+
+/* Headlines, Fonts and Styling */
+
+header h1 {
+    font-family: "Fira Mono", monospace;
+    text-shadow: 1px 1px #67909C;
+}
+
+h1 {
+    font-size: 48px;
+    margin: 0px;
+}
+
+h2 {
+    font-size: 32px;
+    margin: 10px 0px;
+}
+
+a {
+    text-decoration: none;
+    color: #003366;
+}
+
+.separator {
+    width: 100%;
+    height: 1px;
+    background-color: black;
+    margin: 25px 0px;
+}
+
+/* Positions-Classes:
+	Extra-Klassen, die genutzt werden, um Formulare zu zentrieren */
+
+.center {
+    text-align: center;
+}
+
+#discord_widget {
+    margin: 0 auto;
+    width: 350px;
+}
+
+.right {
+    float: right;
+    margin: 20px;
+}
+
+.left {
+    float: left;
+    margin: 20px;
+}

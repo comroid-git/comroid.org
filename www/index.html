@@ -28,7 +28,10 @@
     <link href="https://fonts.googleapis.com/css?family=Fira+Mono" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Fira+Sans&display=swap" rel="stylesheet">
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+
+    <script src="content.js"></script>
+    <script src="common.js"></script>
 
     <title>comroid</title>
 </head>
@@ -38,38 +41,30 @@
     <p> Making Software. Simply. </p>
 </header>
 <div id="nav_container">
-    <nav>
-        <ul>
-            <li><a href="index.html"> Home </a></li>
-            <li><a href="https://status.comroid.org"> Status Page </a></li>
-            <li><a href="about.html"> About us </a></li>
-            <li><a href="https://github.com/comroid-git" target="_blank"> Projects </a></li>
-        </ul>
-    </nav>
+    <script>
+        $(document).ready(function () {
+            initNavigation();
+        })
+    </script>
 </div>
 <div id="content">
-    <div class="center">
-        <p> Welcome to comroid! This page is currently under construction and will be revised and updated in the course
-            of time. </p>
-        <p> To get in touch with us, you can join our Discord Guild meanwhile: <a href="https://discord.comroid.org">discord.comroid.org</a>
-        </p>
-    </div>
-    <div id="discord_widget">
-        <iframe allowtransparency="true" frameborder="0" height="450" src="https://discordapp.com/widget?id=297846944754040842&theme=dark"
-                width="350"></iframe>
-    </div>
-</div>
-<div id="donate">
-    <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
-        <input name="cmd" type="hidden" value="_s-xclick"/>
-        <input name="hosted_button_id" type="hidden" value="NT4L2ELVQRJGS"/>
-        <input alt="Donate with PayPal button" name="submit"
-               src="https://www.paypalobjects.com/en_US/DK/i/btn/btn_donateCC_LG.gif"
-               title="PayPal - The safer, easier way to pay online!" type="image"/>
-        <img alt="" height="1" src="https://www.paypal.com/en_DE/i/scr/pixel.gif" width="1"/>
-    </form>
+    <script>
+        $(document).ready(function () {
+            initContent();
+        })
+    </script>
 </div>
 <footer>
+    <div id="donate">
+        <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+            <input name="cmd" type="hidden" value="_s-xclick"/>
+            <input name="hosted_button_id" type="hidden" value="NT4L2ELVQRJGS"/>
+            <input alt="Donate with PayPal button" name="submit"
+                   src="https://www.paypalobjects.com/en_US/DK/i/btn/btn_donateCC_LG.gif"
+                   title="PayPal - The safer, easier way to pay online!" type="image"/>
+            <img alt="" height="1" src="https://www.paypal.com/en_DE/i/scr/pixel.gif" width="1"/>
+        </form>
+    </div>
     <p>comroid.org&nbsp;|&nbsp;contact@comroid.org</p>
 </footer>
 </body>
