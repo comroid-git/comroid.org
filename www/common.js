@@ -1,43 +1,37 @@
 const hash = window.location.hash.substr(1);
 
 function initContent() {
-    const contentBox = document.getElementById('content');
-    const print = resolveTarget(hash);
-
     console.debug("Hash: "+hash);
 
+    const contentBox = document.getElementById('content');
     if (hash.length === 0) {
         const homepage = pages['homepage'];
-        const homepageContent = resolveContent(homepage);
-
-        insertContent(contentBox, homepageContent, homepage['id'])
+        insertFrame(contentBox, homepage['path'], homepage['id'])
         return;
     }
 
+    const print = resolveTarget(hash);
     if (print.length < 1) {
         console.error("No pages could be found")
         return;
     }
 
     const wrapper = generateContentWrapper(contentBox, print);
-
     print.forEach(function (page) {
-        const content = resolveContent(page);
-        insertContent(wrapper, content, page['id']);
+        insertFrame(wrapper, page['path'], page['id']);
     });
 }
 
 // content insertion
-function insertContent(parent, content, pageId) {
-    const div = document.createElement('div');
+function insertFrame(parent, url, pageId) {
+    const frame = document.createElement('iframe');
 
-    //div.parentNode = parent;
-    div.className = 'content-container';
-    div.id = `content-container-${pageId}`
-    div.innerHTML = content;
+    frame.className = 'content-container';
+    frame.id = `content-container-${pageId}`
+    frame.setAttribute('src', url);
 
-    parent.appendChild(div);
-    return div;
+    parent.appendChild(frame);
+    return frame;
 }
 
 function generateContentWrapper(parent, pages) {
@@ -45,7 +39,6 @@ function generateContentWrapper(parent, pages) {
         return parent;
 
     const wrapper = document.createElement('div')
-    //wrapper.parentNode = parent;
     wrapper.id = 'content-wrapper';
 
     // todo add select buttons

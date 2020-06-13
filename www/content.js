@@ -12,6 +12,7 @@ const pages = {
     },
     'statuspage': {
         'id': 4,
-        'display_name': "comroid Status Page"
+        'display_name': "comroid Status Page",
+        'path': 'https://status.comroid.org'
     }
 }

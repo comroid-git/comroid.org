@@ -42,8 +42,8 @@
 </header>
 <div id="nav_container">
     <script>
-        $(document).ready(function() {
-            initNavigation();
+        $(document).ready(function () {
+            initNavigation(); //todo
         })
     </script>
     <nav>
@@ -57,22 +57,22 @@
 </div>
 <div id="content">
     <script>
-        $(document).ready(function() {
+        $(document).ready(function () {
             initContent();
         })
     </script>
 </div>
-<div id="donate">
-    <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
-        <input name="cmd" type="hidden" value="_s-xclick"/>
-        <input name="hosted_button_id" type="hidden" value="NT4L2ELVQRJGS"/>
-        <input alt="Donate with PayPal button" name="submit"
-               src="https://www.paypalobjects.com/en_US/DK/i/btn/btn_donateCC_LG.gif"
-               title="PayPal - The safer, easier way to pay online!" type="image"/>
-        <img alt="" height="1" src="https://www.paypal.com/en_DE/i/scr/pixel.gif" width="1"/>
-    </form>
-</div>
 <footer>
+    <div id="donate">
+        <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_top">
+            <input name="cmd" type="hidden" value="_s-xclick"/>
+            <input name="hosted_button_id" type="hidden" value="NT4L2ELVQRJGS"/>
+            <input alt="Donate with PayPal button" name="submit"
+                   src="https://www.paypalobjects.com/en_US/DK/i/btn/btn_donateCC_LG.gif"
+                   title="PayPal - The safer, easier way to pay online!" type="image"/>
+            <img alt="" height="1" src="https://www.paypal.com/en_DE/i/scr/pixel.gif" width="1"/>
+        </form>
+    </div>
     <p>comroid.org&nbsp;|&nbsp;contact@comroid.org</p>
 </footer>
 </body>
