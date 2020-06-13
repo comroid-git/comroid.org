@@ -53,6 +53,10 @@ function initContent() {
     }
 
     const print = resolveTarget();
+
+    if (isSet(policy['instant_redir'], getPolicy(print)))
+        location.href = print['path']
+
     insertFrame(contentBox, print['path'], print['id']);
 }
 
