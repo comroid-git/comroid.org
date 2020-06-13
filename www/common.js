@@ -23,7 +23,7 @@ function initNavigation() {
         if (instantRedir) {
             url = pageLoc;
         } else {
-            url = (isSet(page['id'], hash) && absUrl) ? pageLoc : `./#${page['id']}`;
+            url = (!isSet(page['id'], hash) && absUrl) ? pageLoc : `./#${page['id']}`;
         }
         const targetUrl = url;
 
