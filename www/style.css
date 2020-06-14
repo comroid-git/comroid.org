@@ -37,8 +37,6 @@ iframe {
     clear: both;
     height: 100%;
     width: 55%;
-    padding-top: 20px;
-    padding-bottom: 20px;
     margin: 0 auto;
 }
 
@@ -113,7 +111,6 @@ nav ul li .nav-button {
         clear: both;
         height: auto;
         width: 90%;
-        padding: 20px;
         margin: 0 auto;
     }
 
