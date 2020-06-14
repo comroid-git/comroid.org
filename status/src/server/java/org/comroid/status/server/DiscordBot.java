@@ -1,6 +1,7 @@
 package org.comroid.status.server;
 
 import com.google.common.flogger.FluentLogger;
+import org.comroid.api.Polyfill;
 import org.comroid.javacord.util.commands.Command;
 import org.comroid.javacord.util.commands.CommandGroup;
 import org.comroid.javacord.util.commands.CommandHandler;
@@ -22,6 +23,7 @@ import org.javacord.api.entity.user.UserStatus;
 
 import java.awt.*;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Comparator;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -274,6 +276,24 @@ public enum DiscordBot {
             entityCache.getReference(args[0], true).set(service);
 
             return String.format("Created new Service: %s '%s'", service.getName(), service.getDisplayName());
+        }
+
+        @Command(
+                aliases = "set url",
+                usage = "set url <str: service_name> <str: new url>",
+                requiredDiscordPermissions = PermissionType.ADMINISTRATOR,
+                minimumArguments = 2,
+                maximumArguments = 2,
+                convertStringResultsToEmbed = true
+        )
+        public String updateUrl(String[] args) {
+            return server().getServiceByName(args[0])
+                    .map(service -> {
+                        service.put(Polyfill.uncheckedCast(Service.Bind.URL), args[1]);
+
+                        return String.format("Updated URL of Service %s!", service);
+                    })
+                    .orElseThrow(() -> new NoSuchElementException("No Service found with name " + args[0]));
         }
     }
 }
