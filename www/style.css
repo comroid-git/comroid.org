@@ -37,8 +37,6 @@ iframe {
     clear: both;
     height: 100%;
     width: 55%;
-    padding-top: 20px;
-    padding-bottom: 20px;
     margin: 0 auto;
 }
 
@@ -89,7 +87,7 @@ nav ul li:hover {
     text-align: center;
 }
 
-nav ul li .nav_button {
+nav ul li .nav-button {
     font-size: 20px;
     display: block;
     text-decoration: none;
@@ -113,7 +111,6 @@ nav ul li .nav_button {
         clear: both;
         height: auto;
         width: 90%;
-        padding: 20px;
         margin: 0 auto;
     }
 

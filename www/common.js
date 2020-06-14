@@ -15,8 +15,11 @@ function initNavigation() {
         const li = document.createElement('li')
         const div = document.createElement('div')
 
-        div.className = 'nav_button';
+        div.className = 'nav-button';
+        div.id = `nav-button-${key}`
         div.innerText = page['display_name'];
+        if (key === hash || (hash.length === 0 && key === 'home'))
+            div.style.textDecoration = '#e3e3e3 underline';
 
         let url;
         let instantRedir = isSet(policy['instant_redir'], pagePolicy);
