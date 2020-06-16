@@ -22,7 +22,7 @@ if (canPublishToSpace) {
 
 if (canPublishToGitHub) {
     ext {
-        githubRegistryUrl = uri("https://maven.pkg.github.com/${userbase.toLowerCase()}/${rootProject.name.toLowerCase()}")
+        githubRegistryUrl = uri("https://maven.pkg.github.com/comroid-git/comroid.org")
         githubUsername = getenv('GITHUB_USERNAME')
         githubPassword = getenv('GITHUB_PASSWORD')
     }
