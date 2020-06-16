@@ -6,6 +6,17 @@ allprojects {
 
     group 'org.comroid'
     version = '0.11.1-SNAPSHOT'
+
+    repositories {
+        mavenLocal()
+        maven {
+            url "https://maven.jetbrains.space/comroid/repo"
+            credentials.username "Anonymous.User"
+            credentials.password "anonymous"
+        }
+        jcenter()
+        maven { url 'https://www.jitpack.io' }
+    }
 }
 
 tasks.findByName('wrapper').configure {
