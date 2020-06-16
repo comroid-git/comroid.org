@@ -15,7 +15,9 @@ import org.comroid.varbind.bind.VarBind;
 import org.comroid.varbind.container.DataContainerBase;
 import org.intellij.lang.annotations.Language;
 
+import java.net.URL;
 import java.util.Arrays;
+import java.util.Optional;
 
 @Location(Service.Bind.class)
 public interface Service extends Entity, WrappedFormattable {
@@ -28,6 +30,10 @@ public interface Service extends Entity, WrappedFormattable {
 
     default Status getStatus() {
         return requireNonNull(Bind.Status);
+    }
+
+    default Optional<URL> getURL() {
+        return wrap(Bind.URL);
     }
 
     @Override
@@ -86,6 +92,12 @@ public interface Service extends Entity, WrappedFormattable {
                 = Root.createBind("status")
                 .extractAs(ValueType.INTEGER)
                 .andRemap(Service.Status::valueOf)
+                .onceEach()
+                .build();
+        VarBind<String, DependenyObject, URL, URL> URL
+                = Root.createBind("url")
+                .extractAs(ValueType.STRING)
+                .andRemap(Polyfill::url)
                 .onceEach()
                 .build();
     }
