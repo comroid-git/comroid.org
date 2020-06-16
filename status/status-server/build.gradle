@@ -19,35 +19,17 @@ sourceSets {
     web.resources.srcDirs = [file("$rootDir/src/web")]
 }
 
-repositories {
-    maven { url 'https://www.jitpack.io' }
-    mavenLocal()
-    maven {
-        url "https://maven.jetbrains.space/comroid/repo"
-        credentials.username "Anonymous.User"
-        credentials.password "anonymous"
-    }
-    jcenter()
-}
-
 dependencies {
     implementation project(':status-api')
 
     compileOnly 'org.jetbrains:annotations:19.0.0'
 
     // usual dependencies
-    implementation 'com.github.comroid-git.common-util:mutatio:b9b55324e856a2beb46987ec1a21550324e24e35'
-    implementation 'com.github.comroid-git.common-util:common-util:b9b55324e856a2beb46987ec1a21550324e24e35'
-    implementation 'com.github.comroid-git.common-util:uniform:b9b55324e856a2beb46987ec1a21550324e24e35'
-    implementation 'com.github.comroid-git.common-util:varbind:b9b55324e856a2beb46987ec1a21550324e24e35'
-    implementation 'com.github.comroid-git.common-util:restless:b9b55324e856a2beb46987ec1a21550324e24e35'
-    /*
-    implementation 'org.comroid:mutatio:0.10.0-SNAPSHOT'
-    implementation 'org.comroid:common-util:1.5.3-SNAPSHOT'
-    implementation 'org.comroid:uniform:0.15.1-SNAPSHOT'
-    implementation 'org.comroid:varbind:1.0.0-SNAPSHOT'
-    implementation 'org.comroid:restless:0.15.1-SNAPSHOT'
-     */
+    implementation 'org.comroid:mutatio:0.10.1'
+    implementation 'org.comroid:common-util:1.5.4'
+    implementation 'org.comroid:uniform:0.16.0'
+    implementation 'org.comroid:varbind:0.20.0'
+    implementation 'org.comroid:restless:0.15.2'
 
     // Javacord
     implementation 'org.javacord:javacord:3.0.6'

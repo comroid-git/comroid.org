@@ -82,12 +82,24 @@ public interface Service extends Entity, WrappedFormattable {
         @RootBind
         GroupBind<Service, DependenyObject> Root
                 = Entity.Bind.Root.subGroup("service", Invocable.ofConstructor(Polyfill.<Class<Service>>uncheckedCast(Basic.class)));
-        VarBind.OneStage<String> DisplayName
-                = Root.bind1stage("display_name", ValueType.STRING);
-        VarBind.TwoStage<Integer, Status> Status
-                = Root.bind2stage("status", ValueType.INTEGER, Service.Status::valueOf);
-        VarBind.TwoStage<String, URL> URL
-                = Root.bind2stage("url", ValueType.STRING, Polyfill::url);
+        VarBind<String, DependenyObject, String, String> DisplayName
+                = Root.createBind("display_name")
+                .extractAs(ValueType.STRING)
+                .asIdentities()
+                .onceEach()
+                .build();
+        VarBind<Integer, DependenyObject, Service.Status, Service.Status> Status
+                = Root.createBind("status")
+                .extractAs(ValueType.INTEGER)
+                .andRemap(Service.Status::valueOf)
+                .onceEach()
+                .build();
+        VarBind<String, DependenyObject, URL, URL> URL
+                = Root.createBind("url")
+                .extractAs(ValueType.STRING)
+                .andRemap(Polyfill::url)
+                .onceEach()
+                .build();
     }
 
     final class Basic extends DataContainerBase<DependenyObject> implements Service {
