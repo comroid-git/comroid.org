@@ -279,8 +279,8 @@ public enum DiscordBot {
         }
 
         @Command(
-                aliases = "set url",
-                usage = "set url <str: service_name> <str: new url>",
+                aliases = "set-url",
+                usage = "set-url <str: service_name> <str: new url>",
                 requiredDiscordPermissions = PermissionType.ADMINISTRATOR,
                 minimumArguments = 2,
                 maximumArguments = 2,
