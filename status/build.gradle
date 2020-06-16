@@ -10,7 +10,7 @@ allprojects {
     repositories {
         mavenLocal()
         maven {
-            url "https://maven.jetbrains.space/comroid/repo"
+            url "https://maven.jetbrains.space/comroid/release"
             credentials.username "Anonymous.User"
             credentials.password "anonymous"
         }
