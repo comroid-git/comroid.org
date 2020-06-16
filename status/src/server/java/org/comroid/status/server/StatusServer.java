@@ -1,6 +1,7 @@
 package org.comroid.status.server;
 
 import com.google.common.flogger.FluentLogger;
+import org.comroid.api.Junction;
 import org.comroid.common.io.FileHandle;
 import org.comroid.restless.REST;
 import org.comroid.restless.adapter.okhttp.v4.OkHttp3Adapter;
@@ -74,7 +75,15 @@ public class StatusServer implements DependenyObject, Closeable {
         this.rest = new REST<>(DependenyObject.Adapters.HTTP_ADAPTER, DependenyObject.Adapters.SERIALIZATION_ADAPTER, threadPool, this);
         logger.at(Level.INFO).log("REST Client created: %s", rest);
 
-        this.entityCache = new FileCache<>(FastJSONLib.fastJsonLib, Entity.Bind.Name, CACHE_FILE, 250, this);
+        this.entityCache = new FileCache<>(
+                FastJSONLib.fastJsonLib,
+                Entity.Bind.Name,
+                Junction.identity(),
+                CACHE_FILE,
+                250,
+                true,
+                this
+        );
         logger.at(Level.INFO).log("EntityCache created: %s", entityCache);
         logger.at(Level.INFO).log("Loaded %d services",
                 entityCache.stream()
