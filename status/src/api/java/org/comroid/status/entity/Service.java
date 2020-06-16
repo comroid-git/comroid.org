@@ -16,7 +16,6 @@ import org.comroid.varbind.container.DataContainerBase;
 import org.intellij.lang.annotations.Language;
 
 import java.util.Arrays;
-import java.util.concurrent.CompletableFuture;
 
 @Location(Service.Bind.class)
 public interface Service extends Entity, WrappedFormattable {
@@ -77,10 +76,18 @@ public interface Service extends Entity, WrappedFormattable {
         @RootBind
         GroupBind<Service, DependenyObject> Root
                 = Entity.Bind.Root.subGroup("service", Invocable.ofConstructor(Polyfill.<Class<Service>>uncheckedCast(Basic.class)));
-        VarBind.OneStage<String> DisplayName
-                = Root.bind1stage("display_name", ValueType.STRING);
-        VarBind.TwoStage<Integer, Status> Status
-                = Root.bind2stage("status", ValueType.INTEGER, Service.Status::valueOf);
+        VarBind<String, DependenyObject, String, String> DisplayName
+                = Root.createBind("display_name")
+                .extractAs(ValueType.STRING)
+                .asIdentities()
+                .onceEach()
+                .build();
+        VarBind<Integer, DependenyObject, Service.Status, Service.Status> Status
+                = Root.createBind("status")
+                .extractAs(ValueType.INTEGER)
+                .andRemap(Service.Status::valueOf)
+                .onceEach()
+                .build();
     }
 
     final class Basic extends DataContainerBase<DependenyObject> implements Service {

@@ -26,7 +26,11 @@ public interface Entity extends DataContainer<DependenyObject>, Named, Specifiab
     interface Bind {
         GroupBind<Entity, DependenyObject> Root
                 = new GroupBind<>(DependenyObject.Adapters.SERIALIZATION_ADAPTER, "entity");
-        VarBind.OneStage<String> Name
-                = Root.bind1stage("name", ValueType.STRING);
+        VarBind<String, DependenyObject, String, String> Name
+                = Root.createBind("name")
+                .extractAs(ValueType.STRING)
+                .asIdentities()
+                .onceEach()
+                .build();
     }
 }
