@@ -23,12 +23,14 @@ const statusArray = [
 
 /**
  * Inits the grid of the status page, performs the JSON fetch.
+ *
+ * @param {bool} slim Whether to print the Status Server seperately
  */
-function initGrid() {
+function initGrid(slim) {
     fetch('https://api.status.comroid.org/services')
         .then(handleErrors)
         .then(response => response.json())
-        .then(data => createBoxes(data))
+        .then(data => createBoxes(data, slim))
         .catch(error => {
             addBox("status-server", "Status Server", "unknown");
             console.error('There has been a problem with your fetch operation:', error);
@@ -51,25 +53,27 @@ function handleErrors(response) {
  * Creates all boxes for the status page grid.
  *
  * @param {Object} data The JSON data delivered by the Fetch API request
+ * @param {bool} slim Whether to print the Status Server seperately
  */
-function createBoxes(data) {
+function createBoxes(data, slim) {
     for (var i = 0; i < data.length; i++) {
         var obj = data[i];
-        addBox(obj.name, obj.display_name, obj.status);
+        addBox(slim, obj.name, obj.display_name, obj.status);
     }
 }
 
 /**
  * Creates a new div inside the flex container.
  *
+ * @param {bool} slim Whether to print the Status Server seperately
  * @param {string} name The service name parsed from JSON data
  * @param {string} display_name The display name parsed from JSON data
  * @param {string} status The current status of the service
  */
-function addBox(name, display_name, status) {
+function addBox(slim, name, display_name, status) {
     // Create a new box in the status grid
     var newDiv = document.createElement("div");
-    if (name === "status-server") {
+    if (slim && name === "status-server") {
         newDiv.id = "head_wrapper";
     } else {
         newDiv.className = "cell";
