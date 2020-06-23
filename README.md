@@ -12,24 +12,12 @@ Username: Anonymous.User
 Password: anonymous
 ```
 
-### [Release Repository](https://comroid.jetbrains.space/packages/maven/release): `https://maven.jetbrains.space/comroid/release`
+### [Maven Repository](https://comroid.jetbrains.space/packages/maven/release): `https://maven.jetbrains.space/comroid/release`
 #### Gradle
 ```groovy
 repositories {
     maven {
         url "https://maven.jetbrains.space/comroid/release"
-        credentials.username "Anonymous.User"
-        credentials.password "anonymous"
-    }
-}
-```
-
-### [Snapshot Repository](https://comroid.jetbrains.space/packages/maven/snapshot): `https://maven.jetbrains.space/comroid/snapshot`
-#### Gradle
-```groovy
-repositories {
-    maven {
-        url "https://maven.jetbrains.space/comroid/snapshot"
         credentials.username "Anonymous.User"
         credentials.password "anonymous"
     }
