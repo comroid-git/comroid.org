@@ -1,43 +1,95 @@
 const hash = window.location.hash.substr(1);
 
 function initNavigation() {
-    const ul = document.createElement('ul')
-
-    for (key in pages) {
-        const page = pages[key];
-        const pagePolicy = getPolicy(page);
-
-        if (isSet(policy['skip_nav'], pagePolicy))
-            continue;
-
+    function generateLabel(key, page, inside) {
+        const label = document.createElement('div')
         const pageLoc = page['path'];
-        const absUrl = pageLoc.startsWith('http');
-        const li = document.createElement('li')
-        const div = document.createElement('div')
 
-        div.className = 'nav-button';
-        div.id = `nav-button-${key}`
-        div.innerText = page['display_name'];
+        label.className = 'nav-button';
+        label.id = `nav-button-${key}`
+        label.innerText = page['display_name'];
+
         if (key === hash || (hash.length === 0 && key === 'home'))
-            div.style.textDecoration = '#e3e3e3 underline';
-
+            label.style.textDecoration = '#e3e3e3 underline';
         let url;
-        let instantRedir = isSet(policy['instant_redir'], pagePolicy);
+        let instantRedir = isSet(policy['instant_redir'], getPolicy(page));
         if (instantRedir) {
             url = pageLoc;
         } else {
-            url = (key === hash && absUrl) ? pageLoc : `./#${key}`;
+            url = (key === hash && pageLoc.startsWith('http')) ? pageLoc : `./#${key}`;
         }
         const targetUrl = url;
-
-        li.onclick = function () {
+        inside.onclick = function () {
             location.href = targetUrl;
             if (!instantRedir)
                 location.reload();
         };
 
-        li.appendChild(div);
-        ul.appendChild(li);
+        inside.appendChild(label);
+
+        return label;
+    }
+
+    function generateDropdown(key, li) {
+        const dropdown = document.createElement('div')
+        const dropdownId = `nav-dropdown-${key}`;
+
+        dropdown.className = 'nav-dropdown'
+        dropdown.id = dropdownId
+
+        li.onmouseenter = function () {
+            document.getElementById(dropdownId).style.display = 'block';
+        };
+        li.onmouseleave = function () {
+            document.getElementById(dropdownId).style.display = 'none';
+        };
+
+        li.appendChild(dropdown);
+
+        return dropdown;
+    }
+
+    const ul = document.createElement('ul')
+
+    for (let id in navigation) {
+        const blob = navigation[id];
+
+        switch (blob['type']) {
+            case 'box':
+                const page = pages[blob['name']];
+
+                if (isSet(policy['skip_nav'], getPolicy(page)))
+                    continue;
+
+                const pageLoc = page['path'];
+                const li = document.createElement('li')
+
+                generateLabel(blob['name'], page, li);
+
+                ul.appendChild(li);
+                break;
+            case 'drop':
+                const cont = document.createElement('li')
+
+                const label = document.createElement('div')
+                label.className = 'nav-button';
+                label.id = `nav-button-${blob['name']}`
+                label.innerText = blob['display'];
+                cont.appendChild(label);
+
+                const dropdownBox = generateDropdown(blob['name'], cont);
+
+                for (let pageNameId in blob['content']) {
+                    const subpage = pages[blob['content'][pageNameId]];
+                    const label = generateLabel(blob['content'][pageNameId], subpage, dropdownBox)
+
+                    label.className += " nav-dropdown-box"
+                }
+
+                ul.appendChild(cont);
+
+                break;
+        }
     }
 
     document.getElementsByTagName("nav")

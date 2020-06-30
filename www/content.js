@@ -4,32 +4,49 @@ const policy = {
 }
 const pages = {
     'not_found': {
-        'id': 1,
         'display_name': "404 Not Found",
         'path': 'part/not-found.html',
         'policy': policy['skip_nav']
     },
 
     'home': {
-        'id': 2,
         'display_name': "Homepage",
         'path': 'part/homepage.html'
     },
     'status': {
-        'id': 4,
         'display_name': "Status Page",
         'path': 'https://status.comroid.org/slim'
     },
     'about': {
-        'id': 8,
         'display_name': "About Us",
         'path': 'part/about.html'
     },
 
     'github': {
-        'id': 16,
         'display_name': "GitHub",
         'path': 'https://github.com/comroid-git',
         'policy': policy['instant_redir']
+    },
+    'discord': {
+        'display_name': "Discord",
+        'path': 'https://discord.gg/comroid',
+        'policy': policy['instant_redir']
     }
 }
+
+const navigation = [
+    {
+        'type': 'box',
+        'name': 'home'
+    },
+    {
+        'type': 'box',
+        'name': 'status'
+    },
+    {
+        'type': 'drop',
+        'name': 'refs',
+        'display': 'References',
+        'content': [ 'github', 'discord' ]
+    }
+]
