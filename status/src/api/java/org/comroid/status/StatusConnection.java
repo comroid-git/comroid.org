@@ -4,19 +4,24 @@ import org.comroid.mutatio.span.Span;
 import org.comroid.restless.CommonHeaderNames;
 import org.comroid.restless.REST;
 import org.comroid.status.entity.Service;
+import org.comroid.status.gateway.Gateway;
 import org.comroid.status.rest.Endpoint;
 import org.comroid.uniform.ValueType;
 import org.comroid.uniform.cache.ProvidedCache;
 import org.comroid.uniform.node.UniObjectNode;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 
-public class StatusConnection implements DependenyObject {
+public final class StatusConnection implements DependenyObject {
     private final String serviceName;
     private final String token;
+    private final Executor executor;
     private final REST<DependenyObject> rest;
     private final ProvidedCache<String, Service> serviceCache;
+    private final Gateway gateway;
     private final Service ownService;
 
     public String getServiceName() {
@@ -25,6 +30,10 @@ public class StatusConnection implements DependenyObject {
 
     public String getToken() {
         return token;
+    }
+
+    public Gateway getGateway() {
+        return gateway;
     }
 
     public Service getService() {
@@ -42,8 +51,10 @@ public class StatusConnection implements DependenyObject {
     public StatusConnection(String serviceName, String token) {
         this.serviceName = serviceName;
         this.token = token;
-        this.rest = new REST<>(Adapters.HTTP_ADAPTER, Adapters.SERIALIZATION_ADAPTER, this);
+        this.executor = Executors.newFixedThreadPool(4);
+        this.rest = new REST<>(Adapters.HTTP_ADAPTER, Adapters.SERIALIZATION_ADAPTER, executor, this);
         this.serviceCache = new ProvidedCache<>(250, ForkJoinPool.commonPool(), this::requestServiceByName);
+        this.gateway = new Gateway(this.executor);
         this.ownService = requestServiceByName(serviceName).join();
     }
 

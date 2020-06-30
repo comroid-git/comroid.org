@@ -23,13 +23,7 @@ dependencies {
     implementation project(':status-api')
 
     compileOnly 'org.jetbrains:annotations:19.0.0'
-
-    // usual dependencies
-    implementation 'org.comroid:mutatio:0.10.1'
-    implementation 'org.comroid:common-util:1.5.4'
-    implementation 'org.comroid:uniform:0.16.0'
-    implementation 'org.comroid:varbind:0.20.0'
-    implementation 'org.comroid:restless:0.15.2'
+    implementation 'org.comroid:dreadpool:0.10.0'
 
     // Javacord
     implementation 'org.javacord:javacord:3.0.6'

@@ -32,6 +32,7 @@ public class StatusServer implements DependenyObject, Closeable {
     public static final FileHandle TOKEN_DIR = PATH_BASE.createSubDir("token");
     public static final FileHandle CACHE_FILE = DATA_DIR.createSubFile("cache.json");
     public static final int PORT = 42641; // hardcoded in server, do not change
+    public static final int GATEWAY_PORT = 42642; // hardcoded in server, do not change
     public static final ThreadGroup THREAD_GROUP = new ThreadGroup("comroid Status Server");
     public static StatusServer instance;
 
@@ -47,6 +48,7 @@ public class StatusServer implements DependenyObject, Closeable {
     private final FileCache<String, Entity, DependenyObject> entityCache;
     private final REST<StatusServer> rest;
     private final RestServer server;
+    private final WebSocketServer webSocketServer;
 
     public final FileCache<String, Entity, DependenyObject> getEntityCache() {
         return entityCache;
@@ -91,6 +93,7 @@ public class StatusServer implements DependenyObject, Closeable {
                         .count());
 
         this.server = new RestServer(this.rest, DependenyObject.URL_BASE, host, port, ServerEndpoints.values());
+        this.webSocketServer = new WebSocketServer(Adapters.SERIALIZATION_ADAPTER, this.threadPool, host);
         server.addCommonHeader("Access-Control-Allow-Origin", "*");
         logger.at(Level.INFO).log("Server Started! %s", server);
     }
