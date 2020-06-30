@@ -23,7 +23,6 @@ dependencies {
     implementation project(':status-api')
 
     compileOnly 'org.jetbrains:annotations:19.0.0'
-    implementation 'org.comroid:dreadpool:0.10.0'
 
     // Javacord
     implementation 'org.javacord:javacord:3.0.6'
