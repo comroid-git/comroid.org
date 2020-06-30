@@ -31,6 +31,7 @@ public interface Entity extends DataContainer<DependenyObject>, Named, Specifiab
                 .extractAs(ValueType.STRING)
                 .asIdentities()
                 .onceEach()
+                .setRequired(true)
                 .build();
     }
 }

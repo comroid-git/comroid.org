@@ -87,18 +87,21 @@ public interface Service extends Entity, WrappedFormattable {
                 .extractAs(ValueType.STRING)
                 .asIdentities()
                 .onceEach()
+                .setRequired(true)
                 .build();
         VarBind<Integer, DependenyObject, Service.Status, Service.Status> Status
                 = Root.createBind("status")
                 .extractAs(ValueType.INTEGER)
                 .andRemap(Service.Status::valueOf)
                 .onceEach()
+                .setRequired(true)
                 .build();
         VarBind<String, DependenyObject, URL, URL> URL
                 = Root.createBind("url")
                 .extractAs(ValueType.STRING)
                 .andRemap(Polyfill::url)
                 .onceEach()
+                .setRequired(false)
                 .build();
     }
 
