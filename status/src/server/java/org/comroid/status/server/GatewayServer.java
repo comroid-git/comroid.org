@@ -1,8 +1,6 @@
 package org.comroid.status.server;
 
-import org.comroid.api.UUIDContainer;
-import org.comroid.listnr.EventManager;
-import org.comroid.listnr.ListnrCore;
+import org.comroid.listnr.AbstractEventManager;
 import org.comroid.restless.socket.WebSocketServer;
 import org.comroid.restless.socket.event.WebSocketPayload;
 import org.comroid.status.event.GatewayEvent;
@@ -13,21 +11,18 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.concurrent.Executor;
 
-public class GatewayServer extends UUIDContainer
-        implements EventManager<WebSocketPayload.Data, GatewayEvent<GatewayPayload>, GatewayPayload> {
+public class GatewayServer extends AbstractEventManager<WebSocketPayload.Data, GatewayEvent<GatewayPayload>, GatewayPayload> {
     private final WebSocketServer server;
 
     public GatewayServer(
+            StatusServer server,
             SerializationAdapter<?, ?, ?> seriLib,
             Executor executor,
             InetAddress adress,
             int port
     ) throws IOException {
-        this.server = new WebSocketServer(seriLib, executor, it -> it.enqueue("todo"), adress, port);
-    }
+        super(server);
 
-    @Override
-    public ListnrCore listnr() {
-        return server.listnr();
+        this.server = new WebSocketServer(seriLib, executor, it -> it.enqueue("todo"), adress, port);
     }
 }

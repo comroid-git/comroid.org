@@ -3,12 +3,17 @@ package org.comroid.status.server;
 import com.google.common.flogger.FluentLogger;
 import org.comroid.api.Junction;
 import org.comroid.common.io.FileHandle;
+import org.comroid.listnr.AbstractEventManager;
+import org.comroid.listnr.ListnrCore;
 import org.comroid.restless.REST;
 import org.comroid.restless.adapter.okhttp.v4.OkHttp3Adapter;
 import org.comroid.restless.server.RestServer;
+import org.comroid.restless.socket.event.WebSocketPayload;
 import org.comroid.status.DependenyObject;
 import org.comroid.status.entity.Entity;
 import org.comroid.status.entity.Service;
+import org.comroid.status.event.GatewayEvent;
+import org.comroid.status.event.GatewayPayload;
 import org.comroid.status.server.entity.LocalService;
 import org.comroid.status.server.rest.ServerEndpoints;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
@@ -23,7 +28,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
-public class StatusServer implements DependenyObject, Closeable {
+public class StatusServer
+        extends AbstractEventManager<WebSocketPayload.Data, GatewayEvent<GatewayPayload>, GatewayPayload>
+        implements DependenyObject, Closeable {
     //http://localhost:42641/services
 
     public static final FluentLogger logger = FluentLogger.forEnclosingClass();
@@ -48,7 +55,7 @@ public class StatusServer implements DependenyObject, Closeable {
     private final FileCache<String, Entity, DependenyObject> entityCache;
     private final REST<StatusServer> rest;
     private final RestServer server;
-    private final WebSocketServer webSocketServer;
+    private final GatewayServer gatewayServer;
 
     public final FileCache<String, Entity, DependenyObject> getEntityCache() {
         return entityCache;
@@ -62,7 +69,9 @@ public class StatusServer implements DependenyObject, Closeable {
         return threadPool;
     }
 
-    private StatusServer(InetAddress host, int port) throws IOException {
+    private StatusServer(ScheduledExecutorService executor, InetAddress host, int port) throws IOException {
+        super(new ListnrCore(executor));
+
         Adapters.HTTP_ADAPTER = new OkHttp3Adapter();
         Adapters.SERIALIZATION_ADAPTER = FastJSONLib.fastJsonLib;
 
@@ -72,7 +81,7 @@ public class StatusServer implements DependenyObject, Closeable {
         this.threadPool = ThreadPool.fixedSize(THREAD_GROUP, 8);
         logger.at(Level.INFO).log("ThreadPool created: %s", threadPool);
          */
-        this.threadPool = Executors.newScheduledThreadPool(4);
+        this.threadPool = executor;
 
         this.rest = new REST<>(DependenyObject.Adapters.HTTP_ADAPTER, DependenyObject.Adapters.SERIALIZATION_ADAPTER, threadPool, this);
         logger.at(Level.INFO).log("REST Client created: %s", rest);
@@ -93,14 +102,14 @@ public class StatusServer implements DependenyObject, Closeable {
                         .count());
 
         this.server = new RestServer(this.rest, DependenyObject.URL_BASE, host, port, ServerEndpoints.values());
-        this.webSocketServer = new WebSocketServer(Adapters.SERIALIZATION_ADAPTER, this.threadPool, host);
+        this.gatewayServer = new GatewayServer(this, Adapters.SERIALIZATION_ADAPTER, this.threadPool, host, GATEWAY_PORT);
         server.addCommonHeader("Access-Control-Allow-Origin", "*");
         logger.at(Level.INFO).log("Server Started! %s", server);
     }
 
     public static void main(String[] args) throws IOException {
         logger.at(Level.INFO).log("Starting comroid Status Server...");
-        instance = new StatusServer(InetAddress.getByAddress(new byte[]{0, 0, 0, 0}), PORT);
+        instance = new StatusServer(Executors.newScheduledThreadPool(4), InetAddress.getByAddress(new byte[]{0, 0, 0, 0}), PORT);
         DiscordBot.INSTANCE.serverFuture.complete(instance);
 
         logger.at(Level.INFO).log("Status Server running! Booting Discord Bot...");
