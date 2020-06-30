@@ -75,14 +75,13 @@ public enum DiscordBot {
         private final DiscordApi api;
         private final CommandHandler cmd;
         private final Reference<UserStatus> userStatusSupplier = StatusServer.instance.getEntityCache()
-                .pipe()
+                .pipe(any -> true)
                 .map(Reference::process)
                 .filter(ref -> ref.test(Service.class::isInstance))
                 .map(ref -> ref.map(Service.class::cast))
                 .map(ref -> ref.map(Service::getStatus))
                 .map(ref -> ref.filter(status -> status != Status.UNKNOWN))
-                .sorted(Comparator.comparingInt(
-                        ref -> ref.into(Status::getValue)))
+                .sorted(Comparator.comparingInt(ref -> ref.into(Status::getValue)))
                 .map(ref -> ref.orElse(Status.OFFLINE))
                 .map(status -> {
                     switch (status) {

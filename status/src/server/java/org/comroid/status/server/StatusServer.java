@@ -3,6 +3,7 @@ package org.comroid.status.server;
 import com.google.common.flogger.FluentLogger;
 import org.comroid.api.Junction;
 import org.comroid.common.io.FileHandle;
+import org.comroid.common.jvm.JITAssistant;
 import org.comroid.listnr.AbstractEventManager;
 import org.comroid.listnr.ListnrCore;
 import org.comroid.restless.REST;
@@ -45,10 +46,11 @@ public class StatusServer
 
     static {
         logger.at(Level.INFO).log("Preparing classes...");
+        JITAssistant.prepareStatic(Entity.Bind.class, Service.Bind.class);
 
         final long count = LocalService.GROUP.streamAllChildren().count();
         if (count < 3)
-            throw new IllegalStateException("Illegal children on LocalService group");
+            throw new IllegalStateException("Illegal children count on LocalService group: " + count);
     }
 
     private final ScheduledExecutorService threadPool;
@@ -101,10 +103,12 @@ public class StatusServer
                         .filter(ref -> ref.test(Service.class::isInstance))
                         .count());
 
+        logger.at(Level.INFO).log("Starting REST Server...");
         this.server = new RestServer(this.rest, DependenyObject.URL_BASE, host, port, ServerEndpoints.values());
-        this.gatewayServer = new GatewayServer(this, Adapters.SERIALIZATION_ADAPTER, this.threadPool, host, GATEWAY_PORT);
         server.addCommonHeader("Access-Control-Allow-Origin", "*");
-        logger.at(Level.INFO).log("Server Started! %s", server);
+        logger.at(Level.INFO).log("Starting Gateway Server...");
+        this.gatewayServer = new GatewayServer(this, Adapters.SERIALIZATION_ADAPTER, this.threadPool, host, GATEWAY_PORT);
+        logger.at(Level.INFO).log("Status Server ready! %s", server);
     }
 
     public static void main(String[] args) throws IOException {
