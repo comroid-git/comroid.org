@@ -2,6 +2,7 @@ package org.comroid.status.server;
 
 import com.google.common.flogger.FluentLogger;
 import org.comroid.api.Junction;
+import org.comroid.commandline.CommandLineArgs;
 import org.comroid.common.io.FileHandle;
 import org.comroid.common.jvm.JITAssistant;
 import org.comroid.listnr.AbstractEventManager;
@@ -42,6 +43,7 @@ public class StatusServer
     public static final int PORT = 42641; // hardcoded in server, do not change
     public static final int GATEWAY_PORT = 42642; // hardcoded in server, do not change
     public static final ThreadGroup THREAD_GROUP = new ThreadGroup("comroid Status Server");
+    public static CommandLineArgs ARGS;
     public static StatusServer instance;
 
     static {
@@ -112,12 +114,13 @@ public class StatusServer
     }
 
     public static void main(String[] args) throws IOException {
+        ARGS = CommandLineArgs.parse(args);
         logger.at(Level.INFO).log("Starting comroid Status Server...");
         instance = new StatusServer(Executors.newScheduledThreadPool(4), InetAddress.getByAddress(new byte[]{0, 0, 0, 0}), PORT);
         DiscordBot.INSTANCE.serverFuture.complete(instance);
 
         logger.at(Level.INFO).log("Status Server running! Booting Discord Bot...");
-        DiscordBot.INSTANCE.supplyToken(instance, args[0]);
+        DiscordBot.INSTANCE.supplyToken(instance, ARGS.requireNonNull("token", "No token defined using argument --token=<token>"));
 
         Runtime.getRuntime().addShutdownHook(new Thread(instance::close));
         instance.threadPool.scheduleAtFixedRate(() -> {
@@ -130,6 +133,9 @@ public class StatusServer
             }
         }, 5, 5, TimeUnit.MINUTES);
         logger.at(Level.INFO).log("Hooks registered!");
+
+        if (ARGS.hasFlag('t') || ARGS.hasKey("test"))
+            StatusServerTestSite.start();
     }
 
     public final Optional<Service> getServiceByName(String name) {

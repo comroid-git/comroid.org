@@ -27,6 +27,7 @@ public enum ServerEndpoints implements ServerEndpoint {
             StatusServer.instance
                     .getEntityCache()
                     .stream()
+                    .sequential()
                     .filter(ref -> ref.test(Service.class::isInstance))
                     .map(ref -> ref.into(Service.class::cast))
                     .forEach(service -> service.toObjectNode(services.addObject()));
