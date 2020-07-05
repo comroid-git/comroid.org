@@ -18,6 +18,7 @@ import org.comroid.status.event.GatewayEvent;
 import org.comroid.status.event.GatewayPayload;
 import org.comroid.status.server.entity.LocalService;
 import org.comroid.status.server.rest.ServerEndpoints;
+import org.comroid.status.server.test.StatusServerTestSite;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
 import org.comroid.varbind.FileCache;
 
@@ -88,7 +89,12 @@ public class StatusServer
          */
         this.threadPool = executor;
 
-        this.rest = new REST<>(DependenyObject.Adapters.HTTP_ADAPTER, DependenyObject.Adapters.SERIALIZATION_ADAPTER, threadPool, this);
+        this.rest = new REST<>(
+                DependenyObject.Adapters.HTTP_ADAPTER,
+                DependenyObject.Adapters.SERIALIZATION_ADAPTER,
+                threadPool,
+                this
+        );
         logger.at(Level.INFO).log("REST Client created: %s", rest);
 
         this.entityCache = new FileCache<>(
@@ -121,7 +127,7 @@ public class StatusServer
         DiscordBot.INSTANCE.serverFuture.complete(instance);
 
         logger.at(Level.INFO).log("Status Server running! Booting Discord Bot...");
-        DiscordBot.INSTANCE.supplyToken(instance, BOT_TOKEN.getContent());
+        DiscordBot.INSTANCE.supplyToken(instance, ARGS.wrap("token").orElseGet(BOT_TOKEN::getContent));
 
         Runtime.getRuntime().addShutdownHook(new Thread(instance::close));
         instance.threadPool.scheduleAtFixedRate(() -> {

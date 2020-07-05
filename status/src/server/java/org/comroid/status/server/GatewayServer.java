@@ -5,6 +5,7 @@ import org.comroid.restless.socket.WebSocketServer;
 import org.comroid.restless.socket.event.WebSocketPayload;
 import org.comroid.status.event.GatewayEvent;
 import org.comroid.status.event.GatewayPayload;
+import org.comroid.status.server.gateway.GatewaySocketHandler;
 import org.comroid.uniform.SerializationAdapter;
 
 import java.io.IOException;
@@ -23,6 +24,6 @@ public class GatewayServer extends AbstractEventManager<WebSocketPayload.Data, G
     ) throws IOException {
         super(server);
 
-        this.server = new WebSocketServer(seriLib, executor, it -> it.enqueue("todo"), adress, port);
+        this.server = new WebSocketServer(seriLib, executor, GatewaySocketHandler::new, adress, port);
     }
 }

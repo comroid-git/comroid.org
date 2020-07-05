@@ -22,6 +22,7 @@ sourceSets {
 dependencies {
     implementation project(':status-api')
     implementation 'org.comroid:commandline:0.10.3-SNAPSHOT'
+    implementation 'org.comroid:dreadpool:0.10.1-SNAPSHOT'
 
     compileOnly 'org.jetbrains:annotations:19.0.0'
 
