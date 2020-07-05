@@ -38,6 +38,7 @@ public class StatusServer
     public static final FluentLogger logger = FluentLogger.forEnclosingClass();
     public static final FileHandle PATH_BASE = new FileHandle("/home/comroid/srv_status/", true); // server path base
     public static final FileHandle DATA_DIR = PATH_BASE.createSubDir("data");
+    public static final FileHandle BOT_TOKEN = DATA_DIR.createSubFile("token.cred");
     public static final FileHandle TOKEN_DIR = PATH_BASE.createSubDir("token");
     public static final FileHandle CACHE_FILE = DATA_DIR.createSubFile("cache.json");
     public static final int PORT = 42641; // hardcoded in server, do not change
@@ -120,7 +121,7 @@ public class StatusServer
         DiscordBot.INSTANCE.serverFuture.complete(instance);
 
         logger.at(Level.INFO).log("Status Server running! Booting Discord Bot...");
-        DiscordBot.INSTANCE.supplyToken(instance, ARGS.requireNonNull("token", "No token defined using argument --token=<token>"));
+        DiscordBot.INSTANCE.supplyToken(instance, BOT_TOKEN.getContent());
 
         Runtime.getRuntime().addShutdownHook(new Thread(instance::close));
         instance.threadPool.scheduleAtFixedRate(() -> {
