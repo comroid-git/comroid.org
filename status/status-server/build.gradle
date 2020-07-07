@@ -1,7 +1,7 @@
 apply plugin: 'application'
 
 group 'org.comroid'
-version = rootProject.version
+version = parent.version
 apply from: 'vars.gradle'
 
 sourceCompatibility = 1.8
@@ -14,21 +14,28 @@ configurations {
 }
 
 sourceSets {
-    main.java.srcDirs = [file("$rootDir/src/server/java")]
-    main.resources.srcDirs = [file("$rootDir/src/server/resources")]
-    web.resources.srcDirs = [file("$rootDir/src/web")]
+    main.java.srcDirs = [file("$parent.projectDir/src/server/java")]
+    main.resources.srcDirs = [file("$parent.projectDir/src/server/resources")]
+    web.resources.srcDirs = [file("$parent.projectDir/src/web")]
 }
 
 dependencies {
     implementation project(':status:status-api')
-    implementation 'org.comroid:commandline:0.10.3-SNAPSHOT'
-    implementation 'org.comroid:dreadpool:0.10.1-SNAPSHOT'
+    implementation project(':common-util:commandline')
+    implementation project(':common-util:dreadpool')
+
+    /* this should work (but it doesnt)
+    compileOnly project(path: ':common-util:uniform', configuration: 'java8compat')
+    compileOnly project(path: ':common-util:restless', configuration: 'java8compat')
+     */
+    compileOnly project(':common-util:uniform').sourceSets.java8compat.output.classesDirs
+    compileOnly project(':common-util:restless').sourceSets.java8compat.output.classesDirs
 
     compileOnly 'org.jetbrains:annotations:19.0.0'
 
     // Javacord
     implementation 'org.javacord:javacord:3.0.6'
-    implementation 'org.comroid:javacord-utilities:1.5.+'
+    implementation project(':javacord-utilities')
 
     // logging dependencies
     implementation 'com.google.flogger:flogger:0.5.1'

@@ -10,10 +10,10 @@ tasks.withType(Javadoc) {
 }
 
 sourceSets {
-    main.java.srcDirs = [file("$rootDir/src/api/java")]
-    main.resources.srcDirs = [file("$rootDir/src/api/resources")]
-    test.java.srcDirs = [file("$rootDir/src/api-test/java")]
-    test.resources.srcDirs = [file("$rootDir/src/api-test/resources")]
+    main.java.srcDirs = [file("$parent.projectDir/src/api/java")]
+    main.resources.srcDirs = [file("$parent.projectDir/src/api/resources")]
+    test.java.srcDirs = [file("$parent.projectDir/src/api-test/java")]
+    test.resources.srcDirs = [file("$parent.projectDir/src/api-test/resources")]
 }
 
 task sourcesJar(type: Jar) {
@@ -43,8 +43,8 @@ compileJava.options.encoding = 'UTF-8'
 dependencies {
     compileOnly 'org.jetbrains:annotations:19.0.0'
 
-    api 'org.comroid:restless:0.16.0-SNAPSHOT'
-    api 'org.comroid:listnr:0.10.0-SNAPSHOT'
+    api project(':common-util:restless')
+    api project(':common-util:listnr')
 
     testImplementation 'junit:junit:4.13'
     testImplementation 'org.easymock:easymock:4.1'
