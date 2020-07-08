@@ -9,10 +9,10 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.comroid</groupId>
   <artifactId>status-api</artifactId>
-  <version>0.11.0</version>
-  <name>status</name>
+  <version>unspecified</version>
+  <name>repo</name>
   <description>The API for the comroid Status Server</description>
-  <url>https://github.com/comroid-git/status</url>
+  <url>https://github.com/comroid-git/repo</url>
   <inceptionYear>2020</inceptionYear>
   <licenses>
     <license>
@@ -28,40 +28,22 @@
     </developer>
   </developers>
   <scm>
-    <connection>scm:git:git://github.com/comroid-git/status.git</connection>
-    <developerConnection>scm:git:ssh://github.com/comroid-git/status.git</developerConnection>
-    <url>https://github.com/comroid-git/status</url>
+    <connection>scm:git:git://github.com/comroid-git/repo.git</connection>
+    <developerConnection>scm:git:ssh://github.com/comroid-git/repo.git</developerConnection>
+    <url>https://github.com/comroid-git/repo</url>
   </scm>
   <dependencies>
     <dependency>
-      <groupId>com.github.comroid-git.common-util</groupId>
-      <artifactId>mutatio</artifactId>
-      <version>b9b55324e856a2beb46987ec1a21550324e24e35</version>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.github.comroid-git.common-util</groupId>
-      <artifactId>common-util</artifactId>
-      <version>b9b55324e856a2beb46987ec1a21550324e24e35</version>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.github.comroid-git.common-util</groupId>
-      <artifactId>uniform</artifactId>
-      <version>b9b55324e856a2beb46987ec1a21550324e24e35</version>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.github.comroid-git.common-util</groupId>
-      <artifactId>varbind</artifactId>
-      <version>b9b55324e856a2beb46987ec1a21550324e24e35</version>
-      <scope>runtime</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.github.comroid-git.common-util</groupId>
+      <groupId>org.comroid</groupId>
       <artifactId>restless</artifactId>
-      <version>b9b55324e856a2beb46987ec1a21550324e24e35</version>
-      <scope>runtime</scope>
+      <version>0.16.0-SNAPSHOT</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.comroid</groupId>
+      <artifactId>listnr</artifactId>
+      <version>0.10.0-SNAPSHOT</version>
+      <scope>compile</scope>
     </dependency>
   </dependencies>
 </project>
