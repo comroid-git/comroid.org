@@ -36,7 +36,7 @@ dependencies {
     // logging dependencies
     implementation flogger
     runtimeOnly floggerLog4J2
-    runtimeOnly log4J2
+    runtimeOnly log4j2
 
     // runtime adapter dependencies
     runtimeOnly okhttp4
