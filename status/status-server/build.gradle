@@ -20,29 +20,25 @@ sourceSets {
 }
 
 dependencies {
-    implementation project(':status:status-api')
-    implementation project(':common-util:commandline')
-    implementation project(':common-util:dreadpool')
+    implementation comroidStatusApi
+    implementation comroidCommandline
+    implementation comroidDreadpool
 
-    /* this should work (but it doesnt)
-    compileOnly project(path: ':common-util:uniform', configuration: 'java8compat')
-    compileOnly project(path: ':common-util:restless', configuration: 'java8compat')
-     */
-    compileOnly project(':common-util:uniform').sourceSets.java8compat.output.classesDirs
-    compileOnly project(':common-util:restless').sourceSets.java8compat.output.classesDirs
+    compileOnly comroidUniformJ8
+    compileOnly comroidRestlessJ8
 
-    compileOnly 'org.jetbrains:annotations:19.0.0'
+    compileOnly jetbrainsAnnotations
 
     // Javacord
-    implementation 'org.javacord:javacord:3.0.6'
-    implementation project(':javacord-utilities')
+    implementation javacord
+    implementation javacordUtil
 
     // logging dependencies
-    implementation 'com.google.flogger:flogger:0.5.1'
-    runtimeOnly 'com.google.flogger:flogger-log4j2-backend:0.5.1'
-    runtimeOnly 'org.apache.logging.log4j:log4j-core:2.13.3'
+    implementation flogger
+    runtimeOnly floggerLog4J2
+    runtimeOnly log4J2
 
     // runtime adapter dependencies
-    runtimeOnly 'com.squareup.okhttp3:okhttp:4.7.2'
-    runtimeOnly 'com.alibaba:fastjson:1.2.70'
+    runtimeOnly okhttp4
+    runtimeOnly fastjson
 }

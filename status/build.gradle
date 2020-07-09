@@ -5,7 +5,13 @@ allprojects {
     targetCompatibility = 8
 
     group 'org.comroid'
-    version = '0.12.0'
+    version = '0.12.1-SNAPSHOT'
+
+    System.out.println("deps " +name != 'status' )
+    if (name != 'status') {
+        apply from: 'vars.gradle'
+        apply from: '../gradle/dependencies.gradle'
+    }
 
     repositories {
         mavenLocal()

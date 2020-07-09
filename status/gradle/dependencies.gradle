@@ -1,0 +1,33 @@
+System.out.println("deps ")
+
+ext {
+    comroidStatusApi = project(':status:status-api') == null
+            ? 'org.comroid:status-api:0.12.1-SNAPSHOT'
+            : project(':status:status-api')
+    comroidCommandline = project(':common-util:commandline') == null
+            ? 'org.comroid:commandline:0.10.3-SNAPSHOT'
+            : project(':common-util:commandline')
+    comroidDreadpool = project(':common-util:dreadpool')
+    comroidUniformJ8 = project(':common-util:uniform') != null
+            ? 'org.comroid:uniform:0.16.1-SNAPSHOT'
+            : project(':common-util:uniform').sourceSets.java8compat.output.classesDirs
+    comroidRestlessJ8 = project(':common-util:restless') != null
+            ? 'org.comroid:restless:0.15.2'
+            : project(':common-util:restless').sourceSets.java8compat.output.classesDirs
+
+    comroidJavacordUtil = project(':javacord-utilities') != null
+            ? 'org.comroid:javacord-utilities:1.5.2-SNAPSHOT'
+            : project(':javacord-utilities')
+
+    jetbrainsAnnotations = 'org.jetbrains:annotations:19.0.0'
+
+    javacord = 'org.javacord:javacord:3.0.6'
+
+    flogger = 'com.google.flogger:flogger:0.5.1'
+    floggerLog4J2 = 'com.google.flogger:flogger-log4j2-backend:0.5.1'
+    log4j2 = 'org.apache.logging.log4j:log4j-core:2.13.3'
+
+    okhttp4 = 'com.squareup.okhttp3:okhttp:4.7.2'
+
+    fastjson = 'com.alibaba:fastjson:1.2.70'
+}
