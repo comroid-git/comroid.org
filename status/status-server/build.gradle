@@ -31,7 +31,7 @@ dependencies {
 
     // Javacord
     implementation javacord
-    implementation javacordUtil
+    implementation comroidJavacordUtil
 
     // logging dependencies
     implementation flogger
