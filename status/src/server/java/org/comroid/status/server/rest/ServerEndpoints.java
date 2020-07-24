@@ -51,6 +51,17 @@ public enum ServerEndpoints implements ServerEndpoint {
                     .orElseThrow(() -> new RestEndpointException(NOT_FOUND, "No service found with name " + urlParams[0]));
         }
     },
+    SERVICE_STATUS_ICON(Endpoint.SERVICE_STATUS_ICON, false) {
+        @Override
+        public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            return StatusServer.instance.getServiceByName(urlParams[0])
+                    .map(Service::getStatus)
+                    .map(StatusIcon::valueOf)
+                    .map(StatusIcon::getIconFile)
+                    .map(icon -> new REST.Response(200, "image/png", icon))
+                    .orElseThrow(() -> new RestEndpointException(NOT_FOUND, "No service found with name " + urlParams[0]));
+        }
+    },
     UPDATE_SERVICE_STATUS(Endpoint.UPDATE_SERVICE_STATUS, false) {
         @Override
         public REST.Response executePOST(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
