@@ -76,9 +76,9 @@ public enum ServerEndpoints implements ServerEndpoint {
 
             service.setStatus(newStatus);
 
-            return new ResponseBuilder()
+            return new ResponseBuilder(body.getSerializationAdapter())
                     .setStatusCode(200)
-                    .setBody(service.toObjectNode(body.getSerializationAdapter()))
+                    .setBody(service)
                     .build();
         }
     },
@@ -98,9 +98,9 @@ public enum ServerEndpoints implements ServerEndpoint {
 
             service.receivePoll(newStatus, expected, timeout);
 
-            return new ResponseBuilder()
+            return new ResponseBuilder(body.getSerializationAdapter())
                     .setStatusCode(200)
-                    .setBody(service.toObjectNode(body.getSerializationAdapter()))
+                    .setBody(service)
                     .build();
         }
     };
