@@ -50,9 +50,12 @@ public interface Service extends Entity, WrappedFormattable {
         UNKNOWN(0),
 
         OFFLINE(1),
-        MAINTENANCE(2),
-        REPORTED_PROBLEMS(3),
-        ONLINE(4);
+        CRASHED(2),
+        MAINTENANCE(3),
+
+        NOT_RESPONDING(4),
+
+        ONLINE(5);
 
         private final int value;
 
