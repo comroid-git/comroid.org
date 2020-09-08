@@ -4,6 +4,7 @@ import org.comroid.api.IntEnum;
 import org.comroid.api.Polyfill;
 import org.comroid.common.io.FileHandle;
 import org.comroid.status.DependenyObject;
+import org.comroid.status.entity.Entity;
 import org.comroid.status.entity.Service;
 import org.comroid.status.server.StatusServer;
 import org.comroid.status.server.TokenCore;
@@ -17,7 +18,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class LocalStoredService extends DataContainerBase<DependenyObject> implements LocalService {
+public class LocalStoredService extends DataContainerBase<Entity> implements LocalService {
     private final AtomicReference<Status> status;
     private final AtomicReference<String> token;
     private final FileHandle tokenFile;
@@ -38,8 +39,8 @@ public class LocalStoredService extends DataContainerBase<DependenyObject> imple
         put(Bind.Status, IntEnum::getValue, status);
     }
 
-    public LocalStoredService(StatusServer server, UniObjectNode data) {
-        super(data, server);
+    public LocalStoredService(UniObjectNode data) {
+        super(data);
 
         this.status = new AtomicReference<>(wrap(Bind.Status).orElse(Status.UNKNOWN));
         this.tokenFile = StatusServer.TOKEN_DIR.createSubFile(getName() + ".token");
@@ -77,27 +78,33 @@ public class LocalStoredService extends DataContainerBase<DependenyObject> imple
         overwriteTokenFile();
     }
 
-    public static final class Builder extends DataContainerBuilder<Builder, Service, DependenyObject> {
+    @Override
+    public void receivePoll(Status newStatus, int expected, int timeout) {
+
+    }
+
+    public static final class Builder extends DataContainerBuilder<Builder, Entity> {
         public Builder() {
-            super(Polyfill.uncheckedCast(LocalStoredService.class), StatusServer.instance);
+            super(LocalStoredService.class);
         }
 
         @Override
-        protected Service mergeVarCarrier(DataContainer<DependenyObject> dataContainer) {
-            return new OfUnderlying(dataContainer);
+        protected Entity mergeVarCarrier(DataContainer<? super Entity> dataContainer) {
+            return new OfUnderlying(Polyfill.uncheckedCast(dataContainer));
         }
     }
 
-    private static final class OfUnderlying extends LocalStoredService implements LocalService, DataContainer.Underlying<DependenyObject> {
-        private final DataContainer<DependenyObject> underlying;
+    private static final class OfUnderlying extends LocalStoredService
+            implements LocalService, DataContainer.Underlying<Entity> {
+        private final DataContainer<Entity> underlying;
 
         @Override
-        public DataContainer<DependenyObject> getUnderlyingVarCarrier() {
+        public DataContainer<Entity> getUnderlyingVarCarrier() {
             return underlying;
         }
 
-        private OfUnderlying(DataContainer<DependenyObject> underlying) {
-            super((StatusServer) underlying.getDependent(), null);
+        private OfUnderlying(DataContainer<Entity> underlying) {
+            super(null);
 
             this.underlying = underlying;
         }
