@@ -138,11 +138,13 @@ public class StatusServer implements DependenyObject, Closeable {
     }
 
     public LocalService createService(String serviceName, UniObjectNode data) {
-        final LocalService service = new DataContainerBuilder<>(LocalStoredService.class, data, this)
-                .setValue(Service.Bind.Name, serviceName)
-                .setValue(Service.Bind.Status, Service.Status.UNKNOWN.getValue())
-                .build();
-        final Cache<String, Entity> entityCache = getEntityCache();
+        DataContainerBuilder<LocalStoredService> builder = new DataContainerBuilder<>(LocalStoredService.class, data, this);
+
+        builder.setValue(Service.Bind.Name, serviceName);
+        if (!data.has(Service.Bind.Status))
+            builder.setValue(Service.Bind.Status, Service.Status.UNKNOWN.getValue());
+
+        final LocalService service = builder.build();
         entityCache.getReference(serviceName, true).set(service);
 
         return service;
