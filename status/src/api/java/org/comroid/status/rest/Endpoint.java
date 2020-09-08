@@ -19,6 +19,11 @@ public enum Endpoint implements AccessibleEndpoint {
     UPDATE_SERVICE_STATUS(
             "service/%s/status",
             Service.NAME_REGEX
+    ),
+
+    POLL(
+            "service/%s/poll",
+            Service.NAME_REGEX
     );
 
     private final String extension;

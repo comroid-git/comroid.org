@@ -81,6 +81,19 @@ public enum ServerEndpoints implements ServerEndpoint {
                     .setBody(service.toObjectNode(body.getSerializationAdapter()))
                     .build();
         }
+    },
+
+    POLL(Endpoint.POLL, false) {
+        @Override
+        public REST.Response executePOST(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            final LocalService service = requireLocalService(urlParams[0]);
+            checkAuthorization(headers, service);
+
+            return new ResponseBuilder()
+                    .setStatusCode(200)
+                    .setBody(service.toObjectNode(body.getSerializationAdapter()))
+                    .build();
+        }
     };
 
     private final Endpoint underlying;
