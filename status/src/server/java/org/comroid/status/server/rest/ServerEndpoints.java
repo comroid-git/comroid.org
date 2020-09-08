@@ -53,7 +53,9 @@ public enum ServerEndpoints implements ServerEndpoint {
 
         @Override
         public REST.Response executePUT(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            StatusServer.instance.createService(urlParams[0], body);
+            final LocalService service = StatusServer.instance.createService(urlParams[0], body.asObjectNode());
+
+            return new REST.Response(OK, service.toObjectNode(Adapters.SERIALIZATION_ADAPTER));
         }
     },
     SERVICE_STATUS_ICON(Endpoint.SERVICE_STATUS_ICON, false) {
