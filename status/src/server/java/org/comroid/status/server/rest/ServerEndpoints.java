@@ -112,7 +112,7 @@ public enum ServerEndpoints implements ServerEndpoint {
             final Service.Status newStatus = body.process("status")
                     .map(UniNode::asInt)
                     .map(Service.Status::valueOf)
-                    .requireNonNull("New state missing");
+                    .orElseThrow(() -> new RestEndpointException(BAD_REQUEST, "Missing status"));
             final int expected = body.get("expected").asInt(60);
             final int timeout = body.get("timeout").asInt(320);
 
