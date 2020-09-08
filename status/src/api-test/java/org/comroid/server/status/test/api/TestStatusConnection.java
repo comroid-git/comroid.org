@@ -21,7 +21,7 @@ public class TestStatusConnection {
     }
 
     @Test(timeout = 20000)
-    public void testPolling() throws InterruptedException {
+    public void testPolling() {
         connection.refreshTimeout = 5;
         connection.crashedTimeout = 10;
 

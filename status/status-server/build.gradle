@@ -23,8 +23,8 @@ dependencies {
     implementation project(':status:status-api')
     implementation project(':common-util:commandline')
 
-    compileOnly project(':common-util:uniform').sourceSets.java8compat.output.classesDirs
-    compileOnly project(':common-util:restless').sourceSets.java8compat.output.classesDirs
+    implementation project(':common-util:uniform').sourceSets.java8compat.output.classesDirs
+    implementation project(':common-util:restless').sourceSets.java8compat.output.classesDirs
 
     compileOnly jetbrainsAnnotations
 
