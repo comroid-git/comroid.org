@@ -89,6 +89,15 @@ public enum ServerEndpoints implements ServerEndpoint {
             final LocalService service = requireLocalService(urlParams[0]);
             checkAuthorization(headers, service);
 
+            final Service.Status newStatus = body.process("status")
+                    .map(UniNode::asInt)
+                    .map(Service.Status::valueOf)
+                    .requireNonNull("New state missing");
+            final int expected = body.get("expected").asInt(60);
+            final int timeout = body.get("timeout").asInt(320);
+
+            service.receivePoll(newStatus, expected, timeout);
+
             return new ResponseBuilder()
                     .setStatusCode(200)
                     .setBody(service.toObjectNode(body.getSerializationAdapter()))

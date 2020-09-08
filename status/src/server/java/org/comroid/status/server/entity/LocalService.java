@@ -24,4 +24,6 @@ public interface LocalService extends Service {
     String getToken();
 
     void regenerateToken();
+
+    void receivePoll(Status newStatus, int expected, int timeout);
 }
