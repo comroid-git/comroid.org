@@ -2,7 +2,6 @@ package org.comroid.status.server.entity;
 
 import org.comroid.api.Invocable;
 import org.comroid.api.Polyfill;
-import org.comroid.status.DependenyObject;
 import org.comroid.status.entity.Service;
 import org.comroid.varbind.annotation.Location;
 import org.comroid.varbind.annotation.RootBind;
@@ -23,7 +22,7 @@ public interface LocalService extends Service {
 
     String getToken();
 
-    void regenerateToken();
+    String regenerateToken();
 
     void receivePoll(Status newStatus, int expected, int timeout);
 }

@@ -82,28 +82,28 @@ public enum DiscordBot {
                 .map(ref -> ref.map(Service::getStatus))
                 .map(ref -> ref.filter(status -> status != Status.UNKNOWN))
                 .sorted(Comparator.comparingInt(ref -> ref.into(Status::getValue)))
+                .findAny()
                 .map(ref -> ref.orElse(Status.OFFLINE))
                 .map(status -> {
                     switch (status) {
                         case UNKNOWN:
                         case OFFLINE:
+                        case CRASHED:
                             return UserStatus.DO_NOT_DISTURB;
                         case MAINTENANCE:
-                        case REPORTED_PROBLEMS:
+                        case NOT_RESPONDING:
                             return UserStatus.IDLE;
                         case ONLINE:
                             return UserStatus.ONLINE;
                     }
                     throw new AssertionError();
-                })
-                .findAny();
+                });
 
         private Container(DiscordApi api) {
             DefaultEmbedFactory.setEmbedSupplier(() -> new EmbedBuilder().setColor(new Color(0xcf2f2f))
                     .setFooter(
                             "comroid Status Update Bot",
-                            api.getYourself()
-                                    .getAvatar()
+                            api.getYourself().getAvatar()
                     ));
 
             this.api = api;
@@ -182,16 +182,14 @@ public enum DiscordBot {
         )
         public CompletableFuture<String> regenerateToken(String[] args, Server server, User user) {
             final LocalService service = server().getServiceByName(args[0])
-                    .flatMap(it -> it.as(LocalService.class))
+                    .flatMapOptional(it -> it.as(LocalService.class))
                     .orElseThrow(() -> new NoSuchElementException(String.format("No Service found with name `%s`", args[0])));
-
-            service.regenerateToken();
 
             return user.sendMessage(DefaultEmbedFactory.create(server, user)
                     .addField("Token Regenerated!", String.format(
                             "New Token for %s: ```%s```",
                             service,
-                            service.getToken()
+                            service.regenerateToken()
                     )))
                     .thenApply(nil -> String.format("Token for %s regenerated!", service));
         }
@@ -210,7 +208,7 @@ public enum DiscordBot {
             logger.at(Level.INFO).log("User %s update service status: %s -> %s", user, args[0], status);
 
             return server().getServiceByName(args[0])
-                    .flatMap(service -> service.as(LocalService.class))
+                    .flatMapOptional(service -> service.as(LocalService.class))
                     .map(service -> {
                         service.setStatus(status);
                         return String.format(
@@ -233,7 +231,7 @@ public enum DiscordBot {
 
             try {
                 final Set<Service> services = server().getEntityCache()
-                        .stream()
+                        .streamRefs()
                         .filter(ref -> ref.test(Service.class::isInstance))
                         .map(ref -> ref.into(Service.class::cast))
                         .collect(Collectors.toSet());
@@ -267,7 +265,8 @@ public enum DiscordBot {
         public String createService(String[] args, User user) {
             logger.at(Level.INFO).log("User %s is creating service: %s", user, args[0]);
 
-            final Service service = new LocalStoredService.Builder().with(Service.Bind.Name, args[0])
+            final Service service = new LocalStoredService.Builder()
+                    .with(Service.Bind.Name, args[0])
                     .with(Service.Bind.DisplayName, args.length >= 2 ? args[1] : args[0])
                     .build();
 

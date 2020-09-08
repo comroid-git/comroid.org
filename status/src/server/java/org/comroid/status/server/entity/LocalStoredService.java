@@ -5,6 +5,7 @@ import org.comroid.api.Polyfill;
 import org.comroid.common.io.FileHandle;
 import org.comroid.mutatio.ref.Reference;
 import org.comroid.status.entity.Entity;
+import org.comroid.status.entity.Service;
 import org.comroid.status.server.StatusServer;
 import org.comroid.status.server.TokenCore;
 import org.comroid.uniform.node.UniObjectNode;
@@ -64,8 +65,8 @@ public class LocalStoredService extends DataContainerBase<Entity> implements Loc
     }
 
     @Override
-    public void regenerateToken() {
-        overwriteTokenFile();
+    public String regenerateToken() {
+        return overwriteTokenFile();
     }
 
     @Override
@@ -74,13 +75,13 @@ public class LocalStoredService extends DataContainerBase<Entity> implements Loc
         spm.set(new StatusPollManager(expected, timeout));
     }
 
-    public static final class Builder extends DataContainerBuilder<Builder, Entity> {
+    public static final class Builder extends DataContainerBuilder<Builder, Service> {
         public Builder() {
             super(LocalStoredService.class);
         }
 
         @Override
-        protected Entity mergeVarCarrier(DataContainer<? super Entity> dataContainer) {
+        protected Service mergeVarCarrier(DataContainer<? super Service> dataContainer) {
             return new OfUnderlying(Polyfill.uncheckedCast(dataContainer));
         }
     }
