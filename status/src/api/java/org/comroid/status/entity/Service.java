@@ -3,7 +3,7 @@ package org.comroid.status.entity;
 import org.comroid.api.IntEnum;
 import org.comroid.api.Invocable;
 import org.comroid.api.Polyfill;
-import org.comroid.common.ref.WrappedFormattable;
+import org.comroid.api.WrappedFormattable;
 import org.comroid.restless.REST;
 import org.comroid.status.StatusConnection;
 import org.comroid.status.rest.Endpoint;

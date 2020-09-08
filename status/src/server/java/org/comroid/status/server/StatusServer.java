@@ -19,6 +19,7 @@ import org.comroid.status.server.rest.ServerEndpoints;
 import org.comroid.status.server.test.StatusServerTestSite;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
 import org.comroid.uniform.cache.Cache;
+import org.comroid.uniform.node.UniObjectNode;
 import org.comroid.varbind.FileCache;
 import org.comroid.varbind.container.DataContainerBuilder;
 
@@ -136,13 +137,12 @@ public class StatusServer implements DependenyObject, Closeable {
             StatusServerTestSite.start();
     }
 
-    public static LocalService createService(String serviceName, String displayName) {
-        final LocalService service = new DataContainerBuilder<>(LocalStoredService.class, instance)
+    public LocalService createService(String serviceName, UniObjectNode data) {
+        final LocalService service = new DataContainerBuilder<>(LocalStoredService.class, data, this)
                 .setValue(Service.Bind.Name, serviceName)
-                .setValue(Service.Bind.DisplayName, displayName)
                 .setValue(Service.Bind.Status, Service.Status.UNKNOWN.getValue())
                 .build();
-        final Cache<String, Entity> entityCache = instance.getEntityCache();
+        final Cache<String, Entity> entityCache = getEntityCache();
         entityCache.getReference(serviceName, true).set(service);
 
         return service;

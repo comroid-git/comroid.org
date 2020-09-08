@@ -53,7 +53,7 @@ public enum ServerEndpoints implements ServerEndpoint {
 
         @Override
         public REST.Response executePUT(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            return null;
+            StatusServer.instance.createService(urlParams[0], body);
         }
     },
     SERVICE_STATUS_ICON(Endpoint.SERVICE_STATUS_ICON, false) {

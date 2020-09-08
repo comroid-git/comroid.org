@@ -6,11 +6,13 @@ import org.comroid.javacord.util.commands.Command;
 import org.comroid.javacord.util.commands.CommandHandler;
 import org.comroid.javacord.util.ui.embed.DefaultEmbedFactory;
 import org.comroid.mutatio.ref.Reference;
+import org.comroid.status.DependenyObject;
 import org.comroid.status.entity.Entity;
 import org.comroid.status.entity.Service;
 import org.comroid.status.entity.Service.Status;
 import org.comroid.status.server.entity.LocalService;
 import org.comroid.uniform.cache.Cache;
+import org.comroid.uniform.node.UniObjectNode;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
@@ -261,7 +263,9 @@ public enum DiscordBot {
             final String serviceName = args[0];
             logger.at(Level.INFO).log("User %s is creating service: %s", user, serviceName);
 
-            final Service service = StatusServer.createService(serviceName, args.length >= 2 ? args[1] : serviceName);
+            final UniObjectNode data = DependenyObject.Adapters.SERIALIZATION_ADAPTER.createUniObjectNode();
+            data.put(Service.Bind.DisplayName, args.length >= 2 ? args[1] : serviceName);
+            final Service service = StatusServer.createService(serviceName, );
 
             return String.format("Created new Service: %s '%s'", service.getName(), service.getDisplayName());
         }
