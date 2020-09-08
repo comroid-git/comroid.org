@@ -2,14 +2,11 @@ package org.comroid.status.server.rest;
 
 import com.sun.net.httpserver.Headers;
 import org.comroid.restless.CommonHeaderNames;
-import org.comroid.restless.HTTPStatusCodes;
 import org.comroid.restless.REST;
 import org.comroid.restless.endpoint.AccessibleEndpoint;
 import org.comroid.restless.server.RestEndpointException;
 import org.comroid.restless.server.ServerEndpoint;
-import org.comroid.status.DependenyObject;
 import org.comroid.status.DependenyObject.Adapters;
-import org.comroid.status.entity.Entity;
 import org.comroid.status.entity.Service;
 import org.comroid.status.rest.Endpoint;
 import org.comroid.status.server.StatusServer;
@@ -18,7 +15,6 @@ import org.comroid.status.server.entity.LocalService;
 import org.comroid.status.server.util.ResponseBuilder;
 import org.comroid.uniform.node.UniArrayNode;
 import org.comroid.uniform.node.UniNode;
-import org.comroid.varbind.FileCache;
 
 import static org.comroid.restless.HTTPStatusCodes.*;
 
@@ -57,6 +53,8 @@ public enum ServerEndpoints implements ServerEndpoint {
 
         @Override
         public REST.Response executePUT(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            checkAdminAuthorization(headers);
+
             final LocalService service = StatusServer.instance.createService(urlParams[0], body.asObjectNode());
 
             return new REST.Response(OK, service.toObjectNode(Adapters.SERIALIZATION_ADAPTER));
@@ -64,6 +62,8 @@ public enum ServerEndpoints implements ServerEndpoint {
 
         @Override
         public REST.Response executeDELETE(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            checkAdminAuthorization(headers);
+
             final LocalService service = requireLocalService(urlParams[0]);
 
             if (StatusServer.instance.getEntityCache().remove(service))
@@ -126,17 +126,17 @@ public enum ServerEndpoints implements ServerEndpoint {
     };
 
     private final Endpoint underlying;
-    private final boolean allowMemberAccess;
 
+    private final boolean allowMemberAccess;
     @Override
     public AccessibleEndpoint getEndpointBase() {
         return underlying;
     }
+
     ServerEndpoints(Endpoint underlying, boolean allowMemberAccess) {
         this.underlying = underlying;
         this.allowMemberAccess = allowMemberAccess;
     }
-
     private static LocalService requireLocalService(String name) {
         return StatusServer.instance.getServiceByName(name)
                 .flatMapOptional(it -> it.as(LocalService.class))
@@ -154,8 +154,19 @@ public enum ServerEndpoints implements ServerEndpoint {
 
         if (!TokenCore.isValid(token) || !TokenCore.extractName(token).equals(service.getName()))
             throw new RestEndpointException(UNAUTHORIZED, "Malicious Token used");
-
         if (!service.getToken().equals(token))
+            throw new RestEndpointException(UNAUTHORIZED, "Unauthorized");
+    }
+
+    public void checkAdminAuthorization(Headers headers) {
+        if (!headers.containsKey(CommonHeaderNames.AUTHORIZATION))
+            throw new RestEndpointException(UNAUTHORIZED, "Unauthorized");
+
+        final String token = headers.getFirst(CommonHeaderNames.AUTHORIZATION);
+
+        if (!TokenCore.isValid(token) || !TokenCore.extractName(token).equals(StatusServer.ADMIN_TOKEN_NAME))
+            throw new RestEndpointException(UNAUTHORIZED, "Malicious Token used");
+        if (!StatusServer.ADMIN_TOKEN.getContent().equals(token))
             throw new RestEndpointException(UNAUTHORIZED, "Unauthorized");
     }
 

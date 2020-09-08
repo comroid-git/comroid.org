@@ -18,7 +18,6 @@ import org.comroid.status.server.entity.LocalStoredService;
 import org.comroid.status.server.rest.ServerEndpoints;
 import org.comroid.status.server.test.StatusServerTestSite;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
-import org.comroid.uniform.cache.Cache;
 import org.comroid.uniform.node.UniObjectNode;
 import org.comroid.varbind.FileCache;
 import org.comroid.varbind.container.DataContainerBuilder;
@@ -39,12 +38,14 @@ public class StatusServer implements DependenyObject, Closeable {
     public static final FluentLogger logger = FluentLogger.forEnclosingClass();
     public static final FileHandle PATH_BASE = new FileHandle("/home/comroid/srv_status/", true); // server path base
     public static final FileHandle DATA_DIR = PATH_BASE.createSubDir("data");
-    public static final FileHandle BOT_TOKEN = DATA_DIR.createSubFile("token.cred");
+    public static final FileHandle BOT_TOKEN = DATA_DIR.createSubFile("discord.cred");
+    public static final FileHandle ADMIN_TOKEN = DATA_DIR.createSubFile("admin.cred");
     public static final FileHandle TOKEN_DIR = PATH_BASE.createSubDir("token");
     public static final FileHandle CACHE_FILE = DATA_DIR.createSubFile("cache.json");
     public static final int PORT = 42641; // hardcoded in server, do not change
     public static final int GATEWAY_PORT = 42642; // hardcoded in server, do not change
     public static final ThreadGroup THREAD_GROUP = new ThreadGroup("comroid Status Server");
+    public static final String ADMIN_TOKEN_NAME = "admin$access$token";
     public static CommandLineArgs ARGS;
     public static StatusServer instance;
 
@@ -52,11 +53,14 @@ public class StatusServer implements DependenyObject, Closeable {
         logger.at(Level.INFO).log("Preparing classes...");
         JITAssistant.prepareStatic(Entity.Bind.class, Service.Bind.class);
         AssertionException.expect(3, LocalService.GROUP.streamAllChildren().count(), "LocalService children count");
+
+        if (ADMIN_TOKEN.getContent().isEmpty())
+            ADMIN_TOKEN.setContent(TokenCore.generate(ADMIN_TOKEN_NAME));
     }
 
+    public final REST<StatusServer> rest;
     private final ScheduledExecutorService threadPool;
     private final FileCache<String, Entity, DependenyObject> entityCache;
-    public final REST<StatusServer> rest;
     private final RestServer server;
 
     public final FileCache<String, Entity, DependenyObject> getEntityCache() {
