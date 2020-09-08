@@ -3,9 +3,8 @@ package org.comroid.status.server.entity;
 import org.comroid.api.IntEnum;
 import org.comroid.api.Polyfill;
 import org.comroid.common.io.FileHandle;
-import org.comroid.status.DependenyObject;
+import org.comroid.mutatio.ref.Reference;
 import org.comroid.status.entity.Entity;
-import org.comroid.status.entity.Service;
 import org.comroid.status.server.StatusServer;
 import org.comroid.status.server.TokenCore;
 import org.comroid.uniform.node.UniObjectNode;
@@ -13,15 +12,17 @@ import org.comroid.varbind.container.DataContainer;
 import org.comroid.varbind.container.DataContainerBase;
 import org.comroid.varbind.container.DataContainerBuilder;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
 
 public class LocalStoredService extends DataContainerBase<Entity> implements LocalService {
     private final AtomicReference<Status> status;
     private final AtomicReference<String> token;
     private final FileHandle tokenFile;
+    private final ScheduledExecutorService executor = StatusServer.instance.getThreadPool();
+    private final Reference<StatusPollManager> spm = Reference.create();
 
     @Override
     public String getToken() {
@@ -56,19 +57,8 @@ public class LocalStoredService extends DataContainerBase<Entity> implements Loc
             throw new RuntimeException("Could not replace old Token file");
 
         final String newToken = TokenCore.generate(getName());
-
-        try (
-                FileOutputStream fos = new FileOutputStream(tokenFile);
-                OutputStreamWriter osw = new OutputStreamWriter(fos)
-        ) {
-            osw.write(newToken);
-            osw.flush();
-            fos.flush();
-        } catch (IOException e) {
-            throw new RuntimeException("Could not write token", e);
-        } finally {
-            token.set(newToken);
-        }
+        tokenFile.setContent(newToken);
+        token.set(newToken);
 
         return newToken;
     }
@@ -80,7 +70,8 @@ public class LocalStoredService extends DataContainerBase<Entity> implements Loc
 
     @Override
     public void receivePoll(Status newStatus, int expected, int timeout) {
-
+        spm.ifPresent(spm -> spm.complete(newStatus));
+        spm.set(new StatusPollManager(expected, timeout));
     }
 
     public static final class Builder extends DataContainerBuilder<Builder, Entity> {
@@ -107,6 +98,37 @@ public class LocalStoredService extends DataContainerBase<Entity> implements Loc
             super(null);
 
             this.underlying = underlying;
+        }
+    }
+
+    private final class StatusPollManager {
+        private final Reference<Status> state = Reference.create();
+
+        private StatusPollManager(int expected, int timeout) {
+            executor.schedule(this::expire, expected, TimeUnit.SECONDS);
+            executor.schedule(this::timeout, timeout, TimeUnit.SECONDS);
+        }
+
+        private boolean complete(Status newStatus) {
+            synchronized (spm) {
+                if (state.isNonNull())
+                    return false;
+                state.set(newStatus);
+                setStatus(newStatus);
+                return true;
+            }
+        }
+
+        private void expire() {
+            if (complete(Status.NOT_RESPONDING))
+                StatusServer.logger.at(Level.WARNING)
+                        .log("Service {} is not responding within timeout ...", getDisplayName());
+        }
+
+        private void timeout() {
+            if (complete(Status.CRASHED))
+                StatusServer.logger.at(Level.SEVERE)
+                        .log("Service {} timed out!", getDisplayName());
         }
     }
 }
