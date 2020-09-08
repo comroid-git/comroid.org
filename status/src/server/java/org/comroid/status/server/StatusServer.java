@@ -3,6 +3,7 @@ package org.comroid.status.server;
 import com.google.common.flogger.FluentLogger;
 import org.comroid.api.Junction;
 import org.comroid.commandline.CommandLineArgs;
+import org.comroid.common.exception.AssertionException;
 import org.comroid.common.io.FileHandle;
 import org.comroid.common.jvm.JITAssistant;
 import org.comroid.mutatio.proc.Processor;
@@ -47,10 +48,7 @@ public class StatusServer implements DependenyObject, Closeable {
     static {
         logger.at(Level.INFO).log("Preparing classes...");
         JITAssistant.prepareStatic(Entity.Bind.class, Service.Bind.class);
-
-        final long count = LocalService.GROUP.streamAllChildren().count();
-        if (count < 3)
-            throw new IllegalStateException("Illegal children count on LocalService group: " + count);
+        AssertionException.expect(3, LocalService.GROUP.streamAllChildren().count(), "LocalService children count");
     }
 
     private final ScheduledExecutorService threadPool;
