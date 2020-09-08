@@ -80,23 +80,23 @@ public interface Service extends Entity, WrappedFormattable {
 
     interface Bind extends Entity.Bind {
         @RootBind
-        GroupBind<Service, DependenyObject> Root
+        GroupBind<Service> Root
                 = Entity.Bind.Root.subGroup("service", Invocable.ofConstructor(Polyfill.<Class<Service>>uncheckedCast(Basic.class)));
-        VarBind<Object, String, String, String> DisplayName
+        VarBind<Service, String, String, String> DisplayName
                 = Root.createBind("display_name")
                 .extractAs(ValueType.STRING)
                 .asIdentities()
                 .onceEach()
                 .setRequired(true)
                 .build();
-        VarBind<Object, Integer, Service.Status, Service.Status> Status
+        VarBind<Service, Integer, Service.Status, Service.Status> Status
                 = Root.createBind("status")
                 .extractAs(ValueType.INTEGER)
                 .andRemap(Service.Status::valueOf)
                 .onceEach()
                 .setRequired(true)
                 .build();
-        VarBind<Object, String, URL, URL> URL
+        VarBind<Service, String, URL, URL> URL
                 = Root.createBind("url")
                 .extractAs(ValueType.STRING)
                 .andRemap(Polyfill::url)
@@ -105,9 +105,9 @@ public interface Service extends Entity, WrappedFormattable {
                 .build();
     }
 
-    final class Basic extends DataContainerBase<DependenyObject> implements Service {
-        public Basic(StatusConnection connection, UniObjectNode node) {
-            super(node, connection);
+    final class Basic extends DataContainerBase<Entity> implements Service {
+        public Basic(UniObjectNode node) {
+            super(node);
         }
     }
 }

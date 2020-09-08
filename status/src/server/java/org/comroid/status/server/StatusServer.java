@@ -8,12 +8,9 @@ import org.comroid.common.jvm.JITAssistant;
 import org.comroid.restless.REST;
 import org.comroid.restless.adapter.okhttp.v4.OkHttp3Adapter;
 import org.comroid.restless.server.RestServer;
-import org.comroid.restless.socket.event.WebSocketPayload;
 import org.comroid.status.DependenyObject;
 import org.comroid.status.entity.Entity;
 import org.comroid.status.entity.Service;
-import org.comroid.status.event.GatewayEvent;
-import org.comroid.status.event.GatewayPayload;
 import org.comroid.status.server.entity.LocalService;
 import org.comroid.status.server.rest.ServerEndpoints;
 import org.comroid.status.server.test.StatusServerTestSite;
@@ -29,9 +26,9 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
-public class StatusServer
-        extends AbstractEventManager<WebSocketPayload.Data, GatewayEvent<GatewayPayload>, GatewayPayload>
-        implements DependenyObject, Closeable {
+import static org.comroid.status.DependenyObject.Adapters.SERIALIZATION_ADAPTER;
+
+public class StatusServer implements DependenyObject, Closeable {
     //http://localhost:42641/services
 
     public static final FluentLogger logger = FluentLogger.forEnclosingClass();
@@ -74,10 +71,8 @@ public class StatusServer
     }
 
     private StatusServer(ScheduledExecutorService executor, InetAddress host, int port) throws IOException {
-        super(new ListnrCore(executor));
-
         Adapters.HTTP_ADAPTER = new OkHttp3Adapter();
-        Adapters.SERIALIZATION_ADAPTER = FastJSONLib.fastJsonLib;
+        SERIALIZATION_ADAPTER = FastJSONLib.fastJsonLib;
 
         logger.at(Level.INFO).log("Initialized Adapters");
 
@@ -89,9 +84,9 @@ public class StatusServer
 
         this.rest = new REST<>(
                 DependenyObject.Adapters.HTTP_ADAPTER,
-                DependenyObject.Adapters.SERIALIZATION_ADAPTER,
-                threadPool,
-                this
+                SERIALIZATION_ADAPTER,
+                this,
+                threadPool
         );
         logger.at(Level.INFO).log("REST Client created: %s", rest);
 
@@ -106,15 +101,15 @@ public class StatusServer
         );
         logger.at(Level.INFO).log("EntityCache created: %s", entityCache);
         logger.at(Level.INFO).log("Loaded %d services",
-                entityCache.stream()
+                entityCache.stream(any -> true)
                         .filter(ref -> ref.test(Service.class::isInstance))
                         .count());
 
         logger.at(Level.INFO).log("Starting REST Server...");
-        this.server = new RestServer(this.rest, DependenyObject.URL_BASE, host, port, ServerEndpoints.values());
+        this.server = new RestServer(SERIALIZATION_ADAPTER, executor, DependenyObject.URL_BASE, host, port, ServerEndpoints.values());
         server.addCommonHeader("Access-Control-Allow-Origin", "*");
         logger.at(Level.INFO).log("Starting Gateway Server...");
-        this.gatewayServer = new GatewayServer(this, Adapters.SERIALIZATION_ADAPTER, this.threadPool, host, GATEWAY_PORT);
+        this.gatewayServer = new GatewayServer(this, SERIALIZATION_ADAPTER, this.threadPool, host, GATEWAY_PORT);
         logger.at(Level.INFO).log("Status Server ready! %s", server);
     }
 
@@ -145,7 +140,7 @@ public class StatusServer
 
     public final Optional<Service> getServiceByName(String name) {
         logger.at(Level.INFO).log("Returning Service by name: %s", name);
-        return entityCache.stream()
+        return entityCache.stream(any->true)
                 .filter(ref -> !ref.isNull())
                 .filter(ref -> ref.process().test(Service.class::isInstance))
                 .map(ref -> ref.into(Service.class::cast))

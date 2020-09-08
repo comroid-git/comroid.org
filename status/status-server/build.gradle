@@ -20,18 +20,17 @@ sourceSets {
 }
 
 dependencies {
-    implementation comroidStatusApi
-    implementation comroidCommandline
-    implementation comroidDreadpool
+    implementation project(':status:status-api')
+    implementation project(':common-util:commandline')
 
-    compileOnly comroidUniformJ8
-    compileOnly comroidRestlessJ8
+    compileOnly project(':common-util:uniform').sourceSets.java8compat.output.classesDirs
+    compileOnly project(':common-util:restless').sourceSets.java8compat.output.classesDirs
 
     compileOnly jetbrainsAnnotations
 
     // Javacord
     implementation javacord
-    implementation comroidJavacordUtil
+    implementation project(':javacord-utilities')
 
     // logging dependencies
     implementation flogger
