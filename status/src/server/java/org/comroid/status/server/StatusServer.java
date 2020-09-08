@@ -101,7 +101,7 @@ public class StatusServer implements DependenyObject, Closeable {
         );
         logger.at(Level.INFO).log("EntityCache created: %s", entityCache);
         logger.at(Level.INFO).log("Loaded %d services",
-                entityCache.stream(any -> true)
+                entityCache.streamRefs()
                         .filter(ref -> ref.test(Service.class::isInstance))
                         .count());
 
@@ -140,7 +140,7 @@ public class StatusServer implements DependenyObject, Closeable {
 
     public final Optional<Service> getServiceByName(String name) {
         logger.at(Level.INFO).log("Returning Service by name: %s", name);
-        return entityCache.stream(any->true)
+        return entityCache.streamRefs()
                 .filter(ref -> !ref.isNull())
                 .filter(ref -> ref.process().test(Service.class::isInstance))
                 .map(ref -> ref.into(Service.class::cast))
