@@ -57,7 +57,6 @@ public class StatusServer implements DependenyObject, Closeable {
     private final FileCache<String, Entity, DependenyObject> entityCache;
     private final REST<StatusServer> rest;
     private final RestServer server;
-    private final GatewayServer gatewayServer;
 
     public final FileCache<String, Entity, DependenyObject> getEntityCache() {
         return entityCache;
@@ -109,8 +108,6 @@ public class StatusServer implements DependenyObject, Closeable {
         logger.at(Level.INFO).log("Starting REST Server...");
         this.server = new RestServer(SERIALIZATION_ADAPTER, executor, DependenyObject.URL_BASE, host, port, ServerEndpoints.values());
         server.addCommonHeader("Access-Control-Allow-Origin", "*");
-        logger.at(Level.INFO).log("Starting Gateway Server...");
-        this.gatewayServer = new GatewayServer(this, SERIALIZATION_ADAPTER, this.threadPool, host, GATEWAY_PORT);
         logger.at(Level.INFO).log("Status Server ready! %s", server);
     }
 
