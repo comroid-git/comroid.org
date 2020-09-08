@@ -14,10 +14,13 @@ import org.comroid.status.DependenyObject;
 import org.comroid.status.entity.Entity;
 import org.comroid.status.entity.Service;
 import org.comroid.status.server.entity.LocalService;
+import org.comroid.status.server.entity.LocalStoredService;
 import org.comroid.status.server.rest.ServerEndpoints;
 import org.comroid.status.server.test.StatusServerTestSite;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
+import org.comroid.uniform.cache.Cache;
 import org.comroid.varbind.FileCache;
+import org.comroid.varbind.container.DataContainerBuilder;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -131,6 +134,18 @@ public class StatusServer implements DependenyObject, Closeable {
 
         if (ARGS.hasName("test"))
             StatusServerTestSite.start();
+    }
+
+    public static LocalService createService(String serviceName, String displayName) {
+        final LocalService service = new DataContainerBuilder<>(LocalStoredService.class, instance)
+                .setValue(Service.Bind.Name, serviceName)
+                .setValue(Service.Bind.DisplayName, displayName)
+                .setValue(Service.Bind.Status, Service.Status.UNKNOWN.getValue())
+                .build();
+        final Cache<String, Entity> entityCache = instance.getEntityCache();
+        entityCache.getReference(serviceName, true).set(service);
+
+        return service;
     }
 
     public final Processor<Service> getServiceByName(String name) {

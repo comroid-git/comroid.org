@@ -50,6 +50,11 @@ public enum ServerEndpoints implements ServerEndpoint {
                             .build())
                     .orElseThrow(() -> new RestEndpointException(NOT_FOUND, "No service found with name " + urlParams[0]));
         }
+
+        @Override
+        public REST.Response executePUT(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            return null;
+        }
     },
     SERVICE_STATUS_ICON(Endpoint.SERVICE_STATUS_ICON, false) {
         @Override

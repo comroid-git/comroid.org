@@ -75,33 +75,6 @@ public class LocalStoredService extends DataContainerBase<Entity> implements Loc
         spm.set(new StatusPollManager(expected, timeout));
     }
 
-    public static final class Builder extends DataContainerBuilder<Builder, Service> {
-        public Builder() {
-            super(LocalStoredService.class);
-        }
-
-        @Override
-        protected Service mergeVarCarrier(DataContainer<? super Service> dataContainer) {
-            return new OfUnderlying(Polyfill.uncheckedCast(dataContainer));
-        }
-    }
-
-    private static final class OfUnderlying extends LocalStoredService
-            implements LocalService, DataContainer.Underlying<Entity> {
-        private final DataContainer<Entity> underlying;
-
-        @Override
-        public DataContainer<Entity> getUnderlyingVarCarrier() {
-            return underlying;
-        }
-
-        private OfUnderlying(DataContainer<Entity> underlying) {
-            super(null);
-
-            this.underlying = underlying;
-        }
-    }
-
     private final class StatusPollManager {
         private final Reference<Status> state = Reference.create();
 

@@ -3,7 +3,6 @@ package org.comroid.status.server;
 import com.google.common.flogger.FluentLogger;
 import org.comroid.api.Polyfill;
 import org.comroid.javacord.util.commands.Command;
-import org.comroid.javacord.util.commands.CommandGroup;
 import org.comroid.javacord.util.commands.CommandHandler;
 import org.comroid.javacord.util.ui.embed.DefaultEmbedFactory;
 import org.comroid.mutatio.ref.Reference;
@@ -11,7 +10,6 @@ import org.comroid.status.entity.Entity;
 import org.comroid.status.entity.Service;
 import org.comroid.status.entity.Service.Status;
 import org.comroid.status.server.entity.LocalService;
-import org.comroid.status.server.entity.LocalStoredService;
 import org.comroid.uniform.cache.Cache;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
@@ -20,10 +18,10 @@ import org.javacord.api.entity.permission.PermissionType;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.entity.user.UserStatus;
+import org.javacord.api.util.logging.ExceptionLogger;
 
 import java.awt.*;
 import java.io.IOException;
-import java.net.URL;
 import java.util.Comparator;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -46,7 +44,8 @@ public enum DiscordBot {
             .setWaitForServersOnStartup(true)
             .setTotalShards(1)
             .login());
-    private final CompletableFuture<Container> containerFuture = apiFuture.thenApplyAsync(Container::new);
+    private final CompletableFuture<Container> containerFuture = apiFuture.thenApplyAsync(Container::new)
+            .exceptionally(ExceptionLogger.get());
 
     public synchronized CompletableFuture<?> supplyToken(StatusServer server, String token) {
         if (tokenFuture.isDone()) {
@@ -145,10 +144,6 @@ public enum DiscordBot {
 
     }
 
-    @CommandGroup(
-            name = "Status Commands",
-            description = "All commands related to the status server"
-    )
     public class Commands {
         @Command(
                 aliases = "store-data",
@@ -263,15 +258,10 @@ public enum DiscordBot {
                 convertStringResultsToEmbed = true
         )
         public String createService(String[] args, User user) {
-            logger.at(Level.INFO).log("User %s is creating service: %s", user, args[0]);
+            final String serviceName = args[0];
+            logger.at(Level.INFO).log("User %s is creating service: %s", user, serviceName);
 
-            final Service service = new LocalStoredService.Builder()
-                    .with(Service.Bind.Name, args[0])
-                    .with(Service.Bind.DisplayName, args.length >= 2 ? args[1] : args[0])
-                    .build();
-
-            final Cache<String, Entity> entityCache = server().getEntityCache();
-            entityCache.getReference(args[0], true).set(service);
+            final Service service = StatusServer.createService(serviceName, args.length >= 2 ? args[1] : serviceName);
 
             return String.format("Created new Service: %s '%s'", service.getName(), service.getDisplayName());
         }
