@@ -11,7 +11,7 @@ import org.comroid.varbind.bind.GroupBind;
 @Location(value = LocalStoredService.class, fieldName = "GROUP")
 public interface LocalService extends Service {
     @RootBind
-    GroupBind<Service, DependenyObject> GROUP = Bind.Root.subGroup(
+    GroupBind<Service> GROUP = Bind.Root.subGroup(
             "local_service",
             Invocable.ofConstructor(Polyfill.<Class<Service>>uncheckedCast(LocalStoredService.class))
     );

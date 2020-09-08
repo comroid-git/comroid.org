@@ -65,20 +65,8 @@ public enum ServerEndpoints implements ServerEndpoint {
     UPDATE_SERVICE_STATUS(Endpoint.UPDATE_SERVICE_STATUS, false) {
         @Override
         public REST.Response executePOST(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            final LocalService service = StatusServer.instance.getServiceByName(urlParams[0])
-                    .flatMap(it -> it.as(LocalService.class))
-                    .orElseThrow(() -> new RestEndpointException(NOT_FOUND, "No local service found with name " + urlParams[0]));
-
-            if (!headers.containsKey(CommonHeaderNames.AUTHORIZATION))
-                throw new RestEndpointException(UNAUTHORIZED, "Unauthorized");
-
-            final String token = headers.getFirst(CommonHeaderNames.AUTHORIZATION);
-
-            if (!TokenCore.isValid(token) || !TokenCore.extractName(token).equals(service.getName()))
-                throw new RestEndpointException(UNAUTHORIZED, "Malicious Token used");
-
-            if (!service.getToken().equals(token))
-                throw new RestEndpointException(UNAUTHORIZED, "Unauthorized");
+            final LocalService service = requireLocalService(urlParams[0]);
+            checkAuthorization(headers, service);
 
             final Service.Status newStatus = body.process("status")
                     .map(UniNode::asInt)
@@ -102,11 +90,28 @@ public enum ServerEndpoints implements ServerEndpoint {
     public AccessibleEndpoint getEndpointBase() {
         return underlying;
     }
-
-
     ServerEndpoints(Endpoint underlying, boolean allowMemberAccess) {
         this.underlying = underlying;
         this.allowMemberAccess = allowMemberAccess;
+    }
+
+    private static LocalService requireLocalService(String name) {
+        return StatusServer.instance.getServiceByName(name)
+                .flatMapOptional(it -> it.as(LocalService.class))
+                .orElseThrow(() -> new RestEndpointException(NOT_FOUND, "No local service found with name " + name));
+    }
+
+    private static void checkAuthorization(Headers headers, LocalService service) {
+        if (!headers.containsKey(CommonHeaderNames.AUTHORIZATION))
+            throw new RestEndpointException(UNAUTHORIZED, "Unauthorized");
+
+        final String token = headers.getFirst(CommonHeaderNames.AUTHORIZATION);
+
+        if (!TokenCore.isValid(token) || !TokenCore.extractName(token).equals(service.getName()))
+            throw new RestEndpointException(UNAUTHORIZED, "Malicious Token used");
+
+        if (!service.getToken().equals(token))
+            throw new RestEndpointException(UNAUTHORIZED, "Unauthorized");
     }
 
     @Override

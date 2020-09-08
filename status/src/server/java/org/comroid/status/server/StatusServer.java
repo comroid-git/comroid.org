@@ -5,6 +5,7 @@ import org.comroid.api.Junction;
 import org.comroid.commandline.CommandLineArgs;
 import org.comroid.common.io.FileHandle;
 import org.comroid.common.jvm.JITAssistant;
+import org.comroid.mutatio.proc.Processor;
 import org.comroid.restless.REST;
 import org.comroid.restless.adapter.okhttp.v4.OkHttp3Adapter;
 import org.comroid.restless.server.RestServer;
@@ -138,14 +139,14 @@ public class StatusServer implements DependenyObject, Closeable {
             StatusServerTestSite.start();
     }
 
-    public final Optional<Service> getServiceByName(String name) {
+    public final Processor<Service> getServiceByName(String name) {
         logger.at(Level.INFO).log("Returning Service by name: %s", name);
-        return entityCache.streamRefs()
+        return Processor.providedOptional(() -> entityCache.streamRefs()
                 .filter(ref -> !ref.isNull())
                 .filter(ref -> ref.process().test(Service.class::isInstance))
                 .map(ref -> ref.into(Service.class::cast))
                 .filter(service -> service.getName().equals(name))
-                .findFirst();
+                .findFirst());
     }
 
     @Override
