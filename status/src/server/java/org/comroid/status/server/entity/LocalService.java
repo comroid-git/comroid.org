@@ -7,6 +7,8 @@ import org.comroid.varbind.annotation.Location;
 import org.comroid.varbind.annotation.RootBind;
 import org.comroid.varbind.bind.GroupBind;
 
+import java.util.concurrent.CompletableFuture;
+
 @Location(value = LocalStoredService.class, fieldName = "GROUP")
 public interface LocalService extends Service {
     @RootBind
@@ -17,6 +19,11 @@ public interface LocalService extends Service {
 
     @Override
     Status getStatus();
+
+    @Override
+    default CompletableFuture<Status> requestStatus() {
+        return CompletableFuture.completedFuture(getStatus());
+    }
 
     void setStatus(Status status);
 

@@ -4,8 +4,9 @@ import org.comroid.api.IntEnum;
 import org.comroid.api.Invocable;
 import org.comroid.api.Polyfill;
 import org.comroid.common.ref.WrappedFormattable;
-import org.comroid.status.DependenyObject;
+import org.comroid.restless.REST;
 import org.comroid.status.StatusConnection;
+import org.comroid.status.rest.Endpoint;
 import org.comroid.uniform.ValueType;
 import org.comroid.uniform.node.UniObjectNode;
 import org.comroid.varbind.annotation.Location;
@@ -18,6 +19,7 @@ import org.intellij.lang.annotations.Language;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @Location(Service.Bind.class)
 public interface Service extends Entity, WrappedFormattable {
@@ -45,6 +47,8 @@ public interface Service extends Entity, WrappedFormattable {
     default String getAlternateFormattedName() {
         return getName();
     }
+
+    CompletableFuture<Status> requestStatus();
 
     enum Status implements IntEnum {
         UNKNOWN(0),
@@ -109,8 +113,27 @@ public interface Service extends Entity, WrappedFormattable {
     }
 
     final class Basic extends DataContainerBase<Entity> implements Service {
-        public Basic(UniObjectNode node) {
+        private final StatusConnection connection;
+
+        public Basic(StatusConnection connection, UniObjectNode node) {
             super(node);
+
+            this.connection = connection;
+        }
+
+        @Override
+        public CompletableFuture<Status> requestStatus() {
+            return connection.getRest()
+                    .request()
+                    .method(REST.Method.GET)
+                    .endpoint(Endpoint.SPECIFIC_SERVICE.complete(getName()))
+                    .execute$deserializeSingle()
+                    .thenApply(node -> node.get("status").asInt())
+                    .thenApply(Status::valueOf)
+                    .thenApply(status -> {
+                        put(Service.Bind.Status, status.value);
+                        return status;
+                    });
         }
     }
 }

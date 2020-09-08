@@ -15,14 +15,15 @@ import java.util.concurrent.*;
 import static org.comroid.restless.CommonHeaderNames.AUTHORIZATION;
 
 public final class StatusConnection implements DependenyObject {
-    public static int refreshTimeout = 60; // seconds
-    public static int crashedTimeout = 3600; // seconds
     private final String serviceName;
     private final String token;
     private final ScheduledExecutorService executor;
     private final REST<DependenyObject> rest;
     private final ProvidedCache<String, Service> serviceCache;
     private final Service ownService;
+    public int refreshTimeout = 60; // seconds
+    public int crashedTimeout = 3600; // seconds
+    private boolean polling = false;
 
     public String getServiceName() {
         return serviceName;
@@ -45,18 +46,23 @@ public final class StatusConnection implements DependenyObject {
     }
 
     public StatusConnection(String serviceName, FileHandle tokenFile) {
-        this(serviceName, tokenFile, Executors.newScheduledThreadPool(4));
+        this(serviceName, tokenFile.getContent(), Executors.newScheduledThreadPool(4));
     }
 
-    public StatusConnection(String serviceName, FileHandle tokenFile, ScheduledExecutorService executor) {
+    public StatusConnection(String serviceName, String token, ScheduledExecutorService executor) {
         this.serviceName = serviceName;
-        this.token = tokenFile.getContent();
+        this.token = token;
         this.executor = executor;
         this.rest = new REST<>(Adapters.HTTP_ADAPTER, Adapters.SERIALIZATION_ADAPTER, this, executor);
         this.serviceCache = new ProvidedCache<>(250, ForkJoinPool.commonPool(), this::requestServiceByName);
         this.ownService = requestServiceByName(serviceName).join();
+    }
 
-        schedulePoll();
+    public void startPolling() {
+        if (polling)
+            return;
+        executePoll();
+        polling = true;
     }
 
     private void executePoll() {

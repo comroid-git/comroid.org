@@ -22,7 +22,6 @@ import org.comroid.varbind.FileCache;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -53,7 +52,7 @@ public class StatusServer implements DependenyObject, Closeable {
 
     private final ScheduledExecutorService threadPool;
     private final FileCache<String, Entity, DependenyObject> entityCache;
-    private final REST<StatusServer> rest;
+    public final REST<StatusServer> rest;
     private final RestServer server;
 
     public final FileCache<String, Entity, DependenyObject> getEntityCache() {
@@ -130,7 +129,7 @@ public class StatusServer implements DependenyObject, Closeable {
         }, 5, 5, TimeUnit.MINUTES);
         logger.at(Level.INFO).log("Hooks registered!");
 
-        if (ARGS.hasFlag('t') || ARGS.hasKey("test"))
+        if (ARGS.hasName("test"))
             StatusServerTestSite.start();
     }
 
