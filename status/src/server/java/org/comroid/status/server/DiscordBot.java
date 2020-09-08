@@ -265,7 +265,7 @@ public enum DiscordBot {
 
             final UniObjectNode data = DependenyObject.Adapters.SERIALIZATION_ADAPTER.createUniObjectNode();
             data.put(Service.Bind.DisplayName, args.length >= 2 ? args[1] : serviceName);
-            final Service service = StatusServer.createService(serviceName, );
+            final Service service = StatusServer.instance.createService(serviceName, data);
 
             return String.format("Created new Service: %s '%s'", service.getName(), service.getDisplayName());
         }
