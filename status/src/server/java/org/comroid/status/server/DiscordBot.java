@@ -1,20 +1,24 @@
 package org.comroid.status.server;
 
 import com.google.common.flogger.FluentLogger;
+import org.comroid.api.Named;
 import org.comroid.api.Polyfill;
+import org.comroid.dux.DiscordUX;
+import org.comroid.dux.form.DiscordForm;
+import org.comroid.dux.javacord.JavacordDUX;
 import org.comroid.javacord.util.commands.Command;
 import org.comroid.javacord.util.commands.CommandHandler;
 import org.comroid.javacord.util.ui.embed.DefaultEmbedFactory;
 import org.comroid.mutatio.ref.Reference;
 import org.comroid.status.DependenyObject;
-import org.comroid.status.entity.Entity;
 import org.comroid.status.entity.Service;
 import org.comroid.status.entity.Service.Status;
 import org.comroid.status.server.entity.LocalService;
-import org.comroid.uniform.cache.Cache;
 import org.comroid.uniform.node.UniObjectNode;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
+import org.javacord.api.entity.channel.TextChannel;
+import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.permission.PermissionType;
 import org.javacord.api.entity.server.Server;
@@ -25,9 +29,11 @@ import org.javacord.api.util.logging.ExceptionLogger;
 import java.awt.*;
 import java.io.IOException;
 import java.util.Comparator;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -71,10 +77,69 @@ public enum DiscordBot {
         }
     }
 
+    private static final class ModifyCommandUtil {
+        private enum MainMenuSelection implements Named {
+            CHANGE_STATUS("status", "\uD83D\uDEA6", "Update Status");
+
+            private final String target;
+            private final String emoji;
+            private final String name;
+
+            @Override
+            public String getName() {
+                return name;
+            }
+
+            @Override
+            public String getAlternateFormattedName() {
+                return emoji;
+            }
+
+            public String getOptionName() {
+                return target;
+            }
+
+            MainMenuSelection(String targetOption, String emoji, String name) {
+                this.target = targetOption;
+                this.emoji = emoji;
+                this.name = name;
+            }
+        }
+
+        private enum StatusSelection implements Named {
+            OFFLINE(Status.OFFLINE, "\uD83D\uDEA8", "Set to Offline"),
+            MAINTENANCE(Status.MAINTENANCE, "\uD83D\uDEA7", "Set to Maintenance"),
+            ONLINE(Status.ONLINE, "\uD83C\uDF4F", "Set to Online"),
+
+            GO_BACK(Status.UNKNOWN, "⬅️", "Go back to the menu");
+
+            private final String emoji;
+            private final String name;
+            private final Status status;
+
+            @Override
+            public String getName() {
+                return name;
+            }
+
+            @Override
+            public String getAlternateFormattedName() {
+                return emoji;
+            }
+
+            StatusSelection(Status status, String emoji, String name) {
+                this.emoji = emoji;
+                this.name = name;
+                this.status = status;
+            }
+        }
+    }
+
     private class Container {
-        private final DiscordBot.Commands COMMANDS = new DiscordBot.Commands();
+        private final DiscordBot.Commands COMMANDS = new DiscordBot.Commands(this);
         private final DiscordApi api;
         private final CommandHandler cmd;
+        private final DiscordUX<Server, TextChannel, User, Message> dux;
         private final Reference<UserStatus> userStatusSupplier = StatusServer.instance.getEntityCache()
                 .pipe(any -> true)
                 .map(Reference::process)
@@ -109,6 +174,7 @@ public enum DiscordBot {
 
             this.api = api;
             this.cmd = new CommandHandler(api);
+            this.dux = DiscordUX.create(new JavacordDUX(api));
 
             cmd.prefixes = new String[]{"status!"};
             cmd.autoDeleteResponseOnCommandDeletion = true;
@@ -147,12 +213,50 @@ public enum DiscordBot {
     }
 
     public class Commands {
+        private final Container container;
+        private final Map<Service, DiscordForm<Server, TextChannel, User, Message>> serviceForms = new ConcurrentHashMap<>();
+
+        private Commands(Container container) {
+            this.container = container;
+        }
+
         @Command(
                 aliases = "store-data",
+                enablePrivateChat = false,
                 requiredDiscordPermissions = PermissionType.ADMINISTRATOR
         )
         public void storeData(User user) throws IOException {
             StatusServer.instance.getEntityCache().storeData();
+        }
+
+        @Command(
+                usage = "modify <str: service_name>",
+                enablePrivateChat = false,
+                requiredDiscordPermissions = PermissionType.ADMINISTRATOR,
+                minimumArguments = 1,
+                maximumArguments = 1,
+                async = true
+        )
+        public void modify(String[] args, TextChannel channel, User user) {
+            final LocalService service = StatusServer.instance.getServiceByName(args[0]).into(LocalService.class::cast);
+            final DiscordUX<Server, TextChannel, User, Message> dux = container.dux;
+
+            getFormForService(dux, service, user).execute(channel, user);
+        }
+
+        private DiscordForm<Server, TextChannel, User, Message> getFormForService(DiscordUX<Server, TextChannel, User, Message> dux, LocalService service, User user) {
+            return serviceForms.computeIfAbsent(service, k -> dux.createForm()
+                    .addEnumSelection("menu", ModifyCommandUtil.MainMenuSelection.class,
+                            DefaultEmbedFactory.create(user).setDescription("Select what to change"),
+                            ModifyCommandUtil.MainMenuSelection::getOptionName)
+                    .addEnumSelection("status", ModifyCommandUtil.StatusSelection.class,
+                            DefaultEmbedFactory.create(user).setDescription("Select new Status"),
+                            sel -> {
+                                if (sel == ModifyCommandUtil.StatusSelection.GO_BACK)
+                                    return "menu";
+                                service.setStatus(sel.status);
+                                return "menu";
+                            }));
         }
 
         @Command(
