@@ -2,11 +2,14 @@ package org.comroid.status.server.rest;
 
 import com.sun.net.httpserver.Headers;
 import org.comroid.restless.CommonHeaderNames;
+import org.comroid.restless.HTTPStatusCodes;
 import org.comroid.restless.REST;
 import org.comroid.restless.endpoint.AccessibleEndpoint;
 import org.comroid.restless.server.RestEndpointException;
 import org.comroid.restless.server.ServerEndpoint;
+import org.comroid.status.DependenyObject;
 import org.comroid.status.DependenyObject.Adapters;
+import org.comroid.status.entity.Entity;
 import org.comroid.status.entity.Service;
 import org.comroid.status.rest.Endpoint;
 import org.comroid.status.server.StatusServer;
@@ -15,6 +18,7 @@ import org.comroid.status.server.entity.LocalService;
 import org.comroid.status.server.util.ResponseBuilder;
 import org.comroid.uniform.node.UniArrayNode;
 import org.comroid.uniform.node.UniNode;
+import org.comroid.varbind.FileCache;
 
 import static org.comroid.restless.HTTPStatusCodes.*;
 
@@ -56,6 +60,15 @@ public enum ServerEndpoints implements ServerEndpoint {
             final LocalService service = StatusServer.instance.createService(urlParams[0], body.asObjectNode());
 
             return new REST.Response(OK, service.toObjectNode(Adapters.SERIALIZATION_ADAPTER));
+        }
+
+        @Override
+        public REST.Response executeDELETE(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            final LocalService service = requireLocalService(urlParams[0]);
+
+            if (StatusServer.instance.getEntityCache().remove(service))
+                return new REST.Response(OK);
+            throw new RestEndpointException(INTERNAL_SERVER_ERROR, "Could not remove service from cache");
         }
     },
     SERVICE_STATUS_ICON(Endpoint.SERVICE_STATUS_ICON, false) {
