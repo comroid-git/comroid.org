@@ -5,8 +5,6 @@ import org.comroid.api.Junction;
 import org.comroid.commandline.CommandLineArgs;
 import org.comroid.common.io.FileHandle;
 import org.comroid.common.jvm.JITAssistant;
-import org.comroid.listnr.AbstractEventManager;
-import org.comroid.listnr.ListnrCore;
 import org.comroid.restless.REST;
 import org.comroid.restless.adapter.okhttp.v4.OkHttp3Adapter;
 import org.comroid.restless.server.RestServer;

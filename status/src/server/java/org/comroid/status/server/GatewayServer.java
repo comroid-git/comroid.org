@@ -1,6 +1,5 @@
 package org.comroid.status.server;
 
-import org.comroid.listnr.AbstractEventManager;
 import org.comroid.restless.socket.WebSocketServer;
 import org.comroid.restless.socket.event.WebSocketPayload;
 import org.comroid.status.event.GatewayEvent;

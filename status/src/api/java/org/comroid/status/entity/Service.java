@@ -82,21 +82,21 @@ public interface Service extends Entity, WrappedFormattable {
         @RootBind
         GroupBind<Service, DependenyObject> Root
                 = Entity.Bind.Root.subGroup("service", Invocable.ofConstructor(Polyfill.<Class<Service>>uncheckedCast(Basic.class)));
-        VarBind<String, DependenyObject, String, String> DisplayName
+        VarBind<Object, String, String, String> DisplayName
                 = Root.createBind("display_name")
                 .extractAs(ValueType.STRING)
                 .asIdentities()
                 .onceEach()
                 .setRequired(true)
                 .build();
-        VarBind<Integer, DependenyObject, Service.Status, Service.Status> Status
+        VarBind<Object, Integer, Service.Status, Service.Status> Status
                 = Root.createBind("status")
                 .extractAs(ValueType.INTEGER)
                 .andRemap(Service.Status::valueOf)
                 .onceEach()
                 .setRequired(true)
                 .build();
-        VarBind<String, DependenyObject, URL, URL> URL
+        VarBind<Object, String, URL, URL> URL
                 = Root.createBind("url")
                 .extractAs(ValueType.STRING)
                 .andRemap(Polyfill::url)

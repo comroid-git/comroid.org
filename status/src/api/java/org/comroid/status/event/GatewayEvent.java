@@ -28,14 +28,14 @@ public interface GatewayEvent<P extends GatewayPayload> extends EventType<WebSoc
         }
 
         @Override
-        public boolean test(WebSocketPayload.Data data) {
-            return data.getBody()
+        public boolean triggeredBy(WebSocketPayload.Data oldPayload) {
+            return oldPayload.getBody()
                     .get("op")
                     .asInt(-1) == opCode;
         }
 
         @Override
-        public P apply(WebSocketPayload.Data data) {
+        public P createPayload(WebSocketPayload.Data data) {
             return remapper.apply(data.getBody()
                     .get("data")
                     .asObjectNode());

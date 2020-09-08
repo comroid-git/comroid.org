@@ -1,7 +1,5 @@
 package org.comroid.status.gateway;
 
-import org.comroid.listnr.AbstractEventManager;
-import org.comroid.listnr.ListnrCore;
 import org.comroid.mutatio.pipe.Pipe;
 import org.comroid.restless.HttpAdapter;
 import org.comroid.restless.REST;

@@ -1,7 +1,5 @@
 package org.comroid.status;
 
-import org.comroid.listnr.AbstractEventManager;
-import org.comroid.listnr.ListnrCore;
 import org.comroid.mutatio.span.Span;
 import org.comroid.restless.CommonHeaderNames;
 import org.comroid.restless.REST;

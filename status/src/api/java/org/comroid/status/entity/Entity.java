@@ -26,7 +26,7 @@ public interface Entity extends DataContainer<DependenyObject>, Named, Specifiab
     interface Bind {
         GroupBind<Entity, DependenyObject> Root
                 = new GroupBind<>(DependenyObject.Adapters.SERIALIZATION_ADAPTER, "entity");
-        VarBind<String, DependenyObject, String, String> Name
+        VarBind<Object, String, String, String> Name
                 = Root.createBind("name")
                 .extractAs(ValueType.STRING)
                 .asIdentities()
