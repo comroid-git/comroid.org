@@ -3,5 +3,4 @@ ext {
     userbase = 'comroid-git'
 
     projectDescription = 'The comroid Status Server'
-    exportedProjects = project(':status').subprojects.collect { it.name }
 }

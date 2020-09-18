@@ -5,5 +5,4 @@ ext {
     userbase = 'comroid-git'
 
     projectDescription = 'The API for the comroid Status Server'
-    exportedProjects = project(':status').subprojects.collect { it.name }
 }

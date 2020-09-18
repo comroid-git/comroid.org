@@ -43,8 +43,11 @@ compileJava.options.encoding = 'UTF-8'
 dependencies {
     compileOnly 'org.jetbrains:annotations:19.0.0'
 
-    api project(':common-util:restless')
-    api project(':common-util:listnr')
+    if (System.getenv().containsKey("TEAMCITY")) {
+        implementation 'com.github.comroid-git.common-util:restless:master-SNAPSHOT'
+    } else {
+        implementation project(':common-util:restless')
+    }
 
     testImplementation 'junit:junit:4.13'
     testImplementation 'org.easymock:easymock:4.1'
