@@ -1,33 +1,39 @@
 package org.comroid.status.server;
 
 import com.google.common.flogger.FluentLogger;
+import org.comroid.api.Named;
 import org.comroid.api.Polyfill;
+import org.comroid.dux.DiscordUX;
+import org.comroid.dux.form.DiscordForm;
+import org.comroid.dux.javacord.JavacordDUX;
 import org.comroid.javacord.util.commands.Command;
-import org.comroid.javacord.util.commands.CommandGroup;
 import org.comroid.javacord.util.commands.CommandHandler;
 import org.comroid.javacord.util.ui.embed.DefaultEmbedFactory;
 import org.comroid.mutatio.ref.Reference;
-import org.comroid.status.entity.Entity;
+import org.comroid.status.DependenyObject;
 import org.comroid.status.entity.Service;
 import org.comroid.status.entity.Service.Status;
 import org.comroid.status.server.entity.LocalService;
-import org.comroid.status.server.entity.LocalStoredService;
-import org.comroid.uniform.cache.Cache;
+import org.comroid.uniform.node.UniObjectNode;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
+import org.javacord.api.entity.channel.TextChannel;
+import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.permission.PermissionType;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.entity.user.UserStatus;
+import org.javacord.api.util.logging.ExceptionLogger;
 
 import java.awt.*;
 import java.io.IOException;
-import java.net.URL;
 import java.util.Comparator;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -46,7 +52,8 @@ public enum DiscordBot {
             .setWaitForServersOnStartup(true)
             .setTotalShards(1)
             .login());
-    private final CompletableFuture<Container> containerFuture = apiFuture.thenApplyAsync(Container::new);
+    private final CompletableFuture<Container> containerFuture = apiFuture.thenApplyAsync(Container::new)
+            .exceptionally(ExceptionLogger.get());
 
     public synchronized CompletableFuture<?> supplyToken(StatusServer server, String token) {
         if (tokenFuture.isDone()) {
@@ -70,44 +77,103 @@ public enum DiscordBot {
         }
     }
 
+    private static final class ModifyCommandUtil {
+        private enum MainMenuSelection implements Named {
+            CHANGE_STATUS("status", "\uD83D\uDEA6", "Update Status");
+
+            private final String target;
+            private final String emoji;
+            private final String name;
+
+            @Override
+            public String getName() {
+                return name;
+            }
+
+            @Override
+            public String getAlternateFormattedName() {
+                return emoji;
+            }
+
+            public String getOptionName() {
+                return target;
+            }
+
+            MainMenuSelection(String targetOption, String emoji, String name) {
+                this.target = targetOption;
+                this.emoji = emoji;
+                this.name = name;
+            }
+        }
+
+        private enum StatusSelection implements Named {
+            OFFLINE(Status.OFFLINE, "\uD83D\uDEA8", "Set to Offline"),
+            MAINTENANCE(Status.MAINTENANCE, "\uD83D\uDEA7", "Set to Maintenance"),
+            ONLINE(Status.ONLINE, "\uD83C\uDF4F", "Set to Online"),
+
+            GO_BACK(Status.UNKNOWN, "⬅️", "Go back to the menu");
+
+            private final String emoji;
+            private final String name;
+            private final Status status;
+
+            @Override
+            public String getName() {
+                return name;
+            }
+
+            @Override
+            public String getAlternateFormattedName() {
+                return emoji;
+            }
+
+            StatusSelection(Status status, String emoji, String name) {
+                this.emoji = emoji;
+                this.name = name;
+                this.status = status;
+            }
+        }
+    }
+
     private class Container {
-        private final DiscordBot.Commands COMMANDS = new DiscordBot.Commands();
+        private final DiscordBot.Commands COMMANDS = new DiscordBot.Commands(this);
         private final DiscordApi api;
         private final CommandHandler cmd;
+        private final DiscordUX<Server, TextChannel, User, Message> dux;
         private final Reference<UserStatus> userStatusSupplier = StatusServer.instance.getEntityCache()
-                .pipe(any -> true)
-                .map(Reference::process)
-                .filter(ref -> ref.test(Service.class::isInstance))
-                .map(ref -> ref.map(Service.class::cast))
-                .map(ref -> ref.map(Service::getStatus))
-                .map(ref -> ref.filter(status -> status != Status.UNKNOWN))
-                .sorted(Comparator.comparingInt(ref -> ref.into(Status::getValue)))
-                .map(ref -> ref.orElse(Status.OFFLINE))
+                .pipe()
+                .filter(Service.class::isInstance)
+                .map(Service.class::cast)
+                .map(Service::getStatus)
+                .filter(status -> status != Status.UNKNOWN)
+                .sorted(Comparator.comparingInt(Status::getValue))
+                .findAny()
+                .or(() -> Status.OFFLINE)
                 .map(status -> {
                     switch (status) {
                         case UNKNOWN:
                         case OFFLINE:
+                        case CRASHED:
                             return UserStatus.DO_NOT_DISTURB;
                         case MAINTENANCE:
-                        case REPORTED_PROBLEMS:
+                        case NOT_RESPONDING:
                             return UserStatus.IDLE;
                         case ONLINE:
                             return UserStatus.ONLINE;
                     }
                     throw new AssertionError();
-                })
-                .findAny();
+                });
 
         private Container(DiscordApi api) {
             DefaultEmbedFactory.setEmbedSupplier(() -> new EmbedBuilder().setColor(new Color(0xcf2f2f))
                     .setFooter(
                             "comroid Status Update Bot",
-                            api.getYourself()
-                                    .getAvatar()
+                            api.getYourself().getAvatar()
                     ));
 
             this.api = api;
             this.cmd = new CommandHandler(api);
+            this.dux = DiscordUX.create(new JavacordDUX(api));
 
             cmd.prefixes = new String[]{"status!"};
             cmd.autoDeleteResponseOnCommandDeletion = true;
@@ -145,17 +211,51 @@ public enum DiscordBot {
 
     }
 
-    @CommandGroup(
-            name = "Status Commands",
-            description = "All commands related to the status server"
-    )
     public class Commands {
+        private final Container container;
+        private final Map<Service, DiscordForm<Server, TextChannel, User, Message>> serviceForms = new ConcurrentHashMap<>();
+
+        private Commands(Container container) {
+            this.container = container;
+        }
+
         @Command(
                 aliases = "store-data",
+                enablePrivateChat = false,
                 requiredDiscordPermissions = PermissionType.ADMINISTRATOR
         )
         public void storeData(User user) throws IOException {
             StatusServer.instance.getEntityCache().storeData();
+        }
+
+        @Command(
+                usage = "modify <str: service_name>",
+                enablePrivateChat = false,
+                requiredDiscordPermissions = PermissionType.ADMINISTRATOR,
+                minimumArguments = 1,
+                maximumArguments = 1,
+                async = true
+        )
+        public void modify(String[] args, TextChannel channel, User user) {
+            final LocalService service = StatusServer.instance.getServiceByName(args[0]).into(LocalService.class::cast);
+            final DiscordUX<Server, TextChannel, User, Message> dux = container.dux;
+
+            getFormForService(dux, service, user).execute(channel, user);
+        }
+
+        private DiscordForm<Server, TextChannel, User, Message> getFormForService(DiscordUX<Server, TextChannel, User, Message> dux, LocalService service, User user) {
+            return serviceForms.computeIfAbsent(service, k -> dux.createForm()
+                    .addEnumSelection("menu", ModifyCommandUtil.MainMenuSelection.class,
+                            DefaultEmbedFactory.create(user).setDescription("Select what to change"),
+                            ModifyCommandUtil.MainMenuSelection::getOptionName)
+                    .addEnumSelection("status", ModifyCommandUtil.StatusSelection.class,
+                            DefaultEmbedFactory.create(user).setDescription("Select new Status"),
+                            sel -> {
+                                if (sel == ModifyCommandUtil.StatusSelection.GO_BACK)
+                                    return "menu";
+                                service.setStatus(sel.status);
+                                return "menu";
+                            }));
         }
 
         @Command(
@@ -182,16 +282,14 @@ public enum DiscordBot {
         )
         public CompletableFuture<String> regenerateToken(String[] args, Server server, User user) {
             final LocalService service = server().getServiceByName(args[0])
-                    .flatMap(it -> it.as(LocalService.class))
+                    .flatMapOptional(it -> it.as(LocalService.class))
                     .orElseThrow(() -> new NoSuchElementException(String.format("No Service found with name `%s`", args[0])));
-
-            service.regenerateToken();
 
             return user.sendMessage(DefaultEmbedFactory.create(server, user)
                     .addField("Token Regenerated!", String.format(
                             "New Token for %s: ```%s```",
                             service,
-                            service.getToken()
+                            service.regenerateToken()
                     )))
                     .thenApply(nil -> String.format("Token for %s regenerated!", service));
         }
@@ -210,7 +308,7 @@ public enum DiscordBot {
             logger.at(Level.INFO).log("User %s update service status: %s -> %s", user, args[0], status);
 
             return server().getServiceByName(args[0])
-                    .flatMap(service -> service.as(LocalService.class))
+                    .flatMapOptional(service -> service.as(LocalService.class))
                     .map(service -> {
                         service.setStatus(status);
                         return String.format(
@@ -233,7 +331,7 @@ public enum DiscordBot {
 
             try {
                 final Set<Service> services = server().getEntityCache()
-                        .stream()
+                        .streamRefs()
                         .filter(ref -> ref.test(Service.class::isInstance))
                         .map(ref -> ref.into(Service.class::cast))
                         .collect(Collectors.toSet());
@@ -265,14 +363,12 @@ public enum DiscordBot {
                 convertStringResultsToEmbed = true
         )
         public String createService(String[] args, User user) {
-            logger.at(Level.INFO).log("User %s is creating service: %s", user, args[0]);
+            final String serviceName = args[0];
+            logger.at(Level.INFO).log("User %s is creating service: %s", user, serviceName);
 
-            final Service service = new LocalStoredService.Builder().with(Service.Bind.Name, args[0])
-                    .with(Service.Bind.DisplayName, args.length >= 2 ? args[1] : args[0])
-                    .build();
-
-            final Cache<String, Entity> entityCache = server().getEntityCache();
-            entityCache.getReference(args[0], true).set(service);
+            final UniObjectNode data = DependenyObject.Adapters.SERIALIZATION_ADAPTER.createUniObjectNode();
+            data.put(Service.Bind.DisplayName, args.length >= 2 ? args[1] : serviceName);
+            final Service service = StatusServer.instance.createService(serviceName, data);
 
             return String.format("Created new Service: %s '%s'", service.getName(), service.getDisplayName());
         }

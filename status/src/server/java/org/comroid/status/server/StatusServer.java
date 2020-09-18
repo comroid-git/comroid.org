@@ -3,65 +3,64 @@ package org.comroid.status.server;
 import com.google.common.flogger.FluentLogger;
 import org.comroid.api.Junction;
 import org.comroid.commandline.CommandLineArgs;
+import org.comroid.common.exception.AssertionException;
 import org.comroid.common.io.FileHandle;
 import org.comroid.common.jvm.JITAssistant;
-import org.comroid.listnr.AbstractEventManager;
-import org.comroid.listnr.ListnrCore;
+import org.comroid.mutatio.proc.Processor;
 import org.comroid.restless.REST;
 import org.comroid.restless.adapter.okhttp.v4.OkHttp3Adapter;
 import org.comroid.restless.server.RestServer;
-import org.comroid.restless.socket.event.WebSocketPayload;
 import org.comroid.status.DependenyObject;
 import org.comroid.status.entity.Entity;
 import org.comroid.status.entity.Service;
-import org.comroid.status.event.GatewayEvent;
-import org.comroid.status.event.GatewayPayload;
 import org.comroid.status.server.entity.LocalService;
+import org.comroid.status.server.entity.LocalStoredService;
 import org.comroid.status.server.rest.ServerEndpoints;
 import org.comroid.status.server.test.StatusServerTestSite;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
+import org.comroid.uniform.node.UniObjectNode;
 import org.comroid.varbind.FileCache;
+import org.comroid.varbind.container.DataContainerBuilder;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
-public class StatusServer
-        extends AbstractEventManager<WebSocketPayload.Data, GatewayEvent<GatewayPayload>, GatewayPayload>
-        implements DependenyObject, Closeable {
+import static org.comroid.status.DependenyObject.Adapters.SERIALIZATION_ADAPTER;
+
+public class StatusServer implements DependenyObject, Closeable {
     //http://localhost:42641/services
 
     public static final FluentLogger logger = FluentLogger.forEnclosingClass();
     public static final FileHandle PATH_BASE = new FileHandle("/home/comroid/srv_status/", true); // server path base
     public static final FileHandle DATA_DIR = PATH_BASE.createSubDir("data");
-    public static final FileHandle BOT_TOKEN = DATA_DIR.createSubFile("token.cred");
+    public static final FileHandle BOT_TOKEN = DATA_DIR.createSubFile("discord.cred");
+    public static final FileHandle ADMIN_TOKEN = DATA_DIR.createSubFile("admin.cred");
     public static final FileHandle TOKEN_DIR = PATH_BASE.createSubDir("token");
     public static final FileHandle CACHE_FILE = DATA_DIR.createSubFile("cache.json");
     public static final int PORT = 42641; // hardcoded in server, do not change
-    public static final int GATEWAY_PORT = 42642; // hardcoded in server, do not change
     public static final ThreadGroup THREAD_GROUP = new ThreadGroup("comroid Status Server");
+    public static final String ADMIN_TOKEN_NAME = "admin$access$token";
     public static CommandLineArgs ARGS;
     public static StatusServer instance;
 
     static {
         logger.at(Level.INFO).log("Preparing classes...");
         JITAssistant.prepareStatic(Entity.Bind.class, Service.Bind.class);
+        AssertionException.expect(3, LocalService.GROUP.streamAllChildren().count(), "LocalService children count");
 
-        final long count = LocalService.GROUP.streamAllChildren().count();
-        if (count < 3)
-            throw new IllegalStateException("Illegal children count on LocalService group: " + count);
+        if (ADMIN_TOKEN.getContent().isEmpty())
+            ADMIN_TOKEN.setContent(TokenCore.generate(ADMIN_TOKEN_NAME));
     }
 
+    public final REST<StatusServer> rest;
     private final ScheduledExecutorService threadPool;
     private final FileCache<String, Entity, DependenyObject> entityCache;
-    private final REST<StatusServer> rest;
     private final RestServer server;
-    private final GatewayServer gatewayServer;
 
     public final FileCache<String, Entity, DependenyObject> getEntityCache() {
         return entityCache;
@@ -76,10 +75,8 @@ public class StatusServer
     }
 
     private StatusServer(ScheduledExecutorService executor, InetAddress host, int port) throws IOException {
-        super(new ListnrCore(executor));
-
         Adapters.HTTP_ADAPTER = new OkHttp3Adapter();
-        Adapters.SERIALIZATION_ADAPTER = FastJSONLib.fastJsonLib;
+        SERIALIZATION_ADAPTER = FastJSONLib.fastJsonLib;
 
         logger.at(Level.INFO).log("Initialized Adapters");
 
@@ -91,9 +88,9 @@ public class StatusServer
 
         this.rest = new REST<>(
                 DependenyObject.Adapters.HTTP_ADAPTER,
-                DependenyObject.Adapters.SERIALIZATION_ADAPTER,
-                threadPool,
-                this
+                SERIALIZATION_ADAPTER,
+                this,
+                threadPool
         );
         logger.at(Level.INFO).log("REST Client created: %s", rest);
 
@@ -108,15 +105,13 @@ public class StatusServer
         );
         logger.at(Level.INFO).log("EntityCache created: %s", entityCache);
         logger.at(Level.INFO).log("Loaded %d services",
-                entityCache.stream()
+                entityCache.streamRefs()
                         .filter(ref -> ref.test(Service.class::isInstance))
                         .count());
 
         logger.at(Level.INFO).log("Starting REST Server...");
-        this.server = new RestServer(this.rest, DependenyObject.URL_BASE, host, port, ServerEndpoints.values());
+        this.server = new RestServer(SERIALIZATION_ADAPTER, executor, DependenyObject.URL_BASE, host, port, ServerEndpoints.values());
         server.addCommonHeader("Access-Control-Allow-Origin", "*");
-        logger.at(Level.INFO).log("Starting Gateway Server...");
-        this.gatewayServer = new GatewayServer(this, Adapters.SERIALIZATION_ADAPTER, this.threadPool, host, GATEWAY_PORT);
         logger.at(Level.INFO).log("Status Server ready! %s", server);
     }
 
@@ -141,18 +136,31 @@ public class StatusServer
         }, 5, 5, TimeUnit.MINUTES);
         logger.at(Level.INFO).log("Hooks registered!");
 
-        if (ARGS.hasFlag('t') || ARGS.hasKey("test"))
+        if (ARGS.hasName("test"))
             StatusServerTestSite.start();
     }
 
-    public final Optional<Service> getServiceByName(String name) {
+    public LocalService createService(String serviceName, UniObjectNode data) {
+        DataContainerBuilder<LocalStoredService> builder = new DataContainerBuilder<>(LocalStoredService.class, data, this);
+
+        builder.setValue(Service.Bind.Name, serviceName);
+        if (!data.has(Service.Bind.Status))
+            builder.setValue(Service.Bind.Status, Service.Status.UNKNOWN.getValue());
+
+        final LocalService service = builder.build();
+        entityCache.getReference(serviceName, true).set(service);
+
+        return service;
+    }
+
+    public final Processor<Service> getServiceByName(String name) {
         logger.at(Level.INFO).log("Returning Service by name: %s", name);
-        return entityCache.stream()
+        return Processor.providedOptional(() -> entityCache.streamRefs()
                 .filter(ref -> !ref.isNull())
                 .filter(ref -> ref.process().test(Service.class::isInstance))
                 .map(ref -> ref.into(Service.class::cast))
                 .filter(service -> service.getName().equals(name))
-                .findFirst();
+                .findFirst());
     }
 
     @Override

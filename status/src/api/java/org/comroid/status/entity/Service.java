@@ -3,9 +3,10 @@ package org.comroid.status.entity;
 import org.comroid.api.IntEnum;
 import org.comroid.api.Invocable;
 import org.comroid.api.Polyfill;
-import org.comroid.common.ref.WrappedFormattable;
-import org.comroid.status.DependenyObject;
+import org.comroid.api.WrappedFormattable;
+import org.comroid.restless.REST;
 import org.comroid.status.StatusConnection;
+import org.comroid.status.rest.Endpoint;
 import org.comroid.uniform.ValueType;
 import org.comroid.uniform.node.UniObjectNode;
 import org.comroid.varbind.annotation.Location;
@@ -18,6 +19,7 @@ import org.intellij.lang.annotations.Language;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @Location(Service.Bind.class)
 public interface Service extends Entity, WrappedFormattable {
@@ -46,13 +48,18 @@ public interface Service extends Entity, WrappedFormattable {
         return getName();
     }
 
+    CompletableFuture<Status> requestStatus();
+
     enum Status implements IntEnum {
         UNKNOWN(0),
 
         OFFLINE(1),
-        MAINTENANCE(2),
-        REPORTED_PROBLEMS(3),
-        ONLINE(4);
+        CRASHED(2),
+        MAINTENANCE(3),
+
+        NOT_RESPONDING(4),
+
+        ONLINE(5);
 
         private final int value;
 
@@ -80,23 +87,23 @@ public interface Service extends Entity, WrappedFormattable {
 
     interface Bind extends Entity.Bind {
         @RootBind
-        GroupBind<Service, DependenyObject> Root
+        GroupBind<Service> Root
                 = Entity.Bind.Root.subGroup("service", Invocable.ofConstructor(Polyfill.<Class<Service>>uncheckedCast(Basic.class)));
-        VarBind<String, DependenyObject, String, String> DisplayName
+        VarBind<Service, String, String, String> DisplayName
                 = Root.createBind("display_name")
                 .extractAs(ValueType.STRING)
                 .asIdentities()
                 .onceEach()
                 .setRequired(true)
                 .build();
-        VarBind<Integer, DependenyObject, Service.Status, Service.Status> Status
+        VarBind<Service, Integer, Service.Status, Service.Status> Status
                 = Root.createBind("status")
                 .extractAs(ValueType.INTEGER)
                 .andRemap(Service.Status::valueOf)
                 .onceEach()
                 .setRequired(true)
                 .build();
-        VarBind<String, DependenyObject, URL, URL> URL
+        VarBind<Service, String, URL, URL> URL
                 = Root.createBind("url")
                 .extractAs(ValueType.STRING)
                 .andRemap(Polyfill::url)
@@ -105,9 +112,28 @@ public interface Service extends Entity, WrappedFormattable {
                 .build();
     }
 
-    final class Basic extends DataContainerBase<DependenyObject> implements Service {
+    final class Basic extends DataContainerBase<Entity> implements Service {
+        private final StatusConnection connection;
+
         public Basic(StatusConnection connection, UniObjectNode node) {
-            super(node, connection);
+            super(node);
+
+            this.connection = connection;
+        }
+
+        @Override
+        public CompletableFuture<Status> requestStatus() {
+            return connection.getRest()
+                    .request()
+                    .method(REST.Method.GET)
+                    .endpoint(Endpoint.SPECIFIC_SERVICE.complete(getName()))
+                    .execute$deserializeSingle()
+                    .thenApply(node -> node.get("status").asInt())
+                    .thenApply(Status::valueOf)
+                    .thenApply(status -> {
+                        put(Service.Bind.Status, status.value);
+                        return status;
+                    });
         }
     }
 }

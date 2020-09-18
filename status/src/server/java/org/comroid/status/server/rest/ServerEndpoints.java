@@ -26,7 +26,7 @@ public enum ServerEndpoints implements ServerEndpoint {
 
             StatusServer.instance
                     .getEntityCache()
-                    .stream()
+                    .streamRefs()
                     .sequential()
                     .filter(ref -> ref.test(Service.class::isInstance))
                     .map(ref -> ref.into(Service.class::cast))
@@ -50,24 +50,43 @@ public enum ServerEndpoints implements ServerEndpoint {
                             .build())
                     .orElseThrow(() -> new RestEndpointException(NOT_FOUND, "No service found with name " + urlParams[0]));
         }
+
+        @Override
+        public REST.Response executePUT(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            checkAdminAuthorization(headers);
+
+            final LocalService service = StatusServer.instance.createService(urlParams[0], body.asObjectNode());
+
+            return new REST.Response(OK, service.toObjectNode(Adapters.SERIALIZATION_ADAPTER));
+        }
+
+        @Override
+        public REST.Response executeDELETE(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            checkAdminAuthorization(headers);
+
+            final LocalService service = requireLocalService(urlParams[0]);
+
+            if (StatusServer.instance.getEntityCache().remove(service))
+                return new REST.Response(OK);
+            throw new RestEndpointException(INTERNAL_SERVER_ERROR, "Could not remove service from cache");
+        }
+    },
+    SERVICE_STATUS_ICON(Endpoint.SERVICE_STATUS_ICON, false) {
+        @Override
+        public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            return StatusServer.instance.getServiceByName(urlParams[0])
+                    .map(Service::getStatus)
+                    .map(StatusIcon::valueOf)
+                    .map(StatusIcon::getIconFile)
+                    .map(icon -> new REST.Response(200, "image/png", icon))
+                    .orElseThrow(() -> new RestEndpointException(NOT_FOUND, "No service found with name " + urlParams[0]));
+        }
     },
     UPDATE_SERVICE_STATUS(Endpoint.UPDATE_SERVICE_STATUS, false) {
         @Override
         public REST.Response executePOST(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            final LocalService service = StatusServer.instance.getServiceByName(urlParams[0])
-                    .flatMap(it -> it.as(LocalService.class))
-                    .orElseThrow(() -> new RestEndpointException(NOT_FOUND, "No local service found with name " + urlParams[0]));
-
-            if (!headers.containsKey(CommonHeaderNames.AUTHORIZATION))
-                throw new RestEndpointException(UNAUTHORIZED, "Unauthorized");
-
-            final String token = headers.getFirst(CommonHeaderNames.AUTHORIZATION);
-
-            if (!TokenCore.isValid(token) || !TokenCore.extractName(token).equals(service.getName()))
-                throw new RestEndpointException(UNAUTHORIZED, "Malicious Token used");
-
-            if (!service.getToken().equals(token))
-                throw new RestEndpointException(UNAUTHORIZED, "Unauthorized");
+            final LocalService service = requireLocalService(urlParams[0]);
+            checkAuthorization(headers, service);
 
             final Service.Status newStatus = body.process("status")
                     .map(UniNode::asInt)
@@ -77,25 +96,78 @@ public enum ServerEndpoints implements ServerEndpoint {
 
             service.setStatus(newStatus);
 
-            return new ResponseBuilder()
+            return new ResponseBuilder(body.getSerializationAdapter())
                     .setStatusCode(200)
-                    .setBody(service.toObjectNode(body.getSerializationAdapter()))
+                    .setBody(service)
+                    .build();
+        }
+    },
+
+    POLL(Endpoint.POLL, false) {
+        @Override
+        public REST.Response executePOST(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            final LocalService service = requireLocalService(urlParams[0]);
+            checkAuthorization(headers, service);
+
+            final Service.Status newStatus = body.process("status")
+                    .map(UniNode::asInt)
+                    .map(Service.Status::valueOf)
+                    .orElseThrow(() -> new RestEndpointException(BAD_REQUEST, "Missing status"));
+            final int expected = body.get("expected").asInt(60);
+            final int timeout = body.get("timeout").asInt(320);
+
+            service.receivePoll(newStatus, expected, timeout);
+
+            return new ResponseBuilder(body.getSerializationAdapter())
+                    .setStatusCode(200)
+                    .setBody(service)
                     .build();
         }
     };
 
     private final Endpoint underlying;
-    private final boolean allowMemberAccess;
 
+    private final boolean allowMemberAccess;
     @Override
     public AccessibleEndpoint getEndpointBase() {
         return underlying;
     }
 
-
     ServerEndpoints(Endpoint underlying, boolean allowMemberAccess) {
         this.underlying = underlying;
         this.allowMemberAccess = allowMemberAccess;
+    }
+    private static LocalService requireLocalService(String name) {
+        return StatusServer.instance.getServiceByName(name)
+                .flatMapOptional(it -> it.as(LocalService.class))
+                .orElseThrow(() -> new RestEndpointException(NOT_FOUND, "No local service found with name " + name));
+    }
+
+    private static void checkAuthorization(Headers headers, LocalService service) {
+        if (!headers.containsKey(CommonHeaderNames.AUTHORIZATION))
+            throw new RestEndpointException(UNAUTHORIZED, "Unauthorized");
+
+        final String token = headers.getFirst(CommonHeaderNames.AUTHORIZATION);
+
+        if (service.getName().equals("test-dummy") && token.equals("null"))
+            return;
+
+        if (!TokenCore.isValid(token) || !TokenCore.extractName(token).equals(service.getName()))
+            throw new RestEndpointException(UNAUTHORIZED, "Malicious Token used");
+        if (!service.getToken().equals(token))
+            throw new RestEndpointException(UNAUTHORIZED, "Unauthorized");
+    }
+
+    public void checkAdminAuthorization(Headers headers) {
+        if (!headers.containsKey(CommonHeaderNames.AUTHORIZATION))
+            throw new RestEndpointException(UNAUTHORIZED, "Unauthorized");
+
+        final String token = headers.getFirst(CommonHeaderNames.AUTHORIZATION);
+
+        if (!TokenCore.isValid(token) || !TokenCore.extractName(token).equals(StatusServer.ADMIN_TOKEN_NAME))
+            throw new RestEndpointException(UNAUTHORIZED, "Malicious Token used");
+        if (!StatusServer.ADMIN_TOKEN.getContent().equals(token))
+            throw new RestEndpointException(UNAUTHORIZED, "Unauthorized");
     }
 
     @Override

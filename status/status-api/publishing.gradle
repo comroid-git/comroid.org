@@ -3,7 +3,7 @@ import static java.lang.System.getenv
 ext {
     snapshot = project.version.endsWith('SNAPSHOT')
 
-    canSign = getenv().containsKey('GPG_KEYNAME') && getenv().containsKey('GPG_PASSPHRASE')
+    canSign = getenv().containsKey("OVERRIDE_SIGNING") || (getenv().containsKey('GPG_KEYNAME') && getenv().containsKey('GPG_PASSPHRASE'))
     canPublishToSpace = getenv().containsKey('SPACE_PASSWORD') && getenv().containsKey('SPACE_USERNAME')
     canPublishToGitHub = !snapshot && canSign && getenv().containsKey('GITHUB_PASSWORD') && getenv().containsKey('GITHUB_USERNAME')
 }

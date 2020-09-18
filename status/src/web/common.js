@@ -1,11 +1,15 @@
 const statusArray = [
     {
         'classname': 'offline',
-        'display': 'UNSURE'
+        'display': 'UNKNOWN'
     },
     {
         'classname': 'offline',
         'display': 'OFFLINE'
+    },
+    {
+        'classname': 'offline',
+        'display': 'CRASHED'
     },
     {
         'classname': 'maintenance',
@@ -13,7 +17,7 @@ const statusArray = [
     },
     {
         'classname': 'busy',
-        'display': 'BUSY'
+        'display': 'NOT_RESPONDING'
     },
     {
         'classname': 'online',

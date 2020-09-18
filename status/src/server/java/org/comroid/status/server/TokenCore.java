@@ -31,8 +31,6 @@ public final class TokenCore {
 
         if (parts.length != 3)
             return false;
-        if (!parts[0].matches(Service.NAME_REGEX))
-            return false;
         try {
             UUID.fromString(parts[1]);
             UUID.fromString(parts[2]);

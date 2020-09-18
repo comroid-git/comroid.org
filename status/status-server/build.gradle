@@ -20,18 +20,28 @@ sourceSets {
 }
 
 dependencies {
-    implementation comroidStatusApi
-    implementation comroidCommandline
-    implementation comroidDreadpool
-
-    compileOnly comroidUniformJ8
-    compileOnly comroidRestlessJ8
-
     compileOnly jetbrainsAnnotations
+
+    if (System.getenv().containsKey("TEAMCITY")) {
+        implementation project(':status-api')
+        implementation 'com.github.comroid-git.common-util:commandline:master-SNAPSHOT'
+        implementation 'com.github.comroid-git.discord-ux:javacord:master-SNAPSHOT'
+
+        implementation 'com.github.comroid-git.common-util:uniform:master-SNAPSHOT'
+        implementation 'com.github.comroid-git.common-util:restless:master-SNAPSHOT'
+        implementation 'com.github.comroid-git:javacord-utilities:master-SNAPSHOT'
+    } else {
+        implementation project(':status:status-api')
+        implementation project(':common-util:commandline')
+        implementation project(':discord-ux:javacord')
+
+        implementation project(':common-util:uniform').sourceSets.java8compat.output.classesDirs
+        implementation project(':common-util:restless').sourceSets.java8compat.output.classesDirs
+        implementation project(':javacord-utilities')
+    }
 
     // Javacord
     implementation javacord
-    implementation comroidJavacordUtil
 
     // logging dependencies
     implementation flogger

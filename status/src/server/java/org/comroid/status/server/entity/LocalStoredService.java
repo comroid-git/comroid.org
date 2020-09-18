@@ -3,7 +3,8 @@ package org.comroid.status.server.entity;
 import org.comroid.api.IntEnum;
 import org.comroid.api.Polyfill;
 import org.comroid.common.io.FileHandle;
-import org.comroid.status.DependenyObject;
+import org.comroid.mutatio.ref.Reference;
+import org.comroid.status.entity.Entity;
 import org.comroid.status.entity.Service;
 import org.comroid.status.server.StatusServer;
 import org.comroid.status.server.TokenCore;
@@ -12,15 +13,17 @@ import org.comroid.varbind.container.DataContainer;
 import org.comroid.varbind.container.DataContainerBase;
 import org.comroid.varbind.container.DataContainerBuilder;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Level;
 
-public class LocalStoredService extends DataContainerBase<DependenyObject> implements LocalService {
+public class LocalStoredService extends DataContainerBase<Entity> implements LocalService {
     private final AtomicReference<Status> status;
     private final AtomicReference<String> token;
     private final FileHandle tokenFile;
+    private final ScheduledExecutorService executor = StatusServer.instance.getThreadPool();
+    private final Reference<StatusPollManager> spm = Reference.create();
 
     @Override
     public String getToken() {
@@ -38,8 +41,8 @@ public class LocalStoredService extends DataContainerBase<DependenyObject> imple
         put(Bind.Status, IntEnum::getValue, status);
     }
 
-    public LocalStoredService(StatusServer server, UniObjectNode data) {
-        super(data, server);
+    public LocalStoredService(UniObjectNode data) {
+        super(data);
 
         this.status = new AtomicReference<>(wrap(Bind.Status).orElse(Status.UNKNOWN));
         this.tokenFile = StatusServer.TOKEN_DIR.createSubFile(getName() + ".token");
@@ -55,51 +58,51 @@ public class LocalStoredService extends DataContainerBase<DependenyObject> imple
             throw new RuntimeException("Could not replace old Token file");
 
         final String newToken = TokenCore.generate(getName());
-
-        try (
-                FileOutputStream fos = new FileOutputStream(tokenFile);
-                OutputStreamWriter osw = new OutputStreamWriter(fos)
-        ) {
-            osw.write(newToken);
-            osw.flush();
-            fos.flush();
-        } catch (IOException e) {
-            throw new RuntimeException("Could not write token", e);
-        } finally {
-            token.set(newToken);
-        }
+        tokenFile.setContent(newToken);
+        token.set(newToken);
 
         return newToken;
     }
 
     @Override
-    public void regenerateToken() {
-        overwriteTokenFile();
+    public String regenerateToken() {
+        return overwriteTokenFile();
     }
 
-    public static final class Builder extends DataContainerBuilder<Builder, Service, DependenyObject> {
-        public Builder() {
-            super(Polyfill.uncheckedCast(LocalStoredService.class), StatusServer.instance);
-        }
-
-        @Override
-        protected Service mergeVarCarrier(DataContainer<DependenyObject> dataContainer) {
-            return new OfUnderlying(dataContainer);
-        }
+    @Override
+    public void receivePoll(Status newStatus, int expected, int timeout) {
+        spm.ifPresent(spm -> spm.complete(newStatus));
+        spm.set(new StatusPollManager(expected, timeout));
     }
 
-    private static final class OfUnderlying extends LocalStoredService implements LocalService, DataContainer.Underlying<DependenyObject> {
-        private final DataContainer<DependenyObject> underlying;
+    private final class StatusPollManager {
+        private final Reference<Status> state = Reference.create();
 
-        @Override
-        public DataContainer<DependenyObject> getUnderlyingVarCarrier() {
-            return underlying;
+        private StatusPollManager(int expected, int timeout) {
+            executor.schedule(this::expire, expected, TimeUnit.SECONDS);
+            executor.schedule(this::timeout, timeout, TimeUnit.SECONDS);
         }
 
-        private OfUnderlying(DataContainer<DependenyObject> underlying) {
-            super((StatusServer) underlying.getDependent(), null);
+        private boolean complete(Status newStatus) {
+            synchronized (spm) {
+                if (state.isNonNull())
+                    return false;
+                state.set(newStatus);
+                setStatus(newStatus);
+                return true;
+            }
+        }
 
-            this.underlying = underlying;
+        private void expire() {
+            if (complete(Status.NOT_RESPONDING))
+                StatusServer.logger.at(Level.WARNING)
+                        .log("Service {} is not responding within timeout ...", getDisplayName());
+        }
+
+        private void timeout() {
+            if (complete(Status.CRASHED))
+                StatusServer.logger.at(Level.SEVERE)
+                        .log("Service {} timed out!", getDisplayName());
         }
     }
 }
