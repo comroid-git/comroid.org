@@ -20,7 +20,7 @@ sourceSets {
 }
 
 dependencies {
-    compileOnly jetbrainsAnnotations
+    compileOnly 'org.jetbrains:annotations:19.0.0'
 
     if (System.getenv().containsKey("TEAMCITY")) {
         implementation project(':status-api')
@@ -41,14 +41,14 @@ dependencies {
     }
 
     // Javacord
-    implementation javacord
+    implementation 'org.javacord:javacord:3.0.6'
 
     // logging dependencies
-    implementation flogger
-    runtimeOnly floggerLog4J2
-    runtimeOnly log4j2
+    implementation 'com.google.flogger:flogger:0.5.1'
+    runtimeOnly 'com.google.flogger:flogger-log4j2-backend:0.5.1'
+    runtimeOnly 'org.apache.logging.log4j:log4j-core:2.13.3'
 
     // runtime adapter dependencies
-    runtimeOnly okhttp4
-    runtimeOnly fastjson
+    runtimeOnly 'com.squareup.okhttp3:okhttp:4.7.2'
+    runtimeOnly 'com.alibaba:fastjson:1.2.70'
 }

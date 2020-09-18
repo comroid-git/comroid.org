@@ -10,7 +10,6 @@ allprojects {
     System.out.println("deps " +name != 'status' )
     if (name != 'status') {
         apply from: 'vars.gradle'
-        apply from: '../gradle/dependencies.gradle'
     }
 
     repositories {
