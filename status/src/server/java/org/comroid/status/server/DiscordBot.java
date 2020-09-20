@@ -276,6 +276,7 @@ public enum DiscordBot {
                 aliases = "regen-token",
                 usage = "regen-token <str: service_name>",
                 requiredDiscordPermissions = PermissionType.ADMINISTRATOR,
+                enablePrivateChat = false,
                 minimumArguments = 1,
                 maximumArguments = 1,
                 convertStringResultsToEmbed = true
@@ -297,6 +298,7 @@ public enum DiscordBot {
         @Command(
                 usage = "update <str: service_name> <status: new_status>",
                 requiredDiscordPermissions = PermissionType.ADMINISTRATOR,
+                enablePrivateChat = false,
                 minimumArguments = 2,
                 maximumArguments = 2,
                 convertStringResultsToEmbed = true
@@ -358,6 +360,7 @@ public enum DiscordBot {
                 aliases = "create-service",
                 usage = "create-service <str: service_name> [str: display_name]",
                 requiredDiscordPermissions = PermissionType.ADMINISTRATOR,
+                enablePrivateChat = false,
                 minimumArguments = 1,
                 maximumArguments = 2,
                 convertStringResultsToEmbed = true
@@ -377,6 +380,7 @@ public enum DiscordBot {
                 aliases = "set-url",
                 usage = "set-url <str: service_name> <str: new url>",
                 requiredDiscordPermissions = PermissionType.ADMINISTRATOR,
+                enablePrivateChat = false,
                 minimumArguments = 2,
                 maximumArguments = 2,
                 convertStringResultsToEmbed = true
