@@ -88,7 +88,7 @@ public interface Service extends Entity, WrappedFormattable {
     interface Bind extends Entity.Bind {
         @RootBind
         GroupBind<Service> Root
-                = Entity.Bind.Root.subGroup("service", Invocable.ofConstructor(Polyfill.<Class<Service>>uncheckedCast(Basic.class)));
+                = Entity.Bind.Root.subGroup("service", Basic.class);
         VarBind<Service, String, String, String> DisplayName
                 = Root.createBind("display_name")
                 .extractAs(ValueType.STRING)
