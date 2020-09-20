@@ -44,9 +44,9 @@ dependencies {
     compileOnly 'org.jetbrains:annotations:19.0.0'
 
     if (isAutoDeploy) {
-        implementation 'com.github.comroid-git.common-util:restless:master-SNAPSHOT'
+        api 'com.github.comroid-git.common-util:restless:master-SNAPSHOT'
     } else {
-        implementation project(':common-util:restless')
+        api project(':common-util:restless')
     }
 
     testImplementation 'junit:junit:4.13'
