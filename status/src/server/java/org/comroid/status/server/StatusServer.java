@@ -75,6 +75,8 @@ public class StatusServer implements DependenyObject, Closeable {
     }
 
     private StatusServer(ScheduledExecutorService executor, InetAddress host, int port) throws IOException {
+        instance = this;
+
         Adapters.HTTP_ADAPTER = new OkHttp3Adapter();
         SERIALIZATION_ADAPTER = FastJSONLib.fastJsonLib;
 
@@ -118,7 +120,7 @@ public class StatusServer implements DependenyObject, Closeable {
     public static void main(String[] args) throws IOException {
         ARGS = CommandLineArgs.parse(args);
         logger.at(Level.INFO).log("Starting comroid Status Server...");
-        instance = new StatusServer(Executors.newScheduledThreadPool(4), InetAddress.getByAddress(new byte[]{0, 0, 0, 0}), PORT);
+        new StatusServer(Executors.newScheduledThreadPool(4), InetAddress.getByAddress(new byte[]{0, 0, 0, 0}), PORT);
         DiscordBot.INSTANCE.serverFuture.complete(instance);
 
         logger.at(Level.INFO).log("Status Server running! Booting Discord Bot...");
