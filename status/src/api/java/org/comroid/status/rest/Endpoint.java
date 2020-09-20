@@ -5,6 +5,8 @@ import org.comroid.status.DependenyObject;
 import org.comroid.status.entity.Service;
 import org.intellij.lang.annotations.Language;
 
+import java.util.regex.Pattern;
+
 public enum Endpoint implements AccessibleEndpoint {
     LIST_SERVICES("services"),
 
@@ -28,6 +30,7 @@ public enum Endpoint implements AccessibleEndpoint {
 
     private final String extension;
     private final String[] regexGroups;
+    private final Pattern pattern;
 
     @Override
     public String getUrlBase() {
@@ -44,8 +47,14 @@ public enum Endpoint implements AccessibleEndpoint {
         return regexGroups;
     }
 
+    @Override
+    public Pattern getPattern() {
+        return pattern;
+    }
+
     Endpoint(String extension, @Language("RegExp") String... regexGroups) {
         this.extension = extension;
         this.regexGroups = regexGroups;
+        this.pattern = buildUrlPattern();
     }
 }
