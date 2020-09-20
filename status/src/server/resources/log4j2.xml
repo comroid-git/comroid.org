@@ -1,21 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration monitorInterval="60" packages="org.comroid.status" status="debug">
     <Appenders>
-        <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
+        <Console name="console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
         </Console>
-        <File name="logfile" append="false" bufferedIo="true" filename="${env:LOG_FILE:-LOG_FILE}">
-            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
+        <File name="logfile" filename="/home/comroid/srv_status/latest.log">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
         </File>
     </Appenders>
     <Loggers>
+        <Root level="error">
+            <AppenderRef ref="MyFile"/>
+        </Root>
         <Root level="trace">
-            <AppenderRef level="info" ref="Console" />
-            <AppenderRef level="all" ref="logfile" />
+            <AppenderRef level="info" ref="console"/>
+            <AppenderRef level="info" ref="logfile"/>
         </Root>
     </Loggers>
-    <Properties>
-        <Property name="LS">${sys:file.separator}</Property>
-        <Property name="LOG_FILE">/home/comroid/srv_status/latest.log</Property>
-    </Properties>
 </Configuration>
