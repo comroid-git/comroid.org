@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration monitorInterval="60" packages="de.comroid.util" status="debug">
+    <Appenders>
+        <CobaltonLog4J2Appender name="CobaltonLog4J2Appender">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
+        </CobaltonLog4J2Appender>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
+        </Console>
+        <File name="logfile" append="false" bufferedIo="true" filename="${env:LOG_FILE:-LOG_FILE}">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
+        </File>
+    </Appenders>
+    <Loggers>
+        <Root level="trace">
+            <AppenderRef level="info" ref="Console" />
+            <AppenderRef level="all" ref="logfile" />
+        </Root>
+    </Loggers>
+    <Properties>
+        <Property name="LS">${sys:file.separator}</Property>
+        <Property name="LOG_FILE">/home/comroid/srv_status/latest.log</Property>
+    </Properties>
+</Configuration>
