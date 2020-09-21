@@ -24,19 +24,23 @@ dependencies {
 
     if (isAutoDeploy) {
         implementation project(':status-api')
-        implementation 'com.github.comroid-git.common-util:commandline:master-SNAPSHOT'
-        implementation 'com.github.comroid-git.discord-ux:dux-javacord:7da50f0795'
 
         implementation 'com.github.comroid-git.common-util:uniform:master-SNAPSHOT'
         implementation 'com.github.comroid-git.common-util:restless:master-SNAPSHOT'
+
+        implementation 'com.github.comroid-git.common-util:commandline:master-SNAPSHOT'
+
+        implementation 'com.github.comroid-git.discord-ux:dux-javacord:7da50f0795'
         implementation 'com.github.comroid-git:javacord-utilities:master-SNAPSHOT'
     } else {
         implementation project(':status:status-api')
-        implementation project(':common-util:commandline')
-        implementation project(':discord-ux:javacord')
 
         implementation project(':common-util:uniform').sourceSets.java8compat.output.classesDirs
         implementation project(':common-util:restless').sourceSets.java8compat.output.classesDirs
+
+        implementation project(':common-util:commandline')
+
+        implementation project(':discord-ux:javacord')
         implementation project(':javacord-utilities')
     }
 

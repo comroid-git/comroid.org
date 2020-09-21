@@ -124,7 +124,9 @@ public class StatusServer implements DependenyObject, Closeable {
         DiscordBot.INSTANCE.serverFuture.complete(instance);
 
         logger.at(Level.INFO).log("Status Server running! Booting Discord Bot...");
-        DiscordBot.INSTANCE.supplyToken(instance, ARGS.wrap("token").orElseGet(BOT_TOKEN::getContent));
+        if (ARGS.process("token").test("null"::equals))
+            DiscordBot.INSTANCE.supplyToken(instance, ARGS.wrap("token").orElseGet(BOT_TOKEN::getContent));
+        else logger.at(Level.INFO).log("Skipping discord bot creation because token was null");
 
         Runtime.getRuntime().addShutdownHook(new Thread(instance::close));
         instance.threadPool.scheduleAtFixedRate(() -> {

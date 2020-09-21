@@ -1,4 +1,4 @@
-package org.comroid.server.status.test.api;
+package org.comroid.server.status.test.server;
 
 import org.comroid.restless.adapter.okhttp.v4.OkHttp3Adapter;
 import org.comroid.status.DependenyObject;
@@ -13,7 +13,8 @@ import org.junit.Test;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-public class TestStatusConnection {
+
+public class TestStatusServer {
     private StatusConnection connection;
     private Service service;
 
@@ -25,7 +26,7 @@ public class TestStatusConnection {
         service = connection.getService();
     }
 
-    // @Test(timeout = 20000) todo: What to do with this?
+    @Test(timeout = 20000)
     public void testPolling() {
         connection.refreshTimeout = 5;
         connection.crashedTimeout = 10;
