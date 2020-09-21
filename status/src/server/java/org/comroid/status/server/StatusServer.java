@@ -117,7 +117,7 @@ public class StatusServer implements DependenyObject, Closeable {
         logger.at(Level.INFO).log("Status Server ready! %s", server);
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String... args) throws IOException {
         ARGS = CommandLineArgs.parse(args);
         logger.at(Level.INFO).log("Starting comroid Status Server...");
         new StatusServer(Executors.newScheduledThreadPool(4), InetAddress.getByAddress(new byte[]{0, 0, 0, 0}), PORT);

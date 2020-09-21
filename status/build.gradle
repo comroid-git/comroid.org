@@ -51,8 +51,26 @@ allprojects {
 dependencies {
     if (getenv().containsKey("TEAMCITY") || getenv().containsKey("JITPACK")) {
         testImplementation project(':status-server')
+        testImplementation project(':status-api')
+
+        testImplementation 'com.github.comroid-git.common-util:uniform:master-SNAPSHOT'
+        testImplementation 'com.github.comroid-git.common-util:restless:master-SNAPSHOT'
+
+        testImplementation 'com.github.comroid-git.common-util:commandline:master-SNAPSHOT'
+
+        testImplementation 'com.github.comroid-git.discord-ux:dux-javacord:7da50f0795'
+        testImplementation 'com.github.comroid-git:javacord-utilities:master-SNAPSHOT'
     } else {
         testImplementation project(':status:status-server')
+        testImplementation project(':status:status-api')
+
+        testImplementation project(':common-util:uniform').sourceSets.java8compat.output.classesDirs
+        testImplementation project(':common-util:restless').sourceSets.java8compat.output.classesDirs
+
+        testImplementation project(':common-util:commandline')
+
+        testImplementation project(':discord-ux:javacord')
+        testImplementation project(':javacord-utilities')
     }
 
     testImplementation 'junit:junit:4.13'
