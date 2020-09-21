@@ -16,7 +16,6 @@ import org.comroid.status.entity.Service;
 import org.comroid.status.server.entity.LocalService;
 import org.comroid.status.server.entity.LocalStoredService;
 import org.comroid.status.server.rest.ServerEndpoints;
-import org.comroid.status.server.test.StatusServerTestSite;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
 import org.comroid.uniform.node.UniObjectNode;
 import org.comroid.varbind.FileCache;
@@ -125,8 +124,8 @@ public class StatusServer implements DependenyObject, Closeable {
 
         logger.at(Level.INFO).log("Status Server running! Booting Discord Bot...");
         if (ARGS.process("token").test("null"::equals))
-            DiscordBot.INSTANCE.supplyToken(instance, ARGS.wrap("token").orElseGet(BOT_TOKEN::getContent));
-        else logger.at(Level.INFO).log("Skipping discord bot creation because token was null");
+            logger.at(Level.INFO).log("Skipping discord bot creation because token was null");
+        else DiscordBot.INSTANCE.supplyToken(instance, ARGS.wrap("token").orElseGet(BOT_TOKEN::getContent));
 
         Runtime.getRuntime().addShutdownHook(new Thread(instance::close));
         instance.threadPool.scheduleAtFixedRate(() -> {
@@ -139,9 +138,6 @@ public class StatusServer implements DependenyObject, Closeable {
             }
         }, 5, 5, TimeUnit.MINUTES);
         logger.at(Level.INFO).log("Hooks registered!");
-
-        if (ARGS.hasName("test"))
-            StatusServerTestSite.start();
     }
 
     public LocalService createService(String serviceName, UniObjectNode data) {
