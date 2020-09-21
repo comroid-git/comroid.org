@@ -12,6 +12,7 @@ import org.comroid.status.server.StatusServer;
 import org.comroid.uniform.ValueType;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
 import org.comroid.util.MultithreadUtil;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,7 +38,7 @@ public class StatusServerTests {
         DependenyObject.Adapters.SERIALIZATION_ADAPTER = FastJSONLib.fastJsonLib;
 
         // initialize test site
-        StatusServer.main("--token=null", "--test");
+        StatusServer.main("--token", "null", "--test");
         connection = new StatusConnection("test-dummy", "null", Executors.newScheduledThreadPool(4));
 
         service = connection.getService();
@@ -64,6 +65,11 @@ public class StatusServerTests {
         sendPoll().thenCompose(Service::requestStatus)
                 .thenAccept(status -> Assert.assertEquals(Service.Status.ONLINE, status))
                 .join();
+    }
+
+    @After
+    public void destroy() {
+        testServer.close();
     }
 
     private CompletableFuture<Service> sendPoll() {
