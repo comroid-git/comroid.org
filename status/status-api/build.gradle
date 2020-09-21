@@ -55,7 +55,7 @@ dependencies {
     testImplementation 'org.easymock:easymock:4.1'
     testRuntimeOnly 'com.google.flogger:flogger-log4j2-backend:0.5.1'
     testRuntimeOnly 'org.apache.logging.log4j:log4j-core:2.13.3'
-    testRuntimeOnly 'com.squareup.okhttp3:okhttp:4.7.2'
+    testRuntimeOnly 'com.squareup.okhttp3:okhttp:4.9.0'
     testRuntimeOnly 'com.alibaba:fastjson:1.2.70'
 }
 
