@@ -25,22 +25,27 @@ public class TestStatusConnection {
         service = connection.getService();
     }
 
-    //@Test(timeout = 20000) todo: Fix test
+    @Test(timeout = 20000)
     public void testPolling() {
         connection.refreshTimeout = 5;
         connection.crashedTimeout = 10;
 
+        final Service join = connection.sendPoll().join();
+
         connection.sendPoll()
                 .thenCompose(Service::requestStatus)
                 .thenAccept(status -> Assert.assertEquals(Service.Status.ONLINE, status))
-                .thenCompose(nil -> MultithreadUtil.futureAfter(6, TimeUnit.SECONDS))
+                .join();
+        MultithreadUtil.futureAfter(6, TimeUnit.SECONDS)
                 .thenCompose(nil -> service.requestStatus())
                 .thenAccept(status -> Assert.assertEquals(Service.Status.NOT_RESPONDING, status))
-                .thenCompose(nil -> MultithreadUtil.futureAfter(6, TimeUnit.SECONDS))
+                .join();
+        MultithreadUtil.futureAfter(6, TimeUnit.SECONDS)
                 .thenCompose(nil -> service.requestStatus())
                 .thenAccept(status -> Assert.assertEquals(Service.Status.CRASHED, status))
-                .thenCompose(nil -> connection.sendPoll())
-                .thenCompose(nil -> service.requestStatus())
+                .join();
+        connection.sendPoll()
+                .thenCompose(Service::requestStatus)
                 .thenAccept(status -> Assert.assertEquals(Service.Status.ONLINE, status))
                 .join();
     }
