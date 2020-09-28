@@ -30,7 +30,7 @@ dependencies {
 
         implementation 'com.github.comroid-git.common-util:commandline:master-SNAPSHOT'
 
-        implementation 'com.github.comroid-git.discord-ux:dux-javacord:7da50f0795'
+        implementation 'com.github.comroid-git.discord-ux:dux-javacord:master-SNAPSHOT'
         implementation 'com.github.comroid-git:javacord-utilities:master-SNAPSHOT'
     } else {
         implementation project(':status:status-api')
