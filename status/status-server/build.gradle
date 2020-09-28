@@ -25,8 +25,8 @@ dependencies {
     if (isAutoDeploy) {
         implementation project(':status-api')
 
-        implementation 'com.github.comroid-git.common-util:uniform:master-SNAPSHOT'
-        implementation 'com.github.comroid-git.common-util:restless:master-SNAPSHOT'
+        implementation 'com.github.comroid-git.guardian:uniform:master-SNAPSHOT'
+        implementation 'com.github.comroid-git.guardian:restless:master-SNAPSHOT'
 
         implementation 'com.github.comroid-git.common-util:commandline:master-SNAPSHOT'
 
@@ -35,8 +35,8 @@ dependencies {
     } else {
         implementation project(':status:status-api')
 
-        implementation project(':common-util:uniform').sourceSets.java8compat.output.classesDirs
-        implementation project(':common-util:restless').sourceSets.java8compat.output.classesDirs
+        implementation project(':guardian:uniform').sourceSets.java8compat.output.classesDirs
+        implementation project(':guardian:restless').sourceSets.java8compat.output.classesDirs
 
         implementation project(':common-util:commandline')
 

@@ -53,8 +53,8 @@ dependencies {
         testImplementation project(':status-server')
         testImplementation project(':status-api')
 
-        testImplementation 'com.github.comroid-git.common-util:uniform:master-SNAPSHOT'
-        testImplementation 'com.github.comroid-git.common-util:restless:master-SNAPSHOT'
+        testImplementation 'com.github.comroid-git.guardian:uniform:master-SNAPSHOT'
+        testImplementation 'com.github.comroid-git.guardian:restless:master-SNAPSHOT'
 
         testImplementation 'com.github.comroid-git.common-util:commandline:master-SNAPSHOT'
 
@@ -64,8 +64,8 @@ dependencies {
         testImplementation project(':status:status-server')
         testImplementation project(':status:status-api')
 
-        testImplementation project(':common-util:uniform').sourceSets.java8compat.output.classesDirs
-        testImplementation project(':common-util:restless').sourceSets.java8compat.output.classesDirs
+        testImplementation project(':guardian:uniform').sourceSets.java8compat.output.classesDirs
+        testImplementation project(':guardian:restless').sourceSets.java8compat.output.classesDirs
 
         testImplementation project(':common-util:commandline')
 

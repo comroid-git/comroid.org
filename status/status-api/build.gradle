@@ -44,11 +44,11 @@ dependencies {
     compileOnly 'org.jetbrains:annotations:19.0.0'
 
     if (isAutoDeploy) {
-        api 'com.github.comroid-git.common-util:restless:master-SNAPSHOT'
+        api 'com.github.comroid-git.guardian:restless:master-SNAPSHOT'
     } else {
-        api project(':common-util:restless')
-        testImplementation project(':common-util:uniform').sourceSets.java8compat.output.classesDirs
-        testImplementation project(':common-util:restless').sourceSets.java8compat.output.classesDirs
+        api project(':guardian:restless')
+        testImplementation project(':guardian:uniform').sourceSets.java8compat.output.classesDirs
+        testImplementation project(':guardian:restless').sourceSets.java8compat.output.classesDirs
     }
 
     testImplementation 'junit:junit:4.13'
