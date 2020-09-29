@@ -48,7 +48,7 @@ allprojects {
     }
 }
 
-if (!isAutoDeploy) {
+if (!getenv().containsKey("TEAMCITY") && !getenv().containsKey("JITPACK")) {
     evaluationDependsOn ':guardian:uniform'
     evaluationDependsOn ':guardian:restless'
 }
