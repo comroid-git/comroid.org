@@ -63,7 +63,7 @@ dependencies {
 
         testImplementation 'com.github.comroid-git:cli-parser:master-SNAPSHOT'
 
-        testImplementation 'com.github.comroid-git.discord-ux:dux-javacord:7da50f0795'
+        testImplementation 'com.github.comroid-git.discord-ux:dux-javacord:master-SNAPSHOT'
         testImplementation 'com.github.comroid-git:javacord-utilities:master-SNAPSHOT'
     } else {
         testImplementation project(':status:status-server')
