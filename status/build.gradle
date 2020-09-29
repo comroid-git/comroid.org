@@ -15,6 +15,7 @@ allprojects {
     tasks.withType(Javadoc) {
         options {
             encoding = 'UTF-8'
+            /*
             links = [
                     "https://docs.oracle.com/javase/8/docs/api/",
                     "https://docs.oracle.com/javaee/7/api/",
@@ -23,6 +24,7 @@ allprojects {
                     "https://docs.javacord.org/api/v/3.0.4/"//,
                     //"https://ci.dv8tion.net/job/JDA/javadoc/" // broken
             ]
+            */
         }
     }
 
