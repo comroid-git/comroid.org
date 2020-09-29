@@ -28,7 +28,7 @@ dependencies {
         implementation 'com.github.comroid-git.guardian-framework:uniform:master-SNAPSHOT'
         implementation 'com.github.comroid-git.guardian-framework:restless:master-SNAPSHOT'
 
-        implementation 'com.github.comroid-git.common-util:commandline:master-SNAPSHOT'
+        implementation 'com.github.comroid-git:cli-parser:master-SNAPSHOT'
 
         implementation 'com.github.comroid-git.discord-ux:dux-javacord:master-SNAPSHOT'
         implementation 'com.github.comroid-git:javacord-utilities:master-SNAPSHOT'
@@ -38,7 +38,7 @@ dependencies {
         implementation project(':guardian:uniform').sourceSets.java8compat.output.classesDirs
         implementation project(':guardian:restless').sourceSets.java8compat.output.classesDirs
 
-        implementation project(':common-util:commandline')
+        implementation project(':clipa')
 
         implementation project(':discord-ux:javacord')
         implementation project(':javacord-utilities')

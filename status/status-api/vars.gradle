@@ -1,7 +1,7 @@
 import static java.lang.System.getenv
 
 ext {
-    isAutoDeploy = getenv().containsKey("TEAMCITY") || getenv().containsKey("JITPACK")
+    isAutoDeploy = rootProject.name != 'repo' || getenv().containsKey("TEAMCITY") || getenv().containsKey("JITPACK")
 
     artifactName = 'status-api'
     userbase = 'comroid-git'
