@@ -54,7 +54,7 @@ if (!getenv().containsKey("TEAMCITY") && !getenv().containsKey("JITPACK")) {
 }
 
 dependencies {
-    if (isAutoDeploy) {
+    if (getenv().containsKey("TEAMCITY") || getenv().containsKey("JITPACK")) {
         testImplementation project(':status-server')
         testImplementation project(':status-api')
 
