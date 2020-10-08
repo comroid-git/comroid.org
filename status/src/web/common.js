@@ -42,7 +42,7 @@ function timeout(ms, promise) {
  * @param {bool} slim Whether to print the Status Server seperately
  */
 function initGrid(slim) {
-    fetch('https://api.status.comroid.org/services')
+    timeout(5000, fetch('https://api.status.comroid.org/services'))
         .then(handleErrors)
         .then(response => response.json())
         .then(data => createBoxes(data, slim))
