@@ -32,4 +32,6 @@ public interface LocalService extends Service {
     String regenerateToken();
 
     void receivePoll(Status newStatus, int expected, int timeout);
+
+    void discardPoll(Status newStatus);
 }

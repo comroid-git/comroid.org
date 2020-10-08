@@ -71,8 +71,13 @@ public class LocalStoredService extends DataContainerBase<Entity> implements Loc
 
     @Override
     public void receivePoll(Status newStatus, int expected, int timeout) {
-        spm.ifPresent(spm -> spm.complete(newStatus));
+        discardPoll(newStatus);
         spm.set(new StatusPollManager(expected, timeout));
+    }
+
+    @Override
+    public void discardPoll(final Status newStatus) {
+        spm.ifPresentOrElse(spm -> spm.complete(newStatus), () -> setStatus(newStatus));
     }
 
     private final class StatusPollManager {
