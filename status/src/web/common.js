@@ -47,7 +47,7 @@ function initGrid(slim) {
         .then(response => response.json())
         .then(data => createBoxes(data, slim))
         .catch(error => {
-            addBox("status-server", "Status Server", "unknown");
+            addBox(false, "status-server", "Status Server", 0);
             console.error('There has been a problem with your fetch operation:', error);
         });
 }
