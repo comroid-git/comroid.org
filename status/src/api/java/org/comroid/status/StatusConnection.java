@@ -58,11 +58,12 @@ public final class StatusConnection implements DependenyObject {
         this.ownService = requestServiceByName(serviceName).join();
     }
 
-    public void startPolling() {
+    public boolean startPolling() {
         if (polling)
-            return;
+            return false;
         executePoll();
-        polling = true;
+        return (polling = true);
+    }
     }
 
     private void executePoll() {
