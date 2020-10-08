@@ -1,7 +1,7 @@
 const statusArray = [
     {
         'classname': 'offline',
-        'display': 'UNKNOWN'
+        'display': 'UNREACHABLE'
     },
     {
         'classname': 'offline',
