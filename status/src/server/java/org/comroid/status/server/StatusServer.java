@@ -113,6 +113,11 @@ public class StatusServer implements DependenyObject, Closeable {
         logger.at(Level.INFO).log("Starting REST Server...");
         this.server = new RestServer(SERIALIZATION_ADAPTER, executor, DependenyObject.URL_BASE, host, port, ServerEndpoints.values());
         server.addCommonHeader("Access-Control-Allow-Origin", "*");
+
+        getServiceByName("status-server")
+                .flatMap(LocalService.class)
+                .requireNonNull("Status server not found in cache!")
+                .setStatus(Service.Status.ONLINE);
         logger.at(Level.INFO).log("Status Server ready! %s", server);
     }
 
