@@ -1,5 +1,6 @@
 package org.comroid.status;
 
+import org.comroid.api.Polyfill;
 import org.comroid.common.io.FileHandle;
 import org.comroid.mutatio.span.Span;
 import org.comroid.restless.REST;
@@ -45,6 +46,10 @@ public final class StatusConnection implements DependenyObject {
         return serviceCache;
     }
 
+    public boolean isPolling() {
+        return polling;
+    }
+
     public StatusConnection(String serviceName, FileHandle tokenFile) {
         this(serviceName, tokenFile.getContent(), Executors.newScheduledThreadPool(4));
     }
@@ -63,6 +68,19 @@ public final class StatusConnection implements DependenyObject {
             return false;
         executePoll().join();
         return (polling = true);
+    }
+
+    public CompletableFuture<Service> stopPolling(Service.Status newStatus) {
+        if (!polling)
+            return Polyfill.failedFuture(new RuntimeException("Connection is not polling!"));
+        return rest.request(Service.Bind.Root)
+                .method(REST.Method.DELETE)
+                .endpoint(Endpoint.POLL.complete(serviceName))
+                .addHeader(AUTHORIZATION, token)
+                .buildBody(BodyBuilderType.OBJECT, obj ->
+                        obj.put(Service.Bind.Status, newStatus.getValue()))
+                .execute$autoCache(Service.Bind.Name, serviceCache)
+                .thenApply(Span::requireSingle);
     }
 
     private CompletableFuture<Void> executePoll() {
