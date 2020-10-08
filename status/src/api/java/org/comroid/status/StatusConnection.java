@@ -61,13 +61,12 @@ public final class StatusConnection implements DependenyObject {
     public boolean startPolling() {
         if (polling)
             return false;
-        executePoll();
+        executePoll().join();
         return (polling = true);
     }
-    }
 
-    private void executePoll() {
-        sendPoll().thenRun(this::schedulePoll);
+    private CompletableFuture<Void> executePoll() {
+        return sendPoll().thenRun(this::schedulePoll);
     }
 
     private void schedulePoll() {
