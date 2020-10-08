@@ -25,6 +25,17 @@ const statusArray = [
     }
 ]
 
+// taken from https://stackoverflow.com/a/46946573
+// Rough implementation. Untested.
+function timeout(ms, promise) {
+    return new Promise(function(resolve, reject) {
+        setTimeout(function() {
+            reject(new Error("timeout"))
+        }, ms)
+        promise.then(resolve, reject)
+    })
+}
+
 /**
  * Inits the grid of the status page, performs the JSON fetch.
  *
