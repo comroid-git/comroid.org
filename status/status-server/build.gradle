@@ -30,7 +30,7 @@ dependencies {
 
         implementation 'com.github.comroid-git:cli-parser:master-SNAPSHOT'
 
-        implementation 'com.github.comroid-git.botsuite:dux-javacord:master-SNAPSHOT'
+        implementation 'com.github.comroid-git.botsuite:botsuite-javacord:master-SNAPSHOT'
         implementation 'com.github.comroid-git:javacord-utilities:master-SNAPSHOT'
     } else {
         implementation project(':status:status-api')

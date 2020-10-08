@@ -65,7 +65,7 @@ dependencies {
 
         testImplementation 'com.github.comroid-git:cli-parser:master-SNAPSHOT'
 
-        testImplementation 'com.github.comroid-git.botsuite:dux-javacord:master-SNAPSHOT'
+        testImplementation 'com.github.comroid-git.botsuite:botsuite-javacord:master-SNAPSHOT'
         testImplementation 'com.github.comroid-git:javacord-utilities:master-SNAPSHOT'
     } else {
         testImplementation project(':status:status-server')
