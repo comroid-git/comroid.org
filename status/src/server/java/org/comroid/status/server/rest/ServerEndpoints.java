@@ -123,6 +123,24 @@ public enum ServerEndpoints implements ServerEndpoint {
                     .setBody(service)
                     .build();
         }
+
+        @Override
+        public REST.Response executeDELETE(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            final LocalService service = requireLocalService(urlParams[0]);
+            checkAuthorization(headers, service);
+
+            final Service.Status newStatus = body.process("status")
+                    .map(UniNode::asInt)
+                    .map(Service.Status::valueOf)
+                    .orElseThrow(() -> new RestEndpointException(BAD_REQUEST, "Missing status"));
+
+            service.discardPoll(newStatus);
+
+            return new ResponseBuilder(body.getSerializationAdapter())
+                    .setStatusCode(200)
+                    .setBody(service)
+                    .build();
+        }
     };
 
     private final Endpoint underlying;
