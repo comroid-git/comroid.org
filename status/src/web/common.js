@@ -39,7 +39,7 @@ function timeout(ms, promise) {
 /**
  * Inits the grid of the status page, performs the JSON fetch.
  *
- * @param {bool} slim Whether to print the Status Server seperately
+ * @param {boolean} slim Whether to print the Status Server seperately
  */
 function initGrid(slim) {
     timeout(5000, fetch('https://api.status.comroid.org/services'))
@@ -68,11 +68,12 @@ function handleErrors(response) {
  * Creates all boxes for the status page grid.
  *
  * @param {Object} data The JSON data delivered by the Fetch API request
- * @param {bool} slim Whether to print the Status Server seperately
+ * @param {boolean} slim Whether to print the Status Server separately
  */
 function createBoxes(data, slim) {
-    for (var i = 0; i < data.length; i++) {
-        var obj = data[i];
+    for (let i = 0; i < data.length; i++) {
+        const obj = data[i];
+        // noinspection JSUnresolvedVariable
         addBox(slim, obj.name, obj.display_name, obj.status);
     }
 }
@@ -80,14 +81,14 @@ function createBoxes(data, slim) {
 /**
  * Creates a new div inside the flex container.
  *
- * @param {bool} slim Whether to print the Status Server seperately
+ * @param {boolean} slim Whether to print the Status Server seperately
  * @param {string} name The service name parsed from JSON data
  * @param {string} display_name The display name parsed from JSON data
- * @param {string} status The current status of the service
+ * @param {int} status The current status of the service
  */
 function addBox(slim, name, display_name, status) {
     // Create a new box in the status grid
-    var newDiv = document.createElement("div");
+    const newDiv = document.createElement("div");
     if (slim && name === "status-server") {
         newDiv.id = "head_wrapper";
     } else {
@@ -95,8 +96,8 @@ function addBox(slim, name, display_name, status) {
     }
 
     // Add text and status div depending on previous JSON parsing
-    var statusDiv = document.createElement("div");
-    var statusText = document.createElement("p");
+    const statusDiv = document.createElement("div");
+    const statusText = document.createElement("p");
     statusText.appendChild(document.createTextNode(display_name + ":"));
 
     const enm = statusArray[status];
@@ -112,9 +113,9 @@ function addBox(slim, name, display_name, status) {
     // Add the box to the flex container
     // If the box is for the status server, check if there were already boxes created
     // If true, create the status server box before the first child node
-    var container = document.getElementById('flex_container');
+    const container = document.getElementById('flex_container');
     if (name === "status-server" && container.hasChildNodes()) {
-        var child = container.childNodes[1];
+        let child = container.childNodes[1];
         container.insertBefore(newDiv, child);
     } else {
         document.getElementById('flex_container').appendChild(newDiv);
