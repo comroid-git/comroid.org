@@ -89,7 +89,7 @@ function createBoxes(data, slim) {
 function addBox(slim, name, display_name, status) {
     // Create a new box in the status grid
     const newDiv = document.createElement("div");
-    if (slim && name === "status-server") {
+    if (!slim && name === "status-server") {
         newDiv.id = "head_wrapper";
     } else {
         newDiv.className = "cell";
