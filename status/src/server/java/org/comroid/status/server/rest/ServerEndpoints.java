@@ -68,7 +68,7 @@ public enum ServerEndpoints implements ServerEndpoint {
             final LocalService service = requireLocalService(urlParams[0]);
             service.updateFrom(body.asObjectNode());
 
-            return new ResponseBuilder(body.getSerializationAdapter())
+            return new ResponseBuilder(body)
                     .setStatusCode(200)
                     .setBody(service)
                     .build();
@@ -110,7 +110,7 @@ public enum ServerEndpoints implements ServerEndpoint {
 
             service.setStatus(newStatus);
 
-            return new ResponseBuilder(body.getSerializationAdapter())
+            return new ResponseBuilder(body)
                     .setStatusCode(200)
                     .setBody(service)
                     .build();
@@ -132,7 +132,7 @@ public enum ServerEndpoints implements ServerEndpoint {
 
             service.receivePoll(newStatus, expected, timeout);
 
-            return new ResponseBuilder(body.getSerializationAdapter())
+            return new ResponseBuilder(body)
                     .setStatusCode(200)
                     .setBody(service)
                     .build();
@@ -150,7 +150,7 @@ public enum ServerEndpoints implements ServerEndpoint {
 
             service.discardPoll(newStatus);
 
-            return new ResponseBuilder(body.getSerializationAdapter())
+            return new ResponseBuilder(body)
                     .setStatusCode(200)
                     .setBody(service)
                     .build();

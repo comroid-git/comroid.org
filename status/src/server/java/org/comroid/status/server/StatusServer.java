@@ -88,8 +88,7 @@ public class StatusServer implements DependenyObject, Closeable {
         this.threadPool = executor;
 
         this.rest = new REST<>(
-                DependenyObject.Adapters.HTTP_ADAPTER,
-                SERIALIZATION_ADAPTER,
+                Adapters.PROVIDER,
                 this,
                 threadPool
         );

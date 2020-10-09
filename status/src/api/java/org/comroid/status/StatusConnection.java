@@ -1,5 +1,6 @@
 package org.comroid.status;
 
+import org.comroid.api.ContextualProvider;
 import org.comroid.api.Polyfill;
 import org.comroid.common.io.FileHandle;
 import org.comroid.mutatio.span.Span;
@@ -7,6 +8,7 @@ import org.comroid.restless.REST;
 import org.comroid.restless.body.BodyBuilderType;
 import org.comroid.status.entity.Service;
 import org.comroid.status.rest.Endpoint;
+import org.comroid.uniform.SerializationAdapter;
 import org.comroid.uniform.ValueType;
 import org.comroid.uniform.cache.ProvidedCache;
 import org.comroid.uniform.node.UniObjectNode;
@@ -50,15 +52,15 @@ public final class StatusConnection implements DependenyObject {
         return polling;
     }
 
-    public StatusConnection(String serviceName, FileHandle tokenFile) {
-        this(serviceName, tokenFile.getContent(), Executors.newScheduledThreadPool(4));
+    public StatusConnection(ContextualProvider context, String serviceName, FileHandle tokenFile) {
+        this(context, serviceName, tokenFile.getContent(), Executors.newScheduledThreadPool(4));
     }
 
-    public StatusConnection(String serviceName, String token, ScheduledExecutorService executor) {
+    public StatusConnection(ContextualProvider context, String serviceName, String token, ScheduledExecutorService executor) {
         this.serviceName = serviceName;
         this.token = token;
         this.executor = executor;
-        this.rest = new REST<>(Adapters.HTTP_ADAPTER, Adapters.SERIALIZATION_ADAPTER, this, executor);
+        this.rest = new REST<>(context, this, executor);
         this.serviceCache = new ProvidedCache<>(250, ForkJoinPool.commonPool(), this::requestServiceByName);
         this.ownService = requestServiceByName(serviceName).join();
     }
@@ -106,7 +108,8 @@ public final class StatusConnection implements DependenyObject {
     }
 
     public CompletableFuture<Service> updateStatus(Service.Status status) {
-        final UniObjectNode data = rest.getSerializationAdapter().createUniObjectNode();
+        final UniObjectNode data = rest.requireFromContext(SerializationAdapter.class)
+                .createUniObjectNode();
 
         data.put("status", ValueType.INTEGER, status.getValue());
 
