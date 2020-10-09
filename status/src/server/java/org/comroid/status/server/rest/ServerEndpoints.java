@@ -179,7 +179,7 @@ public enum ServerEndpoints implements ServerEndpoint {
             throw new RestEndpointException(UNAUTHORIZED, "Unauthorized");
     }
 
-    public void checkAdminAuthorization(Headers headers) {
+    public static void checkAdminAuthorization(Headers headers) {
         if (!headers.containsKey(CommonHeaderNames.AUTHORIZATION))
             throw new RestEndpointException(UNAUTHORIZED, "Unauthorized");
 
