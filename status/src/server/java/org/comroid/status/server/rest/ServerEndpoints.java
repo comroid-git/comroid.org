@@ -16,6 +16,8 @@ import org.comroid.status.server.util.ResponseBuilder;
 import org.comroid.uniform.node.UniArrayNode;
 import org.comroid.uniform.node.UniNode;
 
+import java.util.function.Function;
+
 import static org.comroid.restless.HTTPStatusCodes.*;
 
 public enum ServerEndpoints implements ServerEndpoint {
@@ -27,6 +29,7 @@ public enum ServerEndpoints implements ServerEndpoint {
             StatusServer.instance
                     .getEntityCache()
                     .pipe(name -> !name.equals("test-dummy"))
+                    .flatMap(Function.identity())
                     .flatMap(Service.class)
                     .forEach(service -> service.toObjectNode(services.addObject()));
 
