@@ -51,6 +51,9 @@ public enum ServerEndpoints implements ServerEndpoint {
 
         @Override
         public REST.Response executePUT(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            if (StatusServer.instance.getEntityCache().containsKey(urlParams[0]))
+                throw new RestEndpointException(BAD_REQUEST, "Service " + urlParams[0] + " already exists!");
+
             checkAdminAuthorization(headers);
 
             final LocalService service = StatusServer.instance.createService(urlParams[0], body.asObjectNode());
@@ -144,6 +147,7 @@ public enum ServerEndpoints implements ServerEndpoint {
     private final Endpoint underlying;
 
     private final boolean allowMemberAccess;
+
     @Override
     public AccessibleEndpoint getEndpointBase() {
         return underlying;
@@ -153,6 +157,7 @@ public enum ServerEndpoints implements ServerEndpoint {
         this.underlying = underlying;
         this.allowMemberAccess = allowMemberAccess;
     }
+
     private static LocalService requireLocalService(String name) {
         return StatusServer.instance.getServiceByName(name)
                 .flatMapOptional(it -> it.as(LocalService.class))
