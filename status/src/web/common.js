@@ -45,7 +45,11 @@ function initGrid(slim) {
     timeout(5000, fetch('https://api.status.comroid.org/services'))
         .then(handleErrors)
         .then(response => response.json())
-        .then(data => createBoxes(data, slim))
+        .then(data => {
+            if (data.length < 1)
+                throw Error('Status Server probably offline');
+            createBoxes(data, slim);
+        })
         .catch(error => {
             addBox(false, "status-server", "Status Server", 0);
             console.error('There has been a problem with your fetch operation:', error);
