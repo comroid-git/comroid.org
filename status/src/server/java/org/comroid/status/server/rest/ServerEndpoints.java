@@ -62,6 +62,19 @@ public enum ServerEndpoints implements ServerEndpoint {
         }
 
         @Override
+        public REST.Response executePATCH(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            checkAdminAuthorization(headers);
+
+            final LocalService service = requireLocalService(urlParams[0]);
+            service.updateFrom(body.asObjectNode());
+
+            return new ResponseBuilder(body.getSerializationAdapter())
+                    .setStatusCode(200)
+                    .setBody(service)
+                    .build();
+        }
+
+        @Override
         public REST.Response executeDELETE(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             checkAdminAuthorization(headers);
 
