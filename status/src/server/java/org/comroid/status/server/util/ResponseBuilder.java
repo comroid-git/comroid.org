@@ -28,7 +28,7 @@ public class ResponseBuilder implements Builder<REST.Response> {
     }
 
     public ResponseBuilder() {
-        this(null);
+        this.serilib = null;
     }
 
     public ResponseBuilder(ContextualTypeProvider<? extends SerializationAdapter<?,?,?>> serializationAdapterProvider) {
