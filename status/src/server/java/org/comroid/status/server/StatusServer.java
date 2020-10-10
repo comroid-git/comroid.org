@@ -117,6 +117,10 @@ public class StatusServer implements DependenyObject, Closeable {
                 .flatMap(LocalService.class)
                 .requireNonNull("Status server not found in cache!")
                 .discardPoll(Service.Status.ONLINE);
+        getServiceByName("test-dummy")
+                .flatMap(LocalService.class)
+                .requireNonNull("Testing Dummy service not found in cache!")
+                .discardPoll(Service.Status.ONLINE);
         logger.at(Level.INFO).log("Status Server ready! %s", server);
     }
 
