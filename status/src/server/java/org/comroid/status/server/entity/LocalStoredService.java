@@ -1,17 +1,13 @@
 package org.comroid.status.server.entity;
 
 import org.comroid.api.IntEnum;
-import org.comroid.api.Polyfill;
 import org.comroid.common.io.FileHandle;
 import org.comroid.mutatio.ref.Reference;
 import org.comroid.status.entity.Entity;
-import org.comroid.status.entity.Service;
 import org.comroid.status.server.StatusServer;
 import org.comroid.status.server.TokenCore;
 import org.comroid.uniform.node.UniObjectNode;
-import org.comroid.varbind.container.DataContainer;
 import org.comroid.varbind.container.DataContainerBase;
-import org.comroid.varbind.container.DataContainerBuilder;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;

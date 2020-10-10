@@ -1,7 +1,5 @@
 package org.comroid.status.server;
 
-import org.comroid.status.entity.Service;
-
 import java.util.Base64;
 import java.util.UUID;
 

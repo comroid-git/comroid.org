@@ -20,14 +20,14 @@ public interface LocalService extends Service {
     @Override
     Status getStatus();
 
+    void setStatus(Status status);
+
+    String getToken();
+
     @Override
     default CompletableFuture<Status> requestStatus() {
         return CompletableFuture.completedFuture(getStatus());
     }
-
-    void setStatus(Status status);
-
-    String getToken();
 
     String regenerateToken();
 

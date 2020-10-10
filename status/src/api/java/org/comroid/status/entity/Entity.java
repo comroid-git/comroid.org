@@ -1,7 +1,7 @@
 package org.comroid.status.entity;
 
-import org.comroid.api.Specifiable;
 import org.comroid.api.Named;
+import org.comroid.api.Specifiable;
 import org.comroid.status.DependenyObject;
 import org.comroid.uniform.ValueType;
 import org.comroid.varbind.bind.GroupBind;

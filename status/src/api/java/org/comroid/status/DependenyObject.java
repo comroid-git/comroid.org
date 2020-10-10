@@ -2,13 +2,10 @@ package org.comroid.status;
 
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.ContextualTypeProvider;
-import org.comroid.api.Polyfill;
 import org.comroid.restless.HttpAdapter;
-import org.comroid.status.entity.Service;
 import org.comroid.uniform.SerializationAdapter;
 import org.jetbrains.annotations.NotNull;
 
-import java.net.URI;
 import java.util.Objects;
 
 public interface DependenyObject {
