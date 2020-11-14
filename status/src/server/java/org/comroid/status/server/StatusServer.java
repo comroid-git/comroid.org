@@ -6,7 +6,7 @@ import org.comroid.commandline.CommandLineArgs;
 import org.comroid.common.exception.AssertionException;
 import org.comroid.common.io.FileHandle;
 import org.comroid.common.jvm.JITAssistant;
-import org.comroid.mutatio.proc.Processor;
+import org.comroid.mutatio.ref.Processor;
 import org.comroid.restless.REST;
 import org.comroid.restless.adapter.okhttp.v4.OkHttp3Adapter;
 import org.comroid.restless.server.RestServer;
