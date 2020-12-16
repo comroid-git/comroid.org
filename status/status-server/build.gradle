@@ -45,7 +45,7 @@ dependencies {
     }
 
     // Javacord
-    implementation 'org.javacord:javacord:3.0.6'
+    implementation 'org.javacord:javacord:3.1.2'
 
     // logging dependencies
     implementation 'com.google.flogger:flogger:0.5.1'
