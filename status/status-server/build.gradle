@@ -30,8 +30,7 @@ dependencies {
 
         implementation 'com.github.comroid-git:cli-parser:master-SNAPSHOT'
 
-        implementation 'com.github.comroid-git.botsuite:botsuite-javacord:master-SNAPSHOT'
-        implementation 'com.github.comroid-git:javacord-utilities:master-SNAPSHOT'
+        implementation 'com.github.comroid-git:CrystalShard:dev-SNAPSHOT'
     } else {
         implementation project(':status:status-api')
 
@@ -40,19 +39,14 @@ dependencies {
 
         implementation project(':clipa')
 
-        implementation project(':botsuite:javacord')
-        implementation project(':javacord-utilities')
+        implementation project(':CrystalShard')
     }
-
-    // Javacord
-    implementation 'org.javacord:javacord:3.0.6'
 
     // logging dependencies
     implementation 'com.google.flogger:flogger:0.5.1'
-    runtimeOnly 'com.google.flogger:flogger-log4j2-backend:0.5.1'
-    runtimeOnly 'org.apache.logging.log4j:log4j-core:2.13.3'
+    runtimeOnly 'com.google.flogger:flogger-system-backend:0.5.1'
 
     // runtime adapter dependencies
-    runtimeOnly 'com.squareup.okhttp3:okhttp:4.7.2'
+    runtimeOnly 'com.squareup.okhttp3:okhttp:4.7.2' // todo Make Optional
     runtimeOnly 'com.alibaba:fastjson:1.2.70'
 }
