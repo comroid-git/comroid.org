@@ -1,11 +1,11 @@
 package org.comroid.status;
 
 import org.comroid.api.ContextualProvider;
-import org.comroid.api.ContextualTypeProvider;
 import org.comroid.restless.HttpAdapter;
 import org.comroid.uniform.SerializationAdapter;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 public interface DependenyObject {
@@ -16,8 +16,8 @@ public interface DependenyObject {
         public static @NotNull SerializationAdapter<?, ?, ?> SERIALIZATION_ADAPTER = null;
         @SuppressWarnings("ConstantConditions") // must be defined by the user
         public static @NotNull HttpAdapter HTTP_ADAPTER = null;
-        public static final ContextualProvider PROVIDER = ContextualProvider.create(
-                (ContextualTypeProvider<?>) () -> Objects.requireNonNull(SERIALIZATION_ADAPTER, "Serialization Adapter is not defined"),
-                (ContextualTypeProvider<?>) () -> Objects.requireNonNull(HTTP_ADAPTER, "HTTP Adapter is not defined"));
+        public static final ContextualProvider PROVIDER = () -> Arrays.asList(
+                Objects.requireNonNull(SERIALIZATION_ADAPTER, "Serialization Adapter is not defined"),
+                Objects.requireNonNull(HTTP_ADAPTER, "HTTP Adapter is not defined"));
     }
 }
