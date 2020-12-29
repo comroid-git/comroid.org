@@ -7,7 +7,6 @@ import org.comroid.common.exception.AssertionException;
 import org.comroid.common.io.FileHandle;
 import org.comroid.common.jvm.JITAssistant;
 import org.comroid.mutatio.proc.Processor;
-import org.comroid.mutatio.ref.Processor;
 import org.comroid.restless.REST;
 import org.comroid.restless.adapter.okhttp.v4.OkHttp3Adapter;
 import org.comroid.restless.server.RestServer;
@@ -57,7 +56,7 @@ public class StatusServer implements DependenyObject, Closeable {
             ADMIN_TOKEN.setContent(TokenCore.generate(ADMIN_TOKEN_NAME));
     }
 
-    public final REST<StatusServer> rest;
+    public final REST rest;
     private final ScheduledExecutorService threadPool;
     private final FileCache<String, Entity, DependenyObject> entityCache;
     private final RestServer server;
@@ -88,11 +87,7 @@ public class StatusServer implements DependenyObject, Closeable {
          */
         this.threadPool = executor;
 
-        this.rest = new REST<>(
-                Adapters.PROVIDER,
-                this,
-                threadPool
-        );
+        this.rest = new REST(Adapters.PROVIDER, threadPool);
         logger.at(Level.INFO).log("REST Client created: %s", rest);
 
         this.entityCache = new FileCache<>(
