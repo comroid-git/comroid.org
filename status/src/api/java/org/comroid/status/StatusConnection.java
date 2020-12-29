@@ -21,7 +21,7 @@ public final class StatusConnection implements DependenyObject {
     private final String serviceName;
     private final String token;
     private final ScheduledExecutorService executor;
-    private final REST<DependenyObject> rest;
+    private final REST rest;
     private final ProvidedCache<String, Service> serviceCache;
     private final Service ownService;
     public int refreshTimeout = 60; // seconds
@@ -40,7 +40,7 @@ public final class StatusConnection implements DependenyObject {
         return ownService;
     }
 
-    public REST<DependenyObject> getRest() {
+    public REST getRest() {
         return rest;
     }
 
@@ -60,7 +60,7 @@ public final class StatusConnection implements DependenyObject {
         this.serviceName = serviceName;
         this.token = token;
         this.executor = executor;
-        this.rest = new REST<>(context, this, executor);
+        this.rest = new REST(context, executor);
         this.serviceCache = new ProvidedCache<>(250, ForkJoinPool.commonPool(), this::requestServiceByName);
         this.ownService = requestServiceByName(serviceName).join();
     }
