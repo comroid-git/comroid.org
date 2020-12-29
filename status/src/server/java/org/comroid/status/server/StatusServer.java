@@ -6,6 +6,7 @@ import org.comroid.commandline.CommandLineArgs;
 import org.comroid.common.exception.AssertionException;
 import org.comroid.common.io.FileHandle;
 import org.comroid.common.jvm.JITAssistant;
+import org.comroid.mutatio.proc.Processor;
 import org.comroid.mutatio.ref.Processor;
 import org.comroid.restless.REST;
 import org.comroid.restless.adapter.okhttp.v4.OkHttp3Adapter;
@@ -128,12 +129,11 @@ public class StatusServer implements DependenyObject, Closeable {
         ARGS = CommandLineArgs.parse(args);
         logger.at(Level.INFO).log("Starting comroid Status Server...");
         new StatusServer(Executors.newScheduledThreadPool(4), InetAddress.getByAddress(new byte[]{0, 0, 0, 0}), PORT);
-        DiscordBot.INSTANCE.serverFuture.complete(instance);
 
         logger.at(Level.INFO).log("Status Server running! Booting Discord Bot...");
         if (ARGS.process("token").test("null"::equals))
             logger.at(Level.INFO).log("Skipping discord bot creation because token was null");
-        else DiscordBot.INSTANCE.supplyToken(instance, ARGS.wrap("token").orElseGet(BOT_TOKEN::getContent));
+        else DiscordBot.token.set(ARGS.wrap("token").orElseGet(BOT_TOKEN::getContent));
 
         Runtime.getRuntime().addShutdownHook(new Thread(instance::close));
         instance.threadPool.scheduleAtFixedRate(() -> {
