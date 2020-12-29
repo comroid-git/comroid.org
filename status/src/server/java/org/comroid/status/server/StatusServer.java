@@ -48,12 +48,12 @@ public class StatusServer implements DependenyObject, Closeable {
     public static StatusServer instance;
 
     static {
+        Adapters.HTTP_ADAPTER = new OkHttp3Adapter();
+        SERIALIZATION_ADAPTER = FastJSONLib.fastJsonLib;
+
         logger.at(Level.INFO).log("Preparing classes...");
         JITAssistant.prepareStatic(Entity.Bind.class, Service.Bind.class);
         AssertionException.expect(3, LocalService.GROUP.streamAllChildren().count(), "LocalService children count");
-
-        Adapters.HTTP_ADAPTER = new OkHttp3Adapter();
-        SERIALIZATION_ADAPTER = FastJSONLib.fastJsonLib;
 
         if (ADMIN_TOKEN.getContent().isEmpty())
             ADMIN_TOKEN.setContent(TokenCore.generate(ADMIN_TOKEN_NAME));
