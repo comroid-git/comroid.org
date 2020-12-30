@@ -1,7 +1,7 @@
 package org.comroid.status.server.util;
 
 import org.comroid.api.Builder;
-import org.comroid.api.ContextualTypeProvider;
+import org.comroid.api.ContextualProvider;
 import org.comroid.restless.REST;
 import org.comroid.uniform.SerializationAdapter;
 import org.comroid.uniform.node.UniNode;
@@ -31,8 +31,8 @@ public class ResponseBuilder implements Builder<REST.Response> {
         this.serilib = null;
     }
 
-    public ResponseBuilder(ContextualTypeProvider<? extends SerializationAdapter<?, ?, ?>> serializationAdapterProvider) {
-        this.serilib = serializationAdapterProvider.getFromContext();
+    public ResponseBuilder(ContextualProvider context) {
+        this.serilib = context.requireFromContext(SerializationAdapter.class);
     }
 
     public ResponseBuilder addHeader(String name, String value) {
