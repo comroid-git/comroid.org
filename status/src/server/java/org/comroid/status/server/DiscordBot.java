@@ -4,7 +4,6 @@ import com.google.common.flogger.FluentLogger;
 import org.comroid.crystalshard.AbstractDiscordBot;
 import org.comroid.crystalshard.DiscordAPI;
 import org.comroid.mutatio.ref.Reference;
-import org.comroid.status.DependenyObject;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -16,8 +15,8 @@ public final class DiscordBot extends AbstractDiscordBot {
     public static final Reference<DiscordBot> instance = Reference.create();
 
     static {
-        DiscordAPI.SERIALIZATION = DependenyObject.Adapters.SERIALIZATION_ADAPTER;
-        DISCORD_API = new DiscordAPI(DependenyObject.Adapters.HTTP_ADAPTER);
+        DiscordAPI.SERIALIZATION = StatusServer.ADAPTER_DEFINITION.serialization;
+        DISCORD_API = new DiscordAPI(StatusServer.ADAPTER_DEFINITION.http);
         token.onChange(newToken -> {
             LOGGER.atInfo().log("New token found! Restarting Discord Bot...");
 

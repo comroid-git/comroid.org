@@ -3,6 +3,7 @@ package org.comroid.status;
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.Polyfill;
 import org.comroid.common.io.FileHandle;
+import org.comroid.common.jvm.JITAssistant;
 import org.comroid.mutatio.span.Span;
 import org.comroid.restless.REST;
 import org.comroid.restless.body.BodyBuilderType;
@@ -17,7 +18,8 @@ import java.util.concurrent.*;
 
 import static org.comroid.restless.CommonHeaderNames.AUTHORIZATION;
 
-public final class StatusConnection implements DependenyObject {
+public final class StatusConnection implements ContextualProvider.Underlying {
+    private final AdapterDefinition adapterDefinition;
     private final String serviceName;
     private final String token;
     private final ScheduledExecutorService executor;
@@ -52,17 +54,25 @@ public final class StatusConnection implements DependenyObject {
         return polling;
     }
 
-    public StatusConnection(ContextualProvider context, String serviceName, FileHandle tokenFile) {
+    @Override
+    public ContextualProvider getUnderlyingContextualProvider() {
+        return adapterDefinition;
+    }
+
+    public StatusConnection(AdapterDefinition context, String serviceName, FileHandle tokenFile) {
         this(context, serviceName, tokenFile.getContent(), Executors.newScheduledThreadPool(4));
     }
 
-    public StatusConnection(ContextualProvider context, String serviceName, String token, ScheduledExecutorService executor) {
+    public StatusConnection(AdapterDefinition context, String serviceName, String token, ScheduledExecutorService executor) {
+        this.adapterDefinition = context;
         this.serviceName = serviceName;
         this.token = token;
         this.executor = executor;
-        this.rest = new REST(context, executor);
+        this.rest = new REST(adapterDefinition, executor);
         this.serviceCache = new ProvidedCache<>(250, ForkJoinPool.commonPool(), this::requestServiceByName);
         this.ownService = requestServiceByName(serviceName).join();
+
+        JITAssistant.prepareStatic(Service.class);
     }
 
     public boolean startPolling() {

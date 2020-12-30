@@ -1,7 +1,7 @@
 package org.comroid.status.rest;
 
 import org.comroid.restless.endpoint.AccessibleEndpoint;
-import org.comroid.status.DependenyObject;
+import org.comroid.status.AdapterDefinition;
 import org.comroid.status.entity.Service;
 import org.intellij.lang.annotations.Language;
 
@@ -34,7 +34,7 @@ public enum Endpoint implements AccessibleEndpoint {
 
     @Override
     public String getUrlBase() {
-        return DependenyObject.URL_BASE;
+        return AdapterDefinition.URL_BASE;
     }
 
     @Override

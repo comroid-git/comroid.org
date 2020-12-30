@@ -1,7 +1,6 @@
 package org.comroid.server.status.test.api;
 
 import org.comroid.restless.adapter.okhttp.v4.OkHttp3Adapter;
-import org.comroid.status.DependenyObject;
 import org.comroid.status.StatusConnection;
 import org.comroid.status.entity.Service;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;

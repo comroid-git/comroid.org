@@ -6,7 +6,6 @@ import org.comroid.restless.REST;
 import org.comroid.restless.endpoint.AccessibleEndpoint;
 import org.comroid.restless.server.RestEndpointException;
 import org.comroid.restless.server.ServerEndpoint;
-import org.comroid.status.DependenyObject.Adapters;
 import org.comroid.status.entity.Service;
 import org.comroid.status.rest.Endpoint;
 import org.comroid.status.server.StatusServer;
@@ -24,7 +23,7 @@ public enum ServerEndpoints implements ServerEndpoint {
     LIST_SERVICES(Endpoint.LIST_SERVICES, false) {
         @Override
         public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            final UniArrayNode services = Adapters.SERIALIZATION_ADAPTER.createUniArrayNode();
+            final UniArrayNode services = StatusServer.ADAPTER_DEFINITION.serialization.createUniArrayNode();
 
             StatusServer.instance
                     .getEntityCache()
@@ -44,7 +43,7 @@ public enum ServerEndpoints implements ServerEndpoint {
         @Override
         public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             return StatusServer.instance.getServiceByName(urlParams[0])
-                    .map(service -> service.toObjectNode(Adapters.SERIALIZATION_ADAPTER))
+                    .map(service -> service.toObjectNode(StatusServer.ADAPTER_DEFINITION))
                     .map(node -> new ResponseBuilder()
                             .setStatusCode(200)
                             .setBody(node)
@@ -61,7 +60,7 @@ public enum ServerEndpoints implements ServerEndpoint {
 
             final LocalService service = StatusServer.instance.createService(urlParams[0], body.asObjectNode());
 
-            return new REST.Response(OK, service.toObjectNode(Adapters.SERIALIZATION_ADAPTER));
+            return new REST.Response(OK, service.toObjectNode(StatusServer.ADAPTER_DEFINITION));
         }
 
         @Override

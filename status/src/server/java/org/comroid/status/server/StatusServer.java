@@ -1,6 +1,7 @@
 package org.comroid.status.server;
 
 import com.google.common.flogger.FluentLogger;
+import org.comroid.api.ContextualProvider;
 import org.comroid.api.Junction;
 import org.comroid.commandline.CommandLineArgs;
 import org.comroid.common.exception.AssertionException;
@@ -10,7 +11,7 @@ import org.comroid.mutatio.proc.Processor;
 import org.comroid.restless.REST;
 import org.comroid.restless.adapter.okhttp.v4.OkHttp3Adapter;
 import org.comroid.restless.server.RestServer;
-import org.comroid.status.DependenyObject;
+import org.comroid.status.AdapterDefinition;
 import org.comroid.status.entity.Entity;
 import org.comroid.status.entity.Service;
 import org.comroid.status.server.entity.LocalService;
@@ -29,11 +30,10 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
-import static org.comroid.status.DependenyObject.Adapters.SERIALIZATION_ADAPTER;
-
-public class StatusServer implements DependenyObject, Closeable {
+public class StatusServer implements ContextualProvider.Underlying, Closeable {
     //http://localhost:42641/services
 
+    public static final AdapterDefinition ADAPTER_DEFINITION;
     public static final FluentLogger logger = FluentLogger.forEnclosingClass();
     public static final FileHandle PATH_BASE = new FileHandle("/home/comroid/srv_status/", true); // server path base
     public static final FileHandle DATA_DIR = PATH_BASE.createSubDir("data");
@@ -48,8 +48,7 @@ public class StatusServer implements DependenyObject, Closeable {
     public static StatusServer instance;
 
     static {
-        Adapters.HTTP_ADAPTER = new OkHttp3Adapter();
-        SERIALIZATION_ADAPTER = FastJSONLib.fastJsonLib;
+        ADAPTER_DEFINITION = AdapterDefinition.initialize(FastJSONLib.fastJsonLib, new OkHttp3Adapter());
 
         logger.at(Level.INFO).log("Preparing classes...");
         JITAssistant.prepareStatic(Entity.Bind.class, Service.Bind.class);
@@ -61,10 +60,10 @@ public class StatusServer implements DependenyObject, Closeable {
 
     public final REST rest;
     private final ScheduledExecutorService threadPool;
-    private final FileCache<String, Entity, DependenyObject> entityCache;
+    private final FileCache<String, Entity, ContextualProvider> entityCache;
     private final RestServer server;
 
-    public final FileCache<String, Entity, DependenyObject> getEntityCache() {
+    public final FileCache<String, Entity, ContextualProvider> getEntityCache() {
         return entityCache;
     }
 
@@ -74,6 +73,11 @@ public class StatusServer implements DependenyObject, Closeable {
 
     public final ScheduledExecutorService getThreadPool() {
         return threadPool;
+    }
+
+    @Override
+    public ContextualProvider getUnderlyingContextualProvider() {
+        return ADAPTER_DEFINITION;
     }
 
     private StatusServer(ScheduledExecutorService executor, InetAddress host, int port) throws IOException {
@@ -87,7 +91,7 @@ public class StatusServer implements DependenyObject, Closeable {
          */
         this.threadPool = executor;
 
-        this.rest = new REST(Adapters.PROVIDER, threadPool);
+        this.rest = new REST(ADAPTER_DEFINITION, threadPool);
         logger.at(Level.INFO).log("REST Client created: %s", rest);
 
         this.entityCache = new FileCache<>(
@@ -106,7 +110,7 @@ public class StatusServer implements DependenyObject, Closeable {
                         .count());
 
         logger.at(Level.INFO).log("Starting REST Server...");
-        this.server = new RestServer(SERIALIZATION_ADAPTER, executor, DependenyObject.URL_BASE, host, port, ServerEndpoints.values());
+        this.server = new RestServer(ADAPTER_DEFINITION.serialization, executor, AdapterDefinition.URL_BASE, host, port, ServerEndpoints.values());
         server.addCommonHeader("Access-Control-Allow-Origin", "*");
 
         getServiceByName("status-server")
