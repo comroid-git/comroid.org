@@ -1,6 +1,7 @@
 package org.comroid.status.server;
 
 import com.google.common.flogger.FluentLogger;
+import com.google.common.flogger.LoggerConfig;
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.Junction;
 import org.comroid.commandline.CommandLineArgs;
@@ -50,7 +51,7 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
     static {
         ADAPTER_DEFINITION = AdapterDefinition.initialize(FastJSONLib.fastJsonLib, new OkHttp3Adapter());
 
-        logger.at(Level.INFO).log("Preparing classes...");
+        logger.atFine().log("Preparing classes...");
         JITAssistant.prepareStatic(Entity.Bind.class, Service.Bind.class);
         AssertionException.expect(3, LocalService.GROUP.streamAllChildren().count(), "LocalService children count");
 
@@ -92,7 +93,7 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
         this.threadPool = executor;
 
         this.rest = new REST(ADAPTER_DEFINITION, threadPool);
-        logger.at(Level.INFO).log("REST Client created: %s", rest);
+        logger.at(Level.CONFIG).log("REST Client created: %s", rest);
 
         this.entityCache = new FileCache<>(
                 FastJSONLib.fastJsonLib,
@@ -103,13 +104,13 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
                 true,
                 this
         );
-        logger.at(Level.INFO).log("EntityCache created: %s", entityCache);
-        logger.at(Level.INFO).log("Loaded %d services",
+        logger.at(Level.CONFIG).log("EntityCache created: %s", entityCache);
+        logger.at(Level.CONFIG).log("Loaded %d services",
                 entityCache.streamRefs()
                         .filter(ref -> ref.test(Service.class::isInstance))
                         .count());
 
-        logger.at(Level.INFO).log("Starting REST Server...");
+        logger.at(Level.CONFIG).log("Starting REST Server...");
         this.server = new RestServer(ADAPTER_DEFINITION.serialization, executor, AdapterDefinition.URL_BASE, host, port, ServerEndpoints.values());
         server.addCommonHeader("Access-Control-Allow-Origin", "*");
 
