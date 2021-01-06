@@ -52,7 +52,7 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
 
         logger.atFine().log("Preparing classes...");
         JITAssistant.prepareStatic(Entity.Bind.class, Service.Bind.class);
-        AssertionException.expect(4, LocalService.GROUP.streamAllChildren().count(), "LocalService children count");
+        AssertionException.expect(3, LocalService.GROUP.streamAllChildren().count(), (x,y) -> x < y,"LocalService children count");
 
         if (ADMIN_TOKEN.getContent().isEmpty())
             ADMIN_TOKEN.setContent(TokenCore.generate(ADMIN_TOKEN_NAME));
