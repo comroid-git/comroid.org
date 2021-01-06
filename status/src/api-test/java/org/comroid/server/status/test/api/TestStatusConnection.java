@@ -1,6 +1,6 @@
 package org.comroid.server.status.test.api;
 
-import org.comroid.restless.adapter.okhttp.v4.OkHttp3Adapter;
+import org.comroid.restless.adapter.okhttp.v4.OkHttp4Adapter;
 import org.comroid.status.StatusConnection;
 import org.comroid.status.entity.Service;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
@@ -17,7 +17,7 @@ public class TestStatusConnection {
 
     @Before
     public void setup() {
-        DependenyObject.Adapters.HTTP_ADAPTER = new OkHttp3Adapter();
+        DependenyObject.Adapters.HTTP_ADAPTER = new OkHttp4Adapter();
         DependenyObject.Adapters.SERIALIZATION_ADAPTER = FastJSONLib.fastJsonLib;
         connection = new StatusConnection("test-dummy", "null", Executors.newScheduledThreadPool(4));
         service = connection.getService();

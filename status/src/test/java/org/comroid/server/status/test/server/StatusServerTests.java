@@ -2,7 +2,7 @@ package org.comroid.server.status.test.server;
 
 import org.comroid.mutatio.span.Span;
 import org.comroid.restless.REST;
-import org.comroid.restless.adapter.okhttp.v4.OkHttp3Adapter;
+import org.comroid.restless.adapter.okhttp.v4.OkHttp4Adapter;
 import org.comroid.restless.body.BodyBuilderType;
 import org.comroid.restless.endpoint.CompleteEndpoint;
 import org.comroid.status.StatusConnection;
@@ -32,7 +32,7 @@ public class StatusServerTests {
 
     @Before
     public void setup() throws IOException {
-        DependenyObject.Adapters.HTTP_ADAPTER = new OkHttp3Adapter();
+        DependenyObject.Adapters.HTTP_ADAPTER = new OkHttp4Adapter();
         DependenyObject.Adapters.SERIALIZATION_ADAPTER = FastJSONLib.fastJsonLib;
 
         // initialize test site

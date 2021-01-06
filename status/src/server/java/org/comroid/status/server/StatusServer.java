@@ -1,7 +1,6 @@
 package org.comroid.status.server;
 
 import com.google.common.flogger.FluentLogger;
-import com.google.common.flogger.LoggerConfig;
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.Junction;
 import org.comroid.commandline.CommandLineArgs;
@@ -10,7 +9,7 @@ import org.comroid.common.io.FileHandle;
 import org.comroid.common.jvm.JITAssistant;
 import org.comroid.mutatio.proc.Processor;
 import org.comroid.restless.REST;
-import org.comroid.restless.adapter.okhttp.v4.OkHttp3Adapter;
+import org.comroid.restless.adapter.okhttp.v4.OkHttp4Adapter;
 import org.comroid.restless.server.RestServer;
 import org.comroid.status.AdapterDefinition;
 import org.comroid.status.entity.Entity;
@@ -49,11 +48,11 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
     public static StatusServer instance;
 
     static {
-        ADAPTER_DEFINITION = AdapterDefinition.initialize(FastJSONLib.fastJsonLib, new OkHttp3Adapter());
+        ADAPTER_DEFINITION = AdapterDefinition.initialize(FastJSONLib.fastJsonLib, new OkHttp4Adapter());
 
         logger.atFine().log("Preparing classes...");
         JITAssistant.prepareStatic(Entity.Bind.class, Service.Bind.class);
-        AssertionException.expect(3, LocalService.GROUP.streamAllChildren().count(), "LocalService children count");
+        AssertionException.expect(4, LocalService.GROUP.streamAllChildren().count(), "LocalService children count");
 
         if (ADMIN_TOKEN.getContent().isEmpty())
             ADMIN_TOKEN.setContent(TokenCore.generate(ADMIN_TOKEN_NAME));
