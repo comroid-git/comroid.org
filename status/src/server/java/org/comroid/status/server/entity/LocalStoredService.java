@@ -1,5 +1,7 @@
 package org.comroid.status.server.entity;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.comroid.api.IntEnum;
 import org.comroid.common.io.FileHandle;
 import org.comroid.mutatio.ref.Reference;
@@ -15,6 +17,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 
 public class LocalStoredService extends DataContainerBase<Entity> implements LocalService {
+    private static final Logger logger = LogManager.getLogger();
     private final AtomicReference<Status> status;
     private final AtomicReference<String> token;
     private final FileHandle tokenFile;
@@ -97,14 +100,12 @@ public class LocalStoredService extends DataContainerBase<Entity> implements Loc
 
         private void expire() {
             if (complete(Status.NOT_RESPONDING))
-                StatusServer.logger.at(Level.WARNING)
-                        .log("Service {} is not responding within timeout ...", getDisplayName());
+                logger.warn("Service {} is not responding within timeout ...", getDisplayName());
         }
 
         private void timeout() {
             if (complete(Status.CRASHED))
-                StatusServer.logger.at(Level.SEVERE)
-                        .log("Service {} timed out!", getDisplayName());
+                logger.warn("Service {} timed out!", getDisplayName());
         }
     }
 }

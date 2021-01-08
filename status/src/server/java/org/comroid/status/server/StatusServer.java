@@ -1,6 +1,7 @@
 package org.comroid.status.server;
 
-import com.google.common.flogger.FluentLogger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.Junction;
 import org.comroid.commandline.CommandLineArgs;
@@ -34,7 +35,7 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
     //http://localhost:42641/services
 
     public static final AdapterDefinition ADAPTER_DEFINITION;
-    public static final FluentLogger logger = FluentLogger.forEnclosingClass();
+    private static final Logger logger = LogManager.getLogger();
     public static final FileHandle PATH_BASE = new FileHandle("/home/comroid/srv_status/", true); // server path base
     public static final FileHandle DATA_DIR = PATH_BASE.createSubDir("data");
     public static final FileHandle BOT_TOKEN = DATA_DIR.createSubFile("discord.cred");
@@ -50,9 +51,9 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
     static {
         ADAPTER_DEFINITION = AdapterDefinition.initialize(FastJSONLib.fastJsonLib, new OkHttp4Adapter());
 
-        logger.atFine().log("Preparing classes...");
+        logger.debug("Preparing classes...");
         JITAssistant.prepareStatic(Entity.Bind.class, Service.Bind.class);
-        AssertionException.expect(3, LocalService.GROUP.streamAllChildren().count(), (x,y) -> x < y,"LocalService children count");
+        AssertionException.expect(3, LocalService.GROUP.streamAllChildren().count(), (x, y) -> x < y, "LocalService children count");
 
         if (ADMIN_TOKEN.getContent().isEmpty())
             ADMIN_TOKEN.setContent(TokenCore.generate(ADMIN_TOKEN_NAME));
@@ -83,7 +84,7 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
     private StatusServer(ScheduledExecutorService executor, InetAddress host, int port) throws IOException {
         instance = this;
 
-        logger.at(Level.INFO).log("Initialized Adapters");
+        logger.info("Initialized Adapters");
 
         /*
         this.threadPool = ThreadPool.fixedSize(THREAD_GROUP, 8);
@@ -92,7 +93,7 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
         this.threadPool = executor;
 
         this.rest = new REST(ADAPTER_DEFINITION, threadPool);
-        logger.at(Level.CONFIG).log("REST Client created: %s", rest);
+        logger.debug("REST Client created: {}", rest);
 
         this.entityCache = new FileCache<>(
                 FastJSONLib.fastJsonLib,
@@ -103,13 +104,13 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
                 true,
                 this
         );
-        logger.at(Level.CONFIG).log("EntityCache created: %s", entityCache);
-        logger.at(Level.CONFIG).log("Loaded %d services",
+        logger.debug("EntityCache created: {}", entityCache);
+        logger.debug("Loaded {} services",
                 entityCache.streamRefs()
                         .filter(ref -> ref.test(Service.class::isInstance))
                         .count());
 
-        logger.at(Level.CONFIG).log("Starting REST Server...");
+        logger.debug("Starting REST Server...");
         this.server = new RestServer(ADAPTER_DEFINITION.serialization, executor, AdapterDefinition.URL_BASE, host, port, ServerEndpoints.values());
         server.addCommonHeader("Access-Control-Allow-Origin", "*");
 
@@ -121,17 +122,17 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
                 .flatMap(LocalService.class)
                 .requireNonNull("Testing Dummy service not found in cache!")
                 .discardPoll(Service.Status.ONLINE);
-        logger.at(Level.INFO).log("Status Server ready! %s", server);
+        logger.debug("Status Server ready! {}", server);
     }
 
     public static void main(String... args) throws IOException {
         ARGS = CommandLineArgs.parse(args);
-        logger.at(Level.INFO).log("Starting comroid Status Server...");
+        logger.info("Starting comroid Status Server...");
         new StatusServer(Executors.newScheduledThreadPool(4), InetAddress.getByAddress(new byte[]{0, 0, 0, 0}), PORT);
 
-        logger.at(Level.INFO).log("Status Server running! Booting Discord Bot...");
+        logger.info("Status Server running! Booting Discord Bot...");
         if (ARGS.process("token").test("null"::equals))
-            logger.at(Level.INFO).log("Skipping discord bot creation because token was null");
+            logger.warn("Skipping discord bot creation because token was null");
         else DiscordBot.token.set(ARGS.wrap("token").orElseGet(BOT_TOKEN::getContent));
 
         Runtime.getRuntime().addShutdownHook(new Thread(instance::close));
@@ -139,12 +140,10 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
             try {
                 instance.entityCache.storeData();
             } catch (IOException e) {
-                logger.at(Level.SEVERE)
-                        .withCause(e)
-                        .log("Could not store data");
+                logger.fatal("Could not store data", e);
             }
         }, 5, 5, TimeUnit.MINUTES);
-        logger.at(Level.INFO).log("Hooks registered!");
+        logger.info("Hooks registered!");
     }
 
     public LocalService createService(String serviceName, UniObjectNode data) {
@@ -161,7 +160,7 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
     }
 
     public final Processor<Service> getServiceByName(String name) {
-        logger.at(Level.INFO).log("Returning Service by name: %s", name);
+        logger.debug("Returning Service by name: {}", name);
         return Processor.providedOptional(() -> entityCache.streamRefs()
                 .filter(ref -> !ref.isNull())
                 .filter(ref -> ref.process().test(Service.class::isInstance))
