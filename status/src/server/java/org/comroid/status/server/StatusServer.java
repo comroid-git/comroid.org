@@ -82,47 +82,53 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
     }
 
     private StatusServer(ScheduledExecutorService executor, InetAddress host, int port) throws IOException {
-        instance = this;
+        try {
+            instance = this;
 
-        logger.info("Initialized Adapters");
+            logger.info("Initialized Adapters");
 
         /*
         this.threadPool = ThreadPool.fixedSize(THREAD_GROUP, 8);
         logger.at(Level.INFO).log("ThreadPool created: %s", threadPool);
          */
-        this.threadPool = executor;
+            this.threadPool = executor;
 
-        this.rest = new REST(ADAPTER_DEFINITION, threadPool);
-        logger.debug("REST Client created: {}", rest);
+            this.rest = new REST(ADAPTER_DEFINITION, threadPool);
+            logger.debug("REST Client created: {}", rest);
 
-        this.entityCache = new FileCache<>(
-                FastJSONLib.fastJsonLib,
-                Entity.Bind.Name,
-                Junction.identity(),
-                CACHE_FILE,
-                250,
-                true,
-                this
-        );
-        logger.debug("EntityCache created: {}", entityCache);
-        logger.debug("Loaded {} services",
-                entityCache.streamRefs()
-                        .filter(ref -> ref.test(Service.class::isInstance))
-                        .count());
+            this.entityCache = new FileCache<>(
+                    FastJSONLib.fastJsonLib,
+                    Entity.Bind.Name,
+                    Junction.identity(),
+                    CACHE_FILE,
+                    250,
+                    true,
+                    this
+            );
+            logger.debug("EntityCache created: {}", entityCache);
+            logger.debug("Loaded {} services",
+                    entityCache.streamRefs()
+                            .filter(ref -> ref.test(Service.class::isInstance))
+                            .count());
 
-        logger.debug("Starting REST Server...");
-        this.server = new RestServer(ADAPTER_DEFINITION.serialization, executor, AdapterDefinition.URL_BASE, host, port, ServerEndpoints.values());
-        server.addCommonHeader("Access-Control-Allow-Origin", "*");
+            logger.debug("Starting REST Server...");
+            this.server = new RestServer(ADAPTER_DEFINITION.serialization, executor, AdapterDefinition.URL_BASE, host, port, ServerEndpoints.values());
+            server.addCommonHeader("Access-Control-Allow-Origin", "*");
 
-        getServiceByName("status-server")
-                .flatMap(LocalService.class)
-                .requireNonNull("Status server not found in cache!")
-                .discardPoll(Service.Status.ONLINE);
-        getServiceByName("test-dummy")
-                .flatMap(LocalService.class)
-                .requireNonNull("Testing Dummy service not found in cache!")
-                .discardPoll(Service.Status.ONLINE);
-        logger.debug("Status Server ready! {}", server);
+            getServiceByName("status-server")
+                    .flatMap(LocalService.class)
+                    .requireNonNull("Status server not found in cache!")
+                    .discardPoll(Service.Status.ONLINE);
+            getServiceByName("test-dummy")
+                    .flatMap(LocalService.class)
+                    .requireNonNull("Testing Dummy service not found in cache!")
+                    .discardPoll(Service.Status.ONLINE);
+            logger.debug("Status Server ready! {}", server);
+        } catch (Throwable t) {
+            logger.error("An error occurred during startup, stopping", t);
+            System.exit(0);
+            throw new Error(t);
+        }
     }
 
     public static void main(String... args) throws IOException {
