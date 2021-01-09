@@ -29,7 +29,6 @@ import java.net.InetAddress;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
 
 public class StatusServer implements ContextualProvider.Underlying, Closeable {
     //http://localhost:42641/services

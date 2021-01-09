@@ -10,7 +10,7 @@ import org.comroid.restless.body.BodyBuilderType;
 import org.comroid.status.entity.Service;
 import org.comroid.status.rest.Endpoint;
 import org.comroid.uniform.SerializationAdapter;
-import org.comroid.uniform.ValueType;
+import org.comroid.uniform.node.impl.StandardValueType;
 import org.comroid.uniform.cache.ProvidedCache;
 import org.comroid.uniform.node.UniObjectNode;
 
@@ -109,9 +109,9 @@ public final class StatusConnection implements ContextualProvider.Underlying {
                 .endpoint(Endpoint.POLL.complete(serviceName))
                 .addHeader(AUTHORIZATION, token)
                 .buildBody(BodyBuilderType.OBJECT, obj -> {
-                    obj.put("status", ValueType.INTEGER, Service.Status.ONLINE.getValue());
-                    obj.put("expected", ValueType.INTEGER, refreshTimeout);
-                    obj.put("timeout", ValueType.INTEGER, crashedTimeout);
+                    obj.put("status", StandardValueType.INTEGER, Service.Status.ONLINE.getValue());
+                    obj.put("expected", StandardValueType.INTEGER, refreshTimeout);
+                    obj.put("timeout", StandardValueType.INTEGER, crashedTimeout);
                 })
                 .execute$autoCache(Service.Bind.Name, serviceCache)
                 .thenApply(Span::requireNonNull);
@@ -121,7 +121,7 @@ public final class StatusConnection implements ContextualProvider.Underlying {
         final UniObjectNode data = rest.requireFromContext(SerializationAdapter.class)
                 .createUniObjectNode();
 
-        data.put("status", ValueType.INTEGER, status.getValue());
+        data.put("status", StandardValueType.INTEGER, status.getValue());
 
         return rest.request(Service.class)
                 .method(REST.Method.POST)

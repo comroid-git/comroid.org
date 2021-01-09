@@ -14,7 +14,6 @@ import org.comroid.varbind.container.DataContainerBase;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Level;
 
 public class LocalStoredService extends DataContainerBase<Entity> implements LocalService {
     private static final Logger logger = LogManager.getLogger();

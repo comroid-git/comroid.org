@@ -6,7 +6,7 @@ import org.comroid.api.WrappedFormattable;
 import org.comroid.restless.REST;
 import org.comroid.status.StatusConnection;
 import org.comroid.status.rest.Endpoint;
-import org.comroid.uniform.ValueType;
+import org.comroid.uniform.node.impl.StandardValueType;
 import org.comroid.uniform.node.UniObjectNode;
 import org.comroid.varbind.annotation.Location;
 import org.comroid.varbind.annotation.RootBind;
@@ -90,21 +90,21 @@ public interface Service extends Entity, WrappedFormattable {
                 = Entity.Bind.Root.subGroup("service", Basic.class);
         VarBind<Service, String, String, String> DisplayName
                 = Root.createBind("display_name")
-                .extractAs(ValueType.STRING)
+                .extractAs(StandardValueType.STRING)
                 .asIdentities()
                 .onceEach()
                 .setRequired(true)
                 .build();
         VarBind<Service, Integer, Service.Status, Service.Status> Status
                 = Root.createBind("status")
-                .extractAs(ValueType.INTEGER)
+                .extractAs(StandardValueType.INTEGER)
                 .andRemap(Service.Status::valueOf)
                 .onceEach()
                 .setRequired(true)
                 .build();
         VarBind<Service, String, URL, URL> URL
                 = Root.createBind("url")
-                .extractAs(ValueType.STRING)
+                .extractAs(StandardValueType.STRING)
                 .andRemap(Polyfill::url)
                 .onceEach()
                 .setRequired(false)

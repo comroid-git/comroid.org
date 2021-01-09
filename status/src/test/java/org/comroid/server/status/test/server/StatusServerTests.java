@@ -8,7 +8,7 @@ import org.comroid.restless.endpoint.CompleteEndpoint;
 import org.comroid.status.StatusConnection;
 import org.comroid.status.entity.Service;
 import org.comroid.status.server.StatusServer;
-import org.comroid.uniform.ValueType;
+import org.comroid.uniform.node.impl.StandardValueType;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
 import org.comroid.util.MultithreadUtil;
 import org.junit.After;
@@ -76,9 +76,9 @@ public class StatusServerTests {
                 .endpoint(pollEndpoint)
                 .addHeader(AUTHORIZATION, "null")
                 .buildBody(BodyBuilderType.OBJECT, obj -> {
-                    obj.put("status", ValueType.INTEGER, Service.Status.ONLINE.getValue());
-                    obj.put("expected", ValueType.INTEGER, 5);
-                    obj.put("timeout", ValueType.INTEGER, 10);
+                    obj.put("status", StandardValueType.INTEGER, Service.Status.ONLINE.getValue());
+                    obj.put("expected", StandardValueType.INTEGER, 5);
+                    obj.put("timeout", StandardValueType.INTEGER, 10);
                 })
                 .execute$autoCache(Service.Bind.Name, connection.getServiceCache())
                 .thenApply(Span::requireNonNull);
