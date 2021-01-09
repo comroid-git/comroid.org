@@ -4,7 +4,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.comroid.crystalshard.AbstractDiscordBot;
 import org.comroid.crystalshard.DiscordAPI;
+import org.comroid.crystalshard.gateway.GatewayIntent;
 import org.comroid.mutatio.ref.Reference;
+import org.comroid.util.Bitmask;
 
 import java.io.IOException;
 
@@ -36,7 +38,7 @@ public final class DiscordBot extends AbstractDiscordBot {
         });
     }
 
-    protected DiscordBot(String token) {
-        super(DISCORD_API, token);
+    protected DiscordBot(String token, GatewayIntent... gatewayIntents) {
+        super(DISCORD_API, token, gatewayIntents);
     }
 }
