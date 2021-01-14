@@ -6,9 +6,7 @@ import org.comroid.crystalshard.AbstractDiscordBot;
 import org.comroid.crystalshard.DiscordAPI;
 import org.comroid.crystalshard.entity.channel.TextChannel;
 import org.comroid.crystalshard.gateway.GatewayIntent;
-import org.comroid.mutatio.ref.FutureReference;
 import org.comroid.mutatio.ref.Reference;
-import org.comroid.util.Bitmask;
 
 import java.io.IOException;
 
@@ -43,10 +41,13 @@ public final class DiscordBot extends AbstractDiscordBot {
     protected DiscordBot(String token, GatewayIntent... gatewayIntents) {
         super(DISCORD_API, token, gatewayIntents);
 
-        getSnowflakeCache().getChannel(736946464118276178L)
-                .flatMap(TextChannel.class)
-                .peek(tc -> logger.info("Channel found: " + tc))
-                .into(tc -> tc.sendText("Hello World"))
-                .thenAccept(msg -> logger.info("Message sent: " + msg));
+        getShards().assertion()
+                .readyTasks
+                .add(shard -> getSnowflakeCache()
+                        .getChannel(736946464118276178L)
+                        .flatMap(TextChannel.class)
+                        .peek(tc -> logger.info("Channel found: " + tc))
+                        .into(tc -> tc.sendText("Hello World"))
+                        .thenAccept(msg -> logger.info("Message sent: " + msg)));
     }
 }
