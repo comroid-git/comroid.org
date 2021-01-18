@@ -21,11 +21,13 @@ import org.comroid.status.server.rest.ServerEndpoints;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
 import org.comroid.uniform.node.UniObjectNode;
 import org.comroid.varbind.FileCache;
+import org.comroid.varbind.container.DataContainer;
 import org.comroid.varbind.container.DataContainerBuilder;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.Map.Entry;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -98,6 +100,7 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
             this.entityCache = new FileCache<>(
                     this,
                     FastJSONLib.fastJsonLib,
+                    StatusServer::resolveEntity,
                     Entity.Bind.Name,
                     Junction.identity(),
                     CACHE_FILE,
@@ -128,6 +131,10 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
             System.exit(0);
             throw new Error(t);
         }
+    }
+
+    private static <V extends DataContainer<V>> V resolveEntity(ContextualProvider context, UniObjectNode data) {
+        return null; // todo
     }
 
     public static void main(String... args) throws IOException {

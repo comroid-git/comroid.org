@@ -87,7 +87,8 @@ public interface Service extends Entity, WrappedFormattable {
     interface Bind extends Entity.Bind {
         @RootBind
         GroupBind<Service> Root
-                = Entity.Bind.Root.subGroup("service", Basic.class);
+                = Entity.Bind.Root.subGroup("service",
+                (connection, node) -> new Basic(connection.requireFromContext(StatusConnection.class), node.asObjectNode()));
         VarBind<Service, String, String, String> DisplayName
                 = Root.createBind("display_name")
                 .extractAs(StandardValueType.STRING)
