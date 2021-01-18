@@ -115,7 +115,7 @@ public interface Service extends Entity, WrappedFormattable {
         private final StatusConnection connection;
 
         public Basic(StatusConnection connection, UniObjectNode node) {
-            super(context, node);
+            super(connection, node);
 
             this.connection = connection;
         }

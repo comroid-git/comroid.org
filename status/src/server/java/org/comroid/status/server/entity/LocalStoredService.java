@@ -40,7 +40,7 @@ public class LocalStoredService extends DataContainerBase<Entity> implements Loc
     }
 
     public LocalStoredService(UniObjectNode data) {
-        super(context, data);
+        super(StatusServer.instance, data);
 
         this.status = new AtomicReference<>(wrap(Bind.Status).orElse(Status.UNKNOWN));
         this.tokenFile = StatusServer.TOKEN_DIR.createSubFile(getName() + ".token");
