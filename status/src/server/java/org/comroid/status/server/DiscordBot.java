@@ -2,7 +2,7 @@ package org.comroid.status.server;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.comroid.crystalshard.AbstractDiscordBot;
+import org.comroid.crystalshard.DiscordBotBase;
 import org.comroid.crystalshard.DiscordAPI;
 import org.comroid.crystalshard.entity.channel.TextChannel;
 import org.comroid.crystalshard.gateway.GatewayIntent;
@@ -11,7 +11,7 @@ import org.comroid.mutatio.ref.Reference;
 
 import java.io.IOException;
 
-public final class DiscordBot extends AbstractDiscordBot {
+public final class DiscordBot extends DiscordBotBase {
     private static final Logger logger = LogManager.getLogger();
     public static final DiscordAPI DISCORD_API;
     public static final Reference<String> token = Reference.create();

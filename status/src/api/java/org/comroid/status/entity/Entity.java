@@ -8,7 +8,7 @@ import org.comroid.varbind.bind.GroupBind;
 import org.comroid.varbind.bind.VarBind;
 import org.comroid.varbind.container.DataContainer;
 
-public interface Entity extends DataContainer<Entity>, Named, Specifiable<Entity> {
+public interface Entity extends DataContainer<Entity>, Named {
     default String getName() {
         return requireNonNull(Bind.Name);
     }
