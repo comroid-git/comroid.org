@@ -6,6 +6,7 @@ import org.comroid.crystalshard.AbstractDiscordBot;
 import org.comroid.crystalshard.DiscordAPI;
 import org.comroid.crystalshard.entity.channel.TextChannel;
 import org.comroid.crystalshard.gateway.GatewayIntent;
+import org.comroid.crystalshard.gateway.event.generic.HeartbeatAckEvent;
 import org.comroid.mutatio.ref.Reference;
 
 import java.io.IOException;
@@ -42,8 +43,9 @@ public final class DiscordBot extends AbstractDiscordBot {
         super(DISCORD_API, token, gatewayIntents);
 
         getShards().assertion()
-                .readyTasks
-                .add(shard -> getSnowflakeCache()
+                .getEventPipeline()
+                .flatMap(HeartbeatAckEvent.class)
+                .forEach(ack -> getSnowflakeCache()
                         .getChannel(736946464118276178L)
                         .flatMap(TextChannel.class)
                         .peek(tc -> logger.info("Channel found: " + tc))
