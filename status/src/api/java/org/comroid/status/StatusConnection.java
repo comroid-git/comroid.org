@@ -69,7 +69,7 @@ public final class StatusConnection implements ContextualProvider.Underlying {
         this.token = token;
         this.executor = executor;
         this.rest = new REST(adapterDefinition, executor);
-        this.serviceCache = new ProvidedCache<>(250, ForkJoinPool.commonPool(), this::requestServiceByName);
+        this.serviceCache = new ProvidedCache<>(context, 250, ForkJoinPool.commonPool(), this::requestServiceByName);
         this.ownService = requestServiceByName(serviceName).join();
 
         JITAssistant.prepareStatic(Service.class);

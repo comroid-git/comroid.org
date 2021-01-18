@@ -60,10 +60,10 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
 
     public final REST rest;
     private final ScheduledExecutorService threadPool;
-    private final FileCache<String, Entity, ContextualProvider> entityCache;
+    private final FileCache<String, Entity> entityCache;
     private final RestServer server;
 
-    public final FileCache<String, Entity, ContextualProvider> getEntityCache() {
+    public final FileCache<String, Entity> getEntityCache() {
         return entityCache;
     }
 
@@ -96,13 +96,13 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
             logger.debug("REST Client created: {}", rest);
 
             this.entityCache = new FileCache<>(
+                    this,
                     FastJSONLib.fastJsonLib,
                     Entity.Bind.Name,
                     Junction.identity(),
                     CACHE_FILE,
                     250,
-                    true,
-                    this
+                    true
             );
             logger.debug("EntityCache created: {}", entityCache);
             logger.debug("Loaded {} services",
