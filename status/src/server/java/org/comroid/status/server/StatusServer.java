@@ -10,7 +10,9 @@ import org.comroid.common.io.FileHandle;
 import org.comroid.common.jvm.JITAssistant;
 import org.comroid.crystalshard.DiscordAPI;
 import org.comroid.crystalshard.DiscordBotBase;
+import org.comroid.crystalshard.model.presence.UserStatus;
 import org.comroid.mutatio.ref.Processor;
+import org.comroid.mutatio.ref.Reference;
 import org.comroid.restless.REST;
 import org.comroid.restless.adapter.okhttp.v4.OkHttp4Adapter;
 import org.comroid.restless.server.RestServer;
@@ -29,6 +31,7 @@ import org.comroid.varbind.container.DataContainerBuilder;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.Comparator;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -69,6 +72,7 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
     private final FileCache<String, Entity> entityCache;
     private final RestServer server;
     private final DiscordBotBase bot;
+    private final Reference<UserStatus> userStatusSupplier;
 
     public final FileCache<String, Entity> getEntityCache() {
         return entityCache;
@@ -136,6 +140,52 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
                     .or(BOT_TOKEN::getContent)
                     .map(token -> new DiscordBotBase(DISCORD, token))
                     .assertion("No discord token found");
+            this.userStatusSupplier = StatusServer.instance.getEntityCache()
+                    .pipe()
+                    .filter(Service.class::isInstance)
+                    .map(Service.class::cast)
+                    .map(Service::getStatus)
+                    .filter(status -> status != Service.Status.UNKNOWN)
+                    .sorted(Comparator.comparingInt(Service.Status::getValue))
+                    .findAny()
+                    .or(() -> Service.Status.OFFLINE)
+                    .map(status -> {
+                        switch (status) {
+                            case UNKNOWN:
+                            case OFFLINE:
+                            case CRASHED:
+                                return UserStatus.DO_NOT_DISTURB;
+                            case MAINTENANCE:
+                            case NOT_RESPONDING:
+                                return UserStatus.IDLE;
+                            case ONLINE:
+                                return UserStatus.ONLINE;
+                        }
+                        throw new AssertionError();
+                    });
+            getThreadPool().scheduleAtFixedRate(() -> {
+                final UserStatus useStatus = userStatusSupplier.orElse(UserStatus.DO_NOT_DISTURB);
+
+                String str = "";
+                switch (useStatus) {
+                    case ONLINE:
+                        str = "All services operating normally";
+                        break;
+                    case IDLE:
+                        str = "Some services have problems";
+                        break;
+                    case DO_NOT_DISTURB:
+                        str = "Some services are offline";
+                        break;
+                    case INVISIBLE:
+                    case OFFLINE:
+                        throw new UnsupportedOperationException("Cannot set Bot Status",
+                                new AssertionError("Invalid useStatus found"));
+                }
+
+                logger.debug("Updating presence to: {} - {}", useStatus, str);
+                bot.updatePresence(useStatus, str);
+            }, 5, 30, TimeUnit.SECONDS);
         } catch (Throwable t) {
             logger.error("An error occurred during startup, stopping", t);
             System.exit(0);
