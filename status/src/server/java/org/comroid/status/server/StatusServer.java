@@ -10,6 +10,9 @@ import org.comroid.common.io.FileHandle;
 import org.comroid.common.jvm.JITAssistant;
 import org.comroid.crystalshard.DiscordAPI;
 import org.comroid.crystalshard.DiscordBotBase;
+import org.comroid.crystalshard.entity.channel.TextChannel;
+import org.comroid.crystalshard.entity.message.Message;
+import org.comroid.crystalshard.gateway.event.dispatch.message.MessageCreateEvent;
 import org.comroid.crystalshard.model.presence.UserStatus;
 import org.comroid.mutatio.ref.Processor;
 import org.comroid.mutatio.ref.Reference;
@@ -35,6 +38,7 @@ import java.util.Comparator;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 public class StatusServer implements ContextualProvider.Underlying, Closeable {
     //http://localhost:42641/services
@@ -188,6 +192,14 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
             }, 5, 30, TimeUnit.SECONDS);
 
             bot.getEventPipeline().forEach(ev -> logger.error(String.format("cache size %d ++DEBUG++ %s", bot.getSnowflakeCache().size(), ev.toString())/*, new Throwable()*/));
+
+            bot.getEventPipeline()
+                    .flatMap(MessageCreateEvent.class)
+                    .flatMap(mce -> mce.message)
+                    .bi(msg -> msg.getComputedReference(Message.CHANNEL))
+                    .flatMapKey(chl -> chl.flatMap(TextChannel.class))
+                    .flatMap(msg -> msg.getComputedReference(Message.CONTENT))
+                    .forEach((chl, txt) -> chl.sendText("You said: " + txt));
         } catch (Throwable t) {
             logger.error("An error occurred during startup, stopping", t);
             System.exit(0);
