@@ -14,6 +14,7 @@ import org.comroid.varbind.bind.GroupBind;
 import org.comroid.varbind.bind.VarBind;
 import org.comroid.varbind.container.DataContainerBase;
 import org.intellij.lang.annotations.Language;
+import org.jetbrains.annotations.NotNull;
 
 import java.net.URL;
 import java.util.Arrays;
@@ -63,7 +64,7 @@ public interface Service extends Entity, WrappedFormattable {
         private final int value;
 
         @Override
-        public int getValue() {
+        public @NotNull Integer getValue() {
             return value;
         }
 
