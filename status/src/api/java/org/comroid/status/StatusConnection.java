@@ -10,7 +10,7 @@ import org.comroid.restless.body.BodyBuilderType;
 import org.comroid.status.entity.Service;
 import org.comroid.status.rest.Endpoint;
 import org.comroid.uniform.SerializationAdapter;
-import org.comroid.uniform.node.impl.StandardValueType;
+import org.comroid.util.StandardValueType;
 import org.comroid.uniform.cache.ProvidedCache;
 import org.comroid.uniform.node.UniObjectNode;
 

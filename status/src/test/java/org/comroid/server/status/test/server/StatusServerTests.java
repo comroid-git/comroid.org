@@ -8,7 +8,7 @@ import org.comroid.restless.endpoint.CompleteEndpoint;
 import org.comroid.status.StatusConnection;
 import org.comroid.status.entity.Service;
 import org.comroid.status.server.StatusServer;
-import org.comroid.uniform.node.impl.StandardValueType;
+import org.comroid.util.StandardValueType;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
 import org.comroid.util.MultithreadUtil;
 import org.junit.After;

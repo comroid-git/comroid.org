@@ -6,7 +6,7 @@ import org.comroid.api.WrappedFormattable;
 import org.comroid.restless.REST;
 import org.comroid.status.StatusConnection;
 import org.comroid.status.rest.Endpoint;
-import org.comroid.uniform.node.impl.StandardValueType;
+import org.comroid.util.StandardValueType;
 import org.comroid.uniform.node.UniObjectNode;
 import org.comroid.varbind.annotation.Location;
 import org.comroid.varbind.annotation.RootBind;
