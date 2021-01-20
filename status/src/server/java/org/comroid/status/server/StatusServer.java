@@ -191,7 +191,7 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
                 bot.updatePresence(useStatus, str);
             }, 5, 30, TimeUnit.SECONDS);
 
-            bot.getEventPipeline().forEach(ev -> logger.error(String.format("cache size %d ++DEBUG++ %s", bot.getSnowflakeCache().size(), ev.toString())/*, new Throwable()*/));
+            bot.getEventPipeline().forEach(ev -> logger.error(String.format("cache size %d ++DEBUG++ %s", bot.getCache().size(), ev.toString())/*, new Throwable()*/));
 
             bot.getEventPipeline()
                     .flatMap(MessageCreateEvent.class)
