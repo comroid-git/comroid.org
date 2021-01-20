@@ -186,6 +186,8 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
                 logger.debug("Updating presence to: {} - {}", useStatus, str);
                 bot.updatePresence(useStatus, str);
             }, 5, 30, TimeUnit.SECONDS);
+
+            bot.getEventPipeline().forEach(ev -> logger.error(String.format("cache size %d ++DEBUG++ %s", bot.getSnowflakeCache().size(), ev.toString())/*, new Throwable()*/));
         } catch (Throwable t) {
             logger.error("An error occurred during startup, stopping", t);
             System.exit(0);
