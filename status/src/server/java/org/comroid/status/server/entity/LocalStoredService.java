@@ -2,12 +2,14 @@ package org.comroid.status.server.entity;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.comroid.api.ContextualProvider;
 import org.comroid.api.IntEnum;
 import org.comroid.common.io.FileHandle;
 import org.comroid.mutatio.ref.Reference;
 import org.comroid.status.entity.Entity;
 import org.comroid.status.server.StatusServer;
 import org.comroid.status.server.TokenCore;
+import org.comroid.uniform.node.UniNode;
 import org.comroid.uniform.node.UniObjectNode;
 import org.comroid.varbind.container.DataContainerBase;
 
@@ -39,7 +41,7 @@ public class LocalStoredService extends DataContainerBase<Entity> implements Loc
         put(Bind.Status, IntEnum::getValue, status);
     }
 
-    public LocalStoredService(UniObjectNode data) {
+    public LocalStoredService(ContextualProvider context, UniNode data) {
         super(StatusServer.instance, data);
 
         this.status = new AtomicReference<>(wrap(Bind.Status).orElse(Status.UNKNOWN));

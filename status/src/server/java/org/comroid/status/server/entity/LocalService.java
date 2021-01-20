@@ -12,7 +12,7 @@ import java.util.concurrent.CompletableFuture;
 @Location(value = LocalStoredService.class, fieldName = "GROUP")
 public interface LocalService extends Service {
     @RootBind
-    GroupBind<Service> GROUP = Bind.Root.subGroup("local_service", LocalStoredService.class);
+    GroupBind<Service> GROUP = Bind.Root.subGroup("local_service", LocalStoredService::new);
 
     @Override
     Status getStatus();

@@ -8,6 +8,8 @@ import org.comroid.commandline.CommandLineArgs;
 import org.comroid.common.exception.AssertionException;
 import org.comroid.common.io.FileHandle;
 import org.comroid.common.jvm.JITAssistant;
+import org.comroid.crystalshard.DiscordAPI;
+import org.comroid.crystalshard.DiscordBotBase;
 import org.comroid.mutatio.ref.Processor;
 import org.comroid.restless.REST;
 import org.comroid.restless.adapter.okhttp.v4.OkHttp4Adapter;
@@ -27,7 +29,6 @@ import org.comroid.varbind.container.DataContainerBuilder;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.Map.Entry;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -45,12 +46,15 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
     public static final FileHandle CACHE_FILE = DATA_DIR.createSubFile("cache.json");
     public static final int PORT = 42641; // hardcoded in server, do not change
     public static final ThreadGroup THREAD_GROUP = new ThreadGroup("comroid Status Server");
+    public static final DiscordAPI DISCORD;
     public static final String ADMIN_TOKEN_NAME = "admin$access$token";
     public static CommandLineArgs ARGS;
     public static StatusServer instance;
 
     static {
         ADAPTER_DEFINITION = AdapterDefinition.initialize(FastJSONLib.fastJsonLib, new OkHttp4Adapter());
+        DiscordAPI.SERIALIZATION = ADAPTER_DEFINITION.serialization;
+        DISCORD = new DiscordAPI(ADAPTER_DEFINITION.http);
 
         logger.debug("Preparing classes...");
         JITAssistant.prepareStatic(Entity.Bind.class, Service.Bind.class);
@@ -64,6 +68,7 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
     private final ScheduledExecutorService threadPool;
     private final FileCache<String, Entity> entityCache;
     private final RestServer server;
+    private final DiscordBotBase bot;
 
     public final FileCache<String, Entity> getEntityCache() {
         return entityCache;
@@ -126,6 +131,11 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
                     .requireNonNull("Testing Dummy service not found in cache!")
                     .discardPoll(Service.Status.ONLINE);
             logger.debug("Status Server ready! {}", server);
+
+            this.bot = ARGS.process("token")
+                    .or(BOT_TOKEN::getContent)
+                    .map(token -> new DiscordBotBase(DISCORD, token))
+                    .assertion("No discord token found");
         } catch (Throwable t) {
             logger.error("An error occurred during startup, stopping", t);
             System.exit(0);
@@ -134,18 +144,13 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
     }
 
     private static <V extends DataContainer<V>> V resolveEntity(ContextualProvider context, UniObjectNode data) {
-        return null; // todo
+        return (V) new LocalStoredService(context, data);
     }
 
     public static void main(String... args) throws IOException {
         ARGS = CommandLineArgs.parse(args);
         logger.info("Starting comroid Status Server...");
         new StatusServer(Executors.newScheduledThreadPool(4), InetAddress.getByAddress(new byte[]{0, 0, 0, 0}), PORT);
-
-        logger.info("Status Server running! Booting Discord Bot...");
-        if (ARGS.process("token").test("null"::equals))
-            logger.warn("Skipping discord bot creation because token was null");
-        else DiscordBot.token.set(ARGS.wrap("token").orElseGet(BOT_TOKEN::getContent));
 
         Runtime.getRuntime().addShutdownHook(new Thread(instance::close));
         instance.threadPool.scheduleAtFixedRate(() -> {
