@@ -197,7 +197,7 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
                     .flatMap(MessageCreateEvent.class)
                     .flatMap(mce -> mce.message)
                     .filter(msg -> msg.author.test(usr -> !usr.isBot()))
-                    .forEach(msg -> msg.getChannel().sendText("You said: " + msg.getContent()));
+                    .forEach(msg -> msg.getUserAuthor().sendText("You said: " + msg.getContent()));
         } catch (Throwable t) {
             logger.error("An error occurred during startup, stopping", t);
             System.exit(0);
