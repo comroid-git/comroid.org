@@ -10,10 +10,13 @@ import org.comroid.common.io.FileHandle;
 import org.comroid.common.jvm.JITAssistant;
 import org.comroid.crystalshard.DiscordAPI;
 import org.comroid.crystalshard.DiscordBotBase;
-import org.comroid.crystalshard.entity.channel.TextChannel;
-import org.comroid.crystalshard.entity.message.Message;
 import org.comroid.crystalshard.gateway.event.dispatch.message.MessageCreateEvent;
 import org.comroid.crystalshard.model.presence.UserStatus;
+import org.comroid.crystalshard.ui.CommandSetup;
+import org.comroid.crystalshard.ui.InteractionCore;
+import org.comroid.crystalshard.ui.annotation.Choice;
+import org.comroid.crystalshard.ui.annotation.Option;
+import org.comroid.crystalshard.ui.annotation.SlashCommand;
 import org.comroid.mutatio.ref.Processor;
 import org.comroid.mutatio.ref.Reference;
 import org.comroid.restless.REST;
@@ -38,7 +41,6 @@ import java.util.Comparator;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 
 public class StatusServer implements ContextualProvider.Underlying, Closeable {
     //http://localhost:42641/services
@@ -190,6 +192,10 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
                 logger.debug("Updating presence to: {} - {}", useStatus, str);
                 bot.updatePresence(useStatus, str);
             }, 5, 30, TimeUnit.SECONDS);
+            final InteractionCore core = bot.getInteractionCore();
+            final CommandSetup commands = core.getCommands();
+            commands.readClass(cmds, Commands.class);
+            core.synchronizeGlobal().join();
 
             bot.getEventPipeline().forEach(ev -> logger.error(String.format("cache size %d ++DEBUG++ %s", bot.getCache().size(), ev.toString())/*, new Throwable()*/));
 
@@ -257,6 +263,25 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
             entityCache.disposeThrow();
         } catch (IOException e) {
             throw new RuntimeException("Could not shut down status server properly", e);
+        }
+    }
+
+    private final Commands cmds = new Commands();
+
+    public final class Commands {
+        @SlashCommand(description = "Prints a text multiple times")
+        public String multi_print(
+                @Option(description = "The text to print", required = true)
+                        String text,
+                @Option(description = "Times to print the text", choices = {
+                        @Choice(name = "once", value = "1"),
+                        @Choice(name = "twice", value = "2")})
+                        int amount
+        ) {
+            StringBuilder str = new StringBuilder();
+            for (int i = 0; i < amount; i++)
+                str.append(text).append(" + ");
+            return str.toString();
         }
     }
 }
