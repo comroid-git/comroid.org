@@ -283,5 +283,21 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
                 str.append(text).append(" + ");
             return str.toString();
         }
+
+        @SlashCommand(description = "Throws an error")
+        public void error$out(
+                @Option(name = "msg", description = "An error message")
+                        String msg
+        ) {
+            throw msg == null ? new RuntimeException() : new RuntimeException(msg);
+        }
+
+        @SlashCommand(description = "May return null")
+        public Object maybeNull(
+                @Option(name = "null", description = "Whether to return null")
+                        boolean rtrn
+        ) {
+            return rtrn ? null : new Object();
+        }
     }
 }
