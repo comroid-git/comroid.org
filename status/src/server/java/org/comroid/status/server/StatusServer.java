@@ -200,9 +200,6 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
             final CommandSetup commands = core.getCommands();
             commands.readClass(Commands.class);
             core.synchronizeGlobal().join();
-            commands.getAllDefinitions()
-                    .forEach(cmd -> commands.addGuildDefinition(736946463661359155L, cmd));
-            core.synchronizeGuild(736946463661359155L).join();
         } catch (Throwable t) {
             logger.error("An error occurred during startup, stopping", t);
             System.exit(0);
