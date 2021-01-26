@@ -268,7 +268,13 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
                 @Option(name = "status", description = "The new Status") Service.Status status
         ) {
             final Service service = entityCache.get(name).as(Service.class, "Invalid Type");
-            return String.format("Service `%s` is currently `%s`", service.getName(), service.getStatus());
+
+            final Service.Status old = service.getStatus();
+            if (status == null)
+                return String.format("Status of Service `%s` is `%s`", service, old);
+            service.as(LocalService.class, "Assertion failure")
+                    .setStatus(status);
+            return String.format("Status of Service `%s` was updated from `%s` to `%s`", service, old, status);
         }
 
         @SlashCommand(description = "Throw an Error")
