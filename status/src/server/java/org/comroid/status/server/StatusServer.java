@@ -4,8 +4,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.Junction;
+import org.comroid.api.Named;
 import org.comroid.commandline.CommandLineArgs;
 import org.comroid.common.exception.AssertionException;
+import org.comroid.common.info.Described;
 import org.comroid.common.io.FileHandle;
 import org.comroid.common.jvm.JITAssistant;
 import org.comroid.crystalshard.DiscordAPI;
@@ -193,7 +195,7 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
             }, 5, 30, TimeUnit.SECONDS);
             final InteractionCore core = bot.getInteractionCore();
             final CommandSetup commands = core.getCommands();
-            commands.readClass(cmds);
+            commands.readClass(Commands.class);
             core.synchronizeGlobal().join();
             commands.getAllDefinitions()
                     .forEach(cmd -> commands.addGuildDefinition(736946463661359155L, cmd));
@@ -260,15 +262,13 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
         }
     }
 
-    private final Commands cmds = new Commands();
-
-    public final class Commands {
+    public static final class Commands {
         @SlashCommand(description = "Fetch a service's Status")
-        public String status(
+        public static String status(
                 @Option(name = "name", description = "Name of the Service", required = true) String name,
                 @Option(name = "status", description = "The new Status") Service.Status status
         ) {
-            final Service service = entityCache.get(name).as(Service.class, "Invalid Type");
+            final Service service = instance.entityCache.get(name).as(Service.class, "Invalid Type");
 
             final Service.Status old = service.getStatus();
             if (status == null)
@@ -279,7 +279,7 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
         }
 
         @SlashCommand
-        public void shutdown(User user) {
+        public static void shutdown(User user) {
             if (user.getID() == 141476933849448448L) {
                 logger.warn("Bot was shut down via Command by {}", user);
                 System.exit(0);
@@ -287,10 +287,40 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
         }
 
         @SlashCommand(description = "Throw an Error")
-        public void error(
-                @Option(name = "msg", description = "Error Message") String msg
-        ) {
-            throw msg == null ? new RuntimeException("test exception") : new RuntimeException(msg);
+        public static final class Error {
+            @SlashCommand
+            public static void npe() {
+                throw new NullPointerException();
+            }
+
+            @SlashCommand
+            public static final class Runtime {
+                @SlashCommand
+                public static void rte() {
+                    throw new RuntimeException();
+                }
+
+                @SlashCommand
+                public static void assertion(@Option(name = "msg", required = true) String msg) {
+                    throw new AssertionError(msg);
+                }
+            }
+        }
+    }
+
+    public enum ErrorType implements Named, Described {
+        NPE("NullPointerException"),
+        RTE("RuntimeException");
+
+        private final String description;
+
+        @Override
+        public String getDescription() {
+            return description;
+        }
+
+        ErrorType(String description) {
+            this.description = description;
         }
     }
 }
