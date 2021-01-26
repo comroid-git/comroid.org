@@ -10,6 +10,7 @@ import org.comroid.common.io.FileHandle;
 import org.comroid.common.jvm.JITAssistant;
 import org.comroid.crystalshard.DiscordAPI;
 import org.comroid.crystalshard.DiscordBotBase;
+import org.comroid.crystalshard.entity.user.User;
 import org.comroid.crystalshard.model.presence.UserStatus;
 import org.comroid.crystalshard.ui.CommandSetup;
 import org.comroid.crystalshard.ui.InteractionCore;
@@ -275,6 +276,14 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
             service.as(LocalService.class, "Assertion failure")
                     .setStatus(status);
             return String.format("Status of Service `%s` was updated from `%s` to `%s`", service, old, status);
+        }
+
+        @SlashCommand
+        public void shutdown(User user) {
+            if (user.getID() == 141476933849448448L) {
+                logger.warn("Bot was shut down via Command by {}", user);
+                System.exit(0);
+            }
         }
 
         @SlashCommand(description = "Throw an Error")
