@@ -8,9 +8,12 @@ import org.comroid.commandline.CommandLineArgs;
 import org.comroid.common.exception.AssertionException;
 import org.comroid.common.io.FileHandle;
 import org.comroid.common.jvm.JITAssistant;
+import org.comroid.crystalshard.Context;
 import org.comroid.crystalshard.DiscordAPI;
 import org.comroid.crystalshard.DiscordBotBase;
 import org.comroid.crystalshard.entity.user.User;
+import org.comroid.crystalshard.model.message.embed.Embed;
+import org.comroid.crystalshard.model.message.embed.EmbedBuilder;
 import org.comroid.crystalshard.model.presence.UserStatus;
 import org.comroid.crystalshard.ui.CommandSetup;
 import org.comroid.crystalshard.ui.InteractionCore;
@@ -37,9 +40,11 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Comparator;
+import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class StatusServer implements ContextualProvider.Underlying, Closeable {
     //http://localhost:42641/services
@@ -290,6 +295,28 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
                         .compose()
                         .join();
                 return null;
+            }
+
+            @SlashCommand
+            public static Object list(Context context) {
+                final Set<Service> services = instance.getEntityCache()
+                        .streamRefs()
+                        .filter(ref -> ref.test(Service.class::isInstance))
+                        .map(ref -> ref.into(Service.class::cast))
+                        .collect(Collectors.toSet());
+
+                if (services.size() == 0)
+                    return "No services defined!";
+
+                final EmbedBuilder builder = new EmbedBuilder(context);
+
+                services.forEach(service -> builder.addField(service.getDisplayName(), String.format(
+                        "Service Name: `%s`\nStatus: `%s`",
+                        service.getName(),
+                        service.getStatus().toString()
+                )));
+
+                return builder;
             }
         }
     }
