@@ -12,13 +12,13 @@ import org.comroid.crystalshard.Context;
 import org.comroid.crystalshard.DiscordAPI;
 import org.comroid.crystalshard.DiscordBotBase;
 import org.comroid.crystalshard.entity.user.User;
-import org.comroid.crystalshard.model.message.embed.Embed;
 import org.comroid.crystalshard.model.message.embed.EmbedBuilder;
 import org.comroid.crystalshard.model.presence.UserStatus;
 import org.comroid.crystalshard.ui.CommandSetup;
 import org.comroid.crystalshard.ui.InteractionCore;
 import org.comroid.crystalshard.ui.annotation.Option;
 import org.comroid.crystalshard.ui.annotation.SlashCommand;
+import org.comroid.mutatio.ref.KeyedReference;
 import org.comroid.mutatio.ref.Processor;
 import org.comroid.mutatio.ref.Reference;
 import org.comroid.restless.REST;
@@ -297,7 +297,7 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
                 return null;
             }
 
-            @SlashCommand
+            @SlashCommand(description = "Lists all Services")
             public static Object list(Context context) {
                 final Set<Service> services = instance.getEntityCache()
                         .streamRefs()
@@ -317,6 +317,19 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
                 )));
 
                 return builder;
+            }
+
+            @SlashCommand(description = "Creates a new Service")
+            public static Object create(
+                    @Option(name = "name", required = true) String serviceName,
+                    @Option(name = "display_name", required = true) String displayName,
+                    Context context
+            ) {
+                final UniObjectNode data = context.getSerializer().createUniObjectNode();
+                data.put(Service.Bind.DisplayName, displayName);
+                final Service service = StatusServer.instance.createService(serviceName, data);
+
+                return String.format("Created new Service: %s '%s'", service.getDisplayName(), service.getName());
             }
         }
     }
