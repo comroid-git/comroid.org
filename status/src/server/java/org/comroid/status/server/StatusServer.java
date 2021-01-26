@@ -4,10 +4,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.Junction;
-import org.comroid.api.Named;
 import org.comroid.commandline.CommandLineArgs;
 import org.comroid.common.exception.AssertionException;
-import org.comroid.common.info.Described;
 import org.comroid.common.io.FileHandle;
 import org.comroid.common.jvm.JITAssistant;
 import org.comroid.crystalshard.DiscordAPI;
@@ -263,64 +261,36 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
     }
 
     public static final class Commands {
-        @SlashCommand(description = "Fetch a service's Status")
-        public static String status(
-                @Option(name = "name", description = "Name of the Service", required = true) String name,
-                @Option(name = "status", description = "The new Status") Service.Status status
-        ) {
-            final Service service = instance.entityCache.get(name).as(Service.class, "Invalid Type");
+        @SlashCommand(name = "service", description = "Modify or view Service information")
+        public static final class ServiceBlob {
+            @SlashCommand(description = "Access a Service's Status")
+            public static String status(
+                    @Option(name = "service", description = "Name of the Service", required = true) String name,
+                    @Option(name = "status", description = "The new Status") Service.Status status
+            ) {
+                final LocalService service = instance.entityCache.get(name).as(LocalService.class, "Invalid Service");
 
-            final Service.Status old = service.getStatus();
-            if (status == null)
-                return String.format("Status of Service `%s` is `%s`", service, old);
-            service.as(LocalService.class, "Assertion failure")
-                    .setStatus(status);
-            return String.format("Status of Service `%s` was updated from `%s` to `%s`", service, old, status);
-        }
-
-        @SlashCommand
-        public static void shutdown(User user) {
-            if (user.getID() == 141476933849448448L) {
-                logger.warn("Bot was shut down via Command by {}", user);
-                System.exit(0);
-            }
-        }
-
-        @SlashCommand(description = "Throw an Error")
-        public static final class Error {
-            @SlashCommand
-            public static void npe() {
-                throw new NullPointerException();
+                final Service.Status old = service.getStatus();
+                if (status == null)
+                    return String.format("Status of Service `%s` is `%s`", service, old);
+                service.setStatus(status);
+                return String.format("Status of %s was updated from `%s` to `%s`", service.getDisplayName(), old, status);
             }
 
-            @SlashCommand
-            public static final class Runtime {
-                @SlashCommand
-                public static void rte() {
-                    throw new RuntimeException();
-                }
+            @SlashCommand(description = "Regenerates the API Token of the Service")
+            public static Void regenerate(
+                    @Option(name = "service", description = "Name of the Service", required = true) String name,
+                    User sender
+            ) {
+                final LocalService service = instance.entityCache.get(name).as(LocalService.class, "Invalid Service");
 
-                @SlashCommand
-                public static void assertion(@Option(name = "msg", required = true) String msg) {
-                    throw new AssertionError(msg);
-                }
+                sender.composeEmbed()
+                        .setTitle(String.format("Token of %#s changed", service))
+                        .setDescription(String.format("New Token: ```%s```", service.regenerateToken()))
+                        .compose()
+                        .join();
+                return null;
             }
-        }
-    }
-
-    public enum ErrorType implements Named, Described {
-        NPE("NullPointerException"),
-        RTE("RuntimeException");
-
-        private final String description;
-
-        @Override
-        public String getDescription() {
-            return description;
-        }
-
-        ErrorType(String description) {
-            this.description = description;
         }
     }
 }
