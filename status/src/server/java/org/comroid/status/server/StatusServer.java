@@ -196,14 +196,9 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
             final CommandSetup commands = core.getCommands();
             commands.readClass(cmds, Commands.class);
             core.synchronizeGlobal().join();
-
-            bot.getEventPipeline().forEach(ev -> logger.error(String.format("cache size %d ++DEBUG++ %s", bot.getCache().size(), ev.toString())/*, new Throwable()*/));
-
-            bot.getEventPipeline()
-                    .flatMap(MessageCreateEvent.class)
-                    .flatMap(mce -> mce.message)
-                    .filter(msg -> msg.author.test(usr -> !usr.isBot()))
-                    .forEach(msg -> msg.getUserAuthor().sendText("You said: " + msg.getContent()));
+            commands.getAllDefinitions()
+                    .forEach(cmd -> commands.addGuildDefinition(736946463661359155L, cmd));
+            core.synchronizeGuild(736946463661359155L);
         } catch (Throwable t) {
             logger.error("An error occurred during startup, stopping", t);
             System.exit(0);
