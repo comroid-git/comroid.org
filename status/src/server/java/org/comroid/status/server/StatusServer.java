@@ -10,11 +10,9 @@ import org.comroid.common.io.FileHandle;
 import org.comroid.common.jvm.JITAssistant;
 import org.comroid.crystalshard.DiscordAPI;
 import org.comroid.crystalshard.DiscordBotBase;
-import org.comroid.crystalshard.gateway.event.dispatch.message.MessageCreateEvent;
 import org.comroid.crystalshard.model.presence.UserStatus;
 import org.comroid.crystalshard.ui.CommandSetup;
 import org.comroid.crystalshard.ui.InteractionCore;
-import org.comroid.crystalshard.ui.annotation.Choice;
 import org.comroid.crystalshard.ui.annotation.Option;
 import org.comroid.crystalshard.ui.annotation.SlashCommand;
 import org.comroid.mutatio.ref.Processor;
@@ -194,11 +192,11 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
             }, 5, 30, TimeUnit.SECONDS);
             final InteractionCore core = bot.getInteractionCore();
             final CommandSetup commands = core.getCommands();
-            commands.readClass(cmds, Commands.class);
+            commands.readClass(cmds);
             core.synchronizeGlobal().join();
             commands.getAllDefinitions()
                     .forEach(cmd -> commands.addGuildDefinition(736946463661359155L, cmd));
-            core.synchronizeGuild(736946463661359155L);
+            core.synchronizeGuild(736946463661359155L).join();
         } catch (Throwable t) {
             logger.error("An error occurred during startup, stopping", t);
             System.exit(0);
@@ -264,35 +262,19 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
     private final Commands cmds = new Commands();
 
     public final class Commands {
-        @SlashCommand(description = "Prints a text multiple times")
-        public String multi_print(
-                @Option(description = "The text to print", required = true)
-                        String text,
-                @Option(description = "Times to print the text", choices = {
-                        @Choice(name = "once", value = "1"),
-                        @Choice(name = "twice", value = "2")})
-                        int amount
+        @SlashCommand(description = "Fetch a service's Status")
+        public String status(
+                @Option(name = "name", description = "Name of the Service", required = true) String name
         ) {
-            StringBuilder str = new StringBuilder();
-            for (int i = 0; i < amount; i++)
-                str.append(text).append(" + ");
-            return str.toString();
+            final Service service = entityCache.get(name).as(Service.class, "Invalid Type");
+            return String.format("Service `%s` is currently `%s`", service.getName(), service.getStatus());
         }
 
-        @SlashCommand(description = "Throws an error")
-        public void error$out(
-                @Option(name = "msg", description = "An error message")
-                        String msg
+        @SlashCommand(description = "Throw an Error")
+        public void error(
+                @Option(name = "msg", description = "Error Message") String msg
         ) {
-            throw msg == null ? new RuntimeException() : new RuntimeException(msg);
-        }
-
-        @SlashCommand(description = "May return null")
-        public Object maybeNull(
-                @Option(name = "null", description = "Whether to return null")
-                        boolean rtrn
-        ) {
-            return rtrn ? null : new Object();
+            throw msg == null ? new RuntimeException("test exception") : new RuntimeException(msg);
         }
     }
 }
