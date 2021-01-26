@@ -264,7 +264,8 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
     public final class Commands {
         @SlashCommand(description = "Fetch a service's Status")
         public String status(
-                @Option(name = "name", description = "Name of the Service", required = true) String name
+                @Option(name = "name", description = "Name of the Service", required = true) String name,
+                @Option(name = "status", description = "The new Status") Service.Status status
         ) {
             final Service service = entityCache.get(name).as(Service.class, "Invalid Type");
             return String.format("Service `%s` is currently `%s`", service.getName(), service.getStatus());
