@@ -18,8 +18,6 @@ import org.comroid.crystalshard.ui.CommandSetup;
 import org.comroid.crystalshard.ui.InteractionCore;
 import org.comroid.crystalshard.ui.annotation.Option;
 import org.comroid.crystalshard.ui.annotation.SlashCommand;
-import org.comroid.mutatio.ref.KeyedReference;
-import org.comroid.mutatio.ref.Processor;
 import org.comroid.mutatio.ref.Reference;
 import org.comroid.restless.REST;
 import org.comroid.restless.adapter.okhttp.v4.OkHttp4Adapter;
