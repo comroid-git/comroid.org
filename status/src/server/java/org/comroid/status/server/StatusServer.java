@@ -320,7 +320,7 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
                     @Option(name = "display_name", required = true) String displayName,
                     Context context
             ) {
-                final UniObjectNode data = context.getSerializer().createUniObjectNode();
+                final UniObjectNode data = context.getSerializer().createObjectNode();
                 data.put(Service.Bind.DisplayName, displayName);
                 final Service service = StatusServer.instance.createService(serviceName, data);
 

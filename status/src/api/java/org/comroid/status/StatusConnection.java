@@ -119,7 +119,7 @@ public final class StatusConnection implements ContextualProvider.Underlying {
 
     public CompletableFuture<Service> updateStatus(Service.Status status) {
         final UniObjectNode data = rest.requireFromContext(SerializationAdapter.class)
-                .createUniObjectNode();
+                .createObjectNode();
 
         data.put("status", StandardValueType.INTEGER, status.getValue());
 

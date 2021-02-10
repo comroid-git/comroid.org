@@ -23,7 +23,7 @@ public enum ServerEndpoints implements ServerEndpoint {
     LIST_SERVICES(Endpoint.LIST_SERVICES, false) {
         @Override
         public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            final UniArrayNode services = StatusServer.ADAPTER_DEFINITION.serialization.createUniArrayNode();
+            final UniArrayNode services = StatusServer.ADAPTER_DEFINITION.serialization.createArrayNode();
 
             StatusServer.instance
                     .getEntityCache()

@@ -24,7 +24,7 @@ public class ResponseBuilder implements Builder<REST.Response> {
     }
 
     public ResponseBuilder setBody(DataContainer<?> body) {
-        return setBody(body.toObjectNode(serilib.createUniObjectNode()));
+        return setBody(body.toObjectNode(serilib.createObjectNode()));
     }
 
     public ResponseBuilder() {
