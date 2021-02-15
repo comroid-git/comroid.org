@@ -10,7 +10,10 @@ allprojects {
     group 'org.comroid'
     version = '0.12.1-SNAPSHOT'
 
-    compileJava.options.encoding = 'UTF-8'
+    compileJava{
+        dependsOn ':dependencies'
+        options.encoding = 'UTF-8'
+    }
 
     tasks.withType(Javadoc) {
         options {
@@ -84,8 +87,4 @@ dependencies {
 tasks.findByName('wrapper')?.configure {
     gradleVersion = '6.2'
     distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
-}
-
-tasks.withType(JavaCompile).configureEach {
-    dependsOn dependencies
 }
