@@ -85,3 +85,7 @@ tasks.findByName('wrapper')?.configure {
     gradleVersion = '6.2'
     distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
 }
+
+tasks.withType(JavaCompile).configureEach {
+    dependsOn dependencies
+}
