@@ -1,6 +1,10 @@
 import static java.lang.System.getenv
 import static java.lang.System.getenv
 
+ext {
+    isAutoDeploy = rootProject.name != 'repo' || getenv().containsKey("TEAMCITY") || getenv().containsKey("JITPACK")
+}
+
 allprojects {
     apply plugin: 'java'
 
@@ -37,23 +41,14 @@ allprojects {
     }
 
     repositories {
+        maven { url 'https://maven.comroid.org' }
         mavenLocal()
-        maven {
-            url "https://maven.jetbrains.space/comroid/release"
-            credentials.username "Anonymous.User"
-            credentials.password "anonymous"
-        }
-        maven {
-            url "https://maven.jetbrains.space/comroid/repo"
-            credentials.username "Anonymous.User"
-            credentials.password "anonymous"
-        }
         jcenter()
         maven { url 'https://www.jitpack.io' }
     }
 }
 
-if (!getenv().containsKey("TEAMCITY") && !getenv().containsKey("JITPACK")) {
+if (!isAutoDeploy) {
     evaluationDependsOn ':guardian:uniform'
     evaluationDependsOn ':guardian:restless'
 }
@@ -63,9 +58,9 @@ dependencies {
         testImplementation project(':status-server')
         testImplementation project(':status-api')
 
-        testImplementation 'com.github.comroid-git:guardian:master-SNAPSHOT'
-        testImplementation 'com.github.comroid-git:cli-parser:master-SNAPSHOT'
-        testImplementation 'com.github.comroid-git:CrystalShard:dev-SNAPSHOT'
+        testImplementation 'org.comroid:restless:0.+'
+        testImplementation 'org.comroid:clipa:0.+'
+        testImplementation 'org.comroid:CrystalShard:0.+'
     } else {
         testImplementation project(':status:status-server')
         testImplementation project(':status:status-api')
