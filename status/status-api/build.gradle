@@ -44,7 +44,7 @@ dependencies {
     compileOnly 'org.jetbrains:annotations:19.0.0'
 
     if (isAutoDeploy) {
-        api 'com.github.comroid-git.guardian-framework:restless:master-SNAPSHOT'
+        api 'com.github.comroid-git.guardian:restless:master-SNAPSHOT'
     } else {
         api project(':guardian:restless')
         testImplementation project(':guardian:uniform').sourceSets.java8compat.output.classesDirs
