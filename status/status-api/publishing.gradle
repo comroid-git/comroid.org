@@ -1,39 +1,9 @@
-import static java.lang.System.getenv
-
-ext {
-    snapshot = project.version.endsWith('SNAPSHOT')
-
-    canSign = getenv().containsKey("OVERRIDE_SIGNING") || (getenv().containsKey('GPG_KEYNAME') && getenv().containsKey('GPG_PASSPHRASE'))
-    canPublishToSpace = getenv().containsKey('SPACE_PASSWORD') && getenv().containsKey('SPACE_USERNAME')
-    canPublishToGitHub = !snapshot && canSign && getenv().containsKey('GITHUB_PASSWORD') && getenv().containsKey('GITHUB_USERNAME')
-}
-
-if (canSign) {
-    ext.'signing.gnupg.keyName' = getenv('GPG_KEYNAME')
-    ext.'signing.gnupg.passphrase' = getenv('GPG_PASSPHRASE')
-}
-
-if (canPublishToSpace) {
-    ext {
-        spaceUsername = getenv('SPACE_USERNAME')
-        spacePassword = getenv('SPACE_PASSWORD')
-    }
-}
-
-if (canPublishToGitHub) {
-    ext {
-        githubRegistryUrl = uri("https://maven.pkg.github.com/comroid-git/comroid.org")
-        githubUsername = getenv('GITHUB_USERNAME')
-        githubPassword = getenv('GITHUB_PASSWORD')
-    }
-}
-
 apply plugin: 'maven-publish'
 
 publishing {
     repositories {
         mavenLocal()
-
+/*
         if (canPublishToSpace) {
             maven {
                 name = 'Space'
@@ -47,6 +17,21 @@ publishing {
                 }
             }
         }
+
+        if (canPublishToSonatype) {
+            maven {
+                name = 'Sonatype'
+                url = snapshot
+                        ? 'https://oss.sonatype.org/content/repositories/snapshots'
+                        : 'https://oss.sonatype.org/service/local/staging/deploy/maven2'
+
+                credentials {
+                    username sonatypeUsername
+                    password sonatypePassword
+                }
+            }
+        }
+ */
 
         if (canPublishToGitHub) {
             maven {
@@ -101,8 +86,6 @@ publishing {
         }
     }
 }
-
-def artifactId = publishing.publications.mavenJava.artifactId
 
 task generateGithubPom(type: GenerateMavenPom) {
     destination = file("$projectDir/pom.xml")
