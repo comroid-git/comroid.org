@@ -238,14 +238,15 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
         return service;
     }
 
-    public final Processor<Service> getServiceByName(String name) {
+    public final Reference<Service> getServiceByName(String name) {
         logger.debug("Returning Service by name: {}", name);
-        return Processor.providedOptional(() -> entityCache.streamRefs()
+        return Reference.provided(() -> entityCache.streamRefs()
                 .filter(ref -> !ref.isNull())
                 .filter(ref -> ref.process().test(Service.class::isInstance))
                 .map(ref -> ref.into(Service.class::cast))
                 .filter(service -> service.getName().equals(name))
-                .findFirst());
+                .findFirst()
+                .orElse(null));
     }
 
     @Override
