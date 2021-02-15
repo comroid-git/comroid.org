@@ -25,11 +25,8 @@ dependencies {
     if (isAutoDeploy) {
         implementation project(':status-api')
 
-        implementation 'com.github.comroid-git.guardian:uniform:master-SNAPSHOT'
-        implementation 'com.github.comroid-git.guardian:restless:master-SNAPSHOT'
-
+        implementation 'com.github.comroid-git:guardian:master-SNAPSHOT'
         implementation 'com.github.comroid-git:cli-parser:master-SNAPSHOT'
-
         implementation 'com.github.comroid-git:CrystalShard:master-SNAPSHOT'
     } else {
         implementation project(':status:status-api')
