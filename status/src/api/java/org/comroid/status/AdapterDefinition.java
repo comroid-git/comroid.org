@@ -12,7 +12,7 @@ public final class AdapterDefinition extends ContextualProvider.Base {
     public final HttpAdapter http;
 
     private AdapterDefinition(SerializationAdapter<?, ?, ?> serialization, HttpAdapter http) {
-        super(serialization, http);
+        super((Base) serialization, http);
 
         this.serialization = serialization;
         this.http = http;

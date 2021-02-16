@@ -64,7 +64,7 @@ public final class StatusConnection implements ContextualProvider.Underlying {
     }
 
     public StatusConnection(ContextualProvider context, String serviceName, String token, ScheduledExecutorService executor) {
-        this.context = context.plus(this);
+        this.context = context.plus("StatusConnection", this);
         this.serviceName = serviceName;
         this.token = token;
         this.executor = executor;
