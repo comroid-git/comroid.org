@@ -4,7 +4,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.Junction;
-import org.comroid.commandline.CommandLineArgs;
 import org.comroid.common.exception.AssertionException;
 import org.comroid.common.io.FileHandle;
 import org.comroid.common.jvm.JITAssistant;
@@ -59,7 +58,6 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
     public static final ThreadGroup THREAD_GROUP = new ThreadGroup("comroid Status Server");
     public static final DiscordAPI DISCORD;
     public static final String ADMIN_TOKEN_NAME = "admin$access$token";
-    public static CommandLineArgs ARGS;
     public static StatusServer instance;
 
     static {
@@ -79,7 +77,7 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
     private final ScheduledExecutorService threadPool;
     private final FileCache<String, Entity> entityCache;
     private final RestServer server;
-    private final DiscordBotBase bot;
+   // private final DiscordBotBase bot;
     private final Reference<UserStatus> userStatusSupplier;
 
     public final FileCache<String, Entity> getEntityCache() {
@@ -144,10 +142,7 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
                     .discardPoll(Service.Status.ONLINE);
             logger.debug("Status Server ready! {}", server);
 
-            this.bot = ARGS.process("token")
-                    .or(BOT_TOKEN::getContent)
-                    .map(token -> new DiscordBotBase(DISCORD, token))
-                    .assertion("No discord token found");
+            //this.bot = new DiscordBotBase(DISCORD, BOT_TOKEN.getContent(true));
             this.userStatusSupplier = StatusServer.instance.getEntityCache()
                     .pipe()
                     .filter(Service.class::isInstance)
@@ -192,12 +187,14 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
                 }
 
                 logger.debug("Updating presence to: {} - {}", useStatus, str);
-                bot.updatePresence(useStatus, str);
+               // bot.updatePresence(useStatus, str);
             }, 5, 30, TimeUnit.SECONDS);
+            /*
             final InteractionCore core = bot.getInteractionCore();
             final CommandSetup commands = core.getCommands();
             commands.readClass(Commands.class);
             core.synchronizeGlobal().join();
+             */
         } catch (Throwable t) {
             logger.error("An error occurred during startup, stopping", t);
             System.exit(0);
@@ -210,7 +207,6 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
     }
 
     public static void main(String... args) throws IOException {
-        ARGS = CommandLineArgs.parse(args);
         logger.info("Starting comroid Status Server...");
         new StatusServer(Executors.newScheduledThreadPool(4), InetAddress.getByAddress(new byte[]{0, 0, 0, 0}), PORT);
 
