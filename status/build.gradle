@@ -70,7 +70,7 @@ dependencies {
         testImplementation project(':CrystalShard')
     }
 
-    testImplementation 'junit:junit:4.13'
+    testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.easymock:easymock:4.1'
     testRuntimeOnly 'com.squareup.okhttp3:okhttp:4.7.2'
     testRuntimeOnly 'com.alibaba:fastjson:1.2.70'
