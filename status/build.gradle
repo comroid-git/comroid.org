@@ -70,9 +70,6 @@ dependencies {
         testImplementation project(':CrystalShard')
     }
 
-    // command line parser
-    testImplementation 'org.comroid:clipa:0.10.3'
-
     testImplementation 'junit:junit:4.13'
     testImplementation 'org.easymock:easymock:4.1'
     testRuntimeOnly 'com.squareup.okhttp3:okhttp:4.7.2'
