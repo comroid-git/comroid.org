@@ -59,7 +59,6 @@ dependencies {
         testImplementation project(':status-api')
 
         testImplementation 'org.comroid:restless:0.+'
-        testImplementation 'org.comroid:clipa:0.+'
         testImplementation 'org.comroid:CrystalShard:0.+'
     } else {
         testImplementation project(':status:status-server')
@@ -68,10 +67,11 @@ dependencies {
         testImplementation project(':guardian:uniform').sourceSets.java8compat.output.classesDirs
         testImplementation project(':guardian:restless').sourceSets.java8compat.output.classesDirs
 
-        testImplementation project(':clipa')
-
         testImplementation project(':CrystalShard')
     }
+
+    // command line parser
+    testImplementation 'org.comroid:clipa:0.10.3'
 
     testImplementation 'junit:junit:4.13'
     testImplementation 'org.easymock:easymock:4.1'
