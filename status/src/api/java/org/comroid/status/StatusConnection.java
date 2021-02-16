@@ -101,6 +101,7 @@ public final class StatusConnection implements ContextualProvider.Underlying {
     }
 
     private CompletableFuture<Void> executePoll() {
+        logger.debug("Polling Status");
         return sendPoll().thenRun(this::schedulePoll);
     }
 
