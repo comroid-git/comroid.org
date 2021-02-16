@@ -9,9 +9,12 @@ import org.comroid.common.io.FileHandle;
 import org.comroid.common.jvm.JITAssistant;
 import org.comroid.crystalshard.Context;
 import org.comroid.crystalshard.DiscordAPI;
+import org.comroid.crystalshard.DiscordBotBase;
 import org.comroid.crystalshard.entity.user.User;
 import org.comroid.crystalshard.model.message.embed.EmbedBuilder;
 import org.comroid.crystalshard.model.presence.UserStatus;
+import org.comroid.crystalshard.ui.CommandSetup;
+import org.comroid.crystalshard.ui.InteractionCore;
 import org.comroid.crystalshard.ui.annotation.Option;
 import org.comroid.crystalshard.ui.annotation.SlashCommand;
 import org.comroid.mutatio.ref.Reference;
@@ -19,7 +22,6 @@ import org.comroid.restless.REST;
 import org.comroid.restless.adapter.okhttp.v4.OkHttp4Adapter;
 import org.comroid.restless.server.RestServer;
 import org.comroid.status.AdapterDefinition;
-import org.comroid.status.StatusConnection;
 import org.comroid.status.entity.Entity;
 import org.comroid.status.entity.Service;
 import org.comroid.status.server.entity.LocalService;
@@ -128,7 +130,7 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
                             .count());
 
             logger.debug("Starting REST Server...");
-            this.server = new RestServer(ADAPTER_DEFINITION.serialization, executor, StatusConnection.URL_BASE, host, port, ServerEndpoints.values());
+            this.server = new RestServer(ADAPTER_DEFINITION.serialization, executor, AdapterDefinition.URL_BASE, host, port, ServerEndpoints.values());
             server.addCommonHeader("Access-Control-Allow-Origin", "*");
 
             getServiceByName("status-server")
