@@ -2,6 +2,7 @@ package org.comroid.status.entity;
 
 import org.comroid.api.Named;
 import org.comroid.status.AdapterDefinition;
+import org.comroid.status.StatusConnection;
 import org.comroid.util.StandardValueType;
 import org.comroid.varbind.bind.GroupBind;
 import org.comroid.varbind.bind.VarBind;
@@ -14,7 +15,7 @@ public interface Entity extends DataContainer<Entity>, Named {
 
     interface Bind {
         GroupBind<Entity> Root
-                = new GroupBind<>(AdapterDefinition.getInstance(), "entity");
+                = new GroupBind<>(StatusConnection.SERIALIZER, "entity");
         VarBind<Entity, String, String, String> Name
                 = Root.createBind("name")
                 .extractAs(StandardValueType.STRING)
