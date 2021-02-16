@@ -19,7 +19,7 @@ import java.util.concurrent.*;
 import static org.comroid.restless.CommonHeaderNames.AUTHORIZATION;
 
 public final class StatusConnection implements ContextualProvider.Underlying {
-    private final AdapterDefinition adapterDefinition;
+    private final ContextualProvider context;
     private final String serviceName;
     private final String token;
     private final ScheduledExecutorService executor;
@@ -56,19 +56,19 @@ public final class StatusConnection implements ContextualProvider.Underlying {
 
     @Override
     public ContextualProvider getUnderlyingContextualProvider() {
-        return adapterDefinition;
+        return context;
     }
 
-    public StatusConnection(AdapterDefinition context, String serviceName, FileHandle tokenFile) {
+    public StatusConnection(ContextualProvider context, String serviceName, FileHandle tokenFile) {
         this(context, serviceName, tokenFile.getContent(), Executors.newScheduledThreadPool(4));
     }
 
-    public StatusConnection(AdapterDefinition context, String serviceName, String token, ScheduledExecutorService executor) {
-        this.adapterDefinition = context;
+    public StatusConnection(ContextualProvider context, String serviceName, String token, ScheduledExecutorService executor) {
+        this.context = context.plus(this);
         this.serviceName = serviceName;
         this.token = token;
         this.executor = executor;
-        this.rest = new REST(adapterDefinition, executor);
+        this.rest = new REST(this.context, executor);
         this.serviceCache = new ProvidedCache<>(context, 250, ForkJoinPool.commonPool(), this::requestServiceByName);
         this.ownService = requestServiceByName(serviceName).join();
 
