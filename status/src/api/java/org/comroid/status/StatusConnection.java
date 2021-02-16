@@ -68,7 +68,7 @@ public final class StatusConnection implements ContextualProvider.Underlying {
         this.serviceName = serviceName;
         this.token = token;
         this.executor = executor;
-        this.rest = new REST(this.context, executor);
+        this.rest = context.getFromContext(REST.class).orElseGet(() -> new REST(this.context, executor));
         this.serviceCache = new ProvidedCache<>(context, 250, ForkJoinPool.commonPool(), this::requestServiceByName);
         this.ownService = requestServiceByName(serviceName).join();
 
