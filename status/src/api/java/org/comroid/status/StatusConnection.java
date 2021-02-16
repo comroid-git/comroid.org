@@ -1,5 +1,7 @@
 package org.comroid.status;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.Polyfill;
 import org.comroid.common.io.FileHandle;
@@ -21,6 +23,7 @@ import java.util.concurrent.*;
 import static org.comroid.restless.CommonHeaderNames.AUTHORIZATION;
 
 public final class StatusConnection implements ContextualProvider.Underlying {
+    private static final Logger logger = LogManager.getLogger();
     private final ContextualProvider context;
     private final String serviceName;
     private final String token;
@@ -102,7 +105,16 @@ public final class StatusConnection implements ContextualProvider.Underlying {
     }
 
     private void schedulePoll() {
-        executor.schedule(this::executePoll, refreshTimeout, TimeUnit.SECONDS);
+        executor.schedule(() -> {
+            try {
+                executePoll().exceptionally(t -> {
+                    logger.error("Error with Poll request", t);
+                    return null;
+                });
+            } catch (Throwable t) {
+                logger.error("Error while executing Poll", t);
+            }
+        }, refreshTimeout, TimeUnit.SECONDS);
     }
 
     public CompletableFuture<Service> sendPoll() {

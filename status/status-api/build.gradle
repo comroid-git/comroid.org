@@ -51,6 +51,10 @@ dependencies {
         testImplementation project(':guardian:restless').sourceSets.java8compat.output.classesDirs
     }
 
+    // logging dependencies
+    implementation 'org.apache.logging.log4j:log4j-api:2.11.0'
+    runtimeOnly 'org.apache.logging.log4j:log4j-core:2.11.0'
+
     testImplementation 'junit:junit:4.13'
     testImplementation 'org.easymock:easymock:4.1'
     testRuntimeOnly 'org.apache.logging.log4j:log4j-core:2.13.3'
