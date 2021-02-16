@@ -80,6 +80,11 @@ public final class StatusConnection implements ContextualProvider.Underlying {
         JITAssistant.prepareStatic(Service.class);
     }
 
+    @Override
+    public String toString() {
+        return String.format("StatusConnection{serviceName='%s', service=%s}", serviceName, ownService.get());
+    }
+
     public boolean startPolling() {
         if (polling)
             return false;
