@@ -4,6 +4,8 @@ import org.comroid.api.ContextualProvider;
 import org.comroid.api.Polyfill;
 import org.comroid.common.io.FileHandle;
 import org.comroid.common.jvm.JITAssistant;
+import org.comroid.mutatio.ref.FutureReference;
+import org.comroid.mutatio.ref.Reference;
 import org.comroid.mutatio.span.Span;
 import org.comroid.restless.REST;
 import org.comroid.restless.body.BodyBuilderType;
@@ -25,7 +27,7 @@ public final class StatusConnection implements ContextualProvider.Underlying {
     private final ScheduledExecutorService executor;
     private final REST rest;
     private final ProvidedCache<String, Service> serviceCache;
-    private final Service ownService;
+    private final Reference<Service> ownService;
     public int refreshTimeout = 60; // seconds
     public int crashedTimeout = 3600; // seconds
     private boolean polling = false;
@@ -39,7 +41,7 @@ public final class StatusConnection implements ContextualProvider.Underlying {
     }
 
     public Service getService() {
-        return ownService;
+        return ownService.assertion();
     }
 
     public REST getRest() {
@@ -70,7 +72,7 @@ public final class StatusConnection implements ContextualProvider.Underlying {
         this.executor = executor;
         this.rest = context.getFromContext(REST.class).orElseGet(() -> new REST(this.context, executor));
         this.serviceCache = new ProvidedCache<>(context, 250, ForkJoinPool.commonPool(), this::requestServiceByName);
-        this.ownService = requestServiceByName(serviceName).join();
+        this.ownService = new FutureReference<>(requestServiceByName(serviceName));
 
         JITAssistant.prepareStatic(Service.class);
     }
