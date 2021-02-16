@@ -123,6 +123,7 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
                     true
             );
             logger.debug("EntityCache created: {}", entityCache);
+            entityCache.reloadData();
             logger.debug("Loaded {} services",
                     entityCache.streamRefs()
                             .filter(ref -> ref.test(Service.class::isInstance))
