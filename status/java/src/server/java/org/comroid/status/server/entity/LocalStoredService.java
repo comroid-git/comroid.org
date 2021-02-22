@@ -7,12 +7,13 @@ import org.comroid.api.IntEnum;
 import org.comroid.common.io.FileHandle;
 import org.comroid.mutatio.ref.Reference;
 import org.comroid.status.entity.Entity;
+import org.comroid.status.entity.Service;
 import org.comroid.status.server.StatusServer;
 import org.comroid.status.server.TokenCore;
 import org.comroid.uniform.node.UniNode;
-import org.comroid.uniform.node.UniObjectNode;
 import org.comroid.varbind.container.DataContainerBase;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -33,6 +34,12 @@ public class LocalStoredService extends DataContainerBase<Entity> implements Loc
     @Override
     public Status getStatus() {
         return status.get();
+    }
+
+    @Override
+    public CompletableFuture<Service> updateStatus(Status status) {
+        setStatus(status);
+        return CompletableFuture.completedFuture(this);
     }
 
     @Override

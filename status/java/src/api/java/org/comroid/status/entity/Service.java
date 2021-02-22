@@ -4,6 +4,7 @@ import org.comroid.api.IntEnum;
 import org.comroid.api.Polyfill;
 import org.comroid.api.WrappedFormattable;
 import org.comroid.restless.REST;
+import org.comroid.restless.body.BodyBuilderType;
 import org.comroid.status.StatusConnection;
 import org.comroid.status.rest.Endpoint;
 import org.comroid.util.StandardValueType;
@@ -18,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -49,6 +51,8 @@ public interface Service extends Entity, WrappedFormattable {
     }
 
     CompletableFuture<Status> requestStatus();
+
+    CompletableFuture<Service> updateStatus(Status status);
 
     enum Status implements IntEnum {
         UNKNOWN(0),
@@ -135,6 +139,20 @@ public interface Service extends Entity, WrappedFormattable {
                         put(Service.Bind.Status, status.value);
                         return status;
                     });
+        }
+
+        @Override
+        public CompletableFuture<Service> updateStatus(Status status) {
+            if (getStatus() == status)
+                return CompletableFuture.completedFuture(this);
+            if (!Objects.equals(put(Service.Bind.Status, status), status.getValue()))
+                return connection.getRest()
+                    .request(Service.Bind.Root)
+                    .method(REST.Method.PATCH)
+                    .endpoint(Endpoint.SPECIFIC_SERVICE.complete(getName()))
+                    .body(this)
+                    .execute$deserializeSingle();
+            else return Polyfill.failedFuture(new RuntimeException("Unable to change status"));
         }
     }
 }
