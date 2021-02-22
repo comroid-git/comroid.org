@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <RootNamespace>status_api</RootNamespace>
+    <RootNamespace>org_comroid_status_api</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
