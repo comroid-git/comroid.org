@@ -6,6 +6,9 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "status-api", "status-api\status-api.csproj", "{1F97CF7D-A2E5-40C0-BCB1-D0B7B9C17A82}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "status-app", "status-app\status-app.csproj", "{83B4292F-DF4D-46B8-B632-40E82067FFEE}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1F97CF7D-A2E5-40C0-BCB1-D0B7B9C17A82} = {1F97CF7D-A2E5-40C0-BCB1-D0B7B9C17A82}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
