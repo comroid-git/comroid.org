@@ -9,15 +9,15 @@ namespace org_comroid_status_api
     {
         public static readonly string BaseUrl = "https://api.comroid.org/";
         private readonly string _serviceName;
-        private readonly string _token;
-        private readonly RestClient _rest;
+        internal readonly string Token;
+        internal readonly RestClient _rest;
 
         public Service OwnService { get; private set; }
 
         public StatusConnection(string serviceName, string token = null)
         {
             _serviceName = serviceName;
-            _token = token;
+            Token = token;
             _rest = new RestClient(BaseUrl);
 
             Task<Service> req = RequestServiceByName(serviceName);

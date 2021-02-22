@@ -2,18 +2,33 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.ConstrainedExecution;
+using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using RestSharp;
 
 namespace org_comroid_status_api
 {
     public abstract class Entity
     {
+        protected readonly StatusConnection Connection;
+
+        protected Entity(StatusConnection connection)
+        {
+            this.Connection = connection;
+        }
+
         [JsonProperty] public string Name { get; set; }
     }
 
     public sealed class Service : Entity
     {
+        public Service(StatusConnection connection) : base(connection)
+        {
+        }
+
         [JsonProperty(propertyName: "display_name")]
         public string DisplayName { get; set; }
 
@@ -25,11 +40,29 @@ namespace org_comroid_status_api
         {
             return ServiceStatus.ValueOf(Status);
         }
+
+        public sealed class StatusHolder
+        {
+            [JsonProperty] public int status { get; private set; }
+
+            internal StatusHolder(int status)
+            {
+                this.status = status;
+            }
+        }
+
+        public async Task<Service> UpdateStatus(ServiceStatus status)
+        {
+            RestRequest req = new RestRequest($"service/{Name}/status", Method.POST, DataFormat.Json);
+            req.AddHeader("Authorization", Connection.Token);
+            req.AddJsonBody(new StatusHolder(status.Value));
+            return Connection._rest.Execute<Service>(req).Data;
+        }
     }
 
     public sealed class ServiceStatus
     {
-        private readonly int _value;
+        public readonly int Value;
         private static readonly List<ServiceStatus> instances = new List<ServiceStatus>();
 
         public static readonly ServiceStatus Unknown = new ServiceStatus(0);
@@ -44,13 +77,13 @@ namespace org_comroid_status_api
 
         private ServiceStatus(int value)
         {
-            _value = value;
+            Value = value;
             instances.Add(this);
         }
 
         public static ServiceStatus ValueOf(int value)
         {
-            return instances.FirstOrDefault(status => status._value == value) ?? Unknown;
+            return instances.FirstOrDefault(status => status.Value == value) ?? Unknown;
         }
     }
 }
