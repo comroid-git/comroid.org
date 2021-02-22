@@ -9,6 +9,24 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
-
+        <Grid.RowDefinitions>
+            <RowDefinition Height="3*" />
+            <RowDefinition Height="5*" />
+            <RowDefinition Height="5*" />
+            <RowDefinition Height="5*" />
+            <RowDefinition Height="5*" />
+            <RowDefinition Height="5*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*" />
+            <ColumnDefinition Width="1*" />
+            <ColumnDefinition Width="1*" />
+            <ColumnDefinition Width="1*" />
+            <ColumnDefinition Width="1*" />
+        </Grid.ColumnDefinitions>
+        <TextBox Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="3" FontSize="55" FontStretch="SemiExpanded" TextAlignment="Center" Text="comroid Status" IsDoubleTapEnabled="False" IsHoldingEnabled="False" IsRightTapEnabled="False" HorizontalTextAlignment="Left" IsReadOnly="True" IsEnabled="False" />
+        <Frame Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5" Margin="70,30,70,30">
+            <TextBox Header="Status Server"   TextAlignment="Center" Text="UNKNOWN" />
+        </Frame>
     </Grid>
 </Page>
