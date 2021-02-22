@@ -19,18 +19,6 @@ function initGrid(slim) {
 }
 
 /**
- * Function to handle failed HTTP responses.
- *
- * @param {Object} response The response object of the fetch API
- */
-function handleErrors(response) {
-    if (!response.ok) {
-        throw Error(response.statusText);
-    }
-    return response;
-}
-
-/**
  * Creates all boxes for the status page grid.
  *
  * @param {Object} data The JSON data delivered by the Fetch API request

@@ -25,6 +25,18 @@ const statusArray = [
     }
 ]
 
+/**
+ * Function to handle failed HTTP responses.
+ *
+ * @param {Object} response The response object of the fetch API
+ */
+function handleErrors(response) {
+    if (!response.ok) {
+        throw Error(response.statusText);
+    }
+    return response;
+}
+
 // taken from https://stackoverflow.com/a/46946573
 // Rough implementation. Untested.
 function timeout(ms, promise) {
