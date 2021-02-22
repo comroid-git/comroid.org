@@ -19,6 +19,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -148,9 +149,9 @@ public interface Service extends Entity, WrappedFormattable {
             if (!Objects.equals(put(Service.Bind.Status, status), status.getValue()))
                 return connection.getRest()
                     .request(Service.Bind.Root)
-                    .method(REST.Method.PATCH)
-                    .endpoint(Endpoint.SPECIFIC_SERVICE.complete(getName()))
-                    .body(this)
+                    .method(REST.Method.POST)
+                    .endpoint(Endpoint.UPDATE_SERVICE_STATUS.complete(getName()))
+                    .buildBody(BodyBuilderType.OBJECT, obj -> obj.put(Service.Bind.Status, status))
                     .execute$deserializeSingle();
             else return Polyfill.failedFuture(new RuntimeException("Unable to change status"));
         }
