@@ -47,3 +47,11 @@ function timeout(ms, promise) {
         promise.then(resolve, reject)
     })
 }
+
+function getStatus(serviceName) {
+    return fetch('https://api.status.comroid.org/service/'+serviceName+'/status')
+        .then(handleErrors)
+        .then(response => response.json())
+        .then(json => parseInt(json))
+        .catch(error => console.error('Could not get status of service ' + serviceName, error));
+}
