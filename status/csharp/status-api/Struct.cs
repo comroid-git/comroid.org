@@ -13,22 +13,11 @@ namespace org_comroid_status_api
 {
     public abstract class Entity
     {
-        protected readonly StatusConnection Connection;
-
-        protected Entity(StatusConnection connection)
-        {
-            this.Connection = connection;
-        }
-
         [JsonProperty] public string Name { get; set; }
     }
 
     public sealed class Service : Entity
     {
-        public Service(StatusConnection connection) : base(connection)
-        {
-        }
-
         [JsonProperty(propertyName: "display_name")]
         public string DisplayName { get; set; }
 
@@ -54,9 +43,9 @@ namespace org_comroid_status_api
         public async Task<Service> UpdateStatus(ServiceStatus status)
         {
             RestRequest req = new RestRequest($"service/{Name}/status", Method.POST, DataFormat.Json);
-            req.AddHeader("Authorization", Connection.Token);
+            req.AddHeader("Authorization", StatusConnection.Instance.Token);
             req.AddJsonBody(new StatusHolder(status.Value));
-            Service yield = await Task.Run(() => Connection._rest.Execute<Service>(req).Data);
+            Service yield = await Task.Run(() => StatusConnection.Instance._rest.Execute<Service>(req).Data);
             return yield;
         }
     }
