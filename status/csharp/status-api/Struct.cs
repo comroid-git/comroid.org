@@ -56,7 +56,8 @@ namespace org_comroid_status_api
             RestRequest req = new RestRequest($"service/{Name}/status", Method.POST, DataFormat.Json);
             req.AddHeader("Authorization", Connection.Token);
             req.AddJsonBody(new StatusHolder(status.Value));
-            return Connection._rest.Execute<Service>(req).Data;
+            Service yield = await Task.Run(() => Connection._rest.Execute<Service>(req).Data);
+            return yield;
         }
     }
 

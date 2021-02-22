@@ -27,8 +27,8 @@ namespace org_comroid_status_api
         public async Task<Service> RequestServiceByName(string serviceName)
         {
             RestRequest req = new RestRequest($"service/{serviceName}", Method.GET, DataFormat.Json);
-
-            return _rest.Execute<Service>(req).Data;
+            Service yield = await Task.Run(() => _rest.Execute<Service>(req).Data);
+            return yield;
         }
     }
 }
