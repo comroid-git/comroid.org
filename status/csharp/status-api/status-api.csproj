@@ -5,6 +5,13 @@
     <RootNamespace>org_comroid_status_api</RootNamespace>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <PackageId>org_comroid_status_api</PackageId>
+    <Version>0.0.1</Version>
+    <Authors>Kaleidox</Authors>
+    <Company>comroid</Company>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="RestSharp" Version="106.11.7" />
