@@ -33,17 +33,21 @@ namespace org_comroid_status_api
         public async Task<Service> RequestServiceByName(string serviceName)
         {
             RestRequest req = new RestRequest($"service/{serviceName}", Method.GET, DataFormat.Json);
-            Service yield = await Task.Run(() => Rest.Execute<Service>(req).Data);
-            return yield;
+            return await Task.Run(() => Rest.Execute<Service>(req).Data);
         }
 
         public async Task<List<Service>> RefreshServiceCache()
         {
-            RestRequest req = new RestRequest("services", Method.GET, DataFormat.Json);
-            List<Service> yields = await Task.Run(() => Rest.Execute<List<Service>>(req).Data);
-            foreach (var srv in yields) 
+            List<Service> yields = await RequestServices();
+            foreach (Service srv in yields) 
                 Cache.Add(srv.Name, srv);
             return yields;
+        }
+
+        public async Task<List<Service>> RequestServices()
+        {
+            RestRequest req = new RestRequest("services", Method.GET, DataFormat.Json);
+            return await Task.Run(() => Rest.Execute<List<Service>>(req).Data);
         }
     }
 }
