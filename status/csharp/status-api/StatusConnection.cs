@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading.Tasks;
 using RestSharp;
 
@@ -28,6 +29,11 @@ namespace org_comroid_status_api
 
             Task<Service> req = RequestServiceByName(serviceName);
             req.GetAwaiter().OnCompleted(() => OwnService = req.Result);
+        }
+
+        public IEnumerable<Service> GetServices()
+        {
+            return Cache.Values.Cast<Service>();
         }
 
         public async Task<Service> RequestServiceByName(string serviceName)
