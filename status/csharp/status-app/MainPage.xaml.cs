@@ -25,6 +25,11 @@ namespace status_app
         public MainPage()
         {
             this.InitializeComponent();
+
+            if (Resources.TryGetValue("StatusBox", out object value))
+            {
+                ControlTemplate template = value as ControlTemplate;
+            }
         }
     }
 }
