@@ -1,4 +1,19 @@
 ﻿<ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ControlTemplate x:Key="StatusBox" TargetType="Frame">
+        <Border BorderBrush="{TemplateBinding BorderBrush}"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                Background="{TemplateBinding Background}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="1.5*"/>
+                    <RowDefinition Height="2*"/>
+                </Grid.RowDefinitions>
+
+                <TextBox Grid.Row="0" Name="Service-Name" IsEnabled="False" />
+                <TextBox Grid.Row="1" Name="Service-Status" IsEnabled="False" />
+            </Grid>
+        </Border>
+    </ControlTemplate>
 </ResourceDictionary>
