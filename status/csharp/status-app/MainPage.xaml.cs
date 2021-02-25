@@ -78,7 +78,7 @@ namespace status_app
             return Stacker.Children
                        .Cast<ServiceBox>()
                        .FirstOrDefault(box => box.Name.Equals($"status-{service.Name}"))
-                   ?? new ServiceBox(Stacker, service);
+                   ?? new ServiceBox(this, service);
         }
 
         private async void InitializeServiceList(object sender, RoutedEventArgs e)
@@ -96,7 +96,7 @@ namespace status_app
             private readonly TextBox _displayName;
             private readonly TextBox _statusText;
 
-            internal ServiceBox(StackPanel stacker, Service service)
+            internal ServiceBox(MainPage mainPage, Service service)
             {
                 Name = $"status-{service.Name}";
                 Visibility = Visibility.Visible;
@@ -106,21 +106,21 @@ namespace status_app
                 this._displayName = new TextBox()
                 {
                     Text = service.DisplayName,
-                    Style = Resources["HeaderTextBlockStyle"] as Style,
+                    Style = mainPage.Resources["HeaderTextBlockStyle"] as Style,
                     HorizontalAlignment = HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center
                 };
                 this._statusText = new TextBox()
                 {
                     Text = ServiceStatus.Unknown.Display,
-                    Style = Resources["HeaderTextBlockStyle"] as Style,
+                    Style = mainPage.Resources["HeaderTextBlockStyle"] as Style,
                     HorizontalAlignment = HorizontalAlignment.Center,
                     VerticalAlignment = VerticalAlignment.Center
                 };
 
                 Children.Add(_displayName);
                 Children.Add(_statusText);
-                stacker.Children.Add(this);
+                mainPage.Stacker.Children.Add(this);
 
                 UpdateDisplay(service);
             }
