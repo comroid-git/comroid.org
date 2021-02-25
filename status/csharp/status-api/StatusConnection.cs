@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using RestSharp;
@@ -46,13 +47,19 @@ namespace org_comroid_status_api
         public async Task<Service> RequestServiceByName(string serviceName)
         {
             RestRequest req = new RestRequest($"service/{serviceName}", Method.GET, DataFormat.Json);
-            return await Task.Run(() => Rest.Execute<Service>(req).Data);
+            IRestResponse<Service> response = await Task.Run(() => Rest.Execute<Service>(req));
+            if (response.Data != null)
+                throw new IOException($"Could not request service {serviceName}", response.ErrorException);
+            return response.Data;
         }
 
         public async Task<List<Service>> RequestServices()
         {
             RestRequest req = new RestRequest("services", Method.GET, DataFormat.Json);
-            return await Task.Run(() => Rest.Execute<List<Service>>(req).Data);
+            IRestResponse<List<Service>> response = await Task.Run(() => Rest.Execute<List<Service>>(req));
+            if (response.Data == null)
+                throw new IOException("Could not request services", response.ErrorException);
+            return response.Data;
         }
 
         public async Task<List<Service>> RefreshServiceCache()
