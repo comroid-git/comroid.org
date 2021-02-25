@@ -100,22 +100,27 @@ namespace status_app
             {
                 Name = $"status-{service.Name}";
                 Visibility = Visibility.Visible;
-                HorizontalAlignment = HorizontalAlignment.Center;
+                Height = 90;
+                HorizontalAlignment = HorizontalAlignment.Stretch;
                 VerticalAlignment = VerticalAlignment.Center;
 
                 this._displayName = new TextBox()
                 {
+                    IsEnabled = false,
                     Text = service.DisplayName,
                     Style = mainPage.Resources["HeaderTextBlockStyle"] as Style,
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                    VerticalAlignment = VerticalAlignment.Stretch,
+                    TextAlignment = TextAlignment.Center
                 };
                 this._statusText = new TextBox()
                 {
+                    IsEnabled = false,
                     Text = ServiceStatus.Unknown.Display,
                     Style = mainPage.Resources["HeaderTextBlockStyle"] as Style,
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                    VerticalAlignment = VerticalAlignment.Stretch,
+                    TextAlignment = TextAlignment.Center
                 };
 
                 Children.Add(_displayName);
