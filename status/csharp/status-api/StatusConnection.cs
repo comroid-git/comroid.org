@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -36,7 +37,9 @@ namespace org_comroid_status_api
             {
                 Task<Service> req = RequestServiceByName(serviceName);
                 req.GetAwaiter().OnCompleted(() => OwnService = req.Result);
+                Debug.WriteLine($"Status Connection opened with service name {serviceName}");
             }
+            else Debug.WriteLine("Status Connection opened without specified Service");
         }
 
         public IEnumerable<Service> GetServices()
@@ -47,6 +50,7 @@ namespace org_comroid_status_api
         public async Task<Service> RequestServiceByName(string serviceName)
         {
             RestRequest req = new RestRequest($"service/{serviceName}", Method.GET, DataFormat.Json);
+            Debug.WriteLine($"Requesting service with name {serviceName}");
             IRestResponse<Service> response = await Task.Run(() => Rest.Execute<Service>(req));
             if (response.Data != null)
                 throw new IOException($"Could not request service {serviceName}", response.ErrorException);
@@ -56,6 +60,7 @@ namespace org_comroid_status_api
         public async Task<List<Service>> RequestServices()
         {
             RestRequest req = new RestRequest("services", Method.GET, DataFormat.Json);
+            Debug.WriteLine("Requesting all services");
             IRestResponse<List<Service>> response = await Task.Run(() => Rest.Execute<List<Service>>(req));
             if (response.Data == null)
                 throw new IOException("Could not request services", response.ErrorException);
@@ -79,6 +84,7 @@ namespace org_comroid_status_api
                     yields[i] = cached;
                 }
             }
+
             return yields;
         }
     }
