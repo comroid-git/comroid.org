@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using RestSharp;
 
@@ -47,6 +49,14 @@ namespace org_comroid_status_api
             req.AddJsonBody(new StatusHolder(status.Value));
             Service yield = await Task.Run(() => StatusConnection.Instance.Rest.Execute<Service>(req).Data);
             return yield;
+        }
+        internal void CopyFrom(Service other)
+        {
+            if (Name != other.Name)
+                throw new ArgumentException("ID mismatch");
+            DisplayName = other.DisplayName;
+            Status = other.Status;
+            Url = other.Url;
         }
     }
 

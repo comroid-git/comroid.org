@@ -10,7 +10,7 @@ namespace org_comroid_status_api
 {
     public sealed class StatusConnection
     {
-        public static readonly string BaseUrl = "https://api.comroid.org/";
+        public static readonly string BaseUrl = "https://api.status.comroid.org/";
         public static StatusConnection Instance;
         private readonly string _serviceName;
         internal readonly string Token;
@@ -65,8 +65,20 @@ namespace org_comroid_status_api
         public async Task<List<Service>> RefreshServiceCache()
         {
             List<Service> yields = await RequestServices();
-            foreach (Service srv in yields)
-                Cache.Add(srv.Name, srv);
+            for (var i = 0; i < yields.Count; i++)
+            {
+                Service srv = yields[i];
+                var sname = srv.Name;
+
+                if (!Cache.ContainsKey(sname))
+                    Cache.Add(sname, srv);
+                else
+                {
+                    Service cached = Cache[sname] as Service;
+                    cached.CopyFrom(srv);
+                    yields[i] = cached;
+                }
+            }
             return yields;
         }
     }
