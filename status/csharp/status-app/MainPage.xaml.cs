@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -26,6 +27,8 @@ namespace status_app
 
         private async void ReloadPage(object sender, RoutedEventArgs e)
         {
+            Debug.WriteLine("Initiating Page reload");
+
             List<Service> services = await Connection.RefreshServiceCache();
 
             foreach (Service service in services)
@@ -33,6 +36,8 @@ namespace status_app
                 ServiceBox existing = ComputeServiceBox(service);
                 existing.UpdateDisplay(service);
             }
+
+            Debug.WriteLine($"Reload complete with {services.Count} services; Stacker has {_stacker.Children.Count} children");
         }
 
         private ServiceBox ComputeServiceBox(Service service)
