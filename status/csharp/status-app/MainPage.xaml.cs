@@ -58,7 +58,7 @@ namespace status_app
         private async void ReloadPage(object sender, RoutedEventArgs e)
         {
             Debug.WriteLine("Initiating Page reload");
-            
+
             List<Service> services = await Connection.RefreshServiceCache();
 
             foreach (Service service in services)
@@ -90,38 +90,47 @@ namespace status_app
         {
             await Launcher.LaunchUriAsync(Homepage);
         }
-    }
 
-    internal sealed class ServiceBox : Panel
-    {
-        private readonly TextBox _displayName;
-        private readonly TextBox _statusText;
-
-        internal ServiceBox(StackPanel stacker, Service service)
+        internal sealed class ServiceBox : StackPanel
         {
-            Name = $"status-{service.Name}";
-            this._displayName = new TextBox()
-            {
-                Text = service.DisplayName, Style = Resources["HeaderTextBlockStyle"] as Style,
-                HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center
-            };
-            this._statusText = new TextBox()
-            {
-                Text = ServiceStatus.Unknown.Display, Style = Resources["HeaderTextBlockStyle"] as Style,
-                HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center
-            };
-            Children.Add(_displayName);
-            Children.Add(_statusText);
-            stacker.Children.Add(this);
+            private readonly TextBox _displayName;
+            private readonly TextBox _statusText;
 
-            UpdateDisplay(service);
-        }
+            internal ServiceBox(StackPanel stacker, Service service)
+            {
+                Name = $"status-{service.Name}";
+                Visibility = Visibility.Visible;
+                HorizontalAlignment = HorizontalAlignment.Center;
+                VerticalAlignment = VerticalAlignment.Center;
 
-        public void UpdateDisplay(Service service)
-        {
-            if (!Name.Equals($"status-{service.Name}"))
-                throw new ArgumentException("Service ID mismatch");
-            _statusText.Text = service.GetStatus().Display;
+                this._displayName = new TextBox()
+                {
+                    Text = service.DisplayName,
+                    Style = Resources["HeaderTextBlockStyle"] as Style,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+                this._statusText = new TextBox()
+                {
+                    Text = ServiceStatus.Unknown.Display,
+                    Style = Resources["HeaderTextBlockStyle"] as Style,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+
+                Children.Add(_displayName);
+                Children.Add(_statusText);
+                stacker.Children.Add(this);
+
+                UpdateDisplay(service);
+            }
+
+            public void UpdateDisplay(Service service)
+            {
+                if (!Name.Equals($"status-{service.Name}"))
+                    throw new ArgumentException("Service ID mismatch");
+                _statusText.Text = service.GetStatus().Display;
+            }
         }
     }
 }
