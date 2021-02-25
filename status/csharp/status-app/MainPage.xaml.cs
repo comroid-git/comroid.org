@@ -5,6 +5,7 @@ using System.Linq;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.System;
+using Windows.UI.Xaml.Media;
 using org_comroid_status_api;
 
 // Die Elementvorlage "Leere Seite" wird unter https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x407 dokumentiert.
@@ -16,9 +17,38 @@ namespace status_app
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        public T FindControl<T>(Type targetType, string ControlName) where T : FrameworkElement
+        {
+            return FindControl<T>(this, targetType, ControlName);
+        }
+
+        public T FindControl<T>(UIElement parent, Type targetType, string ControlName) where T : FrameworkElement
+        {
+            if (parent == null) return null;
+
+            if (parent.GetType() == targetType && ((T) parent).Name == ControlName)
+            {
+                return (T) parent;
+            }
+
+            T result = null;
+            int count = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < count; i++)
+            {
+                UIElement child = (UIElement) VisualTreeHelper.GetChild(parent, i);
+
+                if (FindControl<T>(child, targetType, ControlName) != null)
+                {
+                    result = FindControl<T>(child, targetType, ControlName);
+                    break;
+                }
+            }
+
+            return result;
+        }
+
         public static readonly Uri Homepage = new Uri("https://status.comroid.org");
         internal static readonly StatusConnection Connection = new StatusConnection();
-        private StackPanel _stacker;
 
         public MainPage()
         {
@@ -28,7 +58,7 @@ namespace status_app
         private async void ReloadPage(object sender, RoutedEventArgs e)
         {
             Debug.WriteLine("Initiating Page reload");
-
+            
             List<Service> services = await Connection.RefreshServiceCache();
 
             foreach (Service service in services)
@@ -37,20 +67,22 @@ namespace status_app
                 existing.UpdateDisplay(service);
             }
 
-            Debug.WriteLine($"Reload complete with {services.Count} services; Stacker has {_stacker.Children.Count} children");
+            Debug.WriteLine(
+                $"Reload complete with {services.Count} services; Stacker has {Stacker.Children.Count} children");
         }
+
+        internal StackPanel Stacker => FindControl<StackPanel>(typeof(StackPanel), "ServicePanel");
 
         private ServiceBox ComputeServiceBox(Service service)
         {
-            return _stacker.Children
+            return Stacker.Children
                        .Cast<ServiceBox>()
                        .FirstOrDefault(box => box.Name.Equals($"status-{service.Name}"))
-                   ?? new ServiceBox(_stacker, service);
+                   ?? new ServiceBox(Stacker, service);
         }
 
         private async void InitializeServiceList(object sender, RoutedEventArgs e)
         {
-            _stacker = sender as StackPanel;
             ReloadPage(sender, e);
         }
 
@@ -67,8 +99,7 @@ namespace status_app
 
         internal ServiceBox(StackPanel stacker, Service service)
         {
-            stacker.Children.Add(this);
-
+            Name = $"status-{service.Name}";
             this._displayName = new TextBox()
             {
                 Text = service.DisplayName, Style = Resources["HeaderTextBlockStyle"] as Style,
@@ -81,12 +112,15 @@ namespace status_app
             };
             Children.Add(_displayName);
             Children.Add(_statusText);
+            stacker.Children.Add(this);
 
             UpdateDisplay(service);
         }
 
         public void UpdateDisplay(Service service)
         {
+            if (!Name.Equals($"status-{service.Name}"))
+                throw new ArgumentException("Service ID mismatch");
             _statusText.Text = service.GetStatus().Display;
         }
     }
