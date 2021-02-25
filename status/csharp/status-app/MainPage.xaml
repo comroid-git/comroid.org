@@ -10,21 +10,20 @@
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="3*" />
-            <RowDefinition Height="5*" />
-            <RowDefinition Height="5*" />
-            <RowDefinition Height="5*" />
-            <RowDefinition Height="5*" />
-            <RowDefinition Height="5*" />
+            <RowDefinition Height="1.5*" />
+            <RowDefinition Height="10*" />
+            <RowDefinition Height="1*" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="3*" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <TextBlock Text="comroid Status Server" Style="{StaticResource HeaderTextBlockStyle}" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="3" HorizontalAlignment="Center" VerticalAlignment="Center" />
-        <Button Click="OpenInBrowser" Grid.Row="5" Grid.Column="5" Content="Open in Browser" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,40,40"/>
+        <TextBlock Text="comroid Status Server" Style="{StaticResource HeaderTextBlockStyle}" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        <Button Content="Reload" Click="ReloadPage" Grid.Row="1" Grid.Column="0" Margin="0,20,20,0" HorizontalAlignment="Right" VerticalAlignment="Top" />
+        <ScrollViewer Grid.Row="1" Grid.Column="1" Name="ServiceList">
+            <StackPanel Name="ServicePanel" Loaded="InitializeServiceList" />
+        </ScrollViewer>
+        <Button Content="Open in Browser" Click="OpenInBrowser" Grid.Row="2" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,40,40"/>
     </Grid>
 </Page>

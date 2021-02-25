@@ -24,6 +24,7 @@ namespace status_app
     public sealed partial class MainPage : Page
     {
         public static readonly Uri Homepage = new Uri("https://status.comroid.org");
+        private StackPanel _stacker;
 
         public MainPage()
         {
@@ -35,9 +36,29 @@ namespace status_app
             }
         }
 
+        private async void ReloadPage(object sender, RoutedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        private async void InitializeServiceList(object sender, RoutedEventArgs e)
+        {
+            _stacker = sender as StackPanel;
+        }
+
         private async void OpenInBrowser(object sender, RoutedEventArgs e)
         {
             await Launcher.LaunchUriAsync(Homepage);
+        }
+    }
+
+    public sealed class ServiceBox : Frame
+    {
+        private readonly Service _service;
+
+        private ServiceBox(Service service)
+        {
+            _service = service;
         }
     }
 }
