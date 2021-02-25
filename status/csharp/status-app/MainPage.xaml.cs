@@ -81,7 +81,7 @@ namespace status_app
                    ?? new ServiceBox(this, service);
         }
 
-        private async void InitializeServiceList(object sender, RoutedEventArgs e)
+        private void InitializeServiceList(object sender, RoutedEventArgs e)
         {
             ReloadPage(sender, e);
         }
