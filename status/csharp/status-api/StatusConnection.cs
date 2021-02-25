@@ -18,6 +18,10 @@ namespace org_comroid_status_api
 
         public Service OwnService { get; private set; }
 
+        public StatusConnection() : this(null)
+        {
+        }
+
         public StatusConnection(string serviceName, string token = null)
         {
             Instance = this;
@@ -27,8 +31,11 @@ namespace org_comroid_status_api
             Rest = new RestClient(BaseUrl);
             Cache = new Dictionary<string, Entity>();
 
-            Task<Service> req = RequestServiceByName(serviceName);
-            req.GetAwaiter().OnCompleted(() => OwnService = req.Result);
+            if (serviceName != null)
+            {
+                Task<Service> req = RequestServiceByName(serviceName);
+                req.GetAwaiter().OnCompleted(() => OwnService = req.Result);
+            }
         }
 
         public IEnumerable<Service> GetServices()
