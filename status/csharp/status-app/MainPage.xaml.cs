@@ -12,6 +12,7 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
+using Windows.System;
 
 // Die Elementvorlage "Leere Seite" wird unter https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x407 dokumentiert.
 
@@ -22,6 +23,8 @@ namespace status_app
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        public static readonly Uri Homepage = new Uri("https://status.comroid.org");
+
         public MainPage()
         {
             this.InitializeComponent();
@@ -30,6 +33,11 @@ namespace status_app
             {
                 ControlTemplate template = value as ControlTemplate;
             }
+        }
+
+        private async void OpenInBrowser(object sender, RoutedEventArgs e)
+        {
+            await Launcher.LaunchUriAsync(Homepage);
         }
     }
 }
