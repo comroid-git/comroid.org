@@ -21,8 +21,10 @@
         </Grid.ColumnDefinitions>
         <TextBlock Text="comroid Status Server" Style="{StaticResource HeaderTextBlockStyle}" Grid.Row="0"
                    Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" />
-        <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Margin="0,20,20,0" HorizontalAlignment="Right" VerticalAlignment="Top" >
-            <ProgressRing Name="ReloadingIndicator" IsActive="True" Visibility="Visible" Height="30" Width="30" Margin="0, 0, 10, 0" />
+        <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Margin="0,20,20,0"
+                    HorizontalAlignment="Right" VerticalAlignment="Top">
+            <ProgressRing Name="ReloadingIndicator" IsActive="True" Visibility="Visible" Height="30" Width="30"
+                          Margin="0, 0, 10, 0" />
             <Button Content="Reload" Click="ReloadPage" />
         </StackPanel>
         <StackPanel Grid.Row="1" Grid.Column="1" Name="ServiceList"
