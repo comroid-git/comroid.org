@@ -77,8 +77,9 @@ namespace status_app
         private ServiceBox ComputeServiceBox(Service service)
         {
             return Stacker.Children
-                       .Cast<ServiceBox>()
-                       .FirstOrDefault(box => box.Name.Equals($"status-{service.Name}"))
+                       .Select(each => each as ServiceBox)
+                       .Where(each => each != null)
+                       .FirstOrDefault(box => box.Name.Equals($"status_{service.Name.Replace('-','_')}"))
                    ?? new ServiceBox(this, service);
         }
 
@@ -99,26 +100,27 @@ namespace status_app
 
             internal ServiceBox(MainPage mainPage, Service service)
             {
-                Name = $"status-{service.Name}";
+                Name = $"status_{service.Name.Replace('-','_')}";
                 Visibility = Visibility.Visible;
-                Height = 90;
+                Margin = new Thickness(25, 50, 25, 50);
+                Background = mainPage.Resources["AppBarItemPointerOverBackgroundThemeBrush"] as Brush;
                 HorizontalAlignment = HorizontalAlignment.Stretch;
                 VerticalAlignment = VerticalAlignment.Center;
 
                 this._displayName = new TextBox()
                 {
-                    IsEnabled = false,
                     Text = service.DisplayName,
-                    Style = mainPage.Resources["HeaderTextBlockStyle"] as Style,
+                    Style = mainPage.Resources["TitleTextBlockStyle"] as Style,
+                    FontSize = 25,
                     HorizontalAlignment = HorizontalAlignment.Stretch,
                     VerticalAlignment = VerticalAlignment.Stretch,
                     TextAlignment = TextAlignment.Center
                 };
                 this._statusText = new TextBox()
                 {
-                    IsEnabled = false,
                     Text = ServiceStatus.Unknown.Display,
-                    Style = mainPage.Resources["HeaderTextBlockStyle"] as Style,
+                    Style = mainPage.Resources["BodyTextBlockStyle"] as Style,
+                    FontSize = 18,
                     HorizontalAlignment = HorizontalAlignment.Stretch,
                     VerticalAlignment = VerticalAlignment.Stretch,
                     TextAlignment = TextAlignment.Center
@@ -133,7 +135,7 @@ namespace status_app
 
             public void UpdateDisplay(Service service)
             {
-                if (!Name.Equals($"status-{service.Name}"))
+                if (!Name.Equals($"status_{service.Name.Replace('-','_')}"))
                     throw new ArgumentException("Service ID mismatch");
                 _statusText.Text = service.GetStatus().Display;
             }
