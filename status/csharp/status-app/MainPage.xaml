@@ -9,8 +9,8 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Page.Resources>
-        <ControlTemplate x:Name="ServiceBoxTemplate">
-            <StackPanel Background="{ThemeResource AppBarItemPointerOverBackgroundThemeBrush}"Margin="35 15">
+        <ControlTemplate x:Name="ServiceBoxTemplate" TargetType="Frame">
+            <StackPanel Background="{ThemeResource AppBarItemPointerOverBackgroundThemeBrush}" Margin="35 15">
                 <TextBlock Text="Dummy Service" Style="{StaticResource TitleTextBlockStyle}" FontSize="25"
                            Padding="0 9" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                            TextAlignment="Center" />
