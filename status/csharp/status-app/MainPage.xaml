@@ -22,7 +22,12 @@
         <TextBlock Text="comroid Status Server" Style="{StaticResource HeaderTextBlockStyle}" Grid.Row="0" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" />
         <Button Content="Reload" Click="ReloadPage" Grid.Row="1" Grid.Column="0" Margin="0,20,20,0" HorizontalAlignment="Right" VerticalAlignment="Top" />
         <ScrollViewer Grid.Row="1" Grid.Column="1" Name="ServiceList">
-            <StackPanel Name="ServicePanel" Loaded="InitializeServiceList" />
+            <StackPanel Name="ServicePanel" Loaded="InitializeServiceList">
+                <StackPanel Name="box_dummy" Background="{ThemeResource AppBarItemPointerOverBackgroundThemeBrush}">
+                    <TextBlock Text="Dummy Service"  Style="{StaticResource TitleTextBlockStyle}" FontSize="25" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TextAlignment="Center" />
+                    <TextBlock Text="Offline"  Style="{StaticResource BodyTextBlockStyle}" FontSize="18" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TextAlignment="Center" />
+                </StackPanel>
+            </StackPanel>
         </ScrollViewer>
         <Button Content="Open in Browser" Click="OpenInBrowser" Grid.Row="2" Grid.Column="2" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,40,40"/>
     </Grid>
