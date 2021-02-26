@@ -27,11 +27,13 @@
                           Margin="0, 0, 10, 0" />
             <Button Content="Reload" Click="ReloadPage" />
         </StackPanel>
-        <StackPanel Grid.Row="1" Grid.Column="1" Name="ServiceList"
-                    Background="{ThemeResource AppBarItemBackgroundThemeBrush}" Loaded="InitializeServiceList">
-            <local:StatusServerBox />
-        </StackPanel>
         <Button Content="Open in Browser" Click="OpenInBrowser" Grid.Row="2" Grid.Column="2"
+        <ScrollViewer Grid.Row="1" Grid.Column="1" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Visible">
+            <StackPanel Name="ServiceList"
+                        Background="{ThemeResource AppBarItemBackgroundThemeBrush}" Loaded="InitializeServiceList">
+                <local:StatusServerBox />
+            </StackPanel>
+        </ScrollViewer>
                 HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,40,40" />
     </Grid>
 </Page>
