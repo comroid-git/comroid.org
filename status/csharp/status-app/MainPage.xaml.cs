@@ -19,36 +19,6 @@ namespace status_app
     /// </summary>
     public sealed partial class MainPage : Page
     {
-        public T FindControl<T>(Type targetType, string ControlName) where T : FrameworkElement
-        {
-            return FindControl<T>(this, targetType, ControlName);
-        }
-
-        public T FindControl<T>(UIElement parent, Type targetType, string ControlName) where T : FrameworkElement
-        {
-            if (parent == null) return null;
-
-            if (parent.GetType() == targetType && ((T) parent).Name == ControlName)
-            {
-                return (T) parent;
-            }
-
-            T result = null;
-            int count = VisualTreeHelper.GetChildrenCount(parent);
-            for (int i = 0; i < count; i++)
-            {
-                UIElement child = (UIElement) VisualTreeHelper.GetChild(parent, i);
-
-                if (FindControl<T>(child, targetType, ControlName) != null)
-                {
-                    result = FindControl<T>(child, targetType, ControlName);
-                    break;
-                }
-            }
-
-            return result;
-        }
-
         public static readonly Uri Homepage = new Uri("https://status.comroid.org");
         internal static readonly StatusConnection Connection = new StatusConnection();
 
@@ -70,14 +40,12 @@ namespace status_app
             }
 
             Debug.WriteLine(
-                $"Reload complete with {services.Count} services; Stacker has {Stacker.Children.Count} children");
+                $"Reload complete with {services.Count} services; Stacker has {ServicePanel.Children.Count} children");
         }
-
-        internal StackPanel Stacker => FindControl<StackPanel>(typeof(StackPanel), "ServicePanel");
 
         private ServiceBox ComputeServiceBox(Service service)
         {
-            return Stacker.Children
+            return ServicePanel.Children
                        .Select(each => each as ServiceBox)
                        .Where(each => each != null)
                        .FirstOrDefault(box => box.Name.Equals($"status_{service.Name.Replace('-', '_')}"))
@@ -101,17 +69,20 @@ namespace status_app
 
             internal ServiceBox(MainPage mainPage, Service service)
             {
+                StackPanel mainPageBoxTemplate = mainPage.box_template;
+
                 Name = $"status_{service.Name.Replace('-', '_')}";
                 Visibility = Visibility.Visible;
                 Margin = new Thickness(25, 50, 25, 50);
-                Background = mainPage.Resources["AppBarItemPointerOverBackgroundThemeBrush"] as Brush;
+                Background = mainPage.Resources["AppBarItemPointerOverBackgroundThemeBrush"] as Brush ??
+                             throw new ArgumentException("grrr");
                 HorizontalAlignment = HorizontalAlignment.Stretch;
                 VerticalAlignment = VerticalAlignment.Center;
 
                 this._displayName = new TextBox()
                 {
                     Text = service.DisplayName,
-                    Style = mainPage.Resources["TitleTextBlockStyle"] as Style,
+                    Style = mainPage.Resources["TitleTextBlockStyle"] as Style ?? throw new ArgumentException("grrr"),
                     FontSize = 25,
                     HorizontalAlignment = HorizontalAlignment.Stretch,
                     VerticalAlignment = VerticalAlignment.Stretch,
@@ -120,7 +91,7 @@ namespace status_app
                 this._statusText = new TextBox()
                 {
                     Text = ServiceStatus.Unknown.Display,
-                    Style = mainPage.Resources["BodyTextBlockStyle"] as Style,
+                    Style = mainPage.Resources["BodyTextBlockStyle"] as Style ?? throw new ArgumentException("grrr"),
                     FontSize = 18,
                     HorizontalAlignment = HorizontalAlignment.Stretch,
                     VerticalAlignment = VerticalAlignment.Stretch,
@@ -129,7 +100,7 @@ namespace status_app
 
                 Children.Add(_displayName);
                 Children.Add(_statusText);
-                mainPage.Stacker.Children.Add(this);
+                mainPage.ServicePanel.Children.Add(this);
 
                 UpdateDisplay(service);
             }
