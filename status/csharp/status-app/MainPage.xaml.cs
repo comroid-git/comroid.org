@@ -6,6 +6,7 @@ using System.Threading;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.System;
+using Windows.UI;
 using Windows.UI.Xaml.Media;
 using org_comroid_status_api;
 
@@ -79,7 +80,7 @@ namespace status_app
             return Stacker.Children
                        .Select(each => each as ServiceBox)
                        .Where(each => each != null)
-                       .FirstOrDefault(box => box.Name.Equals($"status_{service.Name.Replace('-','_')}"))
+                       .FirstOrDefault(box => box.Name.Equals($"status_{service.Name.Replace('-', '_')}"))
                    ?? new ServiceBox(this, service);
         }
 
@@ -100,7 +101,7 @@ namespace status_app
 
             internal ServiceBox(MainPage mainPage, Service service)
             {
-                Name = $"status_{service.Name.Replace('-','_')}";
+                Name = $"status_{service.Name.Replace('-', '_')}";
                 Visibility = Visibility.Visible;
                 Margin = new Thickness(25, 50, 25, 50);
                 Background = mainPage.Resources["AppBarItemPointerOverBackgroundThemeBrush"] as Brush;
@@ -114,7 +115,7 @@ namespace status_app
                     FontSize = 25,
                     HorizontalAlignment = HorizontalAlignment.Stretch,
                     VerticalAlignment = VerticalAlignment.Stretch,
-                    TextAlignment = TextAlignment.Center
+                    TextAlignment = TextAlignment.Center,
                 };
                 this._statusText = new TextBox()
                 {
@@ -135,9 +136,12 @@ namespace status_app
 
             public void UpdateDisplay(Service service)
             {
-                if (!Name.Equals($"status_{service.Name.Replace('-','_')}"))
+                if (!Name.Equals($"status_{service.Name.Replace('-', '_')}"))
                     throw new ArgumentException("Service ID mismatch");
-                _statusText.Text = service.GetStatus().Display;
+                ServiceStatus status = service.GetStatus();
+                _statusText.Text = status.Display;
+                _statusText.Foreground = new SolidColorBrush(Color.FromArgb(status.DisplayColor.A,
+                    status.DisplayColor.R, status.DisplayColor.G, status.DisplayColor.B));
             }
         }
     }
