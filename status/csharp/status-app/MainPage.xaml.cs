@@ -62,45 +62,15 @@ namespace status_app
             await Launcher.LaunchUriAsync(Homepage);
         }
 
-        internal sealed class ServiceBox : StackPanel
+        internal sealed class ServiceBox : Frame
         {
-            private readonly TextBox _displayName;
-            private readonly TextBox _statusText;
-
             internal ServiceBox(MainPage mainPage, Service service)
             {
-                StackPanel template = mainPage.box_template;
-
                 Name = $"status_{service.Name.Replace('-', '_')}";
-                Visibility = Visibility.Visible;
-                Margin = new Thickness(25, 50, 25, 50);
-                Background = mainPage.Resources["AppBarItemPointerOverBackgroundThemeBrush"] as Brush ??
-                             throw new ArgumentException("grrr");
-                HorizontalAlignment = HorizontalAlignment.Stretch;
-                VerticalAlignment = VerticalAlignment.Center;
-
-                this._displayName = new TextBox()
-                {
-                    Text = service.DisplayName,
-                    Style = mainPage.Resources["TitleTextBlockStyle"] as Style ?? throw new ArgumentException("grrr"),
-                    FontSize = 25,
-                    HorizontalAlignment = HorizontalAlignment.Stretch,
-                    VerticalAlignment = VerticalAlignment.Stretch,
-                    TextAlignment = TextAlignment.Center,
-                };
-                this._statusText = new TextBox()
-                {
-                    Text = ServiceStatus.Unknown.Display,
-                    Style = mainPage.Resources["BodyTextBlockStyle"] as Style ?? throw new ArgumentException("grrr"),
-                    FontSize = 18,
-                    HorizontalAlignment = HorizontalAlignment.Stretch,
-                    VerticalAlignment = VerticalAlignment.Stretch,
-                    TextAlignment = TextAlignment.Center
-                };
-
-                Children.Add(_displayName);
-                Children.Add(_statusText);
-                mainPage.ServicePanel.Children.Add(this);
+                Template = mainPage.Resources["ServiceBoxTemplate"] as ControlTemplate 
+                           ?? throw new MissingMemberException("ServiceBoxTemplate not found");
+                
+                mainPage.ServiceList.Children.Add(this);
 
                 UpdateDisplay(service);
             }
@@ -110,9 +80,11 @@ namespace status_app
                 if (!Name.Equals($"status_{service.Name.Replace('-', '_')}"))
                     throw new ArgumentException("Service ID mismatch");
                 ServiceStatus status = service.GetStatus();
+                /*
                 _statusText.Text = status.Display;
                 _statusText.Foreground = new SolidColorBrush(Color.FromArgb(status.DisplayColor.A,
                     status.DisplayColor.R, status.DisplayColor.G, status.DisplayColor.B));
+                */
             }
         }
     }
