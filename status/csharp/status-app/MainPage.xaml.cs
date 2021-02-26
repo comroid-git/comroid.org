@@ -40,12 +40,12 @@ namespace status_app
             }
 
             Debug.WriteLine(
-                $"Reload complete with {services.Count} services; Stacker has {ServicePanel.Children.Count} children");
+                $"Reload complete with {services.Count} services; Stacker has {ServiceList.Children.Count} children");
         }
 
         private ServiceBox ComputeServiceBox(Service service)
         {
-            return ServicePanel.Children
+            return ServiceList.Children
                        .Select(each => each as ServiceBox)
                        .Where(each => each != null)
                        .FirstOrDefault(box => box.Name.Equals($"status_{service.Name.Replace('-', '_')}"))
@@ -67,12 +67,10 @@ namespace status_app
             internal ServiceBox(MainPage mainPage, Service service)
             {
                 Name = $"status_{service.Name.Replace('-', '_')}";
-                Template = mainPage.Resources["ServiceBoxTemplate"] as ControlTemplate 
+                Template = mainPage.Resources["ServiceBoxTemplate"] as ControlTemplate
                            ?? throw new MissingMemberException("ServiceBoxTemplate not found");
-                
-                mainPage.ServiceList.Children.Add(this);
 
-                UpdateDisplay(service);
+                mainPage.ServiceList.Children.Add(this);
             }
 
             public void UpdateDisplay(Service service)
@@ -81,6 +79,7 @@ namespace status_app
                     throw new ArgumentException("Service ID mismatch");
                 ServiceStatus status = service.GetStatus();
                 /*
+                TextBlock _statusText = (Content as StackPanel).Children[1] as TextBlock;
                 _statusText.Text = status.Display;
                 _statusText.Foreground = new SolidColorBrush(Color.FromArgb(status.DisplayColor.A,
                     status.DisplayColor.R, status.DisplayColor.G, status.DisplayColor.B));
