@@ -10,7 +10,7 @@ namespace status_app
     /// <summary>
     ///     Stellt das anwendungsspezifische Verhalten bereit, um die Standardanwendungsklasse zu ergänzen.
     /// </summary>
-    internal sealed partial class App : Application
+    public sealed partial class App : Application
     {
         /// <summary>
         ///     Initialisiert das Singletonanwendungsobjekt. Dies ist die erste Zeile von erstelltem Code
