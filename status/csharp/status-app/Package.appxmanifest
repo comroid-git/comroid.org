@@ -8,14 +8,14 @@
 
   <Identity
     Name="b141f503-faee-4fac-9a2d-80de0fc84be8"
-    Publisher="CN=burdo"
-    Version="0.0.1.0" />
+    Publisher="CN=comroid"
+    Version="0.1.0.0" />
 
   <mp:PhoneIdentity PhoneProductId="b141f503-faee-4fac-9a2d-80de0fc84be8" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>status-app</DisplayName>
-    <PublisherDisplayName>burdo</PublisherDisplayName>
+    <PublisherDisplayName>comroid</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
