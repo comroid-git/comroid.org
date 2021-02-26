@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Threading.Tasks;
-using System.Timers;
+using System.Threading;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.System;
@@ -51,15 +50,10 @@ namespace status_app
 
         public static readonly Uri Homepage = new Uri("https://status.comroid.org");
         internal static readonly StatusConnection Connection = new StatusConnection();
-        internal readonly Timer Timer = new Timer();
 
         public MainPage()
         {
             this.InitializeComponent();
-
-            Timer.Elapsed += (s, e) => ReloadPage(s, null);
-            Timer.Interval = 10 * 1000;
-            Timer.Start();
         }
 
         private async void ReloadPage(object sender, RoutedEventArgs e)
