@@ -30,6 +30,7 @@ namespace status_app
         private async void ReloadPage(object sender, RoutedEventArgs e)
         {
             Debug.WriteLine("Initiating Page reload");
+            ReloadingIndicator.Visibility = Visibility.Visible;
 
             List<Service> services = await Connection.RefreshServiceCache();
 
@@ -39,6 +40,7 @@ namespace status_app
                 existing.UpdateDisplay(service);
             }
 
+            ReloadingIndicator.Visibility = Visibility.Collapsed;
             Debug.WriteLine(
                 $"Reload complete with {services.Count} services; Stacker has {ServiceList.Children.Count} children");
         }
