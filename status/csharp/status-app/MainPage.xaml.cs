@@ -69,7 +69,7 @@ namespace status_app
 
             internal ServiceBox(MainPage mainPage, Service service)
             {
-                StackPanel mainPageBoxTemplate = mainPage.box_template;
+                StackPanel template = mainPage.box_template;
 
                 Name = $"status_{service.Name.Replace('-', '_')}";
                 Visibility = Visibility.Visible;
