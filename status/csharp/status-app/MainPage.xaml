@@ -24,8 +24,8 @@
         <ScrollViewer Grid.Row="1" Grid.Column="1" Name="ServiceList">
             <StackPanel Name="ServicePanel" Loaded="InitializeServiceList">
                 <StackPanel Name="box_template" Background="{ThemeResource AppBarItemPointerOverBackgroundThemeBrush}" Margin="35 15" >
-                    <TextBlock Text="Dummy Service"  Style="{StaticResource TitleTextBlockStyle}" FontSize="25" Padding="0 9" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TextAlignment="Center" />
-                    <TextBlock Text="Offline"  Style="{StaticResource BodyTextBlockStyle}" FontSize="18" Padding="0 7"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TextAlignment="Center" />
+                    <TextBlock Text="Dummy Service" Style="{StaticResource TitleTextBlockStyle}" FontSize="25" Padding="0 9" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TextAlignment="Center" />
+                    <TextBlock Text="Unknown" Style="{StaticResource BodyTextBlockStyle}" FontSize="18" Padding="0 7"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TextAlignment="Center" />
                 </StackPanel>
             </StackPanel>
         </ScrollViewer>
