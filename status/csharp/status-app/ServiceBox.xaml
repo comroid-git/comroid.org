@@ -10,9 +10,10 @@
     d:DesignWidth="800">
     <StackPanel Background="{ThemeResource AppBarItemPointerOverBackgroundThemeBrush}" Margin="35 15">
         <TextBlock Text="{Binding ServiceName}" Style="{StaticResource TitleTextBlockStyle}" FontSize="25"
+                   Name="ServiceNameLabel"
                    Padding="0 9" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                    TextAlignment="Center" />
         <TextBlock Text="{Binding StatusText}" Foreground="{Binding StatusColor}" Style="{StaticResource BodyTextBlockStyle}" FontSize="18" Padding="0 7"
-                   HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TextAlignment="Center" />
+                   Name="StatusTextLabel"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TextAlignment="Center" />
     </StackPanel>
 </UserControl>

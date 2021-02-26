@@ -25,7 +25,7 @@
                 HorizontalAlignment="Right" VerticalAlignment="Top" />
         <StackPanel Grid.Row="1" Grid.Column="1" Name="ServiceList"
                     Background="{ThemeResource AppBarItemBackgroundThemeBrush}" Loaded="InitializeServiceList">
-            <local:ServiceBox ServiceName="Hello World" StatusColor="Aqua" StatusText="Hurso" />
+            <local:StatusServerBox />
         </StackPanel>
         <Button Content="Open in Browser" Click="OpenInBrowser" Grid.Row="2" Grid.Column="2"
                 HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,40,40" />

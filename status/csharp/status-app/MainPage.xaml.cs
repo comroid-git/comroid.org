@@ -45,11 +45,15 @@ namespace status_app
 
         private ServiceBox ComputeServiceBox(Service service)
         {
-            return ServiceList.Children
-                       .Select(each => each as ServiceBox)
-                       .Where(each => each != null)
-                       .FirstOrDefault(box => box.Name.Equals($"status_{service.Name.Replace('-', '_')}"))
-                   ?? new ServiceBox(this, service);
+            ServiceBox @default = ServiceList.Children
+                .Select(each => each as ServiceBox)
+                .Where(each => each != null)
+                .FirstOrDefault(box => box.Name.Equals($"status-{service.Name}"));
+            if (@default != null)
+                return @default;
+            ServiceBox inst = new ServiceBox(service.Name);
+            ServiceList.Children.Add(inst);
+            return inst;
         }
 
         private void InitializeServiceList(object sender, RoutedEventArgs e)
@@ -60,31 +64,6 @@ namespace status_app
         private async void OpenInBrowser(object sender, RoutedEventArgs e)
         {
             await Launcher.LaunchUriAsync(Homepage);
-        }
-
-        internal sealed class ServiceBox : Frame
-        {
-            internal ServiceBox(MainPage mainPage, Service service)
-            {
-                Name = $"status_{service.Name.Replace('-', '_')}";
-                Template = mainPage.Resources["ServiceBoxTemplate"] as ControlTemplate
-                           ?? throw new MissingMemberException("ServiceBoxTemplate not found");
-
-                mainPage.ServiceList.Children.Add(this);
-            }
-
-            public void UpdateDisplay(Service service)
-            {
-                if (!Name.Equals($"status_{service.Name.Replace('-', '_')}"))
-                    throw new ArgumentException("Service ID mismatch");
-                ServiceStatus status = service.GetStatus();
-                /*
-                TextBlock _statusText = (Content as StackPanel).Children[1] as TextBlock;
-                _statusText.Text = status.Display;
-                _statusText.Foreground = new SolidColorBrush(Color.FromArgb(status.DisplayColor.A,
-                    status.DisplayColor.R, status.DisplayColor.G, status.DisplayColor.B));
-                */
-            }
         }
     }
 }
