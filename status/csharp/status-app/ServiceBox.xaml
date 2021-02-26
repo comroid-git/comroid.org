@@ -2,7 +2,6 @@
     x:Class="status_app.ServiceBox"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:status_app"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
@@ -13,7 +12,9 @@
                    Name="ServiceNameLabel"
                    Padding="0 9" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                    TextAlignment="Center" />
-        <TextBlock Text="{Binding StatusText}" Foreground="{Binding StatusColor}" Style="{StaticResource BodyTextBlockStyle}" FontSize="18" Padding="0 7"
-                   Name="StatusTextLabel"  HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TextAlignment="Center" />
+        <TextBlock Text="{Binding StatusText}" Foreground="{Binding StatusColor}"
+                   Style="{StaticResource BodyTextBlockStyle}" FontSize="18" Padding="0 7"
+                   Name="StatusTextLabel" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                   TextAlignment="Center" />
     </StackPanel>
 </UserControl>

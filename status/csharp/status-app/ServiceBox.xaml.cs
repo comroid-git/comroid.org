@@ -1,26 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
-using Windows.Graphics.Printing.OptionDetails;
 using Windows.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Navigation;
 using org_comroid_status_api;
 
 // The User Control item template is documented at https://go.microsoft.com/fwlink/?LinkId=234236
 
 namespace status_app
 {
-    public sealed partial class StatusServerBox : ServiceBox
+    public sealed class StatusServerBox : ServiceBox
     {
         public StatusServerBox() : base("status-server")
         {
@@ -51,6 +40,13 @@ namespace status_app
             new PropertyMetadata(null)
         );
 
+        public ServiceBox(string serviceName)
+        {
+            Name = $"status-{serviceName}";
+            DataContext = this;
+            InitializeComponent();
+        }
+
         public string ServiceName
         {
             get => GetValue(ServiceNameProperty).ToString();
@@ -66,13 +62,6 @@ namespace status_app
         internal Color StatusColor
         {
             set => SetValue(StatusColorProperty, new SolidColorBrush(value));
-        }
-
-        public ServiceBox(string serviceName)
-        {
-            Name = $"status-{serviceName}";
-            DataContext = this;
-            this.InitializeComponent();
         }
 
         public void UpdateDisplay(Service service)
