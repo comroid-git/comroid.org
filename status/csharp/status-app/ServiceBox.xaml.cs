@@ -46,8 +46,8 @@ namespace status_app
 
         public static readonly DependencyProperty StatusColorProperty = DependencyProperty.Register(
             "StatusColor",
-            typeof(string),
-            typeof(Color),
+            typeof(Brush),
+            typeof(ServiceBox),
             new PropertyMetadata(null)
         );
 
@@ -63,10 +63,9 @@ namespace status_app
             internal set => SetValue(StatusTextProperty, value);
         }
 
-        public Color StatusColor
+        internal Color StatusColor
         {
-            get => (Color) (GetValue(StatusColorProperty) ?? Color.FromArgb(0,0,0,0));
-            internal set => SetValue(StatusColorProperty, value);
+            set => SetValue(StatusColorProperty, new SolidColorBrush(value));
         }
 
         public ServiceBox(string serviceName)
