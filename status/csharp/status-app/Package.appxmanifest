@@ -9,7 +9,7 @@
   <Identity
     Name="b141f503-faee-4fac-9a2d-80de0fc84be8"
     Publisher="CN=comroid"
-    Version="0.3.0.0" />
+    Version="0.3.1.0" />
 
   <mp:PhoneIdentity PhoneProductId="b141f503-faee-4fac-9a2d-80de0fc84be8" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 

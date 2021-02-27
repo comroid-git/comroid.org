@@ -39,6 +39,7 @@ namespace status_app
                                 ReloadPage(sender, null);
                         });
                 };
+            AutoUpdate = true;
         }
 
         private async void ReloadPage(object sender, RoutedEventArgs e)
