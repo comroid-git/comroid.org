@@ -43,6 +43,9 @@ namespace status_app
                 }
                 catch (Exception ex)
                 {
+                    UIElementCollection children = ((Panel) _rootBox.Parent).Children;
+                    foreach (UIElement uiElement in children.Where(it => it != _rootBox).ToArray())
+                        children.Remove(uiElement);
                     _rootBox.ServiceName = "Status Server is Unreachable";
                     _rootBox.StatusText = $"Could not fetch services - [{ex.GetType().Name}]: {ex.Message}";
                     _rootBox.StatusColor = ServiceBox.ConvertColor(ServiceStatus.OfflineColor);
