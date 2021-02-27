@@ -28,7 +28,7 @@ steps:
     restoreSolution: '$(solution)'
 
 - task: DownloadSecureFile@1
-  name: mySecureFile
+  name: keystoreFile
   inputs:
     secureFile: '$(signing.keystore)'
 
@@ -38,7 +38,7 @@ steps:
     script: |
       Write-Host "Start adding the PFX file to the certificate store."
 
-      $pfxpath = '$(signing.keystore)'
+      $pfxpath = '$(keystoreFile.secureFilePath)'
       $password = '$(signing.password)'
       
       Add-Type -AssemblyName System.Security
