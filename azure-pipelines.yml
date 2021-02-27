@@ -10,17 +10,25 @@ pool:
   vmImage: 'windows-latest'
 
 variables:
-  group: status-app
-  solution: 'status/csharp/csharp.sln'
-  buildPlatform: 'x86|x64|ARM'
-  buildConfiguration: 'Release'
-  appxPackageDir: '$(build.artifactStagingDirectory)\AppxPackages\\'
+  - group: status-app
+  - name: solution
+    value: 'status/csharp/csharp.sln'
+  - name: buildPlatform
+    value: 'x86|x64|ARM'
+  - name: buildConfiguration
+    value: 'Release'
+  - name: appxPackageDir
+    value: '$(build.artifactStagingDirectory)\AppxPackages\\'
 
 steps:
 - task: NuGetToolInstaller@1
 
+- task: NuGetCommand@2
+  inputs:
+    restoreSolution: '$(solution)'
+
 - task: DownloadSecureFile@1
-  name: mySecureFile
+  name: keystoreFile
   inputs:
     secureFile: '$(signing.keystore)'
 
@@ -30,7 +38,7 @@ steps:
     script: |
       Write-Host "Start adding the PFX file to the certificate store."
 
-      $pfxpath = '$(mySecureFile.keystore)'
+      $pfxpath = '$(keystoreFile.secureFilePath)'
       $password = '$(signing.password)'
       
       Add-Type -AssemblyName System.Security
@@ -40,10 +48,6 @@ steps:
       $store.Open([System.Security.Cryptography.X509Certificates.OpenFlags]"ReadWrite")
       $store.Add($cert)
       $store.Close()
-
-- task: NuGetCommand@2
-  inputs:
-    restoreSolution: '$(solution)'
 
 - task: VSBuild@1
   inputs:
@@ -73,7 +77,7 @@ steps:
 
 - task: AppCenterDistribute@3
   inputs:
-    serverEndpoint: 'VSAC'
+    serverEndpoint: 'VS AppCenter'
     appSlug: '$(appSlug)'
     appFile: '$(build.artifactstagingdirectory)\AppxPackages\*.appxupload'
     releaseNotesOption: 'input'
