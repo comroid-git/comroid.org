@@ -47,6 +47,10 @@ const navigation = [
     },
     {
         'type': 'box',
+        'name': 'projects'
+    },
+    {
+        'type': 'box',
         'name': 'github'
     },
     {
