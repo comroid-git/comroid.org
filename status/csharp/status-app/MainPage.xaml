@@ -25,7 +25,7 @@
             <ProgressRing Name="ReloadingIndicator" IsActive="True" Visibility="Collapsed" Height="30" Width="30"
                           Margin="0, 0, 10, 0" />
             <Button Content="Reload" Click="ReloadPage" />
-            <CheckBox Name="DoAutoReload" Content="Auto" IsChecked="{Binding AutoUpdate}" Margin="10,0,0,0" Width="100" />
+            <CheckBox Name="DoAutoReload" Content="Auto" IsChecked="True" Click="UpdateDoAutoReload" Margin="10,0,0,0" Width="100" />
         </StackPanel>
         <ScrollViewer Grid.Row="1" Grid.Column="1" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Visible">
             <StackPanel Name="ServiceList" Background="{ThemeResource AppBarItemBackgroundThemeBrush}">

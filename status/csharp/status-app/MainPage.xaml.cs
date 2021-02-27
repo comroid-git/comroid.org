@@ -23,18 +23,7 @@ namespace status_app
         internal static readonly StatusConnection Connection = new StatusConnection();
         private static StatusServerBox _rootBox;
 
-        public static readonly DependencyProperty AutoUpdateProperty = DependencyProperty.Register(
-            "AutoUpdateProp",
-            typeof(bool),
-            typeof(MainPage),
-            new PropertyMetadata(true)
-        );
-
-        public bool AutoUpdate
-        {
-            get => (bool) (GetValue(AutoUpdateProperty) ?? false);
-            set => SetValue(AutoUpdateProperty, value);
-        }
+        public bool AutoUpdate { get; internal set; }
 
         public MainPage()
         {
@@ -105,6 +94,11 @@ namespace status_app
         private void RootBoxLoaded(object sender, RoutedEventArgs e)
         {
             _rootBox = sender as StatusServerBox;
+        }
+
+        private void UpdateDoAutoReload(object sender, RoutedEventArgs e)
+        {
+            AutoUpdate = DoAutoReload.IsChecked ?? false;
         }
     }
 }
