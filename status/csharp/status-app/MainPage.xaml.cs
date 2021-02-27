@@ -23,45 +23,65 @@ namespace status_app
         internal static readonly StatusConnection Connection = new StatusConnection();
         private static StatusServerBox _rootBox;
 
+        public static readonly DependencyProperty AutoUpdateProperty = DependencyProperty.Register(
+            "AutoUpdateProp",
+            typeof(bool),
+            typeof(MainPage),
+            new PropertyMetadata(true)
+        );
+
+        public bool AutoUpdate
+        {
+            get => (bool) (GetValue(AutoUpdateProperty) ?? false);
+            set => SetValue(AutoUpdateProperty, value);
+        }
+
         public MainPage()
         {
+            DataContext = this;
             InitializeComponent();
-            new Timer(5 * 1000) { AutoReset = true, Enabled = true }.Elapsed += (sender, args) => ReloadPage(sender, null);
+            new Timer(5 * 1000) {AutoReset = true, Enabled = true}.Elapsed +=
+                async (sender, args) =>
+                {
+                    await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal,
+                        async () =>
+                        {
+                            if (AutoUpdate)
+                                ReloadPage(sender, null);
+                        });
+                };
         }
 
         private async void ReloadPage(object sender, RoutedEventArgs e)
         {
-            await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () =>
+            Debug.WriteLine("Initiating Page reload");
+            ReloadingIndicator.Visibility = Visibility.Visible;
+
+            List<Service> services = null;
+            try
             {
-                Debug.WriteLine("Initiating Page reload");
-                ReloadingIndicator.Visibility = Visibility.Visible;
+                services = await Connection.RefreshServiceCache();
+            }
+            catch (Exception ex)
+            {
+                UIElementCollection children = ((Panel) _rootBox.Parent).Children;
+                foreach (UIElement uiElement in children.Where(it => it != _rootBox).ToArray())
+                    children.Remove(uiElement);
+                _rootBox.ServiceName = "Status Server is Unreachable";
+                _rootBox.StatusText = $"Could not fetch services - [{ex.GetType().Name}]: {ex.Message}";
+                _rootBox.StatusColor = ServiceBox.ConvertColor(ServiceStatus.OfflineColor);
+                services = new List<Service>();
+            }
 
-                List<Service> services = null;
-                try
-                {
-                    services = await Connection.RefreshServiceCache();
-                }
-                catch (Exception ex)
-                {
-                    UIElementCollection children = ((Panel) _rootBox.Parent).Children;
-                    foreach (UIElement uiElement in children.Where(it => it != _rootBox).ToArray())
-                        children.Remove(uiElement);
-                    _rootBox.ServiceName = "Status Server is Unreachable";
-                    _rootBox.StatusText = $"Could not fetch services - [{ex.GetType().Name}]: {ex.Message}";
-                    _rootBox.StatusColor = ServiceBox.ConvertColor(ServiceStatus.OfflineColor);
-                    services = new List<Service>();
-                }
+            foreach (Service service in services)
+            {
+                ServiceBox existing = ComputeServiceBox(service);
+                existing.UpdateDisplay(service);
+            }
 
-                foreach (Service service in services)
-                {
-                    ServiceBox existing = ComputeServiceBox(service);
-                    existing.UpdateDisplay(service);
-                }
-
-                ReloadingIndicator.Visibility = Visibility.Collapsed;
-                Debug.WriteLine(
-                    $"Reload complete with {services.Count} services; Stacker has {ServiceList.Children.Count} children");
-            });
+            ReloadingIndicator.Visibility = Visibility.Collapsed;
+            Debug.WriteLine(
+                $"Reload complete with {services.Count} services; Stacker has {ServiceList.Children.Count} children");
         }
 
         private ServiceBox ComputeServiceBox(Service service)

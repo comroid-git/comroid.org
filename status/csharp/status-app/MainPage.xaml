@@ -8,23 +8,24 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Grid>
+    <Grid Loaded="ReloadPage">
         <Grid.RowDefinitions>
             <RowDefinition Height="1.5*" MinHeight="70" />
             <RowDefinition Height="10*" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="1.4*" />
             <ColumnDefinition Width="3*" />
-            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="1.4*" />
         </Grid.ColumnDefinitions>
         <TextBlock Text="comroid Status App" Style="{StaticResource HeaderTextBlockStyle}" Grid.Row="0"
                    Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="0, 10" />
-        <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Margin="0,20,20,0" 
+        <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" Margin="0,20,0,0" 
                     HorizontalAlignment="Right" VerticalAlignment="Top">
-            <ProgressRing Name="ReloadingIndicator" IsActive="True" Visibility="Visible" Height="30" Width="30"
+            <ProgressRing Name="ReloadingIndicator" IsActive="True" Visibility="Collapsed" Height="30" Width="30"
                           Margin="0, 0, 10, 0" />
             <Button Content="Reload" Click="ReloadPage" />
+            <CheckBox Name="DoAutoReload" Content="Auto" IsChecked="{Binding AutoUpdate}" Margin="10,0,0,0" Width="100" />
         </StackPanel>
         <ScrollViewer Grid.Row="1" Grid.Column="1" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Visible">
             <StackPanel Name="ServiceList" Background="{ThemeResource AppBarItemBackgroundThemeBrush}">
