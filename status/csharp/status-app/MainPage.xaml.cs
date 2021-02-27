@@ -21,6 +21,7 @@ namespace status_app
     {
         public static readonly Uri Homepage = new Uri("https://status.comroid.org");
         internal static readonly StatusConnection Connection = new StatusConnection();
+        private static StatusServerBox _rootBox;
 
         public MainPage()
         {
@@ -35,7 +36,18 @@ namespace status_app
                 Debug.WriteLine("Initiating Page reload");
                 ReloadingIndicator.Visibility = Visibility.Visible;
 
-                List<Service> services = await Connection.RefreshServiceCache();
+                List<Service> services = null;
+                try
+                {
+                    services = await Connection.RefreshServiceCache();
+                }
+                catch (Exception ex)
+                {
+                    _rootBox.ServiceName = "Status Server is Unreachable";
+                    _rootBox.StatusText = $"Could not fetch services - [{ex.GetType().Name}]: {ex.Message}";
+                    _rootBox.StatusColor = ServiceBox.ConvertColor(ServiceStatus.OfflineColor);
+                    services = new List<Service>();
+                }
 
                 foreach (Service service in services)
                 {
@@ -65,6 +77,11 @@ namespace status_app
         private async void OpenInBrowser(object sender, RoutedEventArgs e)
         {
             await Launcher.LaunchUriAsync(Homepage);
+        }
+
+        private void RootBoxLoaded(object sender, RoutedEventArgs e)
+        {
+            _rootBox = sender as StatusServerBox;
         }
     }
 }

@@ -28,7 +28,7 @@
         </StackPanel>
         <ScrollViewer Grid.Row="1" Grid.Column="1" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Visible">
             <StackPanel Name="ServiceList" Background="{ThemeResource AppBarItemBackgroundThemeBrush}">
-                <local:StatusServerBox />
+                <local:StatusServerBox Loaded="RootBoxLoaded" />
             </StackPanel>
         </ScrollViewer>
         <Button Content="Open in Browser" Click="OpenInBrowser" Grid.Row="1" Grid.Column="2"
