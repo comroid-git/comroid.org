@@ -4,6 +4,9 @@ using Windows.ApplicationModel.Activation;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Navigation;
+using Microsoft.AppCenter;
+using Microsoft.AppCenter.Analytics;
+using Microsoft.AppCenter.Crashes;
 
 namespace status_app
 {
@@ -18,6 +21,7 @@ namespace status_app
         /// </summary>
         public App()
         {
+            AppCenter.Start("661d293d-79fc-4655-811d-ac0e1539dd9a", typeof(Analytics), typeof(Crashes));
             InitializeComponent();
             Suspending += OnSuspending;
         }
