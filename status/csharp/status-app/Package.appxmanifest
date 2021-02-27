@@ -7,11 +7,11 @@
   IgnorableNamespaces="uap mp">
 
   <Identity
-    Name="b141f503-faee-4fac-9a2d-80de0fc84be8"
-    Publisher="CN=comroid"
     Version="0.3.1.0" />
+    Name="45830comroid.comroidStatusApp"
+    Publisher="CN=4ED9048F-2281-43A9-A7A7-D2A7FC6D046B"
 
-  <mp:PhoneIdentity PhoneProductId="b141f503-faee-4fac-9a2d-80de0fc84be8" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="8e25c7c4-d939-4792-b39f-55e4786ad8ec" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>comroid Status App</DisplayName>
