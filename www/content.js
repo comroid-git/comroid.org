@@ -13,6 +13,10 @@ const pages = {
         'display_name': "Homepage",
         'path': 'part/homepage.html'
     },
+    'projects': {
+        'display_name': "Projects",
+        'path': 'part/projects.html'
+    },
     'status': {
         'display_name': "Status Page",
         'path': 'https://status.comroid.org/slim'
