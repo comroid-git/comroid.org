@@ -22,7 +22,7 @@ steps:
 - task: DownloadSecureFile@1
   name: mySecureFile
   inputs:
-    secureFile: '$(signing.keystore)'
+    secureFile: $(signing.keystore)
 
 - task: PowerShell@2
   inputs:
@@ -30,7 +30,7 @@ steps:
     script: |
       Write-Host "Start adding the PFX file to the certificate store."
 
-      $pfxpath = '$(mySecureFile.keystore)'
+      $pfxpath = '$(signing.keystore)'
       $password = '$(signing.password)'
       
       Add-Type -AssemblyName System.Security
