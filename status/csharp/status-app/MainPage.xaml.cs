@@ -2,10 +2,13 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Timers;
 using Windows.System;
+using Windows.UI.Core;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using org_comroid_status_api;
+using Windows.ApplicationModel.Core;
 
 // Die Elementvorlage "Leere Seite" wird unter https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x407 dokumentiert.
 
@@ -22,24 +25,28 @@ namespace status_app
         public MainPage()
         {
             InitializeComponent();
+            new Timer(5 * 1000) { AutoReset = true, Enabled = true }.Elapsed += (sender, args) => ReloadPage(sender, null);
         }
 
         private async void ReloadPage(object sender, RoutedEventArgs e)
         {
-            Debug.WriteLine("Initiating Page reload");
-            ReloadingIndicator.Visibility = Visibility.Visible;
-
-            List<Service> services = await Connection.RefreshServiceCache();
-
-            foreach (Service service in services)
+            await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, async () =>
             {
-                ServiceBox existing = ComputeServiceBox(service);
-                existing.UpdateDisplay(service);
-            }
+                Debug.WriteLine("Initiating Page reload");
+                ReloadingIndicator.Visibility = Visibility.Visible;
 
-            ReloadingIndicator.Visibility = Visibility.Collapsed;
-            Debug.WriteLine(
-                $"Reload complete with {services.Count} services; Stacker has {ServiceList.Children.Count} children");
+                List<Service> services = await Connection.RefreshServiceCache();
+
+                foreach (Service service in services)
+                {
+                    ServiceBox existing = ComputeServiceBox(service);
+                    existing.UpdateDisplay(service);
+                }
+
+                ReloadingIndicator.Visibility = Visibility.Collapsed;
+                Debug.WriteLine(
+                    $"Reload complete with {services.Count} services; Stacker has {ServiceList.Children.Count} children");
+            });
         }
 
         private ServiceBox ComputeServiceBox(Service service)
