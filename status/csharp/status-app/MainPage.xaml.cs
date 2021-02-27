@@ -62,11 +62,6 @@ namespace status_app
             return inst;
         }
 
-        private void InitializeServiceList(object sender, RoutedEventArgs e)
-        {
-            ReloadPage(sender, e);
-        }
-
         private async void OpenInBrowser(object sender, RoutedEventArgs e)
         {
             await Launcher.LaunchUriAsync(Homepage);
