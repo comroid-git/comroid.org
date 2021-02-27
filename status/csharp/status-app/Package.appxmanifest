@@ -7,9 +7,9 @@
   IgnorableNamespaces="uap mp">
 
   <Identity
-    Version="0.3.1.0" />
     Name="45830comroid.comroidStatusApp"
     Publisher="CN=4ED9048F-2281-43A9-A7A7-D2A7FC6D046B"
+    Version="0.3.2.0" />
 
   <mp:PhoneIdentity PhoneProductId="8e25c7c4-d939-4792-b39f-55e4786ad8ec" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
