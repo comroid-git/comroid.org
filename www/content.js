@@ -17,20 +17,17 @@ const pages = {
         'display_name': "Status Page",
         'path': 'https://status.comroid.org/slim'
     },
-    'about': {
-        'display_name': "About Us",
-        'path': 'part/about.html'
-    },
-
     'github': {
         'display_name': "GitHub",
-        'path': 'https://github.com/comroid-git',
-        'policy': policy['instant_redir']
+        'path': 'https://github.com/comroid-git'
     },
-    'discord': {
-        'display_name': "Discord",
-        'path': 'https://discord.gg/comroid',
-        'policy': policy['instant_redir']
+    'contact': {
+        'display_name': "Contact",
+        'path': 'part/contact.html'
+    },
+    'privacy': {
+        'display_name': "Privacy",
+        'path': 'part/privacy.html'
     }
 }
 
@@ -44,9 +41,15 @@ const navigation = [
         'name': 'status'
     },
     {
-        'type': 'drop',
-        'name': 'refs',
-        'display': 'References',
-        'content': [ 'github', 'discord' ]
+        'type': 'box',
+        'name': 'github'
+    },
+    {
+        'type': 'box',
+        'name': 'privacy'
+    },
+    {
+        'type': 'box',
+        'name': 'contact'
     }
 ]
