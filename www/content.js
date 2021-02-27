@@ -19,7 +19,8 @@ const pages = {
     },
     'github': {
         'display_name': "GitHub",
-        'path': 'https://github.com/comroid-git'
+        'path': 'https://github.com/comroid-git',
+        'policy': policy['instant_redir']
     },
     'contact': {
         'display_name': "Contact",
