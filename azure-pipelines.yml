@@ -77,7 +77,7 @@ steps:
 
 - task: AppCenterDistribute@3
   inputs:
-    serverEndpoint: 'VSAC'
+    serverEndpoint: 'VS AppCenter'
     appSlug: '$(appSlug)'
     appFile: '$(build.artifactstagingdirectory)\AppxPackages\*.appxupload'
     releaseNotesOption: 'input'
