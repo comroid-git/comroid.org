@@ -72,7 +72,12 @@ namespace status_app
             ServiceStatus status = service.GetStatus();
             StatusText = status.Display;
             System.Drawing.Color old = status.DisplayColor;
-            StatusColor = Color.FromArgb(old.A, old.R, old.G, old.B);
+            StatusColor = ConvertColor(old);
+        }
+
+        internal static Color ConvertColor(System.Drawing.Color sysColor)
+        {
+            return Color.FromArgb(sysColor.A, sysColor.R, sysColor.G, sysColor.B);
         }
     }
 }
