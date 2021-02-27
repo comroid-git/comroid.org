@@ -10,11 +10,15 @@ pool:
   vmImage: 'windows-latest'
 
 variables:
-  solution: 'status/csharp/csharp.sln'
-  buildPlatform: 'x86|x64|ARM'
-  buildConfiguration: 'Release'
-  appxPackageDir: '$(build.artifactStagingDirectory)\AppxPackages\\'
-  group: status-app
+  - group: status-app
+  - name: solution
+    value: 'status/csharp/csharp.sln'
+  - name: buildPlatform
+    value: 'x86|x64|ARM'
+  - name: buildConfiguration
+    value: 'Release'
+  - name: appxPackageDir
+    value: '$(build.artifactStagingDirectory)\AppxPackages\\'
 
 steps:
 - task: NuGetToolInstaller@1
