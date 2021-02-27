@@ -30,7 +30,7 @@ steps:
     script: |
       Write-Host "Start adding the PFX file to the certificate store."
 
-      $pfxpath = '$(signing.keystore)'
+      $pfxpath = '$(mySecureFile.keystore)'
       $password = '$(signing.password)'
       
       Add-Type -AssemblyName System.Security
