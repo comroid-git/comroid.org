@@ -10,10 +10,6 @@ pool:
   vmImage: 'windows-latest'
 
 variables:
-  solution: 'status/csharp/csharp.sln'
-  buildPlatform: 'x86|x64|ARM'
-  buildConfiguration: 'Release'
-  appxPackageDir: '$(build.artifactStagingDirectory)\AppxPackages\\'
   group: status-app
 
 steps:
