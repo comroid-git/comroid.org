@@ -43,7 +43,6 @@ namespace status_app
                 }
                 catch (Exception ex)
                 {
-                    ex = ex.InnerException; // ex is always from RequestServices()
                     UIElementCollection children = ((Panel) _rootBox.Parent).Children;
                     foreach (UIElement uiElement in children.Where(it => it != _rootBox).ToArray())
                         children.Remove(uiElement);
