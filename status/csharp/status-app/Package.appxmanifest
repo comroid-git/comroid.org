@@ -14,7 +14,7 @@
   <mp:PhoneIdentity PhoneProductId="b141f503-faee-4fac-9a2d-80de0fc84be8" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
-    <DisplayName>status-app</DisplayName>
+    <DisplayName>comroid Status App</DisplayName>
     <PublisherDisplayName>comroid</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
