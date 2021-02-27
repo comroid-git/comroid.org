@@ -63,7 +63,7 @@ namespace org_comroid_status_api
             Debug.WriteLine("Requesting all services");
             IRestResponse<List<Service>> response = await Task.Run(() => Rest.Execute<List<Service>>(req));
             if (response.Data == null)
-                throw new IOException("Could not request services", response.ErrorException);
+                throw new IOException($"[{response.StatusCode}] Could not request services", response.ErrorException);
             return response.Data;
         }
 
