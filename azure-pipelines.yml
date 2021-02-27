@@ -19,10 +19,14 @@ variables:
 steps:
 - task: NuGetToolInstaller@1
 
+- task: NuGetCommand@2
+  inputs:
+    restoreSolution: '$(solution)'
+
 - task: DownloadSecureFile@1
   name: mySecureFile
   inputs:
-    secureFile: $(signing.keystore)
+    secureFile: '$(signing.keystore)'
 
 - task: PowerShell@2
   inputs:
@@ -40,10 +44,6 @@ steps:
       $store.Open([System.Security.Cryptography.X509Certificates.OpenFlags]"ReadWrite")
       $store.Add($cert)
       $store.Close()
-
-- task: NuGetCommand@2
-  inputs:
-    restoreSolution: '$(solution)'
 
 - task: VSBuild@1
   inputs:
