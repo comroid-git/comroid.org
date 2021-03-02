@@ -9,8 +9,8 @@ import org.comroid.restless.server.ServerEndpoint;
 import org.comroid.status.entity.Service;
 import org.comroid.status.rest.Endpoint;
 import org.comroid.status.server.StatusServer;
-import org.comroid.status.server.auth.TokenCore;
 import org.comroid.status.server.auth.AdminSession;
+import org.comroid.status.server.auth.TokenCore;
 import org.comroid.status.server.entity.LocalService;
 import org.comroid.status.server.util.ResponseBuilder;
 import org.comroid.uniform.node.UniArrayNode;
@@ -173,6 +173,19 @@ public enum ServerEndpoints implements ServerEndpoint {
             }
 
             return AdminSession.create(headers);
+        }
+
+        @Override
+        public REST.Response executeDELETE(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            try {
+                if (!AdminSession.deleteSession(headers.getFirst(CommonHeaderNames.AUTHORIZATION)))
+                    throw new RestEndpointException(UNAUTHORIZED, "No session was closed");
+            } catch (Throwable t) {
+                if (t instanceof RestEndpointException)
+                    throw t;
+                throw new RestEndpointException(INTERNAL_SERVER_ERROR, "There was an error closing the session", t);
+            }
+            return new REST.Response(ACCEPTED);
         }
     };
 

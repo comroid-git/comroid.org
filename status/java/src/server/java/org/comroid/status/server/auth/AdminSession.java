@@ -1,6 +1,7 @@
 package org.comroid.status.server.auth;
 
 import com.sun.net.httpserver.Headers;
+import org.comroid.api.UncheckedCloseable;
 import org.comroid.mutatio.ref.Reference;
 import org.comroid.restless.REST;
 import org.comroid.restless.server.RestEndpointException;
@@ -22,7 +23,7 @@ import static org.comroid.restless.HTTPStatusCodes.*;
 import static org.comroid.status.server.auth.TokenCore.extractName;
 import static org.comroid.status.server.auth.TokenCore.generate;
 
-public final class AdminSession extends DataContainerBase<AdminSession> {
+public final class AdminSession extends DataContainerBase<AdminSession> implements UncheckedCloseable {
     @RootBind
     public static final GroupBind<AdminSession> TYPE
             = new GroupBind<>(StatusServer.instance, "admin-session");
@@ -70,7 +71,21 @@ public final class AdminSession extends DataContainerBase<AdminSession> {
         return sessions.getOrDefault(sessionToken, null);
     }
 
+    public static boolean deleteSession(@Nullable String token) throws RestEndpointException {
+        if (token == null)
+            throw new RestEndpointException(UNAUTHORIZED);
+        AdminSession session = findSession(token);
+        if (session == null)
+            return false;
+        session.close();
+        return true;
+    }
+
     public REST.Response infoResponse() {
         return new REST.Response(OK, toUniNode());
+    }
+
+    @Override
+    public void close() {
     }
 }
