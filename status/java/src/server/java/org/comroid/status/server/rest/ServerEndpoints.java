@@ -10,6 +10,7 @@ import org.comroid.status.entity.Service;
 import org.comroid.status.rest.Endpoint;
 import org.comroid.status.server.StatusServer;
 import org.comroid.status.server.auth.TokenCore;
+import org.comroid.status.server.auth.AdminSession;
 import org.comroid.status.server.entity.LocalService;
 import org.comroid.status.server.util.ResponseBuilder;
 import org.comroid.uniform.node.UniArrayNode;
@@ -159,6 +160,20 @@ public enum ServerEndpoints implements ServerEndpoint {
         }
     },
     ADMIN_AUTHORIZE(Endpoint.ADMIN_AUTHORIZE, false) {
+        @Override
+        public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            try {
+                checkAdminAuthorization(headers);
+            } catch (RestEndpointException e) {
+                String sessionToken = headers.getFirst(CommonHeaderNames.AUTHORIZATION);
+                AdminSession session = AdminSession.findSession(sessionToken);
+                if (session == null)
+                    throw e;
+                return session.infoResponse();
+            }
+
+            return AdminSession.create(headers);
+        }
     };
 
     private final Endpoint underlying;
@@ -198,14 +213,20 @@ public enum ServerEndpoints implements ServerEndpoint {
 
     public static void checkAdminAuthorization(Headers headers) {
         if (!headers.containsKey(CommonHeaderNames.AUTHORIZATION))
-            throw new RestEndpointException(UNAUTHORIZED, "Unauthorized");
+            throw new RestEndpointException(UNAUTHORIZED);
 
         final String token = headers.getFirst(CommonHeaderNames.AUTHORIZATION);
 
-        if (!TokenCore.isValid(token) || !TokenCore.extractName(token).equals(StatusServer.ADMIN_TOKEN_NAME))
-            throw new RestEndpointException(UNAUTHORIZED, "Malicious Token used");
-        if (!StatusServer.ADMIN_TOKEN.getContent().equals(token))
-            throw new RestEndpointException(UNAUTHORIZED, "Unauthorized");
+        try {
+            if (!TokenCore.isValid(token) || !TokenCore.extractName(token).equals(StatusServer.ADMIN_TOKEN_NAME))
+                throw new RestEndpointException(UNAUTHORIZED, "Malicious Token used");
+            if (!StatusServer.ADMIN_TOKEN.getContent().equals(token))
+                throw new RestEndpointException(UNAUTHORIZED);
+        } catch (Throwable t) {
+            if (t instanceof RestEndpointException)
+                throw t;
+            throw new RestEndpointException(UNAUTHORIZED, "Token caused an exception", t);
+        }
     }
 
     @Override
