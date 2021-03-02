@@ -6,7 +6,7 @@ import org.comroid.api.ContextualProvider;
 import org.comroid.api.Junction;
 import org.comroid.common.exception.AssertionException;
 import org.comroid.common.io.FileHandle;
-import org.comroid.common.java.JITAssistant;
+import org.comroid.common.jvm.JITAssistant;
 import org.comroid.crystalshard.Context;
 import org.comroid.crystalshard.DiscordAPI;
 import org.comroid.crystalshard.entity.user.User;
