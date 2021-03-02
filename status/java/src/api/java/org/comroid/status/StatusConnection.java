@@ -14,10 +14,12 @@ import org.comroid.restless.body.BodyBuilderType;
 import org.comroid.status.entity.Service;
 import org.comroid.status.rest.Endpoint;
 import org.comroid.uniform.SerializationAdapter;
-import org.comroid.util.StandardValueType;
 import org.comroid.uniform.cache.ProvidedCache;
 import org.comroid.uniform.node.UniObjectNode;
+import org.comroid.util.StandardValueType;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.NoSuchElementException;
 import java.util.concurrent.*;
 
 import static org.comroid.restless.CommonHeaderNames.AUTHORIZATION;
@@ -25,6 +27,7 @@ import static org.comroid.restless.CommonHeaderNames.AUTHORIZATION;
 public final class StatusConnection implements ContextualProvider.Underlying {
     private static final Logger logger = LogManager.getLogger();
     private final ContextualProvider context;
+    @Nullable
     private final String serviceName;
     private final String token;
     private final ScheduledExecutorService executor;
@@ -64,11 +67,15 @@ public final class StatusConnection implements ContextualProvider.Underlying {
         return context;
     }
 
-    public StatusConnection(ContextualProvider context, String serviceName, FileHandle tokenFile) {
+    public StatusConnection(ContextualProvider context, FileHandle tokenFile) {
+        this(context, null, tokenFile);
+    }
+
+    public StatusConnection(ContextualProvider context, @Nullable String serviceName, FileHandle tokenFile) {
         this(context, serviceName, tokenFile.getContent(), Executors.newScheduledThreadPool(4));
     }
 
-    public StatusConnection(ContextualProvider context, String serviceName, String token, ScheduledExecutorService executor) {
+    public StatusConnection(ContextualProvider context, @Nullable String serviceName, String token, ScheduledExecutorService executor) {
         this.context = context.plus("StatusConnection", this);
         this.serviceName = serviceName;
         this.token = token;
@@ -95,6 +102,8 @@ public final class StatusConnection implements ContextualProvider.Underlying {
     public CompletableFuture<Service> stopPolling(Service.Status newStatus) {
         if (!polling)
             return Polyfill.failedFuture(new RuntimeException("Connection is not polling!"));
+        if (serviceName == null)
+            throw new NoSuchElementException("No service name defined");
         return rest.request(Service.Bind.Root)
                 .method(REST.Method.DELETE)
                 .endpoint(Endpoint.POLL.complete(serviceName))
@@ -123,7 +132,9 @@ public final class StatusConnection implements ContextualProvider.Underlying {
         }, refreshTimeout, TimeUnit.SECONDS);
     }
 
-    public CompletableFuture<Service> sendPoll() {
+    private CompletableFuture<Service> sendPoll() {
+        if (serviceName == null)
+            throw new NoSuchElementException("No service name defined");
         return rest.request(Service.Bind.Root)
                 .method(REST.Method.POST)
                 .endpoint(Endpoint.POLL.complete(serviceName))
@@ -138,6 +149,8 @@ public final class StatusConnection implements ContextualProvider.Underlying {
     }
 
     public CompletableFuture<Service> updateStatus(Service.Status status) {
+        if (serviceName == null)
+            throw new NoSuchElementException("No service name defined");
         final UniObjectNode data = rest.requireFromContext(SerializationAdapter.class)
                 .createObjectNode();
 

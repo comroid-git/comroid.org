@@ -21,6 +21,7 @@ import org.comroid.restless.server.RestServer;
 import org.comroid.status.AdapterDefinition;
 import org.comroid.status.entity.Entity;
 import org.comroid.status.entity.Service;
+import org.comroid.status.server.auth.TokenCore;
 import org.comroid.status.server.entity.LocalService;
 import org.comroid.status.server.entity.LocalStoredService;
 import org.comroid.status.server.rest.ServerEndpoints;

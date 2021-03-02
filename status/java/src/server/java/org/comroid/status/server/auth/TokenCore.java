@@ -1,4 +1,4 @@
-package org.comroid.status.server;
+package org.comroid.status.server.auth;
 
 import java.util.Base64;
 import java.util.UUID;
