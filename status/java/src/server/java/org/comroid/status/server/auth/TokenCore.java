@@ -47,6 +47,6 @@ public final class TokenCore {
         final Base64.Decoder decoder = Base64.getDecoder();
         final String decoded = new String(decoder.decode(token));
 
-        return decoded.substring(0, decoded.lastIndexOf(':', decoded.lastIndexOf(':') - 1));
+        return decoded.substring(0, decoded.indexOf(':'));
     }
 }
