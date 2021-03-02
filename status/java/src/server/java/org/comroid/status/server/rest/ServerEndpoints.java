@@ -9,7 +9,7 @@ import org.comroid.restless.server.ServerEndpoint;
 import org.comroid.status.entity.Service;
 import org.comroid.status.rest.Endpoint;
 import org.comroid.status.server.StatusServer;
-import org.comroid.status.server.TokenCore;
+import org.comroid.status.server.auth.TokenCore;
 import org.comroid.status.server.entity.LocalService;
 import org.comroid.status.server.util.ResponseBuilder;
 import org.comroid.uniform.node.UniArrayNode;

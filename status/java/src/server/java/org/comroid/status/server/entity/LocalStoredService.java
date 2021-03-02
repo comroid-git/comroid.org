@@ -9,7 +9,7 @@ import org.comroid.mutatio.ref.Reference;
 import org.comroid.status.entity.Entity;
 import org.comroid.status.entity.Service;
 import org.comroid.status.server.StatusServer;
-import org.comroid.status.server.TokenCore;
+import org.comroid.status.server.auth.TokenCore;
 import org.comroid.uniform.node.UniNode;
 import org.comroid.varbind.container.DataContainerBase;
 
