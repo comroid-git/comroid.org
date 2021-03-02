@@ -1,7 +1,5 @@
 package org.comroid.status.server.auth;
 
-import org.comroid.status.server.StatusServer;
-
 import java.util.Base64;
 import java.util.UUID;
 
@@ -32,8 +30,6 @@ public final class TokenCore {
         if (parts.length != 3)
             return false;
         try {
-            StatusServer.instance.getServiceByName(extractName(token))
-                    .orElseThrow(() -> new IllegalArgumentException("Token refers to nonexistent service"));
             UUID.fromString(parts[1]);
             UUID.fromString(parts[2]);
         } catch (Throwable ignored) {
