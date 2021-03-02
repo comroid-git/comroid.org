@@ -26,7 +26,8 @@ public enum Endpoint implements AccessibleEndpoint {
     POLL(
             "service/%s/poll",
             Service.NAME_REGEX
-    );
+    ),
+    ADMIN_AUTHORIZE("admin");
 
     private final String extension;
     private final String[] regexGroups;

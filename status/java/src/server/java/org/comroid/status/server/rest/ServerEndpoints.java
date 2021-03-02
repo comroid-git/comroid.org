@@ -157,6 +157,8 @@ public enum ServerEndpoints implements ServerEndpoint {
                     .setBody(service)
                     .build();
         }
+    },
+    ADMIN_AUTHORIZE(Endpoint.ADMIN_AUTHORIZE, false) {
     };
 
     private final Endpoint underlying;
