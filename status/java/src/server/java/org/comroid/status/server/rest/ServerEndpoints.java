@@ -27,10 +27,9 @@ public enum ServerEndpoints implements ServerEndpoint {
 
             StatusServer.instance
                     .getEntityCache()
-                    .pipe(name -> !name.equals("test-dummy"))
-                    .flatMap(Function.identity())
+                    .filterKey(name -> !name.equals("test-dummy"))
                     .flatMap(Service.class)
-                    .forEach(service -> service.toObjectNode(services.addObject()));
+                    .peek(service -> service.toObjectNode(services.addObject()));
 
             return new ResponseBuilder()
                     .setStatusCode(200)
