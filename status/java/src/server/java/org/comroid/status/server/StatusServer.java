@@ -143,13 +143,12 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
 
             //this.bot = new DiscordBotBase(DISCORD, BOT_TOKEN.getContent(true));
             this.userStatusSupplier = StatusServer.instance.getEntityCache()
-                    .pipe()
                     .filter(Service.class::isInstance)
                     .map(Service.class::cast)
                     .map(Service::getStatus)
                     .filter(status -> status != Service.Status.UNKNOWN)
                     .sorted(Comparator.comparingInt(Service.Status::getValue))
-                    .findAny()
+                    .findFirst()
                     .or(() -> Service.Status.OFFLINE)
                     .map(status -> {
                         switch (status) {
@@ -237,7 +236,7 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
         logger.debug("Returning Service by name: {}", name);
         return Reference.provided(() -> entityCache.streamRefs()
                 .filter(ref -> !ref.isNull())
-                .filter(ref -> ref.process().test(Service.class::isInstance))
+                .filter(ref -> ref.test(Service.class::isInstance))
                 .map(ref -> ref.into(Service.class::cast))
                 .filter(service -> service.getName().equals(name))
                 .findFirst()
