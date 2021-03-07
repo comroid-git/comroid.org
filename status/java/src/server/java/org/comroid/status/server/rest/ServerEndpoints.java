@@ -29,7 +29,7 @@ public enum ServerEndpoints implements ServerEndpoint {
                     .getEntityCache()
                     .filterKey(name -> !name.equals("test-dummy"))
                     .flatMap(Service.class)
-                    .peek(service -> service.toObjectNode(services.addObject()));
+                    .forEach(service -> service.toObjectNode(services.addObject()));
 
             return new ResponseBuilder()
                     .setStatusCode(200)
