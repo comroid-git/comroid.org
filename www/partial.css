@@ -1,3 +1,8 @@
+html {
+    height: 100%;
+    margin: 0;
+}
+
 body {
     padding: 0;
     margin: 0 auto;
@@ -12,18 +17,6 @@ body {
     width: 55%;
 }
 
-html {
-    height: 100%;
-    margin: 0;
-}
-
-#content {
-    clear: both;
-    height: 100%;
-    width: 55%;
-    margin: 0 auto;
-}
-
 @media only screen and (max-width: 768px) {
     #content {
         clear: both;
@@ -31,6 +24,10 @@ html {
         width: 90%;
         padding: 20px;
         margin: 0 auto;
+    }
+
+    #discord_widget {
+        width: 100%;
     }
 }
 
@@ -52,7 +49,6 @@ h2 {
 }
 
 a {
-    cursor: pointer !important;
     text-decoration: none;
     color: #003366;
 }
@@ -69,6 +65,11 @@ a {
 
 .center {
     text-align: center;
+}
+
+#discord_widget {
+    margin: 0 auto;
+    width: 350px;
 }
 
 .right {
