@@ -164,6 +164,7 @@ h2 {
 }
 
 a {
+    cursor: pointer;
     text-decoration: none;
     color: #003366;
 }
