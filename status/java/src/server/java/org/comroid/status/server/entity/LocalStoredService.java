@@ -37,19 +37,13 @@ public class LocalStoredService extends DataContainerBase<Entity> implements Loc
     }
 
     @Override
-    public CompletableFuture<Service> updateStatus(Status status) {
-        setStatus(status);
-        return CompletableFuture.completedFuture(this);
-    }
-
-    @Override
     public void setStatus(Status status) {
         this.status.set(status);
         put(Bind.Status, IntEnum::getValue, status);
     }
 
     public LocalStoredService(ContextualProvider context, UniNode data) {
-        super(StatusServer.instance, data);
+        super(StatusServer.instance, data.asObjectNode());
 
         this.status = new AtomicReference<>(wrap(Bind.Status).orElse(Status.UNKNOWN));
         this.tokenFile = StatusServer.TOKEN_DIR.createSubFile(getName() + ".token");
@@ -58,6 +52,12 @@ public class LocalStoredService extends DataContainerBase<Entity> implements Loc
         if (!tokenFile.exists())
             overwriteTokenFile();
         else token.set(tokenFile.getContent());
+    }
+
+    @Override
+    public CompletableFuture<Service> updateStatus(Status status) {
+        setStatus(status);
+        return CompletableFuture.completedFuture(this);
     }
 
     private synchronized String overwriteTokenFile() {
