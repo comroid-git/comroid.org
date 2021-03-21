@@ -39,13 +39,13 @@ public class LocalStoredService extends DataContainerBase<Entity> implements Loc
     @Override
     public void setStatus(Status status) {
         this.status.set(status);
-        put(Bind.STATUS, IntEnum::getValue, status);
+        put(STATUS, status);
     }
 
     public LocalStoredService(ContextualProvider context, UniNode data) {
         super(StatusServer.instance, data.asObjectNode());
 
-        this.status = new AtomicReference<>(wrap(Bind.STATUS).orElse(Status.UNKNOWN));
+        this.status = new AtomicReference<>(wrap(STATUS).orElse(Status.UNKNOWN));
         this.tokenFile = StatusServer.TOKEN_DIR.createSubFile(getName() + ".token");
 
         this.token = new AtomicReference<>(null);

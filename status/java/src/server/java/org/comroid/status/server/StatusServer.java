@@ -64,7 +64,6 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
         DISCORD = new DiscordAPI(ADAPTER_DEFINITION.http);
 
         logger.debug("Preparing classes...");
-        JITAssistant.prepareStatic(Entity.Bind.class, Service.Bind.class);
         AssertionException.expect(3, LocalService.GROUP.streamAllChildren().count(), (x, y) -> x < y, "LocalService children count");
 
         if (ADMIN_TOKEN.getContent().isEmpty())
@@ -112,9 +111,8 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
 
             this.entityCache = new FileCache<>(
                     this,
-                    FastJSONLib.fastJsonLib,
                     StatusServer::resolveEntity,
-                    Entity.Bind.NAME,
+                    Entity.NAME,
                     Junction.identity(),
                     CACHE_FILE,
                     250,
@@ -222,9 +220,9 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
     public LocalService createService(String serviceName, UniObjectNode data) {
         DataContainerBuilder<LocalStoredService> builder = new DataContainerBuilder<>(LocalStoredService.class, data, this);
 
-        builder.setValue(Service.Bind.NAME, serviceName);
-        if (!data.has(Service.Bind.STATUS))
-            builder.setValue(Service.Bind.STATUS, Service.Status.UNKNOWN.getValue());
+        builder.setValue(Service.NAME, serviceName);
+        if (!data.has(Service.STATUS))
+            builder.setValue(Service.STATUS, Service.Status.UNKNOWN.getValue());
 
         final LocalService service = builder.build();
         entityCache.getReference(serviceName, true).set(service);
@@ -316,7 +314,7 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
                     Context context
             ) {
                 final UniObjectNode data = context.getSerializer().createObjectNode();
-                data.put(Service.Bind.DISPLAY_NAME, displayName);
+                data.put(Service.DISPLAY_NAME, displayName);
                 final Service service = StatusServer.instance.createService(serviceName, data);
 
                 return String.format("Created new Service: %s '%s'", service.getDisplayName(), service.getName());

@@ -104,13 +104,13 @@ public final class StatusConnection implements ContextualProvider.Underlying {
             return Polyfill.failedFuture(new RuntimeException("Connection is not polling!"));
         if (serviceName == null)
             throw new NoSuchElementException("No service name defined");
-        return rest.request(Service.Bind.Type)
+        return rest.request(Service.Type)
                 .method(REST.Method.DELETE)
                 .endpoint(Endpoint.POLL.complete(serviceName))
                 .addHeader(AUTHORIZATION, token)
                 .buildBody(BodyBuilderType.OBJECT, obj ->
-                        obj.put(Service.Bind.STATUS, newStatus.getValue()))
-                .execute$autoCache(Service.Bind.NAME, serviceCache)
+                        obj.put(Service.STATUS, newStatus.getValue()))
+                .execute$autoCache(Service.NAME, serviceCache)
                 .thenApply(Span::requireSingle);
     }
 
@@ -135,7 +135,7 @@ public final class StatusConnection implements ContextualProvider.Underlying {
     private CompletableFuture<Service> sendPoll() {
         if (serviceName == null)
             throw new NoSuchElementException("No service name defined");
-        return rest.request(Service.Bind.Type)
+        return rest.request(Service.Type)
                 .method(REST.Method.POST)
                 .endpoint(Endpoint.POLL.complete(serviceName))
                 .addHeader(AUTHORIZATION, token)
@@ -144,7 +144,7 @@ public final class StatusConnection implements ContextualProvider.Underlying {
                     obj.put("expected", StandardValueType.INTEGER, refreshTimeout);
                     obj.put("timeout", StandardValueType.INTEGER, crashedTimeout);
                 })
-                .execute$autoCache(Service.Bind.NAME, serviceCache)
+                .execute$autoCache(Service.NAME, serviceCache)
                 .thenApply(Span::requireNonNull);
     }
 
@@ -161,7 +161,7 @@ public final class StatusConnection implements ContextualProvider.Underlying {
                 .endpoint(Endpoint.UPDATE_SERVICE_STATUS.complete(serviceName))
                 .addHeader(AUTHORIZATION, token)
                 .body(data.toString())
-                .execute$autoCache(Service.Bind.NAME, serviceCache)
+                .execute$autoCache(Service.NAME, serviceCache)
                 .thenApply(Span::requireNonNull);
     }
 
@@ -169,7 +169,7 @@ public final class StatusConnection implements ContextualProvider.Underlying {
         return rest.request(Service.class)
                 .method(REST.Method.GET)
                 .endpoint(Endpoint.SPECIFIC_SERVICE.complete(name))
-                .execute$autoCache(Service.Bind.NAME, serviceCache)
+                .execute$autoCache(Service.NAME, serviceCache)
                 .thenApply(Span::requireNonNull);
     }
 }
