@@ -33,8 +33,8 @@ public enum Endpoint implements ServerEndpoint.This {
         @Override
         public REST.Response executePOST(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             try {
-                String email = body.process(EMAIL).map(UniNode::asString).requireNonNull("No Email provided");
-                String password = body.process(PASSWORD).map(UniNode::asString).requireNonNull("No Password provided");
+                String email = body.use(EMAIL).map(UniNode::asString).requireNonNull("No Email provided");
+                String password = body.use(PASSWORD).map(UniNode::asString).requireNonNull("No Password provided");
 
                 UserAccount account = AuthServer.instance.getUserManager().createAccount(email, password);
 

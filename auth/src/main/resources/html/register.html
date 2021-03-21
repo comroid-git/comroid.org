@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <meta name="author" content="Tobias Burdow"/>
+    <meta name="publisher" content="comroid"/>
+    <meta name="description" content="Making Software. Simply."/>
+    <meta name="keywords" content="comroid, account"/>
+    <meta name="robots" content="index, follow"/>
+
+    <link href="https://cdn.comroid.org/img/logo-clean.png" rel="icon">
+    <link href="https://comroid.org/style.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Fira+Mono" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Sans&display=swap" rel="stylesheet">
+
+    <title> comroid Account </title>
+</head>
+<body>
+<header>
+    <h1> comroid </h1>
+    <p> Making Software. Simply. </p>
+</header>
+<div id="content">
+    <h2>Register a comroid Account</h2>
+    <p>Please use the below form to register for a comroid Account</p>
+    <form action="./register" method="post">
+        <label for="emailInput">E-Mail</label>
+        <input type="text" id="emailInput" name="email" title="E-Mail">
+        <br />
+        <label for="passwordInput">Password</label>
+        <input type="password" id="passwordInput" name="password" title="Password">
+        <br />
+        <input type="checkbox" id="consent" required="required">
+        <label for="consent">Terms Accepted</label>
+        <br />
+        <button type="submit">Register now</button>
+    </form>
+</div>
+</body>
+</html>
