@@ -5,16 +5,17 @@ import org.comroid.api.Polyfill;
 import org.comroid.auth.user.UserAccount;
 import org.comroid.auth.user.UserSession;
 import org.comroid.restless.CommonHeaderNames;
-import org.comroid.restless.HTTPStatusCodes;
 import org.comroid.restless.REST;
 import org.comroid.restless.server.RestEndpointException;
 import org.comroid.restless.server.ServerEndpoint;
-import org.comroid.uniform.SerializationAdapter;
 import org.comroid.uniform.node.UniNode;
-import org.comroid.uniform.node.UniObjectNode;
 import org.intellij.lang.annotations.Language;
 
+import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.comroid.auth.user.UserAccount.EMAIL;
 import static org.comroid.auth.user.UserAccount.PASSWORD;
@@ -75,7 +76,7 @@ public enum Endpoint implements ServerEndpoint.This {
                 UserSession session = AuthServer.instance.getUserManager().loginUser(email, password);
 
                 REST.Header.List resp = new REST.Header.List();
-                resp.add("Set-Cookie", session.getCookie());
+                resp.add("Set-Cookie", String.format("org.comroid.auth=%s", session.getCookie()));
                 resp.add(CommonHeaderNames.REDIRECT_TARGET, "account");
                 return new REST.Response(MOVED_PERMANENTLY, resp);
             } catch (Throwable t) {
@@ -83,11 +84,23 @@ public enum Endpoint implements ServerEndpoint.This {
             }
         }
     },
-    SESSION_DATA("session_data/%s", "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$") {
+    SESSION_DATA("session_data") {
         @Override
         public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            String cookie = urlParams[0];
-            UserSession session = AuthServer.instance.getUserManager().findSession(cookie);
+            String[] cookies = headers.getFirst(COOKIE).split("; ");
+            UserSession session = Stream.of(cookies)
+                    .filter(UserSession::isAppCookie)
+                    .map(str -> str.substring(UserSession.COOKIE_PREFIX.length() + 1))
+                    .map(c -> {
+                        try {
+                            return AuthServer.instance.getUserManager().findSession(c);
+                        } catch (Throwable ignored) {
+                            return null;
+                        }
+                    })
+                    .filter(Objects::nonNull)
+                    .findAny()
+                    .orElseThrow(() -> new RestEndpointException(UNAUTHORIZED));
             REST.Header.List response = new REST.Header.List();
             response.add(COOKIE, session.getCookie());
             return new REST.Response(OK, session.getSessionData(), response);

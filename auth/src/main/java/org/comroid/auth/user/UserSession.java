@@ -3,20 +3,19 @@ package org.comroid.auth.user;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
 import org.comroid.uniform.node.UniObjectNode;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
 import java.util.UUID;
 
 public final class UserSession {
-    private final String cookie;
+    public static final String COOKIE_PREFIX = "org.comroid.auth";
     private final UserAccount account;
-
-    public String getCookie() {
-        return cookie;
-    }
+    private final String cookie;
 
     public UserAccount getAccount() {
         return account;
+    }
+
+    public String getCookie() {
+        return cookie;
     }
 
     public UniObjectNode getSessionData() {
@@ -28,9 +27,15 @@ public final class UserSession {
     }
 
     UserSession(UserAccount account) {
-        String str = String.format("%s-%s-%s", UUID.randomUUID(), account.getUUID(), UUID.randomUUID());
-        byte[] encoded = Base64.getEncoder().encode(str.getBytes(StandardCharsets.UTF_8));
-        this.cookie = new String(encoded);
         this.account = account;
+        this.cookie = generateCookie();
+    }
+
+    public static boolean isAppCookie(String fullCookie) {
+        return fullCookie.indexOf(COOKIE_PREFIX) == 0;
+    }
+
+    private String generateCookie() {
+        return String.format("%s-%s", account.getUUID(), UUID.randomUUID());
     }
 }
