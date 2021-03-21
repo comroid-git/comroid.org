@@ -13,6 +13,10 @@ const pages = {
         'display_name': "Homepage",
         'path': 'part/homepage.html'
     },
+    'auth': {
+        'display_name': "Authentication Server",
+        'path': 'https://auth.comroid.org'
+    },
     'projects': {
         'display_name': "Projects",
         'path': 'part/projects.html'
@@ -40,6 +44,10 @@ const navigation = [
     {
         'type': 'box',
         'name': 'home'
+    },
+    {
+        'type': 'box',
+        'name': 'auth'
     },
     {
         'type': 'box',
