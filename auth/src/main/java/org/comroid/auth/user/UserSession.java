@@ -1,9 +1,17 @@
 package org.comroid.auth.user;
 
+import com.sun.net.httpserver.Headers;
+import org.comroid.auth.server.AuthServer;
+import org.comroid.restless.server.RestEndpointException;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
 import org.comroid.uniform.node.UniObjectNode;
 
+import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Stream;
+
+import static org.comroid.restless.CommonHeaderNames.COOKIE;
+import static org.comroid.restless.HTTPStatusCodes.UNAUTHORIZED;
 
 public final class UserSession {
     public static final String COOKIE_PREFIX = "org.comroid.auth";
@@ -29,6 +37,23 @@ public final class UserSession {
     UserSession(UserAccount account) {
         this.account = account;
         this.cookie = generateCookie();
+    }
+
+    public static UserSession findSession(Headers headers) {
+        String[] cookies = headers.getFirst(COOKIE).split("; ");
+        return Stream.of(cookies)
+                .filter(UserSession::isAppCookie)
+                .map(str -> str.substring(UserSession.COOKIE_PREFIX.length() + 1))
+                .map(c -> {
+                    try {
+                        return AuthServer.instance.getUserManager().findSession(c);
+                    } catch (Throwable ignored) {
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .findAny()
+                .orElseThrow(() -> new RestEndpointException(UNAUTHORIZED));
     }
 
     public static boolean isAppCookie(String fullCookie) {

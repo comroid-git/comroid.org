@@ -85,6 +85,10 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
         return session;
     }
 
+    public boolean closeSession(UserSession session) {
+        return sessions.remove(session.getCookie()) != session;
+    }
+
     @Override
     public void close() {
     }

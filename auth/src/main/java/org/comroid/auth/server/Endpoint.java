@@ -4,7 +4,6 @@ import com.sun.net.httpserver.Headers;
 import org.comroid.api.Polyfill;
 import org.comroid.auth.user.UserAccount;
 import org.comroid.auth.user.UserSession;
-import org.comroid.common.io.FileHandle;
 import org.comroid.restless.CommonHeaderNames;
 import org.comroid.restless.REST;
 import org.comroid.restless.server.RestEndpointException;
@@ -12,18 +11,12 @@ import org.comroid.restless.server.ServerEndpoint;
 import org.comroid.uniform.node.UniNode;
 import org.intellij.lang.annotations.Language;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.StringReader;
-import java.util.List;
-import java.util.Objects;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.comroid.auth.user.UserAccount.EMAIL;
 import static org.comroid.auth.user.UserAccount.PASSWORD;
-import static org.comroid.restless.CommonHeaderNames.COOKIE;
 import static org.comroid.restless.HTTPStatusCodes.*;
 
 public enum Endpoint implements ServerEndpoint.This {
@@ -103,28 +96,28 @@ public enum Endpoint implements ServerEndpoint.This {
                 throw new RestEndpointException(INTERNAL_SERVER_ERROR, "Could not log in", t);
             }
         }
+
+        @Override
+        public REST.Response executeDELETE(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            return new REST.Response(Polyfill.uri("logout"));
+        }
+    },
+    LOGOUT("logout") {
+        @Override
+        public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            UserSession session = UserSession.findSession(headers);
+            AuthServer.instance.getUserManager().closeSession(session);
+            REST.Header.List response = new REST.Header.List();
+            response.add("Set-Cookie", String.format("%s=null", UserSession.COOKIE_PREFIX));
+            return new REST.Response(OK, response);
+        }
     },
     SESSION_DATA("session_data.js") {
         @Override
         public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            String[] cookies = headers.getFirst(COOKIE).split("; ");
-            UserSession session = Stream.of(cookies)
-                    .filter(UserSession::isAppCookie)
-                    .map(str -> str.substring(UserSession.COOKIE_PREFIX.length() + 1))
-                    .map(c -> {
-                        try {
-                            return AuthServer.instance.getUserManager().findSession(c);
-                        } catch (Throwable ignored) {
-                            return null;
-                        }
-                    })
-                    .filter(Objects::nonNull)
-                    .findAny()
-                    .orElseThrow(() -> new RestEndpointException(UNAUTHORIZED));
-            REST.Header.List response = new REST.Header.List();
-            response.add(COOKIE, session.getCookie());
+            UserSession session = UserSession.findSession(headers);
             String dataWrapper = String.format("const sessionData = JSON.parse('%s');", session.getSessionData().toSerializedString());
-            return new REST.Response(OK, "application/javascript", new StringReader(dataWrapper), response);
+            return new REST.Response(OK, "application/javascript", new StringReader(dataWrapper));
         }
     };
 
