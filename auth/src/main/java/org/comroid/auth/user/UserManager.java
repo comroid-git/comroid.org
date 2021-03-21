@@ -18,6 +18,7 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
     private static final Logger logger = LogManager.getLogger("UserManager");
     public static final FileHandle DIR = AuthServer.DIR.createSubDir("users");
     private final Map<UUID, UserAccount> accounts = new ConcurrentHashMap<>();
+    private final Map<String, UserSession> sessions = new ConcurrentHashMap<>();
     private final ContextualProvider context;
 
     static {
@@ -73,7 +74,15 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
                 .findAny()
                 .filter(usr -> usr.password.contentEquals(password))
                 .map(UserSession::new)
+                .filter(session -> sessions.put(session.getCookie(), session) != session)
                 .orElseThrow(() -> new IllegalArgumentException("Could not authenticate"));
+    }
+
+    public UserSession findSession(String cookie) {
+        UserSession session = sessions.getOrDefault(cookie, null);
+        if (session == null)
+            throw new IllegalArgumentException("No session found with given cookie");
+        return session;
     }
 
     @Override

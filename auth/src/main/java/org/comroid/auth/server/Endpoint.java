@@ -9,13 +9,16 @@ import org.comroid.restless.HTTPStatusCodes;
 import org.comroid.restless.REST;
 import org.comroid.restless.server.RestEndpointException;
 import org.comroid.restless.server.ServerEndpoint;
+import org.comroid.uniform.SerializationAdapter;
 import org.comroid.uniform.node.UniNode;
+import org.comroid.uniform.node.UniObjectNode;
 import org.intellij.lang.annotations.Language;
 
 import java.util.regex.Pattern;
 
 import static org.comroid.auth.user.UserAccount.EMAIL;
 import static org.comroid.auth.user.UserAccount.PASSWORD;
+import static org.comroid.restless.CommonHeaderNames.COOKIE;
 import static org.comroid.restless.HTTPStatusCodes.*;
 
 public enum Endpoint implements ServerEndpoint.This {
@@ -25,10 +28,16 @@ public enum Endpoint implements ServerEndpoint.This {
             return new REST.Response(Polyfill.uri("login"), false);
         }
     },
+    API("api.js") {
+        @Override
+        public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            return new REST.Response(OK, "application/javascript", AuthServer.WEB.createSubFile("api.js"));
+        }
+    },
     ACCOUNT("account") {
         @Override
         public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            return new REST.Response(OK, "text/html", AuthServer.WEB.createSubFile("register.html"));
+            return new REST.Response(OK, "text/html", AuthServer.WEB.createSubFile("account.html"));
         }
     },
     REGISTRATION("register") {
@@ -66,12 +75,22 @@ public enum Endpoint implements ServerEndpoint.This {
                 UserSession session = AuthServer.instance.getUserManager().loginUser(email, password);
 
                 REST.Header.List resp = new REST.Header.List();
-                resp.add(CommonHeaderNames.COOKIE, session.getCookie());
+                resp.add("Set-Cookie", session.getCookie());
                 resp.add(CommonHeaderNames.REDIRECT_TARGET, "account");
-                return new REST.Response(PERMANENT_REDIRECT, resp);
+                return new REST.Response(MOVED_PERMANENTLY, resp);
             } catch (Throwable t) {
                 throw new RestEndpointException(INTERNAL_SERVER_ERROR, "Could not log in", t);
             }
+        }
+    },
+    SESSION_DATA("session_data/%s", "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$") {
+        @Override
+        public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            String cookie = urlParams[0];
+            UserSession session = AuthServer.instance.getUserManager().findSession(cookie);
+            REST.Header.List response = new REST.Header.List();
+            response.add(COOKIE, session.getCookie());
+            return new REST.Response(OK, session.getSessionData(), response);
         }
     };
 
