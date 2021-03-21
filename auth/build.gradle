@@ -5,7 +5,7 @@ version '0.10-SNAPSHOT'
 
 apply from: 'gradle/vars.gradle'
 
-mainClassName = 'org.comroid.netbox.server.NetBoxServer'
+mainClassName = 'org.comroid.auth.server.AuthServer'
 
 sourceCompatibility = 11
 targetCompatibility = 11
