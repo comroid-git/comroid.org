@@ -24,21 +24,39 @@
         }
     </style>
 
+    <script src="session_data.js" type="application/javascript"></script>
+
     <title> comroid Account </title>
 </head>
 <body>
-<div id="content">
-    <h2>Login to your comroid Account</h2>
-    <form action="./login" method="post">
-        <label for="emailInput">E-Mail</label>
-        <input id="emailInput" name="email" title="E-Mail" type="text">
-        <br/>
-        <label for="passwordInput">Password</label>
-        <input id="passwordInput" name="password" title="Password" type="password">
-        <br/>
-        <button type="submit">Login now</button>
-    </form>
-    <p>Need an account? <a href="register">Register here</a> </p>
+<div style="display: none">
+    <div id="login_panel">
+        <h2>Login to your comroid Account</h2>
+        <form action="./login" method="post">
+            <label for="emailInput">E-Mail</label>
+            <input id="emailInput" name="email" title="E-Mail" type="text">
+            <br/>
+            <label for="passwordInput">Password</label>
+            <input id="passwordInput" name="password" title="Password" type="password">
+            <br/>
+            <button type="submit">Login now</button>
+        </form>
+    </div>
+    <div id="user_panel">
+        <h2>Logged In</h2>
+        <p id="idText"></p>
+    </div>
 </div>
+<div id="content">
+</div>
+<script type="application/javascript">
+    if (sessionData === undefined) {
+        document.getElementById('content').innerHTML = document.getElementById('login_panel').innerHTML
+    } else {
+        document.getElementById('content').innerHTML = document.getElementById('user_panel').innerHTML
+
+        document.getElementById('idText').innerText = "User ID: " + sessionData['account']['uuid'];
+    }
+</script>
 </body>
 </html>

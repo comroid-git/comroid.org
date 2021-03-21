@@ -26,6 +26,16 @@ public enum Endpoint implements ServerEndpoint.This {
             return new REST.Response(Polyfill.uri("login"), false);
         }
     },
+    WIDGET("widget") {
+        @Override
+        public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            try {
+                return new REST.Response(OK, "text/html", AuthServer.WEB.createSubFile("widget.html"));
+            } catch (FileNotFoundException e) {
+                throw new AssertionError(e);
+            }
+        }
+    },
     API("api.js") {
         @Override
         public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
@@ -90,7 +100,10 @@ public enum Endpoint implements ServerEndpoint.This {
 
                 REST.Header.List resp = new REST.Header.List();
                 resp.add("Set-Cookie", String.format("org.comroid.auth=%s", session.getCookie()));
-                resp.add(CommonHeaderNames.REDIRECT_TARGET, "account");
+                String referrer = headers.getFirst(CommonHeaderNames.REFERER);
+                referrer = referrer == null ? "" : referrer.substring(referrer.lastIndexOf('/') + 1);
+                boolean isWidget = referrer.equals("widget");
+                resp.add(CommonHeaderNames.REDIRECT_TARGET, isWidget ? "widget" : "account");
                 return new REST.Response(MOVED_PERMANENTLY, resp);
             } catch (Throwable t) {
                 throw new RestEndpointException(INTERNAL_SERVER_ERROR, "Could not log in", t);
@@ -116,9 +129,14 @@ public enum Endpoint implements ServerEndpoint.This {
     SESSION_DATA("session_data.js") {
         @Override
         public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            UserSession session = UserSession.findSession(headers);
-            String dataWrapper = String.format("const sessionData = JSON.parse('%s');", session.getSessionData().toSerializedString());
-            return new REST.Response(OK, "application/javascript", new StringReader(dataWrapper));
+            try {
+                UserSession session = UserSession.findSession(headers);
+                String dataWrapper = String.format("const sessionData = JSON.parse('%s');", session.getSessionData().toSerializedString());
+                return new REST.Response(OK, "application/javascript", new StringReader(dataWrapper));
+            } catch (RestEndpointException ignored) {
+                String dataWrapper = "const sessionData = undefined;";
+                return new REST.Response(OK, "application/javascript", new StringReader(dataWrapper));
+            }
         }
     };
 
