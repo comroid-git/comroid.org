@@ -176,9 +176,8 @@ a {
     margin: 25px 0px;
 }
 
-#donate {
+.widget {
     position: absolute;
-    bottom: 90px;
 
     margin: 10px;
     padding: 10px;
@@ -189,6 +188,14 @@ a {
     border-radius: 16px;
     width: max-content;
     background-color: #00274f;
+}
+
+#sessionWidget {
+    bottom: 180px;
+}
+
+#donate {
+    bottom: 90px;
 }
 
 /* Positions-Classes:
