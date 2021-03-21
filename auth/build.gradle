@@ -34,8 +34,8 @@ dependencies {
     // command line parser
 
     if (isAutoDeploy) {
-        implementation 'org.comroid:status-api:0.12.1'
-        implementation 'org.comroid:restless:0.17.0'
+        implementation 'org.comroid:status-api:0.+'
+        implementation 'org.comroid:restless:0.+'
     } else {
         implementation project(':status:status-api')
 
