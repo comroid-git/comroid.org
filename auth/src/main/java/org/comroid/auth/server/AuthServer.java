@@ -58,7 +58,7 @@ public final class AuthServer implements ContextualProvider.Underlying {
             this.context = MASTER_CONTEXT.plus("NetBoxServer", executor);
 
             logger.debug("Starting Rest server");
-            this.rest = new RestServer(MASTER_CONTEXT, this.executor, URL_BASE, InetAddress.getLoopbackAddress(), PORT, Endpoint.values());
+            this.rest = new RestServer(MASTER_CONTEXT, this.executor, URL_BASE, OS.current == OS.WINDOWS ? InetAddress.getLoopbackAddress() : InetAddress.getLocalHost(), PORT, Endpoint.values());
         } catch (UnknownHostException e) {
             throw new AssertionError(e);
         } catch (IOException e) {
