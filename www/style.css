@@ -191,11 +191,13 @@ a {
 }
 
 #sessionWidget {
-    bottom: 180px;
+    bottom: 110px;
+    right: 25px;
 }
 
 #donate {
-    bottom: 90px;
+    bottom: 100px;
+    left: 15px;
 }
 
 /* Positions-Classes:
