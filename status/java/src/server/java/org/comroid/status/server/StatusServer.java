@@ -114,7 +114,7 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
                     this,
                     FastJSONLib.fastJsonLib,
                     StatusServer::resolveEntity,
-                    Entity.Bind.Name,
+                    Entity.Bind.NAME,
                     Junction.identity(),
                     CACHE_FILE,
                     250,
@@ -222,9 +222,9 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
     public LocalService createService(String serviceName, UniObjectNode data) {
         DataContainerBuilder<LocalStoredService> builder = new DataContainerBuilder<>(LocalStoredService.class, data, this);
 
-        builder.setValue(Service.Bind.Name, serviceName);
-        if (!data.has(Service.Bind.Status))
-            builder.setValue(Service.Bind.Status, Service.Status.UNKNOWN.getValue());
+        builder.setValue(Service.Bind.NAME, serviceName);
+        if (!data.has(Service.Bind.STATUS))
+            builder.setValue(Service.Bind.STATUS, Service.Status.UNKNOWN.getValue());
 
         final LocalService service = builder.build();
         entityCache.getReference(serviceName, true).set(service);
@@ -316,7 +316,7 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
                     Context context
             ) {
                 final UniObjectNode data = context.getSerializer().createObjectNode();
-                data.put(Service.Bind.DisplayName, displayName);
+                data.put(Service.Bind.DISPLAY_NAME, displayName);
                 final Service service = StatusServer.instance.createService(serviceName, data);
 
                 return String.format("Created new Service: %s '%s'", service.getDisplayName(), service.getName());

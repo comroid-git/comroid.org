@@ -19,26 +19,24 @@ import org.jetbrains.annotations.NotNull;
 
 import java.net.URL;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-@Location(Service.Bind.class)
 public interface Service extends Entity, WrappedFormattable {
     @Language("RegExp")
     String NAME_REGEX = "\\w[\\w\\d-]+";
 
     default String getDisplayName() {
-        return requireNonNull(Bind.DisplayName);
+        return requireNonNull(DISPLAY_NAME);
     }
 
     default Status getStatus() {
-        return requireNonNull(Bind.Status);
+        return requireNonNull(STATUS);
     }
 
     default Optional<URL> getURL() {
-        return wrap(Bind.URL);
+        return wrap(URL);
     }
 
     @Override
@@ -90,33 +88,32 @@ public interface Service extends Entity, WrappedFormattable {
         }
     }
 
-    interface Bind extends Entity.Bind {
         @RootBind
-        GroupBind<Service> Root
-                = Entity.Bind.Root.subGroup("service",
+        GroupBind<Service> Type
+                = Entity.Type.subGroup("service",
                 (connection, node) -> new Basic(connection.requireFromContext(StatusConnection.class), node.asObjectNode()));
-        VarBind<Service, String, String, String> DisplayName
-                = Root.createBind("display_name")
+        VarBind<Service, String, String, String> DISPLAY_NAME
+                = Type.createBind("display_name")
                 .extractAs(StandardValueType.STRING)
                 .asIdentities()
                 .onceEach()
                 .setRequired(true)
                 .build();
-        VarBind<Service, Integer, Service.Status, Service.Status> Status
-                = Root.createBind("status")
+        VarBind<Service, Integer, Service.Status, Service.Status> STATUS
+                = Type.createBind("status")
                 .extractAs(StandardValueType.INTEGER)
                 .andRemap(Service.Status::valueOf)
                 .onceEach()
                 .setRequired(true)
                 .build();
         VarBind<Service, String, URL, URL> URL
-                = Root.createBind("url")
+                = Type.createBind("url")
                 .extractAs(StandardValueType.STRING)
                 .andRemap(Polyfill::url)
                 .onceEach()
                 .setRequired(false)
                 .build();
-    }
+
 
     final class Basic extends DataContainerBase<Entity> implements Service {
         private final StatusConnection connection;
@@ -137,7 +134,7 @@ public interface Service extends Entity, WrappedFormattable {
                     .thenApply(node -> node.get("status").asInt())
                     .thenApply(Status::valueOf)
                     .thenApply(status -> {
-                        put(Service.Bind.Status, status.value);
+                        put(STATUS, status.value);
                         return status;
                     });
         }
@@ -146,12 +143,12 @@ public interface Service extends Entity, WrappedFormattable {
         public CompletableFuture<Service> updateStatus(Status status) {
             if (getStatus() == status)
                 return CompletableFuture.completedFuture(this);
-            if (!Objects.equals(put(Service.Bind.Status, status), status.getValue()))
+            if (!Objects.equals(put(STATUS, status), status.getValue()))
                 return connection.getRest()
-                    .request(Service.Bind.Root)
+                    .request(Service.Type)
                     .method(REST.Method.POST)
                     .endpoint(Endpoint.UPDATE_SERVICE_STATUS.complete(getName()))
-                    .buildBody(BodyBuilderType.OBJECT, obj -> obj.put(Service.Bind.Status, status))
+                    .buildBody(BodyBuilderType.OBJECT, obj -> obj.put(STATUS, status))
                     .execute$deserializeSingle();
             else return Polyfill.failedFuture(new RuntimeException("Unable to change status"));
         }
