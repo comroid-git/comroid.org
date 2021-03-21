@@ -23,7 +23,8 @@ public final class AuthServer implements ContextualProvider.Underlying {
     public static final int PORT = 42020;
     public static final FileHandle DIR = new FileHandle("/srv/auth/", true);
     public static final FileHandle STATUS_CRED = DIR.createSubFile("status.cred");
-    public static final FileHandle CACHE_FILE = DIR.createSubFile("cache.json");
+    public static final FileHandle DATA = DIR.createSubDir("data");
+    public static final FileHandle CACHE_FILE = DATA.createSubFile("cache.json");
     public static AuthServer instance;
 
     static {
@@ -45,7 +46,7 @@ public final class AuthServer implements ContextualProvider.Underlying {
         try {
             this.executor = executor;
             logger.debug("Initializing Status Connection...");
-            this.status = new StatusConnection(MASTER_CONTEXT, "netbox-server", STATUS_CRED.getContent(true), executor);
+            this.status = new StatusConnection(MASTER_CONTEXT, "auth-server", STATUS_CRED.getContent(true), executor);
             this.context = MASTER_CONTEXT.plus("NetBoxServer", executor);
             logger.debug("Starting RestServer with {} endpoints", Endpoint.values().length);
             this.rest = new RestServer(MASTER_CONTEXT, this.executor, URL_BASE, InetAddress.getLocalHost(), PORT, Endpoint.values());
