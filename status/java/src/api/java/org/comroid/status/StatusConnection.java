@@ -20,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.NoSuchElementException;
 import java.util.concurrent.*;
+import java.util.function.Function;
 
 import static org.comroid.restless.CommonHeaderNames.AUTHORIZATION;
 
@@ -84,10 +85,8 @@ public final class StatusConnection implements ContextualProvider.Underlying {
         this.rest = new REST(this.context, executor);
         logger.debug("Building Cache...");
         this.serviceCache = new ProvidedCache<>(context, 250, ForkJoinPool.commonPool(), this::requestServiceByName);
-        this.ownService = new FutureReference<>(requestServiceByName(serviceName).exceptionally(t -> {
-            logger.error("Could not request own service", t);
-            return null;
-        }));
+        this.ownService = new FutureReference<>(requestServiceByName(serviceName)
+                .exceptionally(exceptionLogger("Could not request own service")));
     }
 
     @Override
@@ -98,7 +97,7 @@ public final class StatusConnection implements ContextualProvider.Underlying {
     public boolean startPolling() {
         if (polling)
             return false;
-        executePoll().join();
+        executePoll().exceptionally(exceptionLogger("Error during initial Polling"));
         return (polling = true);
     }
 
@@ -125,10 +124,7 @@ public final class StatusConnection implements ContextualProvider.Underlying {
     private void schedulePoll() {
         executor.schedule(() -> {
             try {
-                executePoll().exceptionally(t -> {
-                    Logger.error("Error with Poll request", t);
-                    return null;
-                });
+                executePoll().exceptionally(exceptionLogger("Error ocurred during Poll"));
             } catch (Throwable t) {
                 Logger.error("Error while executing Poll", t);
             }
@@ -136,6 +132,8 @@ public final class StatusConnection implements ContextualProvider.Underlying {
     }
 
     private CompletableFuture<Service> sendPoll() {
+        logger.debug("Sending Poll");
+
         if (serviceName == null)
             throw new NoSuchElementException("No service name defined");
         return rest.request(Service.Type)
@@ -174,5 +172,12 @@ public final class StatusConnection implements ContextualProvider.Underlying {
                 .endpoint(Endpoint.SPECIFIC_SERVICE.complete(name))
                 .execute$autoCache(Service.NAME, serviceCache)
                 .thenApply(Span::requireNonNull);
+    }
+
+    private <T> Function<Throwable, T> exceptionLogger(String message) {
+        return t -> {
+            logger.error(message, t);
+            return null;
+        };
     }
 }
