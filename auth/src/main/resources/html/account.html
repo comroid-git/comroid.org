@@ -14,18 +14,31 @@
     <link href="https://fonts.googleapis.com/css?family=Fira+Mono" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Fira+Sans&display=swap" rel="stylesheet">
 
-    <script src="session_data" type="application/javascript"></script>
+    <style>
+        a {
+            color: #e3e3e3 !important;
+        }
+
+        a:visited {
+            color: #e3e3e3 !important;
+        }
+    </style>
+
+    <script src="session_data.js" type="application/javascript"></script>
     <script src="api.js" type="application/javascript"></script>
 
     <title> comroid Account </title>
 </head>
-<body>
-<header>
+<body onload="initData()">
+<header style="height: 150px !important;">
     <h1> comroid Account </h1>
     <p> Manage your comroid Account </p>
+    <p> <a href="login">Login</a> | <a href="register">Register</a> </p>
 </header>
 <div id="content">
     <h2>Your comroid Account</h2>
+    <p> Account ID: <div id="data_id"></div> </p>
+    <p> E-Mail: <div id="data_email"></div> </p>
 </div>
 </body>
 </html>

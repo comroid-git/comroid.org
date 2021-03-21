@@ -4,6 +4,7 @@ import com.sun.net.httpserver.Headers;
 import org.comroid.api.Polyfill;
 import org.comroid.auth.user.UserAccount;
 import org.comroid.auth.user.UserSession;
+import org.comroid.common.io.FileHandle;
 import org.comroid.restless.CommonHeaderNames;
 import org.comroid.restless.REST;
 import org.comroid.restless.server.RestEndpointException;
@@ -11,6 +12,9 @@ import org.comroid.restless.server.ServerEndpoint;
 import org.comroid.uniform.node.UniNode;
 import org.intellij.lang.annotations.Language;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.StringReader;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
@@ -32,19 +36,31 @@ public enum Endpoint implements ServerEndpoint.This {
     API("api.js") {
         @Override
         public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            return new REST.Response(OK, "application/javascript", AuthServer.WEB.createSubFile("api.js"));
+            try {
+                return new REST.Response(OK, "application/javascript", AuthServer.WEB.createSubFile("api.js"));
+            } catch (FileNotFoundException e) {
+                throw new AssertionError(e);
+            }
         }
     },
     ACCOUNT("account") {
         @Override
         public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            return new REST.Response(OK, "text/html", AuthServer.WEB.createSubFile("account.html"));
+            try {
+                return new REST.Response(OK, "text/html", AuthServer.WEB.createSubFile("account.html"));
+            } catch (FileNotFoundException e) {
+                throw new AssertionError(e);
+            }
         }
     },
     REGISTRATION("register") {
         @Override
         public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            return new REST.Response(OK, "text/html", AuthServer.WEB.createSubFile("register.html"));
+            try {
+                return new REST.Response(OK, "text/html", AuthServer.WEB.createSubFile("register.html"));
+            } catch (FileNotFoundException e) {
+                throw new AssertionError(e);
+            }
         }
 
         @Override
@@ -64,7 +80,11 @@ public enum Endpoint implements ServerEndpoint.This {
     LOGIN("login") {
         @Override
         public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            return new REST.Response(OK, "text/html", AuthServer.WEB.createSubFile("login.html"));
+            try {
+                return new REST.Response(OK, "text/html", AuthServer.WEB.createSubFile("login.html"));
+            } catch (FileNotFoundException e) {
+                throw new AssertionError(e);
+            }
         }
 
         @Override
@@ -84,7 +104,7 @@ public enum Endpoint implements ServerEndpoint.This {
             }
         }
     },
-    SESSION_DATA("session_data") {
+    SESSION_DATA("session_data.js") {
         @Override
         public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             String[] cookies = headers.getFirst(COOKIE).split("; ");
@@ -103,7 +123,8 @@ public enum Endpoint implements ServerEndpoint.This {
                     .orElseThrow(() -> new RestEndpointException(UNAUTHORIZED));
             REST.Header.List response = new REST.Header.List();
             response.add(COOKIE, session.getCookie());
-            return new REST.Response(OK, session.getSessionData(), response);
+            String dataWrapper = String.format("const sessionData = JSON.parse('%s');", session.getSessionData().toSerializedString());
+            return new REST.Response(OK, "application/javascript", new StringReader(dataWrapper), response);
         }
     };
 

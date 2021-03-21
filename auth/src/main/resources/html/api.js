@@ -14,16 +14,7 @@ function timeout(ms, promise) {
     })
 }
 
-function importSessionData() {
-    return fetch('session_data/' + document.cookie)
-        .then(handleErrors)
-        .then(response => {
-            alert('got session data: ' + response);
-            return response;
-        })
-        .then(response => response.json())
-        .catch(error => console.error('Could not retrieve session data', error));
+function initData() {
+    document.getElementById('data_id').innerText = sessionData['account']['uuid'];
+    document.getElementById('data_email').innerText = sessionData['account']['email'];
 }
-
-alert('cookie: '+document.cookie)
-const dataPromise = importSessionData();
