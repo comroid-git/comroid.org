@@ -1,5 +1,7 @@
 package org.comroid.auth.server;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.os.OS;
 import org.comroid.common.io.FileHandle;
@@ -15,6 +17,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 public final class AuthServer implements ContextualProvider.Underlying {
+    public static final Logger logger = LogManager.getLogger("AuthServer");
     public static final ContextualProvider MASTER_CONTEXT;
     public static final String URL_BASE = "https://auth.comroid.org/";
     public static final int PORT = 42020;
@@ -38,10 +41,13 @@ public final class AuthServer implements ContextualProvider.Underlying {
     }
 
     public AuthServer(ScheduledExecutorService executor) {
+        logger.info("Booting up");
         try {
             this.executor = executor;
+            logger.debug("Initializing Status Connection...");
             this.status = new StatusConnection(MASTER_CONTEXT, "netbox-server", STATUS_CRED.getContent(true), executor);
             this.context = MASTER_CONTEXT.plus("NetBoxServer", executor);
+            logger.debug("Starting RestServer with {} endpoints", Endpoint.values().length);
             this.rest = new RestServer(MASTER_CONTEXT, this.executor, URL_BASE, InetAddress.getLocalHost(), PORT, Endpoint.values());
         } catch (UnknownHostException e) {
             throw new AssertionError(e);
@@ -51,6 +57,7 @@ public final class AuthServer implements ContextualProvider.Underlying {
 
         if (OS.current == OS.UNIX && !status.isPolling() && !status.startPolling())
             throw new UnsupportedOperationException("Could not start polling server status");
+        logger.info("Ready!");
     }
 
     public static void main(String[] args) {

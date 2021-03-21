@@ -5,7 +5,6 @@ import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.Polyfill;
 import org.comroid.common.io.FileHandle;
-import org.comroid.common.java.JITAssistant;
 import org.comroid.mutatio.ref.FutureReference;
 import org.comroid.mutatio.ref.Reference;
 import org.comroid.mutatio.span.Span;
@@ -25,7 +24,8 @@ import java.util.concurrent.*;
 import static org.comroid.restless.CommonHeaderNames.AUTHORIZATION;
 
 public final class StatusConnection implements ContextualProvider.Underlying {
-    private static final Logger logger = LogManager.getLogger();
+    public static final Logger Logger = LogManager.getLogger("StatusConnection");
+    private final Logger logger;
     private final ContextualProvider context;
     @Nullable
     private final String serviceName;
@@ -76,15 +76,18 @@ public final class StatusConnection implements ContextualProvider.Underlying {
     }
 
     public StatusConnection(ContextualProvider context, @Nullable String serviceName, String token, ScheduledExecutorService executor) {
+        this.logger = serviceName == null ? Logger : LogManager.getLogger(String.format("StatusConnection(%s)", serviceName));
         this.context = context.plus("StatusConnection", this);
         this.serviceName = serviceName;
         this.token = token;
         this.executor = executor;
         this.rest = new REST(this.context, executor);
+        logger.debug("Building Cache...");
         this.serviceCache = new ProvidedCache<>(context, 250, ForkJoinPool.commonPool(), this::requestServiceByName);
-        this.ownService = new FutureReference<>(requestServiceByName(serviceName));
-
-        JITAssistant.prepareStatic(Service.class);
+        this.ownService = new FutureReference<>(requestServiceByName(serviceName).exceptionally(t -> {
+            logger.error("Could not request own service", t);
+            return null;
+        }));
     }
 
     @Override
@@ -115,7 +118,7 @@ public final class StatusConnection implements ContextualProvider.Underlying {
     }
 
     private CompletableFuture<Void> executePoll() {
-        logger.debug("Polling Status");
+        Logger.debug("Polling Status");
         return sendPoll().thenRun(this::schedulePoll);
     }
 
@@ -123,11 +126,11 @@ public final class StatusConnection implements ContextualProvider.Underlying {
         executor.schedule(() -> {
             try {
                 executePoll().exceptionally(t -> {
-                    logger.error("Error with Poll request", t);
+                    Logger.error("Error with Poll request", t);
                     return null;
                 });
             } catch (Throwable t) {
-                logger.error("Error while executing Poll", t);
+                Logger.error("Error while executing Poll", t);
             }
         }, refreshTimeout, TimeUnit.SECONDS);
     }
