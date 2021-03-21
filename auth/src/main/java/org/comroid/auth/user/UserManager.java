@@ -6,6 +6,7 @@ import org.comroid.api.ContextualProvider;
 import org.comroid.api.UncheckedCloseable;
 import org.comroid.auth.server.AuthServer;
 import org.comroid.common.io.FileHandle;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.Map;
@@ -51,10 +52,28 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
     public UserAccount createAccount(String email, String password) {
         logger.info("Creating new user account with email " + email);
 
+        if (accounts.values()
+                .stream()
+                .flatMap(usr -> usr.email.stream())
+                .anyMatch(email::equalsIgnoreCase))
+            throw new IllegalArgumentException("E-Mail is already in use!");
+
         UUID uuid = UUID.randomUUID();
         UserAccount account = new UserAccount(this, uuid, email, password);
         accounts.put(uuid, account);
         return account;
+    }
+
+    public UserSession loginUser(String email, String password) {
+        logger.info("User {} logging in...", email);
+
+        return accounts.values()
+                .stream()
+                .filter(usr -> usr.email.contentEquals(email))
+                .findAny()
+                .filter(usr -> usr.password.contentEquals(password))
+                .map(UserSession::new)
+                .orElseThrow(() -> new IllegalArgumentException("Could not authenticate"));
     }
 
     @Override

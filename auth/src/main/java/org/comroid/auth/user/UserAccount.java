@@ -48,7 +48,7 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
         super(context, obj -> {
             if (!sourceDir.isDirectory())
                 throw new IllegalArgumentException(String.format("File is not a directory: %s", sourceDir));
-            if (!sourceDir.mkdir())
+            if (!sourceDir.exists() && !sourceDir.mkdir())
                 throw new IllegalArgumentException(String.format("Could not create user directory %s", sourceDir));
             FileHandle subFile = sourceDir.createSubFile("user.json");
             if (!subFile.exists())
