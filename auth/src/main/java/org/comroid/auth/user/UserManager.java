@@ -6,24 +6,31 @@ import org.comroid.api.ContextualProvider;
 import org.comroid.api.UncheckedCloseable;
 import org.comroid.auth.server.AuthServer;
 import org.comroid.common.io.FileHandle;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 public final class UserManager implements ContextualProvider.Underlying, UncheckedCloseable {
-    private static final Logger logger = LogManager.getLogger("UserManager");
     public static final FileHandle DIR = AuthServer.DIR.createSubDir("users");
-    private final Map<UUID, UserAccount> accounts = new ConcurrentHashMap<>();
-    private final Map<String, UserSession> sessions = new ConcurrentHashMap<>();
-    private final ContextualProvider context;
+    public static final FileHandle SALTS = AuthServer.DIR.createSubDir("salts");
+    private static final Logger logger = LogManager.getLogger("UserManager");
+    private static final Map<String, byte[]> salts = new ConcurrentHashMap<>();
 
     static {
         DIR.mkdir();
+        SALTS.mkdir();
+        for (File file : SALTS.listFiles())
+            file.delete();
     }
+
+    private final Map<UUID, UserAccount> accounts = new ConcurrentHashMap<>();
+    private final Map<String, UserSession> sessions = new ConcurrentHashMap<>();
+    private final ContextualProvider context;
 
     @Override
     public ContextualProvider getUnderlyingContextualProvider() {
@@ -50,6 +57,31 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
         logger.info("Loading finished; loaded {} user accounts", accounts.size());
     }
 
+    public static byte[] getSalt(String root) {
+        return salts.computeIfAbsent(root, k -> {
+            FileHandle f = SALTS.createSubFile(k + ".salt");
+            if (f.exists())
+                return f.getContent(false).getBytes();
+            if (!f.exists() && !f.validateExists())
+                throw new RuntimeException();
+            String base = root + UUID.randomUUID().toString();
+            f.setContent(base);
+            return base.getBytes();
+        });
+    }
+
+    public static String encrypt(String email, String password) {
+        try {
+            byte[] bytes = getSalt(email);
+            MessageDigest md = MessageDigest.getInstance("SHA-512");
+            md.update(bytes);
+            byte[] hashedPassword = md.digest(password.getBytes(StandardCharsets.US_ASCII));
+            return new String(hashedPassword);
+        } catch (Throwable t) {
+            throw new RuntimeException(t);
+        }
+    }
+
     public UserAccount createAccount(String email, String password) {
         logger.info("Creating new user account with email " + email);
 
@@ -72,7 +104,7 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
                 .stream()
                 .filter(usr -> usr.email.contentEquals(email))
                 .findAny()
-                .filter(usr -> usr.password.contentEquals(password))
+                .filter(usr -> usr.password.contentEquals(encrypt(email, password)))
                 .map(UserSession::new)
                 .filter(session -> sessions.put(session.getCookie(), session) != session)
                 .orElseThrow(() -> new IllegalArgumentException("Could not authenticate"));

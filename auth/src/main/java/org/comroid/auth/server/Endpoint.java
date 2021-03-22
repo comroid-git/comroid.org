@@ -115,8 +115,12 @@ public enum Endpoint implements ServerEndpoint.This {
         @Override
         public REST.Response executePOST(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             try {
-                String email = body.use(EMAIL).map(UniNode::asString).requireNonNull("No Email provided");
-                String password = body.use(PASSWORD).map(UniNode::asString).requireNonNull("No Password provided");
+                String email = body.use(EMAIL)
+                        .map(UniNode::asString)
+                        .requireNonNull("No Email provided");
+                String password = body.use(PASSWORD)
+                        .map(UniNode::asString)
+                        .requireNonNull("No Password provided");
 
                 UserSession session = AuthServer.instance.getUserManager().loginUser(email, password);
 

@@ -62,7 +62,7 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
         super(context, obj -> {
             obj.put(ID, id.toString());
             obj.put(EMAIL, email);
-            obj.put(PASSWORD, password);
+            obj.put(PASSWORD, UserManager.encrypt(email, password));
         });
         this.dir = UserManager.DIR.createSubDir(id.toString());
         dir.mkdir();
