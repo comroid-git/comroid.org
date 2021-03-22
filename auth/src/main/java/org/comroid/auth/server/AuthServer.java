@@ -3,6 +3,7 @@ package org.comroid.auth.server;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
+import org.comroid.api.Polyfill;
 import org.comroid.api.UncheckedCloseable;
 import org.comroid.api.os.OS;
 import org.comroid.auth.user.UserManager;
@@ -10,6 +11,7 @@ import org.comroid.common.io.FileHandle;
 import org.comroid.restless.adapter.java.JavaHttpAdapter;
 import org.comroid.restless.server.RestServer;
 import org.comroid.status.StatusConnection;
+import org.comroid.status.entity.Service;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
 
 import java.io.FileOutputStream;
@@ -36,10 +38,6 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
     public static final FileHandle WEB = DIR.createSubDir("web");
     public static AuthServer instance;
 
-    public UserManager getUserManager() {
-        return userManager;
-    }
-
     static {
         DIR.mkdir();
         DATA.mkdir();
@@ -52,6 +50,10 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
     private final ContextualProvider context;
     private final UserManager userManager;
     private final RestServer rest;
+
+    public UserManager getUserManager() {
+        return userManager;
+    }
 
     @Override
     public final ContextualProvider getUnderlyingContextualProvider() {
@@ -89,22 +91,6 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
         logger.info("Ready!");
     }
 
-    @Override
-    public void close() {
-        logger.info("Shutting down");
-        try {
-            rest.close();
-        } catch (Throwable t) {
-            logger.error("Could not shutdown Rest Server gracefully", t);
-        }
-        try {
-            userManager.close();
-        } catch (Throwable t) {
-            logger.error("Could not shutdown UserManager gracefully", t);
-        }
-        logger.info("Goodbye!");
-    }
-
     private static void extractWebResources() {
         Stream.of(WEB_RESOURCES)
                 .map(WEB::createSubFile)
@@ -128,5 +114,23 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
         extractWebResources();
 
         instance = new AuthServer(Executors.newScheduledThreadPool(8));
+    }
+
+    @Override
+    public void close() {
+        logger.info("Shutting down");
+        try {
+            rest.close();
+        } catch (Throwable t) {
+            logger.error("Could not shutdown Rest Server gracefully", t);
+        }
+        try {
+            userManager.close();
+        } catch (Throwable t) {
+            logger.error("Could not shutdown UserManager gracefully", t);
+        }
+        status.stopPolling(Service.Status.OFFLINE)
+                .exceptionally(Polyfill.exceptionLogger(logger, "Could not stop Polling"));
+        logger.info("Goodbye!");
     }
 }
