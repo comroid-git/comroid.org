@@ -3,7 +3,6 @@ package org.comroid.auth.server;
 import com.sun.net.httpserver.Headers;
 import org.comroid.api.Polyfill;
 import org.comroid.auth.user.UserAccount;
-import org.comroid.auth.user.UserManager;
 import org.comroid.auth.user.UserSession;
 import org.comroid.mutatio.ref.Reference;
 import org.comroid.restless.CommonHeaderNames;
@@ -18,7 +17,6 @@ import java.io.StringReader;
 import java.util.regex.Pattern;
 
 import static org.comroid.auth.user.UserAccount.EMAIL;
-import static org.comroid.auth.user.UserAccount.PASSWORD;
 import static org.comroid.restless.HTTPStatusCodes.*;
 
 public enum Endpoint implements ServerEndpoint.This {
@@ -74,21 +72,21 @@ public enum Endpoint implements ServerEndpoint.This {
                     throw new RestEndpointException(UNAUTHORIZED, "Invalid Session Cookie");
 
                 account.updateFrom(body.asObjectNode());
-                if (body.has(PASSWORD)) {
+                if (body.has("password")) {
                     Reference<String> email = body.use(EMAIL).map(UniNode::asString);
 
                     if (!body.has("previous_password"))
                         throw new RestEndpointException(BAD_REQUEST, "Old Password missing");
                     if (!body.use("previous_password")
                             .map(UniNode::asString)
-                            .combine(email, UserManager::encrypt)
-                            .test(account.password::contentEquals))
+                            .combine(email, UserAccount::encrypt)
+                            .test(account.login::contentEquals))
                         throw new RestEndpointException(UNAUTHORIZED, "Old Password wrong");
 
-                    body.use(PASSWORD)
+                    body.use("password")
                             .map(UniNode::asString)
-                            .combine(email, UserManager::encrypt)
-                            .consume(hash -> account.put(PASSWORD, hash));
+                            .combine(email, UserAccount::encrypt)
+                            .consume(hash -> account.put(UserAccount.LOGIN, hash));
                 }
 
                 return new REST.Response(OK, account);
@@ -110,8 +108,12 @@ public enum Endpoint implements ServerEndpoint.This {
         @Override
         public REST.Response executePOST(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             try {
-                String email = body.use(EMAIL).map(UniNode::asString).requireNonNull("No Email provided");
-                String password = body.use(PASSWORD).map(UniNode::asString).requireNonNull("No Password provided");
+                String email = body.use(EMAIL)
+                        .map(UniNode::asString)
+                        .requireNonNull("No Email provided");
+                String password = body.use("password")
+                        .map(UniNode::asString)
+                        .requireNonNull("No Password provided");
 
                 UserAccount account = AuthServer.instance.getUserManager().createAccount(email, password);
 
@@ -137,7 +139,7 @@ public enum Endpoint implements ServerEndpoint.This {
                 String email = body.use(EMAIL)
                         .map(UniNode::asString)
                         .requireNonNull("No Email provided");
-                String password = body.use(PASSWORD)
+                String password = body.use("password")
                         .map(UniNode::asString)
                         .requireNonNull("No Password provided");
 

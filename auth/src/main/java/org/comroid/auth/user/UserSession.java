@@ -31,7 +31,7 @@ public final class UserSession {
     public UniObjectNode getSessionData() {
         UniObjectNode data = FastJSONLib.fastJsonLib.createObjectNode();
 
-        account.toObjectNode(data.putObject("account")).remove("password");
+        account.toObjectNode(data.putObject("account")).remove("login");
 
         return data;
     }

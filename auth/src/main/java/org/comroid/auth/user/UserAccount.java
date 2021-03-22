@@ -11,6 +11,8 @@ import org.comroid.varbind.bind.GroupBind;
 import org.comroid.varbind.bind.VarBind;
 import org.comroid.varbind.container.DataContainerBase;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.UUID;
 
 public final class UserAccount extends DataContainerBase<UserAccount> implements UUIDContainer {
@@ -25,13 +27,13 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
             = Type.createBind("email")
             .extractAs(StandardValueType.STRING)
             .build();
-    public static final VarBind<UserAccount, String, String, String> PASSWORD
-            = Type.createBind("password")
+    public static final VarBind<UserAccount, String, String, String> LOGIN
+            = Type.createBind("login")
             .extractAs(StandardValueType.STRING)
             .build();
     public final Ref<UUID> id = getComputedReference(ID);
     public final Ref<String> email = getComputedReference(EMAIL);
-    public final Ref<String> password = getComputedReference(PASSWORD);
+    public final Ref<String> login = getComputedReference(LOGIN);
     private final FileHandle dir;
 
     @Override
@@ -62,10 +64,27 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
         super(context, obj -> {
             obj.put(ID, id.toString());
             obj.put(EMAIL, email);
-            obj.put(PASSWORD, UserManager.encrypt(email, password));
+            obj.put(LOGIN, encrypt(email, password));
         });
         this.dir = UserManager.DIR.createSubDir(id.toString());
         dir.mkdir();
         dir.createSubFile("user.json").setContent(toSerializedString());
+    }
+
+    public static String encrypt(String email, String password) {
+        try {
+            byte[] bytes = UserManager.getSalt(email);
+            MessageDigest md = MessageDigest.getInstance("SHA-512");
+            md.update(bytes);
+            byte[] hashedPassword = md.digest(password.getBytes(StandardCharsets.US_ASCII));
+            return new String(hashedPassword);
+        } catch (Throwable t) {
+            throw new RuntimeException(t);
+        }
+    }
+
+    public boolean tryLogin(String email, String password) {
+        String result = encrypt(email, password);
+        return login.contentEquals(result);
     }
 }

@@ -68,18 +68,6 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
         });
     }
 
-    public static String encrypt(String email, String password) {
-        try {
-            byte[] bytes = getSalt(email);
-            MessageDigest md = MessageDigest.getInstance("SHA-512");
-            md.update(bytes);
-            byte[] hashedPassword = md.digest(password.getBytes(StandardCharsets.US_ASCII));
-            return new String(hashedPassword);
-        } catch (Throwable t) {
-            throw new RuntimeException(t);
-        }
-    }
-
     public UserAccount createAccount(String email, String password) {
         logger.info("Creating new user account with email " + email);
 
@@ -102,14 +90,14 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
                 .stream()
                 .filter(usr -> usr.email.contentEquals(email))
                 .findAny()
-                .filter(usr -> usr.password.contentEquals(encrypt(email, password)))
+                .filter(usr -> usr.tryLogin(email, password))
                 .map(UserSession::new)
                 .filter(session -> sessions.put(session.getCookie(), session) != session)
                 .orElseThrow(() -> new IllegalArgumentException("Could not authenticate"));
     }
 
     public UserSession findSession(String cookie) {
-        UserSession session = sessions.getOrDefault(cookie, null);
+        UserSession session = sessions.getOrDefault(UserSession.COOKIE_PREFIX + '=' + cookie, null);
         if (session == null)
             throw new IllegalArgumentException("No session found with given cookie");
         return session;
