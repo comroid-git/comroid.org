@@ -5,6 +5,8 @@ import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.Polyfill;
 import org.comroid.common.io.FileHandle;
+import org.comroid.mutatio.model.RefList;
+import org.comroid.mutatio.model.RefOPs;
 import org.comroid.mutatio.ref.FutureReference;
 import org.comroid.mutatio.ref.Reference;
 import org.comroid.mutatio.span.Span;
