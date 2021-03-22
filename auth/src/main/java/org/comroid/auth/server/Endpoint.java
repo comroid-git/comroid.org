@@ -152,6 +152,11 @@ public enum Endpoint implements ServerEndpoint.This {
                 return new REST.Response(OK, "application/javascript", new StringReader(dataWrapper));
             }
         }
+
+        @Override
+        public boolean allowMemberAccess() {
+            return true;
+        }
     };
 
     private final String extension;
