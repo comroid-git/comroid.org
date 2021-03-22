@@ -124,7 +124,7 @@ public final class StatusConnection implements ContextualProvider.Underlying {
                 .execute$autoCache(Service.NAME, serviceCache)
                 .thenApply(services -> {
                     polling = false;
-                    return services.requireSingle();
+                    return services.getAny();
                 });
     }
 
@@ -160,7 +160,7 @@ public final class StatusConnection implements ContextualProvider.Underlying {
                 .addHeader(AUTHORIZATION, token)
                 .body(data.toString())
                 .execute$autoCache(Service.NAME, serviceCache)
-                .thenApply(Span::requireNonNull);
+                .thenApply(RefOPs::getAny);
     }
 
     public CompletableFuture<Service> requestServiceByName(String name) {
@@ -168,7 +168,7 @@ public final class StatusConnection implements ContextualProvider.Underlying {
                 .method(REST.Method.GET)
                 .endpoint(Endpoint.SPECIFIC_SERVICE.complete(name))
                 .execute$autoCache(Service.NAME, serviceCache)
-                .thenApply(Span::requireNonNull);
+                .thenApply(RefOPs::getAny);
     }
 
     private <T> Function<Throwable, T> exceptionLogger(String message) {
