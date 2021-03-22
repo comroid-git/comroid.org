@@ -121,7 +121,7 @@ public enum Endpoint implements ServerEndpoint.This {
             UserSession session = UserSession.findSession(headers);
             AuthServer.instance.getUserManager().closeSession(session);
             REST.Header.List response = new REST.Header.List();
-            response.add("Set-Cookie", String.format("%s=null", UserSession.COOKIE_PREFIX));
+            response.add("Set-Cookie", String.format("%s=null; Domain=.comroid.org; Path=/", UserSession.COOKIE_PREFIX));
             response.add(CommonHeaderNames.REDIRECT_TARGET, "login");
             return new REST.Response(MOVED_PERMANENTLY, response);
         }
