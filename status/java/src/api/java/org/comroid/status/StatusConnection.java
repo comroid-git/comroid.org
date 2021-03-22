@@ -113,7 +113,10 @@ public final class StatusConnection implements ContextualProvider.Underlying {
                 .buildBody(BodyBuilderType.OBJECT, obj ->
                         obj.put(Service.STATUS, newStatus.getValue()))
                 .execute$autoCache(Service.NAME, serviceCache)
-                .thenApply(Span::requireSingle);
+                .thenApply(services -> {
+                    polling = false;
+                    return services.requireSingle();
+                });
     }
 
     private CompletableFuture<Void> executePoll() {
