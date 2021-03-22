@@ -14,12 +14,22 @@ function timeout(ms, promise) {
     })
 }
 
+function populateTag(data, tag, names, index) {
+    if (names.length - 1 > index)
+        return populateTag(data[names[index]], tag, names, index + 1)
+    tag.innerText = data[names[index]]
+}
+
 function initData() {
     if (sessionData === undefined) {
         document.getElementById('content').innerHTML = "<p>You are not logged in</p>";
         return;
     }
 
-    document.getElementById('data_id').innerText = sessionData['account']['uuid'];
-    document.getElementById('data_email').innerText = sessionData['account']['email'];
+    document.getElementById('content')
+        .querySelectorAll('.inject')
+        .forEach(e => {
+            let vname = e.classList[1].split('.')
+            populateTag(sessionData, e, vname, 0)
+        })
 }
