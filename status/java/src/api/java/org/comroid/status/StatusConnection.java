@@ -116,8 +116,7 @@ public final class StatusConnection implements ContextualProvider.Underlying {
                 .method(REST.Method.DELETE)
                 .endpoint(Endpoint.POLL.complete(serviceName))
                 .addHeader(AUTHORIZATION, token)
-                .buildBody(BodyBuilderType.OBJECT, obj ->
-                        obj.put(Service.STATUS, newStatus.getValue()))
+                .buildBody(BodyBuilderType.OBJECT, obj -> obj.put(Service.STATUS, newStatus))
                 .execute$autoCache(Service.NAME, serviceCache)
                 .thenApply(services -> {
                     polling = false;
@@ -140,9 +139,9 @@ public final class StatusConnection implements ContextualProvider.Underlying {
                 .endpoint(Endpoint.POLL.complete(serviceName))
                 .addHeader(AUTHORIZATION, token)
                 .buildBody(BodyBuilderType.OBJECT, obj -> {
-                    obj.put("status", StandardValueType.INTEGER, Service.Status.ONLINE.getValue());
-                    obj.put("expected", StandardValueType.INTEGER, refreshTimeout);
-                    obj.put("timeout", StandardValueType.INTEGER, crashedTimeout);
+                    obj.put(Service.STATUS, Service.Status.ONLINE);
+                    obj.put("expected", refreshTimeout);
+                    obj.put("timeout", crashedTimeout);
                 })
                 .execute$autoCache(Service.NAME, serviceCache)
                 .thenApply(Span::requireNonNull);
@@ -154,7 +153,7 @@ public final class StatusConnection implements ContextualProvider.Underlying {
         final UniObjectNode data = rest.requireFromContext(SerializationAdapter.class)
                 .createObjectNode();
 
-        data.put("status", StandardValueType.INTEGER, status.getValue());
+        data.put(Service.STATUS, status);
 
         return rest.request(Service.class)
                 .method(REST.Method.POST)
