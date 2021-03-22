@@ -38,6 +38,10 @@ const pages = {
     'privacy': {
         'display_name': "Privacy",
         'path': 'part/privacy.html'
+    },
+    'tos': {
+        'display_name': "Terms of Use",
+        'path': 'part/terms-of-use.html'
     }
 }
 
