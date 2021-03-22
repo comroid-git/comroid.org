@@ -2,6 +2,7 @@ package org.comroid.status.server.rest;
 
 import com.sun.net.httpserver.Headers;
 import org.comroid.restless.CommonHeaderNames;
+import org.comroid.restless.HTTPStatusCodes;
 import org.comroid.restless.REST;
 import org.comroid.restless.endpoint.AccessibleEndpoint;
 import org.comroid.restless.server.RestEndpointException;
@@ -15,6 +16,7 @@ import org.comroid.status.server.util.ResponseBuilder;
 import org.comroid.uniform.node.UniArrayNode;
 import org.comroid.uniform.node.UniNode;
 
+import java.io.FileNotFoundException;
 import java.util.function.Function;
 
 import static org.comroid.restless.HTTPStatusCodes.*;
@@ -93,7 +95,13 @@ public enum ServerEndpoints implements ServerEndpoint {
                     .map(Service::getStatus)
                     .map(StatusIcon::valueOf)
                     .map(StatusIcon::getIconFile)
-                    .map(icon -> new REST.Response(200, "image/png", icon))
+                    .map(icon -> {
+                        try {
+                            return new REST.Response(200, "image/png", icon);
+                        } catch (FileNotFoundException e) {
+                            throw new RestEndpointException(INTERNAL_SERVER_ERROR, e);
+                        }
+                    })
                     .orElseThrow(() -> new RestEndpointException(NOT_FOUND, "No service found with name " + urlParams[0]));
         }
     },
