@@ -13,7 +13,7 @@ function initGrid(slim) {
             createBoxes(data, slim);
         })
         .catch(error => {
-            addBox(false, "status-server", "Status Server", 0);
+            addBox(false, "status-server", "Status Server", 0, undefined);
             console.error('There has been a problem with your fetch operation:', error);
         });
 }
@@ -28,7 +28,7 @@ function createBoxes(data, slim) {
     for (let i = 0; i < data.length; i++) {
         const obj = data[i];
         // noinspection JSUnresolvedVariable
-        addBox(slim, obj.name, obj.display_name, obj.status);
+        addBox(slim, obj.name, obj.display_name, obj.status, obj.url);
     }
 }
 
@@ -40,7 +40,7 @@ function createBoxes(data, slim) {
  * @param {string} display_name The display name parsed from JSON data
  * @param {int} status The current status of the service
  */
-function addBox(slim, name, display_name, status) {
+function addBox(slim, name, display_name, status, url) {
     // Create a new box in the status grid
     const newDiv = document.createElement("div");
     if (/*!slim &&*/ name === "status-server") {
@@ -59,6 +59,10 @@ function addBox(slim, name, display_name, status) {
     statusDiv.className = enm['classname'];
     statusDiv.innerHTML = enm['display'];
 
+    if (url !== undefined) {
+        newDiv.onclick = () => window.open(url);
+        newDiv.style.cursor = 'pointer'
+    }
 
     // Append text and status div to the box
     newDiv.appendChild(statusText);
