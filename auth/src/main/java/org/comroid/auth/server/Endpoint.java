@@ -85,7 +85,7 @@ public enum Endpoint implements ServerEndpoint.This {
                     if (!body.use("previous_password")
                             .map(UniNode::asString)
                             .combine(email, UserManager::encrypt)
-                            .test(newHash::contentEquals))
+                            .test(account.password::contentEquals))
                         throw new RestEndpointException(UNAUTHORIZED, "Old Password wrong");
 
                     newHash.consume(hash -> account.put(PASSWORD, hash));
