@@ -120,6 +120,8 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
     public void close() {
         logger.info("Shutting down");
         try {
+            status.stopPolling(Service.Status.OFFLINE)
+                    .exceptionally(Polyfill.exceptionLogger(logger, "Could not stop Polling"));
             rest.close();
         } catch (Throwable t) {
             logger.error("Could not shutdown Rest Server gracefully", t);
@@ -129,8 +131,6 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
         } catch (Throwable t) {
             logger.error("Could not shutdown UserManager gracefully", t);
         }
-        status.stopPolling(Service.Status.OFFLINE)
-                .exceptionally(Polyfill.exceptionLogger(logger, "Could not stop Polling"));
         logger.info("Goodbye!");
     }
 }
