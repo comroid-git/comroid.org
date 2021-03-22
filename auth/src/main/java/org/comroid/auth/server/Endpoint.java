@@ -61,6 +61,23 @@ public enum Endpoint implements ServerEndpoint.This {
             }
         }
     },
+    MODIFY_ACCOUNT("account/%s", "\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b") {
+        @Override
+        public REST.Response executePATCH(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            try {
+                UserSession session = UserSession.findSession(headers);
+                UserAccount account = session.getAccount();
+
+                if (account.getUUID().toString().equalsIgnoreCase(urlParams[0]))
+                    throw new RestEndpointException(UNAUTHORIZED, "Invalid Session Cookie");
+
+                account.updateFrom(body.asObjectNode());
+                return new REST.Response(OK, account);
+            } catch (RestEndpointException ignored) {
+                return new REST.Response(UNAUTHORIZED);
+            }
+        }
+    },
     REGISTRATION("register") {
         @Override
         public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
