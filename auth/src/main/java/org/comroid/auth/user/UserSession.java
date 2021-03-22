@@ -15,6 +15,7 @@ import static org.comroid.restless.HTTPStatusCodes.UNAUTHORIZED;
 
 public final class UserSession {
     public static final String COOKIE_PREFIX = "org.comroid.auth";
+    public static final String NULL_COOKIE = wrapCookie("null");
     private final UserAccount account;
     private final String cookie;
 
@@ -23,7 +24,7 @@ public final class UserSession {
     }
 
     public String getCookie() {
-        return cookie;
+        return wrapCookie(cookie);
     }
 
     public UniObjectNode getSessionData() {
@@ -37,6 +38,10 @@ public final class UserSession {
     UserSession(UserAccount account) {
         this.account = account;
         this.cookie = generateCookie();
+    }
+
+    public static String wrapCookie(String cookie) {
+        return String.format("%s=%s; Domain=.comroid.org; Path=/", UserSession.COOKIE_PREFIX, cookie);
     }
 
     public static UserSession findSession(Headers headers) {
