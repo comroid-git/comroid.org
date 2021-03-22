@@ -38,7 +38,7 @@ public final class StatusConnection implements ContextualProvider.Underlying {
     private final ProvidedCache<String, Service> serviceCache;
     private final Reference<Service> ownService;
     public int refreshTimeout = 60; // seconds
-    public int crashedTimeout = 3600; // seconds
+    public int crashedTimeout = 120; // seconds
     private boolean polling = false;
 
     public String getServiceName() {
