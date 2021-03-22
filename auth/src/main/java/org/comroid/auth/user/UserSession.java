@@ -1,6 +1,7 @@
 package org.comroid.auth.user;
 
 import com.sun.net.httpserver.Headers;
+import org.comroid.api.os.OS;
 import org.comroid.auth.server.AuthServer;
 import org.comroid.restless.server.RestEndpointException;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
@@ -41,7 +42,7 @@ public final class UserSession {
     }
 
     public static String wrapCookie(String cookie) {
-        return String.format("%s=%s; Domain=.comroid.org; Path=/", UserSession.COOKIE_PREFIX, cookie);
+        return String.format("%s=%s%s", UserSession.COOKIE_PREFIX, cookie, OS.current == OS.UNIX ? "; Domain=.comroid.org; Path=/" : "");
     }
 
     public static UserSession findSession(Headers headers) {
