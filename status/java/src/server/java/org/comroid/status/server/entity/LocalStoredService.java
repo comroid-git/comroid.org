@@ -98,7 +98,7 @@ public class LocalStoredService extends DataContainerBase<Entity> implements Loc
 
         private boolean complete(Status newStatus) {
             synchronized (spm) {
-                if (state.isNonNull())
+                if (state.isNonNull() && !state.contentEquals(Status.NOT_RESPONDING))
                     return false;
                 state.set(newStatus);
                 setStatus(newStatus);
