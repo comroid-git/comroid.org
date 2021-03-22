@@ -99,7 +99,7 @@ public enum Endpoint implements ServerEndpoint.This {
                 UserSession session = AuthServer.instance.getUserManager().loginUser(email, password);
 
                 REST.Header.List resp = new REST.Header.List();
-                resp.add("Set-Cookie", String.format("org.comroid.auth=%s", session.getCookie()));
+                resp.add("Set-Cookie", String.format("org.comroid.auth=%s; Domain=comroid.org", session.getCookie()));
                 String referrer = headers.getFirst(CommonHeaderNames.REFERER);
                 referrer = referrer == null ? "" : referrer.substring(referrer.lastIndexOf('/') + 1);
                 boolean isWidget = referrer.equals("widget");
