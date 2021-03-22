@@ -23,6 +23,8 @@ function populateTag(data, tag, names, index) {
 function initData() {
     if (sessionData === undefined) {
         document.getElementById('content').innerHTML = "<p>You are not logged in</p>";
+    } catch {
+        document.getElementById('content').innerHTML = "<p>Unable to fetch session data</p>";
         return;
     }
 
