@@ -126,7 +126,7 @@ public enum Endpoint implements ServerEndpoint.This {
             return new REST.Response(MOVED_PERMANENTLY, response);
         }
     },
-    SESSION_DATA("session_data.js") {
+    SESSION_DATA("session") {
         @Override
         public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             try {
