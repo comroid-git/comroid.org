@@ -76,9 +76,6 @@ public enum Endpoint implements ServerEndpoint.This {
                 account.updateFrom(body.asObjectNode());
                 if (body.has(PASSWORD)) {
                     Reference<String> email = body.use(EMAIL).map(UniNode::asString);
-                    Reference<String> newHash = body.use(PASSWORD)
-                            .map(UniNode::asString)
-                            .combine(email, UserManager::encrypt);
 
                     if (!body.has("previous_password"))
                         throw new RestEndpointException(BAD_REQUEST, "Old Password missing");
@@ -88,7 +85,10 @@ public enum Endpoint implements ServerEndpoint.This {
                             .test(account.password::contentEquals))
                         throw new RestEndpointException(UNAUTHORIZED, "Old Password wrong");
 
-                    newHash.consume(hash -> account.put(PASSWORD, hash));
+                    body.use(PASSWORD)
+                            .map(UniNode::asString)
+                            .combine(email, UserManager::encrypt)
+                            .consume(hash -> account.put(PASSWORD, hash));
                 }
 
                 return new REST.Response(OK, account);
