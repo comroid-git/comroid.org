@@ -95,7 +95,7 @@ public final class StatusConnection implements ContextualProvider.Underlying {
 
     @Override
     public String toString() {
-        return String.format("StatusConnection{serviceName='%s', service=%s}", serviceName, ownService.get());
+        return String.format("StatusConnection{serviceName='%s', service=%s}", serviceName, ownService == null ? "undefined" : ownService.get());
     }
 
     public boolean startPolling() {
