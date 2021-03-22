@@ -143,7 +143,7 @@ public final class StatusConnection implements ContextualProvider.Underlying {
                     obj.put("timeout", crashedTimeout);
                 })
                 .execute$autoCache(Service.NAME, serviceCache)
-                .thenApply(Span::requireNonNull);
+                .thenApply(RefOPs::getAny);
     }
 
     public CompletableFuture<Service> updateStatus(Service.Status status) {
