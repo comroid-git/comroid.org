@@ -15,6 +15,11 @@ function timeout(ms, promise) {
 }
 
 function initData() {
+    if (sessionData === undefined) {
+        document.getElementById('content').innerHTML = "<p>You are not logged in</p>";
+        return;
+    }
+
     document.getElementById('data_id').innerText = sessionData['account']['uuid'];
     document.getElementById('data_email').innerText = sessionData['account']['email'];
 }
