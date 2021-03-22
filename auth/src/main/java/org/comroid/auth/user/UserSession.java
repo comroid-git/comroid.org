@@ -5,6 +5,7 @@ import org.comroid.api.os.OS;
 import org.comroid.auth.server.AuthServer;
 import org.comroid.restless.server.RestEndpointException;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
+import org.comroid.uniform.node.UniNode;
 import org.comroid.uniform.node.UniObjectNode;
 
 import java.util.Objects;
@@ -35,7 +36,9 @@ public final class UserSession {
     public UniObjectNode getSessionData() {
         UniObjectNode data = FastJSONLib.fastJsonLib.createObjectNode();
 
-        account.toObjectNode(data.putObject("account")).remove("login");
+        UniObjectNode account = this.account.toObjectNode(data.putObject("account"));
+        account.remove("login");
+        account.compute("email", (k, str) -> ((UniNode) str).asString().replace("%40", "@"));
 
         return data;
     }
