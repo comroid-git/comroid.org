@@ -99,7 +99,7 @@ public enum Endpoint implements ServerEndpoint.This {
                 UserSession session = AuthServer.instance.getUserManager().loginUser(email, password);
 
                 REST.Header.List resp = new REST.Header.List();
-                resp.add("Set-Cookie", String.format("org.comroid.auth=%s", session.getCookie()));
+                resp.add("Set-Cookie", String.format("%s=%s; Domain=.comroid.org; Path=/", UserSession.COOKIE_PREFIX, session.getCookie()));
                 String referrer = headers.getFirst(CommonHeaderNames.REFERER);
                 referrer = referrer == null ? "" : referrer.substring(referrer.lastIndexOf('/') + 1);
                 boolean isWidget = referrer.equals("widget");
@@ -121,7 +121,7 @@ public enum Endpoint implements ServerEndpoint.This {
             UserSession session = UserSession.findSession(headers);
             AuthServer.instance.getUserManager().closeSession(session);
             REST.Header.List response = new REST.Header.List();
-            response.add("Set-Cookie", String.format("%s=null", UserSession.COOKIE_PREFIX));
+            response.add("Set-Cookie", String.format("%s=null; Domain=.comroid.org; Path=/", UserSession.COOKIE_PREFIX));
             response.add(CommonHeaderNames.REDIRECT_TARGET, "login");
             return new REST.Response(MOVED_PERMANENTLY, response);
         }
