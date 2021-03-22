@@ -1,3 +1,17 @@
+const loginPanel = `
+    <div id="login_panel">
+        <h2>Login to your comroid Account</h2>
+        <form action="./login" method="post">
+            <label for="emailInput">E-Mail</label>
+            <input id="emailInput" name="email" title="E-Mail" type="text">
+            <br/>
+            <label for="passwordInput">Password</label>
+            <input id="passwordInput" name="password" title="Password" type="password">
+            <br/>
+            <button type="submit">Login now</button>
+        </form>
+    </div>`;
+
 function handleErrors(response) {
     if (!response.ok) {
         throw Error(response.statusText);
@@ -23,11 +37,11 @@ function populateTag(data, tag, names, index) {
 function initData() {
     try {
         if (sessionData === undefined) {
-            document.getElementById('content').innerHTML = "<p>You are not logged in</p>";
+            document.getElementById('content').innerHTML = loginPanel;
             return;
         }
     } catch {
-        document.getElementById('content').innerHTML = "<p>Unable to fetch session data</p>";
+        document.getElementById('content').innerHTML = loginPanel;
         return;
     }
 
