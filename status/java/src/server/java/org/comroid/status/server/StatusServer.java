@@ -129,6 +129,8 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
             this.server = new RestServer(ADAPTER_DEFINITION.serialization, executor, AdapterDefinition.URL_BASE, host, port, ServerEndpoints.values());
             server.addCommonHeader("Access-Control-Allow-Origin", "*");
 
+            entityCache.flatMap(LocalService.class)
+                    .forEach(service -> service.setStatus(Service.Status.OFFLINE));
             getServiceByName("status-server")
                     .flatMap(LocalService.class)
                     .requireNonNull("Status server not found in cache!")
