@@ -15,7 +15,8 @@ const pages = {
     },
     'auth': {
         'display_name': "Authentication Server",
-        'path': 'https://auth.comroid.org'
+        'path': 'https://auth.comroid.org',
+        'policy': policy['instant_redir']
     },
     'projects': {
         'display_name': "Projects",
