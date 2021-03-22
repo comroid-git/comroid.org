@@ -11,6 +11,7 @@ import org.comroid.restless.server.RestEndpointException;
 import org.comroid.restless.server.ServerEndpoint;
 import org.comroid.uniform.node.UniNode;
 import org.intellij.lang.annotations.Language;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.FileNotFoundException;
 import java.io.StringReader;
@@ -147,11 +148,7 @@ public enum Endpoint implements ServerEndpoint.This {
 
                 REST.Header.List resp = new REST.Header.List();
                 resp.add("Set-Cookie", session.getCookie());
-                String referrer = headers.getFirst(CommonHeaderNames.REFERER);
-                referrer = referrer == null ? "" : referrer.substring(referrer.lastIndexOf('/') + 1);
-                boolean isWidget = referrer.equals("widget");
-                resp.add(CommonHeaderNames.REDIRECT_TARGET, isWidget ? "widget" : "account");
-                return new REST.Response(MOVED_PERMANENTLY, resp);
+                return forwardToWidgetOr(headers, resp, "account");
             } catch (Throwable t) {
                 throw new RestEndpointException(INTERNAL_SERVER_ERROR, "Could not log in", t);
             }
@@ -169,11 +166,7 @@ public enum Endpoint implements ServerEndpoint.This {
             AuthServer.instance.getUserManager().closeSession(session);
             REST.Header.List response = new REST.Header.List();
             response.add("Set-Cookie", UserSession.NULL_COOKIE);
-            String referrer = headers.getFirst(CommonHeaderNames.REFERER);
-            referrer = referrer == null ? "" : referrer.substring(referrer.lastIndexOf('/') + 1);
-            boolean isWidget = referrer.equals("widget");
-            response.add(CommonHeaderNames.REDIRECT_TARGET, isWidget ? "widget" : "account");
-            return new REST.Response(MOVED_PERMANENTLY, response);
+            return forwardToWidgetOr(headers, response, "account");
         }
     },
     SESSION_DATA("session") {
@@ -232,5 +225,14 @@ public enum Endpoint implements ServerEndpoint.This {
         this.extension = extension;
         this.regex = regex;
         this.pattern = buildUrlPattern();
+    }
+
+    @NotNull
+    private static REST.Response forwardToWidgetOr(Headers headers, REST.Header.List response, String other) {
+        String referrer = headers.getFirst(CommonHeaderNames.REFERER);
+        referrer = referrer == null ? "" : referrer.substring(referrer.lastIndexOf('/') + 1);
+        boolean isWidget = referrer.equals("widget");
+        response.add(CommonHeaderNames.REDIRECT_TARGET, isWidget ? "widget" : other);
+        return new REST.Response(MOVED_PERMANENTLY, response);
     }
 }
