@@ -82,9 +82,11 @@ public final class StatusConnection implements ContextualProvider.Underlying {
         this.serviceName = serviceName;
         this.token = token;
         this.executor = executor;
-        this.rest = new REST(this.context, executor);
         logger.debug("Building Cache...");
         this.serviceCache = new ProvidedCache<>(context, 250, ForkJoinPool.commonPool(), this::requestServiceByName);
+        this.context.addToContext(executor, serviceCache);
+        this.rest = new REST(this.context, executor);
+        this.context.addToContext(rest);
         this.ownService = new FutureReference<>(requestServiceByName(serviceName)
                 .exceptionally(exceptionLogger("Could not request own service")));
     }
