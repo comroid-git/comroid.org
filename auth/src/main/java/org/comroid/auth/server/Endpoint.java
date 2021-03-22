@@ -3,7 +3,9 @@ package org.comroid.auth.server;
 import com.sun.net.httpserver.Headers;
 import org.comroid.api.Polyfill;
 import org.comroid.auth.user.UserAccount;
+import org.comroid.auth.user.UserManager;
 import org.comroid.auth.user.UserSession;
+import org.comroid.mutatio.ref.Reference;
 import org.comroid.restless.CommonHeaderNames;
 import org.comroid.restless.REST;
 import org.comroid.restless.server.RestEndpointException;
@@ -72,6 +74,23 @@ public enum Endpoint implements ServerEndpoint.This {
                     throw new RestEndpointException(UNAUTHORIZED, "Invalid Session Cookie");
 
                 account.updateFrom(body.asObjectNode());
+                if (body.has(PASSWORD)) {
+                    Reference<String> email = body.use(EMAIL).map(UniNode::asString);
+                    Reference<String> newHash = body.use(PASSWORD)
+                            .map(UniNode::asString)
+                            .combine(email, UserManager::encrypt);
+
+                    if (!body.has("previous_password"))
+                        throw new RestEndpointException(BAD_REQUEST, "Old Password missing");
+                    if (!body.use("previous_password")
+                            .map(UniNode::asString)
+                            .combine(email, UserManager::encrypt)
+                            .test(newHash::contentEquals))
+                        throw new RestEndpointException(UNAUTHORIZED, "Old Password wrong");
+
+                    newHash.consume(hash -> account.put(PASSWORD, hash));
+                }
+
                 return new REST.Response(OK, account);
             } catch (RestEndpointException ignored) {
                 return new REST.Response(UNAUTHORIZED);
