@@ -62,9 +62,9 @@
     if (sessionData === undefined) {
         document.getElementById('content').innerHTML = document.getElementById('login_panel').innerHTML
     } else {
-        document.getElementById('content').innerHTML = document.getElementById('user_panel').innerHTML
-
         document.getElementById('idText').innerText = "User ID: " + sessionData['account']['uuid'];
+
+        document.getElementById('content').innerHTML = document.getElementById('user_panel').innerHTML
     }
 </script>
 </body>
