@@ -8,8 +8,6 @@ import org.comroid.auth.server.AuthServer;
 import org.comroid.common.io.FileHandle;
 
 import java.io.File;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -92,12 +90,12 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
                 .findAny()
                 .filter(usr -> usr.tryLogin(email, password))
                 .map(UserSession::new)
-                .filter(session -> sessions.put(session.getCookie(), session) != session)
+                .filter(session -> sessions.put(session.getPlainCookie(), session) != session)
                 .orElseThrow(() -> new IllegalArgumentException("Could not authenticate"));
     }
 
     public UserSession findSession(String cookie) {
-        UserSession session = sessions.getOrDefault(UserSession.COOKIE_PREFIX + '=' + cookie, null);
+        UserSession session = sessions.getOrDefault(cookie, null);
         if (session == null)
             throw new IllegalArgumentException("No session found with given cookie");
         return session;

@@ -24,6 +24,10 @@ public final class UserSession {
         return account;
     }
 
+    public String getPlainCookie() {
+        return cookie;
+    }
+
     public String getCookie() {
         return wrapCookie(cookie);
     }
