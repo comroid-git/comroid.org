@@ -131,6 +131,11 @@ public enum Endpoint implements ServerEndpoint.This {
         public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             try {
                 UserSession session = UserSession.findSession(headers);
+
+                String accept = headers.getFirst(CommonHeaderNames.ACCEPTED_CONTENT_TYPE);
+                if (accept != null && accept.equals("application/json"))
+                    return new REST.Response(OK, session.getSessionData());
+
                 String dataWrapper = String.format("const sessionData = JSON.parse('%s');", session.getSessionData().toSerializedString());
                 return new REST.Response(OK, "application/javascript", new StringReader(dataWrapper));
             } catch (RestEndpointException ignored) {
