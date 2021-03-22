@@ -97,7 +97,13 @@ public final class StatusConnection implements ContextualProvider.Underlying {
     public boolean startPolling() {
         if (polling)
             return false;
-        executePoll().exceptionally(exceptionLogger("Error during initial Polling"));
+        executor.scheduleAtFixedRate(() -> {
+            try {
+                executePoll().exceptionally(exceptionLogger("Error ocurred during Poll"));
+            } catch (Throwable t) {
+                Logger.error("Error while executing Poll", t);
+            }
+        }, 0, refreshTimeout, TimeUnit.SECONDS);
         return (polling = true);
     }
 
@@ -119,19 +125,9 @@ public final class StatusConnection implements ContextualProvider.Underlying {
                 });
     }
 
-    private CompletableFuture<Void> executePoll() {
+    private CompletableFuture<Service> executePoll() {
         Logger.debug("Polling Status");
-        return sendPoll().thenRun(this::schedulePoll);
-    }
-
-    private void schedulePoll() {
-        executor.schedule(() -> {
-            try {
-                executePoll().exceptionally(exceptionLogger("Error ocurred during Poll"));
-            } catch (Throwable t) {
-                Logger.error("Error while executing Poll", t);
-            }
-        }, refreshTimeout, TimeUnit.SECONDS);
+        return sendPoll();
     }
 
     private CompletableFuture<Service> sendPoll() {
