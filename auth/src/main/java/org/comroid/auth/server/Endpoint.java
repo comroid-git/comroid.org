@@ -169,7 +169,10 @@ public enum Endpoint implements ServerEndpoint.This {
             AuthServer.instance.getUserManager().closeSession(session);
             REST.Header.List response = new REST.Header.List();
             response.add("Set-Cookie", UserSession.NULL_COOKIE);
-            response.add(CommonHeaderNames.REDIRECT_TARGET, "login");
+            String referrer = headers.getFirst(CommonHeaderNames.REFERER);
+            referrer = referrer == null ? "" : referrer.substring(referrer.lastIndexOf('/') + 1);
+            boolean isWidget = referrer.equals("widget");
+            response.add(CommonHeaderNames.REDIRECT_TARGET, isWidget ? "widget" : "account");
             return new REST.Response(MOVED_PERMANENTLY, response);
         }
     },
