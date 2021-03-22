@@ -144,6 +144,10 @@ public enum Endpoint implements ServerEndpoint.This {
                 String dataWrapper = String.format("const sessionData = JSON.parse('%s');", session.getSessionData().toSerializedString());
                 return new REST.Response(OK, "application/javascript", new StringReader(dataWrapper));
             } catch (RestEndpointException ignored) {
+                String accept = headers.getFirst(CommonHeaderNames.ACCEPTED_CONTENT_TYPE);
+                if (accept != null && accept.equals("application/json"))
+                    return new REST.Response(UNAUTHORIZED);
+
                 String dataWrapper = "const sessionData = undefined;";
                 return new REST.Response(OK, "application/javascript", new StringReader(dataWrapper));
             }
