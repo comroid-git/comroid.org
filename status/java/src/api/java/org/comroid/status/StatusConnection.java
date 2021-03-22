@@ -105,7 +105,7 @@ public final class StatusConnection implements ContextualProvider.Underlying {
             try {
                 sendPoll().exceptionally(exceptionLogger("Error ocurred during Poll"));
             } catch (Throwable t) {
-                Logger.error("Error while executing Poll", t);
+                logger.error("Error while executing Poll", t);
             }
         }, 0, refreshTimeout, TimeUnit.SECONDS);
         return (polling = true);
