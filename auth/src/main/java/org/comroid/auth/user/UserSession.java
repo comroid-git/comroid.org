@@ -40,8 +40,10 @@ public final class UserSession {
     }
 
     public static UserSession findSession(Headers headers) {
-        String[] cookies = headers.getFirst(COOKIE).split("; ");
-        return Stream.of(cookies)
+        return Stream.of(headers.getFirst(COOKIE))
+                .filter(Objects::nonNull)
+                .map(str -> str.split("; "))
+                .flatMap(Stream::of)
                 .filter(UserSession::isAppCookie)
                 .map(str -> str.substring(UserSession.COOKIE_PREFIX.length() + 1))
                 .map(c -> {
