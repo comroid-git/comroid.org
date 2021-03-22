@@ -70,7 +70,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
                 logger.debug("Initializing Status Connection...");
                 this.status = new StatusConnection(MASTER_CONTEXT, "auth-server", STATUS_CRED.getContent(true), executor);
             } else this.status = null;
-            this.context = MASTER_CONTEXT.plus("NetBoxServer", executor);
+            this.context = MASTER_CONTEXT.plus("Auth Server", executor);
 
             logger.debug("Starting UserManager");
             this.userManager = new UserManager(this);
@@ -81,7 +81,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
         } catch (UnknownHostException e) {
             throw new AssertionError(e);
         } catch (IOException e) {
-            throw new RuntimeException("Could not start NetBox Server", e);
+            throw new RuntimeException("Could not start Auth Server", e);
         }
 
         if (status != null && !status.isPolling() && !status.startPolling())
