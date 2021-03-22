@@ -189,7 +189,7 @@ public enum Endpoint implements ServerEndpoint.This {
                     return new REST.Response(UNAUTHORIZED);
 
                 String dataWrapper = "const sessionData = undefined;";
-                return new REST.Response(OK, "application/javascript", new StringReader(dataWrapper));
+                return new REST.Response(201, "application/javascript", new StringReader(dataWrapper));
             }
         }
 
