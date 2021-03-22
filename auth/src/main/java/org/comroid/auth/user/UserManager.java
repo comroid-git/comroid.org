@@ -24,8 +24,6 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
     static {
         DIR.mkdir();
         SALTS.mkdir();
-        for (File file : SALTS.listFiles())
-            file.delete();
     }
 
     private final Map<UUID, UserAccount> accounts = new ConcurrentHashMap<>();
