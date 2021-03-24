@@ -142,13 +142,22 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
             logger.debug("Status Server ready! {}", server);
 
             //this.bot = new DiscordBotBase(DISCORD, BOT_TOKEN.getContent(true));
+
+            // we need to show the 'least-available' status for quick information
+            // ... from the entity cache ...
             this.userStatusSupplier = StatusServer.instance.getEntityCache()
+                    // ... take all services ...
                     .filter(Service.class::isInstance)
                     .map(Service.class::cast)
+                    // ... get their statuses ...
                     .map(Service::getStatus)
+                    // ... if they are not unknown ...
                     .filter(status -> status != Service.Status.UNKNOWN)
+                    // ... sort them, offline goes first, online goes last ...
                     .sorted(Comparator.comparingInt(Service.Status::getValue))
+                    // ... find the 'worst' of them
                     .findFirst()
+                    // ... or if no status is available, everything is offline
                     .or(() -> Service.Status.OFFLINE)
                     .map(status -> {
                         switch (status) {
@@ -165,6 +174,7 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
                         throw new AssertionError();
                     });
             getThreadPool().scheduleAtFixedRate(() -> {
+                // ... and then compute the result only when it is accessed
                 final UserStatus useStatus = userStatusSupplier.orElse(UserStatus.DO_NOT_DISTURB);
 
                 String str = "";
