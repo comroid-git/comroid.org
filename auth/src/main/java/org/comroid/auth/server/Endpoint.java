@@ -42,13 +42,27 @@ public enum Endpoint implements ServerEndpoint.This {
             }
         }
     },
-    API("api.js") {
+    API("api") {
         @Override
         public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             try {
-                return new REST.Response(OK, "application/javascript", AuthServer.WEB.createSubFile("api.js"));
-            } catch (FileNotFoundException e) {
-                throw new AssertionError(e);
+                UserSession session = UserSession.findSession(headers);
+
+                String accept = headers.getFirst(CommonHeaderNames.ACCEPTED_CONTENT_TYPE);
+                if (accept != null && accept.equals("application/json"))
+                    return new REST.Response(OK, session.getSessionData());
+
+                String dataWrapper = String.format("const sessionData = JSON.parse('%s');", session.getSessionData().toSerializedString());
+                dataWrapper += '\n' + API_JS;
+                return new REST.Response(OK, "application/javascript", new StringReader(dataWrapper));
+            } catch (RestEndpointException ignored) {
+                String accept = headers.getFirst(CommonHeaderNames.ACCEPTED_CONTENT_TYPE);
+                if (accept != null && accept.equals("application/json"))
+                    return new REST.Response(UNAUTHORIZED);
+
+                String dataWrapper = "const sessionData = undefined;";
+                dataWrapper += '\n' + API_JS;
+                return new REST.Response(UNAUTHORIZED, "application/javascript", new StringReader(dataWrapper));
             }
         }
     },
@@ -168,34 +182,9 @@ public enum Endpoint implements ServerEndpoint.This {
             response.add("Set-Cookie", UserSession.NULL_COOKIE);
             return forwardToWidgetOr(headers, response, "account");
         }
-    },
-    SESSION_DATA("session") {
-        @Override
-        public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            try {
-                UserSession session = UserSession.findSession(headers);
-
-                String accept = headers.getFirst(CommonHeaderNames.ACCEPTED_CONTENT_TYPE);
-                if (accept != null && accept.equals("application/json"))
-                    return new REST.Response(OK, session.getSessionData());
-
-                String dataWrapper = String.format("const sessionData = JSON.parse('%s');", session.getSessionData().toSerializedString());
-                return new REST.Response(OK, "application/javascript", new StringReader(dataWrapper));
-            } catch (RestEndpointException ignored) {
-                String accept = headers.getFirst(CommonHeaderNames.ACCEPTED_CONTENT_TYPE);
-                if (accept != null && accept.equals("application/json"))
-                    return new REST.Response(UNAUTHORIZED);
-
-                String dataWrapper = "const sessionData = undefined;";
-                return new REST.Response(UNAUTHORIZED, "application/javascript", new StringReader(dataWrapper));
-            }
-        }
-
-        @Override
-        public boolean allowMemberAccess() {
-            return true;
-        }
     };
+
+    public static final String API_JS = AuthServer.WEB.createSubFile("api.js").getContent(false);
 
     private final String extension;
     private final String[] regex;
