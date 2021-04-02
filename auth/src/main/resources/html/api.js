@@ -17,7 +17,7 @@ function sessionNav() {
 
 function initData() {
     try {
-        console.debug("sessionData = ", sessionData);
+        console.debug("auth - sessionData = ", sessionData);
     } catch {
         var sessionData = undefined;
     }
@@ -25,10 +25,15 @@ function initData() {
     const isWidget = sessionNav() === undefined;
 
     if (sessionData === undefined) {
+        console.log("auth - Invalid Session; loading login Panel")
         content().innerHTML = loginPanel;
+
         if (!isWidget)
             sessionNav().innerHTML = `<a onclick="content().innerHTML = loginPanel">Login</a> | <a onclick="content().innerHTML = registerPanel">Register</a>`;
+        return;
     } else {
+        console.log("auth - Session found; ")
+
         if (!isWidget)
             sessionNav().innerHTML = `<a href="logout">Logout</a>`;
     }
