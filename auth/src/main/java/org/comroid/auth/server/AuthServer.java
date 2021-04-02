@@ -28,11 +28,9 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
     public static final ContextualProvider MASTER_CONTEXT;
     public static final String URL_BASE = "https://auth.comroid.org/";
     public static final int PORT = 42000;
-    public static final String[] WEB_RESOURCES = new String[]{"api.js", "panel/login.html", "panel/register.html", "account.html", "widget.html"};
     public static final FileHandle DIR = new FileHandle("/srv/auth/", true);
     public static final FileHandle STATUS_CRED = DIR.createSubFile("status.cred");
     public static final FileHandle DATA = DIR.createSubDir("data");
-    public static final FileHandle WEB = DIR.createSubDir("web");
     public static final WebResources Resources;
     public static AuthServer instance;
 
@@ -89,31 +87,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
         logger.info("Ready!");
     }
 
-    /*
-        private static void extractWebResources() {
-            Stream.of(WEB_RESOURCES)
-                    .map(WEB::createSubFile)
-                    .forEach(file -> {
-                        String resource = String.format("html/%#s", file);
-                        try (
-                                InputStream is = ClassLoader.getSystemResourceAsStream(resource);
-                                OutputStream os = new FileOutputStream(file, false)
-                        ) {
-                            if (is == null)
-                                throw new NoSuchElementException("No resource found with name " + resource);
-                            is.transferTo(os);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    });
-        }
-    */
     public static void main(String[] args) {
-        /*
-        logger.debug("Extracting web resources");
-        extractWebResources();
-         */
-
         instance = new AuthServer(Executors.newScheduledThreadPool(8));
     }
 

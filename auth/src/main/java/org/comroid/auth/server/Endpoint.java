@@ -14,7 +14,6 @@ import org.comroid.util.ReaderUtil;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
@@ -38,11 +37,7 @@ public enum Endpoint implements ServerEndpoint.This {
     WIDGET("widget") {
         @Override
         public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            try {
-                return new REST.Response(OK, "text/html", AuthServer.WEB.createSubFile("widget.html"));
-            } catch (FileNotFoundException e) {
-                throw new AssertionError(e);
-            }
+            return new REST.Response(OK, "text/html", AuthServer.Resources.getPage("widget"));
         }
     },
     API("api") {
