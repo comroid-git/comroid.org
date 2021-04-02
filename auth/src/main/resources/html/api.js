@@ -29,7 +29,6 @@ function initData() {
         if (!isWidget)
             sessionNav().innerHTML = `<a onclick="content().innerHTML = loginPanel">Login</a> | <a onclick="content().innerHTML = registerPanel">Register</a>`;
     } else {
-        content().innerHTML = loginPanel;
         if (!isWidget)
             sessionNav().innerHTML = `<a href="logout">Logout</a>`;
     }
