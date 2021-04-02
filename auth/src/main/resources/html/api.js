@@ -19,7 +19,7 @@ function initData() {
     try {
         console.debug("auth - sessionData = ", sessionData);
     } catch {
-        var sessionData = undefined;
+        sessionData = undefined;
     }
 
     const isWidget = sessionNav() === undefined;
