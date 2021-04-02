@@ -27,19 +27,9 @@
     <script src="api" type="application/javascript"></script>
     <script type="application/javascript">
         function initPage() {
-            try {
-                console.debug("Initializing Data");
-                initData();
-                console.debug("Session Loaded; Data: ", sessionData)
-            } catch {
-                var sessionData = undefined;
-            }
-
-            if (sessionData === undefined) {
-                document.getElementById('sessionNav').innerHTML = `<a href="login">Login</a> | <a href="register">Register</a>`;
-            } else {
-                document.getElementById('sessionNav').innerHTML = `<a href="logout">Logout</a>`;
-            }
+            console.debug("Initializing Data");
+            initData();
+            console.debug("Session Loaded; Data: ", sessionData)
         }
     </script>
 
