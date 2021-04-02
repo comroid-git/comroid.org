@@ -35,6 +35,38 @@
     </style>
 
     <script src="api" type="application/javascript"></script>
+    <script type="application/javascript">
+        loginPanel = `<div id="loginPanel">
+    <form action="./login" method="post">
+        <label for="emailInput">E-Mail</label>
+        <input id="emailInput" name="email" title="E-Mail" type="text">
+        <br/>
+        <label for="passwordInput">Password</label>
+        <input id="passwordInput" name="password" title="Password" type="password">
+        <br/>
+        <button type="submit">Login now</button>
+    </form>
+    </div>`;
+        registerPanel = `<div id="registerPanel">
+    <form action="./register" method="post">
+        <label for="emailInput">E-Mail</label>
+        <input id="emailInput" name="email" title="E-Mail" type="email">
+        <br/>
+        <label for="passwordInput">Password</label>
+        <input id="passwordInput" name="password" title="Password" type="password">
+        <br/>
+        <input id="consent" required="required" type="checkbox">
+        <label for="consent"><a href="https://comroid.org/#tos">Terms of Use</a> Accepted</label>
+        <br/>
+        <button type="submit">Register now</button>
+    </form>
+    </div>`;
+
+        function initWidget() {
+            console.log("auth - Initializing Widget");
+            initData();
+        }
+    </script>
 
     <title> comroid Account </title>
 </head>
