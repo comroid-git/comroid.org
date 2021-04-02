@@ -31,7 +31,7 @@ function initData() {
         sessionNav().innerHTML = `<a href="logout">Logout</a>`;
     }
 
-    content
+    content()
         .querySelectorAll('.inject')
         .forEach(e => {
             let vname = e.classList[1].split('.')
