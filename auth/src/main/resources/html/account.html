@@ -25,14 +25,27 @@
     </style>
 
     <script src="api" type="application/javascript"></script>
+    <script type="application/javascript">
+        function initPage() {
+            console.debug("Initializing Data");
+            initData();
+            console.debug("Session Loaded; Data: ", sessionData)
+
+            if (sessionData === undefined) {
+                document.getElementById('sessionNav').innerHTML = '<a href="login">Login</a> | <a href="register">Register</a>';
+            } else {
+                document.getElementById('sessionNav').innerHTML = '<a href="logout">Logout</a>';
+            }
+        }
+    </script>
 
     <title> comroid Account </title>
 </head>
-<body onload="initData()">
+<body onload="initPage()">
 <header style="height: 150px !important;">
     <h1><a href="https://comroid.org">comroid</a></h1>
     <h2><a href="account">Manage your comroid Account</a></h2>
-    <p><a href="login">Login</a> | <a href="register">Register</a> | <a href="logout">Logout</a></p>
+    <p id="sessionNav">...</p>
 </header>
 <div id="content">
     <h2>Your comroid Account</h2>
