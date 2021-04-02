@@ -114,7 +114,7 @@ public enum Endpoint implements ServerEndpoint.This {
         @Override
         public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             try {
-                return new REST.Response(OK, "text/html", AuthServer.WEB.createSubFile("register.html"));
+                return new REST.Response(OK, "text/html", AuthServer.WEB.createSubFile("panel/register.html"));
             } catch (FileNotFoundException e) {
                 throw new AssertionError(e);
             }
@@ -142,7 +142,7 @@ public enum Endpoint implements ServerEndpoint.This {
         @Override
         public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             try {
-                return new REST.Response(OK, "text/html", AuthServer.WEB.createSubFile("login.html"));
+                return new REST.Response(OK, "text/html", AuthServer.WEB.createSubFile("panel/login.html"));
             } catch (FileNotFoundException e) {
                 throw new AssertionError(e);
             }
