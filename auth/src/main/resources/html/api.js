@@ -1,21 +1,5 @@
 const loginPanel = `<iframe src="login"></iframe>`;
 
-function handleErrors(response) {
-    if (!response.ok) {
-        throw Error(response.statusText);
-    }
-    return response;
-}
-
-function timeout(ms, promise) {
-    return new Promise(function (resolve, reject) {
-        setTimeout(function () {
-            reject(new Error("timeout"))
-        }, ms)
-        promise.then(resolve, reject)
-    })
-}
-
 function populateTag(data, tag, names, index) {
     if (names.length - 1 > index)
         return populateTag(data[names[index]], tag, names, index + 1)
