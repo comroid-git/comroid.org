@@ -108,7 +108,9 @@ public enum Endpoint implements ServerEndpoint.This {
         @Override
         public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             InputStreamReader registerPanel = AuthServer.Resources.getPanel("register");
-            return new REST.Response(OK, "text/html", registerPanel);
+            REST.Header.List response = new REST.Header.List();
+            response.add(CommonHeaderNames.CACHE_CONTROL, "no-cache");
+            return new REST.Response(OK, "text/html", registerPanel, response);
         }
 
         @Override
@@ -133,7 +135,9 @@ public enum Endpoint implements ServerEndpoint.This {
         @Override
         public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             InputStreamReader loginPanel = AuthServer.Resources.getPanel("login");
-            return new REST.Response(OK, "text/html", loginPanel);
+            REST.Header.List response = new REST.Header.List();
+            response.add(CommonHeaderNames.CACHE_CONTROL, "no-cache");
+            return new REST.Response(OK, "text/html", loginPanel, response);
         }
 
         @Override
@@ -167,6 +171,7 @@ public enum Endpoint implements ServerEndpoint.This {
             UserSession session = UserSession.findSession(headers);
             AuthServer.instance.getUserManager().closeSession(session);
             REST.Header.List response = new REST.Header.List();
+            response.add(CommonHeaderNames.CACHE_CONTROL, "no-cache");
             response.add("Set-Cookie", UserSession.NULL_COOKIE);
             return forwardToWidgetOr(headers, response, "account");
         }
