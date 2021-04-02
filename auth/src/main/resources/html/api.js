@@ -22,7 +22,7 @@ function initData() {
         sessionData = undefined;
     }
 
-    const isWidget = sessionNav() === undefined;
+    const isWidget = sessionNav() === null;
 
     if (sessionData === undefined) {
         console.log("auth - Invalid Session; loading login Panel")
