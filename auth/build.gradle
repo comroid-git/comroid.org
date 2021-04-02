@@ -43,6 +43,9 @@ dependencies {
         implementation project(':guardian:restless').sourceSets.java11compat.output.classesDirs
     }
 
+    // mailing dependency
+    implementation 'org.simplejavamail:simple-java-mail:6.5.0'
+
     // logging dependencies
     implementation 'org.apache.logging.log4j:log4j-api:2.11.0'
     runtimeOnly 'org.apache.logging.log4j:log4j-core:2.11.0'
