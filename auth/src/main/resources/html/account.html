@@ -27,14 +27,18 @@
     <script src="api" type="application/javascript"></script>
     <script type="application/javascript">
         function initPage() {
-            console.debug("Initializing Data");
-            initData();
-            console.debug("Session Loaded; Data: ", sessionData)
+            try {
+                console.debug("Initializing Data");
+                initData();
+                console.debug("Session Loaded; Data: ", sessionData)
+            } catch {
+                var sessionData = undefined;
+            }
 
             if (sessionData === undefined) {
-                document.getElementById('sessionNav').innerHTML = '<a href="login">Login</a> | <a href="register">Register</a>';
+                document.getElementById('sessionNav').innerHTML = `<a href="login">Login</a> | <a href="register">Register</a>`;
             } else {
-                document.getElementById('sessionNav').innerHTML = '<a href="logout">Logout</a>';
+                document.getElementById('sessionNav').innerHTML = `<a href="logout">Logout</a>`;
             }
         }
     </script>
