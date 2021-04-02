@@ -37,6 +37,7 @@
     <script src="api" type="application/javascript"></script>
     <script type="application/javascript">
         loginPanel = `<div id="loginPanel">
+    <h2>Login to your comroid Account</h2>
     <form action="./login" method="post">
         <label for="emailInput">E-Mail</label>
         <input id="emailInput" name="email" title="E-Mail" type="text">
@@ -46,8 +47,10 @@
         <br/>
         <button type="submit">Login now</button>
     </form>
+    <a onclick="content().innerHTML = registerPanel">Register an Account</a>
     </div>`;
         registerPanel = `<div id="registerPanel">
+    <h2>Register a comroid Account</h2>
     <form action="./register" method="post">
         <label for="emailInput">E-Mail</label>
         <input id="emailInput" name="email" title="E-Mail" type="email">
@@ -60,6 +63,7 @@
         <br/>
         <button type="submit">Register now</button>
     </form>
+    <a onclick="content().innerHTML = loginPanel">Log In to an existing Account</a>
     </div>`;
 
         function initWidget() {
