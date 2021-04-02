@@ -1,4 +1,5 @@
 const loginPanel = `<iframe src="login"></iframe>`;
+const registerPanel = `<iframe src="register"></iframe>`;
 
 function populateTag(data, tag, names, index) {
     if (names.length - 1 > index)
@@ -8,16 +9,23 @@ function populateTag(data, tag, names, index) {
 
 function initData() {
     try {
-        if (sessionData === undefined) {
-            document.getElementById('content').innerHTML = loginPanel;
-            return;
-        }
+        console.debug("sessionData = ", sessionData);
     } catch {
-        document.getElementById('content').innerHTML = loginPanel;
-        return;
+        var sessionData = undefined;
     }
 
-    document.getElementById('content')
+    const content = document.getElementById('content');
+    const sessionNav = document.getElementById('sessionNav');
+
+    if (sessionData === undefined) {
+        content.innerHTML = loginPanel;
+        sessionNav.innerHTML = `<a onclick="content = loginPanel">Login</a> | <a onclick="content = registerPanel">Register</a>`;
+    } else {
+        content.innerHTML = loginPanel;
+        sessionNav.innerHTML = `<a href="logout">Logout</a>`;
+    }
+
+    content
         .querySelectorAll('.inject')
         .forEach(e => {
             let vname = e.classList[1].split('.')
