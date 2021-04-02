@@ -7,6 +7,14 @@ function populateTag(data, tag, names, index) {
     tag.innerText = data[names[index]]
 }
 
+function content() {
+    return document.getElementById('content');
+}
+
+function sessionNav() {
+    return document.getElementById('sessionNav');
+}
+
 function initData() {
     try {
         console.debug("sessionData = ", sessionData);
@@ -14,15 +22,13 @@ function initData() {
         var sessionData = undefined;
     }
 
-    const content = document.getElementById('content');
-    const sessionNav = document.getElementById('sessionNav');
 
     if (sessionData === undefined) {
-        content.innerHTML = loginPanel;
-        sessionNav.innerHTML = `<a onclick="content.innerHTML = loginPanel">Login</a> | <a onclick="content.innerHTML = registerPanel">Register</a>`;
+        content().innerHTML = loginPanel;
+        sessionNav().innerHTML = `<a onclick="content().innerHTML = loginPanel">Login</a> | <a onclick="content().innerHTML = registerPanel">Register</a>`;
     } else {
-        content.innerHTML = loginPanel;
-        sessionNav.innerHTML = `<a href="logout">Logout</a>`;
+        content().innerHTML = loginPanel;
+        sessionNav().innerHTML = `<a href="logout">Logout</a>`;
     }
 
     content
