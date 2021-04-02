@@ -26,12 +26,7 @@ public enum Endpoint implements ServerEndpoint.This {
     HOME("") {
         @Override
         public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            try {
-                UserSession.findSession(headers);
-                return new REST.Response(Polyfill.uri("account"), false);
-            } catch (RestEndpointException ignored) {
-                return new REST.Response(Polyfill.uri("login"), false);
-            }
+            return new REST.Response(Polyfill.uri("account"), false);
         }
     },
     WIDGET("widget") {
