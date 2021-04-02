@@ -19,7 +19,7 @@ function initData() {
 
     if (sessionData === undefined) {
         content.innerHTML = loginPanel;
-        sessionNav.innerHTML = `<a onclick="content = loginPanel">Login</a> | <a onclick="content = registerPanel">Register</a>`;
+        sessionNav.innerHTML = `<a onclick="content.innerHTML = loginPanel">Login</a> | <a onclick="content.innerHTML = registerPanel">Register</a>`;
     } else {
         content.innerHTML = loginPanel;
         sessionNav.innerHTML = `<a href="logout">Logout</a>`;
