@@ -45,7 +45,7 @@ public enum Endpoint implements ServerEndpoint.This {
                 if (accept != null && accept.equals("application/json"))
                     return new REST.Response(OK, session.getSessionData());
 
-                String dataWrapper = String.format("const sessionData = JSON.parse('%s');", session.getSessionData().toSerializedString());
+                String dataWrapper = String.format("let sessionData = JSON.parse('%s');", session.getSessionData().toSerializedString());
                 InputStreamReader api = AuthServer.Resources.getAPI();
                 Reader page = ReaderUtil.combine('\n', new StringReader(dataWrapper), api);
 
@@ -55,7 +55,7 @@ public enum Endpoint implements ServerEndpoint.This {
                 if (accept != null && accept.equals("application/json"))
                     return new REST.Response(UNAUTHORIZED);
 
-                String dataWrapper = "const sessionData = undefined;";
+                String dataWrapper = "let sessionData = undefined;";
                 InputStreamReader api = AuthServer.Resources.getAPI();
                 Reader page = ReaderUtil.combine('\n', new StringReader(dataWrapper), api);
 

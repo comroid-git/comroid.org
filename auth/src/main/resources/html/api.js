@@ -1,5 +1,5 @@
-const loginPanel = `<iframe src="login"></iframe>`;
-const registerPanel = `<iframe src="register"></iframe>`;
+let loginPanel = `<iframe src="login"></iframe>`;
+let registerPanel = `<iframe src="register"></iframe>`;
 
 function populateTag(data, tag, names, index) {
     if (names.length - 1 > index)
