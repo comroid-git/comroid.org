@@ -13,6 +13,10 @@ import org.comroid.restless.server.RestServer;
 import org.comroid.status.StatusConnection;
 import org.comroid.status.entity.Service;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
+import org.jetbrains.annotations.Nullable;
+import org.simplejavamail.api.mailer.Mailer;
+import org.simplejavamail.api.mailer.config.TransportStrategy;
+import org.simplejavamail.mailer.MailerBuilder;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,10 +46,11 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
     }
 
     private final ScheduledExecutorService executor;
-    private final StatusConnection status;
+    private final @Nullable StatusConnection status;
     private final ContextualProvider context;
     private final UserManager userManager;
     private final RestServer rest;
+    private final @Nullable Mailer mailer;
 
     public UserManager getUserManager() {
         return userManager;
@@ -76,6 +81,13 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
 
             logger.debug("Starting Rest server");
             this.rest = new RestServer(context, this.executor, URL_BASE, OS.current == OS.WINDOWS ? InetAddress.getLoopbackAddress() : InetAddress.getLocalHost(), PORT, Endpoint.values());
+
+            //if (OS.current == OS.UNIX) {
+            logger.debug("Loading Mailer");
+            this.mailer = MailerBuilder.withTransportStrategy(TransportStrategy.SMTPS)
+                    .withSMTPServer("mail.comroid.org", 465 /* todo: add authentication data */)
+                    .buildMailer();
+            //}
         } catch (UnknownHostException e) {
             throw new AssertionError(e);
         } catch (IOException e) {
