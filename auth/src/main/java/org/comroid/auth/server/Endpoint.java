@@ -10,10 +10,13 @@ import org.comroid.restless.REST;
 import org.comroid.restless.server.RestEndpointException;
 import org.comroid.restless.server.ServerEndpoint;
 import org.comroid.uniform.node.UniNode;
+import org.comroid.util.ReaderUtil;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.FileNotFoundException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.io.StringReader;
 import java.util.regex.Pattern;
 
@@ -53,27 +56,28 @@ public enum Endpoint implements ServerEndpoint.This {
                     return new REST.Response(OK, session.getSessionData());
 
                 String dataWrapper = String.format("const sessionData = JSON.parse('%s');", session.getSessionData().toSerializedString());
-                dataWrapper += '\n' + API_JS;
-                return new REST.Response(OK, "application/javascript", new StringReader(dataWrapper));
+                InputStreamReader api = AuthServer.Resources.getAPI();
+                Reader page = ReaderUtil.combine('\n', new StringReader(dataWrapper), api);
+
+                return new REST.Response(OK, "application/javascript", page);
             } catch (RestEndpointException ignored) {
                 String accept = headers.getFirst(CommonHeaderNames.ACCEPTED_CONTENT_TYPE);
                 if (accept != null && accept.equals("application/json"))
                     return new REST.Response(UNAUTHORIZED);
 
                 String dataWrapper = "const sessionData = undefined;";
-                dataWrapper += '\n' + API_JS;
-                return new REST.Response(UNAUTHORIZED, "application/javascript", new StringReader(dataWrapper));
+                InputStreamReader api = AuthServer.Resources.getAPI();
+                Reader page = ReaderUtil.combine('\n', new StringReader(dataWrapper), api);
+
+                return new REST.Response(UNAUTHORIZED, "application/javascript", page);
             }
         }
     },
     ACCOUNT("account") {
         @Override
         public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            try {
-                return new REST.Response(OK, "text/html", AuthServer.WEB.createSubFile("account.html"));
-            } catch (FileNotFoundException e) {
-                throw new AssertionError(e);
-            }
+            InputStreamReader accountPage = AuthServer.Resources.getPage("account");
+            return new REST.Response(OK, "text/html", accountPage);
         }
     },
     MODIFY_ACCOUNT("account/%s", "\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b") {
@@ -113,11 +117,8 @@ public enum Endpoint implements ServerEndpoint.This {
     REGISTRATION("register") {
         @Override
         public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            try {
-                return new REST.Response(OK, "text/html", AuthServer.WEB.createSubFile("panel/register.html"));
-            } catch (FileNotFoundException e) {
-                throw new AssertionError(e);
-            }
+            InputStreamReader registerPanel = AuthServer.Resources.getPanel("register");
+            return new REST.Response(OK, "text/html", registerPanel);
         }
 
         @Override
@@ -141,11 +142,8 @@ public enum Endpoint implements ServerEndpoint.This {
     LOGIN("login") {
         @Override
         public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            try {
-                return new REST.Response(OK, "text/html", AuthServer.WEB.createSubFile("panel/login.html"));
-            } catch (FileNotFoundException e) {
-                throw new AssertionError(e);
-            }
+            InputStreamReader loginPanel = AuthServer.Resources.getPanel("login");
+            return new REST.Response(OK, "text/html", loginPanel);
         }
 
         @Override
@@ -183,8 +181,6 @@ public enum Endpoint implements ServerEndpoint.This {
             return forwardToWidgetOr(headers, response, "account");
         }
     };
-
-    public static final String API_JS = AuthServer.WEB.createSubFile("api.js").getContent(false);
 
     private final String extension;
     private final String[] regex;

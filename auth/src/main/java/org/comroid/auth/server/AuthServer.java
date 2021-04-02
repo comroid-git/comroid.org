@@ -14,16 +14,13 @@ import org.comroid.status.StatusConnection;
 import org.comroid.status.entity.Service;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.NoSuchElementException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.stream.Stream;
 
 public final class AuthServer implements ContextualProvider.Underlying, UncheckedCloseable {
     //http://localhost:42000
@@ -36,12 +33,13 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
     public static final FileHandle STATUS_CRED = DIR.createSubFile("status.cred");
     public static final FileHandle DATA = DIR.createSubDir("data");
     public static final FileHandle WEB = DIR.createSubDir("web");
+    public static final WebResources Resources;
     public static AuthServer instance;
 
     static {
         DIR.mkdir();
         DATA.mkdir();
-        WEB.mkdir();
+        Resources = new WebResources(ClassLoader.getSystemClassLoader());
         MASTER_CONTEXT = ContextualProvider.create(FastJSONLib.fastJsonLib, new JavaHttpAdapter());
     }
 
@@ -91,27 +89,30 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
         logger.info("Ready!");
     }
 
-    private static void extractWebResources() {
-        Stream.of(WEB_RESOURCES)
-                .map(WEB::createSubFile)
-                .forEach(file -> {
-                    String resource = String.format("html/%#s", file);
-                    try (
-                            InputStream is = ClassLoader.getSystemResourceAsStream(resource);
-                            OutputStream os = new FileOutputStream(file, false)
-                    ) {
-                        if (is == null)
-                            throw new NoSuchElementException("No resource found with name " + resource);
-                        is.transferTo(os);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                });
-    }
-
+    /*
+        private static void extractWebResources() {
+            Stream.of(WEB_RESOURCES)
+                    .map(WEB::createSubFile)
+                    .forEach(file -> {
+                        String resource = String.format("html/%#s", file);
+                        try (
+                                InputStream is = ClassLoader.getSystemResourceAsStream(resource);
+                                OutputStream os = new FileOutputStream(file, false)
+                        ) {
+                            if (is == null)
+                                throw new NoSuchElementException("No resource found with name " + resource);
+                            is.transferTo(os);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    });
+        }
+    */
     public static void main(String[] args) {
+        /*
         logger.debug("Extracting web resources");
         extractWebResources();
+         */
 
         instance = new AuthServer(Executors.newScheduledThreadPool(8));
     }
@@ -132,5 +133,36 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
             logger.error("Could not shutdown UserManager gracefully", t);
         }
         logger.info("Goodbye!");
+    }
+
+    public static final class WebResources {
+        private final ClassLoader classLoader;
+
+        public InputStreamReader getAPI() {
+            return getWebResourceByName("api.js");
+        }
+
+        private WebResources(ClassLoader classLoader) {
+            this.classLoader = classLoader;
+        }
+
+        public InputStreamReader getPage(String name) {
+            return getWebResourceByName(name + ".html");
+        }
+
+        public InputStreamReader getPanel(String name) {
+            return getWebResourceByName(String.format("panel/%s.html", name));
+        }
+
+        public InputStreamReader getWebResourceByName(String name) {
+            return new InputStreamReader(getResourceByName("html/" + name));
+        }
+
+        public InputStream getResourceByName(String name) {
+            InputStream resource = classLoader.getResourceAsStream(name);
+            if (resource == null)
+                throw new NullPointerException("Could not locate resource: " + name);
+            return resource;
+        }
     }
 }
