@@ -64,7 +64,7 @@ public enum Endpoint implements ServerEndpoint.This {
                 InputStreamReader api = AuthServer.Resources.getAPI();
                 Reader page = ReaderUtil.combine('\n', new StringReader(dataWrapper), api);
 
-                return new REST.Response(UNAUTHORIZED, "application/javascript", page);
+                return new REST.Response(OK, "application/javascript", page);
             }
         }
     },
