@@ -22,13 +22,16 @@ function initData() {
         var sessionData = undefined;
     }
 
+    const isWidget = sessionNav() === undefined;
 
     if (sessionData === undefined) {
         content().innerHTML = loginPanel;
-        sessionNav().innerHTML = `<a onclick="content().innerHTML = loginPanel">Login</a> | <a onclick="content().innerHTML = registerPanel">Register</a>`;
+        if (!isWidget)
+            sessionNav().innerHTML = `<a onclick="content().innerHTML = loginPanel">Login</a> | <a onclick="content().innerHTML = registerPanel">Register</a>`;
     } else {
         content().innerHTML = loginPanel;
-        sessionNav().innerHTML = `<a href="logout">Logout</a>`;
+        if (!isWidget)
+            sessionNav().innerHTML = `<a href="logout">Logout</a>`;
     }
 
     content()
