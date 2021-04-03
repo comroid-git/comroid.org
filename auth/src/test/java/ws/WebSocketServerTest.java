@@ -18,7 +18,7 @@ public class WebSocketServerTest {
     private static final Logger logger = LogManager.getLogger();
     public static final int PORT = 5674;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
         logger.info("Starting Server");
         WebsocketServer server = new WebsocketServer(
                 null,
@@ -28,7 +28,13 @@ public class WebSocketServerTest {
                 PORT);
 
         server.getConnectionPipeline()
-                .peek(connection -> connection.sendText("hello client"));
+                .peek(connection -> {
+                    logger.info("connection received");
+                    connection.sendText("hello client");
+                    //connection.sendText("hello client2");
+                });
+
+        WebSocketClientTest.main(args);
     }
 
     public static void mains(String[] args) throws NoSuchAlgorithmException {
