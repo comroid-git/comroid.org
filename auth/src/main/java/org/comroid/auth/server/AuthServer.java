@@ -31,6 +31,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
     public static final ContextualProvider MASTER_CONTEXT;
     public static final String URL_BASE = "https://auth.comroid.org/";
     public static final int PORT = 42000;
+    public static final int SOCKET_PORT = 42001;
     public static final FileHandle DIR = new FileHandle("/srv/auth/", true);
     public static final FileHandle STATUS_CRED = DIR.createSubFile("status.cred");
     public static final FileHandle DATA = DIR.createSubDir("data");
