@@ -14,8 +14,12 @@ import org.comroid.status.StatusConnection;
 import org.comroid.status.entity.Service;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
 import org.jetbrains.annotations.Nullable;
+import org.simplejavamail.api.email.Email;
+import org.simplejavamail.api.email.EmailPopulatingBuilder;
+import org.simplejavamail.api.mailer.AsyncResponse;
 import org.simplejavamail.api.mailer.Mailer;
 import org.simplejavamail.api.mailer.config.TransportStrategy;
+import org.simplejavamail.email.EmailBuilder;
 import org.simplejavamail.mailer.MailerBuilder;
 
 import java.io.IOException;
@@ -23,8 +27,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.function.Consumer;
 
 public final class AuthServer implements ContextualProvider.Underlying, UncheckedCloseable {
     //http://localhost:42000
@@ -87,7 +93,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
                 this.mailer = MailerBuilder.withTransportStrategy(TransportStrategy.SMTPS)
                         .withSMTPServer("mail.comroid.org", 465 /* todo: add authentication data */)
                         .buildMailer();
-            }
+            } else mailer = null;
         } catch (UnknownHostException e) {
             throw new AssertionError(e);
         } catch (IOException e) {
@@ -101,6 +107,24 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
 
     public static void main(String[] args) {
         instance = new AuthServer(Executors.newScheduledThreadPool(8));
+    }
+
+    public CompletableFuture<?> sendEmail(String recipient, Consumer<EmailPopulatingBuilder> emailBuilder) {
+        if (mailer == null)
+            return CompletableFuture.failedFuture(new RuntimeException("Mailer is not initialized"));
+        EmailPopulatingBuilder builder = EmailBuilder.startingBlank()
+                .from("auth@comroid.org")
+                .to(recipient);
+        emailBuilder.accept(builder);
+
+        final CompletableFuture<Void> future = new CompletableFuture<>();
+        Email email = builder.buildEmail();
+        AsyncResponse async = mailer.sendMail(email, true);
+        if (async == null)
+            throw new RuntimeException("Could not send E-Mail to " + recipient);
+        async.onException(future::completeExceptionally);
+        async.onSuccess(() -> future.complete(null));
+        return future;
     }
 
     @Override
