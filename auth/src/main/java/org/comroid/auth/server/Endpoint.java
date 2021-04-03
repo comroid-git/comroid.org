@@ -66,7 +66,7 @@ public enum Endpoint implements ServerEndpoint.This {
     PASSWORD_RESET("password-reset") {
         @Override
         public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            return new REST.Response(OK, "text/html", AuthServer.Resources.getPanel(""));
+            return new REST.Response(OK, "text/html", AuthServer.Resources.getPanel("password-reset"));
         }
 
         @Override
