@@ -29,15 +29,12 @@ public class WebSocketClientTest {
         socket.getPacketPipeline()
                 .filterKey(t -> t == WebsocketPacket.Type.OPEN)
                 .peek(packet -> {
-                    logger.info("sending response for OPEN packet");
+                    logger.info("WebSocket Opened! {}", packet);
                     socket.send("hello server");
                 });
 
-        logger.info("Sending test data");
-        socket.send("penis");
-
         socket.getPacketPipeline()
-                .peekBoth((t, p) -> logger.info("data received: {} - {}", t, p))
+                .peekBoth((t, p) -> logger.info("Client received: {} - {}", t, p))
                 .filterKey(t -> t == WebsocketPacket.Type.ERROR)
                 .peek(packet -> packet.getError().consume(e -> logger.error("Error Occurred", e)));
 
