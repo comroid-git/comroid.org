@@ -15,8 +15,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class WebSocketServerTest {
-    private static final Logger logger = LogManager.getLogger();
     public static final int PORT = 5674;
+    private static final Logger logger = LogManager.getLogger();
 
     public static void main(String[] args) throws IOException, InterruptedException {
         logger.info("Starting Server");
@@ -34,6 +34,7 @@ public class WebSocketServerTest {
                     //connection.sendText("hello client2");
                 });
 
+        Thread.sleep(1000);
         WebSocketClientTest.main(args);
     }
 

@@ -18,6 +18,7 @@ public class WebSocketClientTest {
     public static void main(String[] args) throws InterruptedException {
         HTTP = new JavaHttpAdapter();
 
+        logger.info("Creating WebSocket");
         Websocket socket = HTTP.createWebSocket(
                 ForkJoinPool.commonPool(),
                 e -> logger.error("Error in websocket", e),
@@ -25,6 +26,7 @@ public class WebSocketClientTest {
                 new REST.Header.List()
         ).join();
 
+        logger.info("Sending test data");
         socket.send("penis");
 
         socket.getPacketPipeline()
