@@ -14,8 +14,7 @@ import org.comroid.status.StatusConnection;
 import org.comroid.status.entity.Service;
 import org.comroid.uniform.SerializationAdapter;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
-import org.comroid.uniform.adapter.json.jackson.JacksonJSONAdapter;
-import org.comroid.webkit.WebkitServer;
+import org.comroid.webkit.server.WebkitServer;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,10 +34,9 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
     public static final FileHandle DIR = new FileHandle("/srv/auth/", true);
     public static final FileHandle STATUS_CRED = DIR.createSubFile("status.cred");
     public static final FileHandle DATA = DIR.createSubDir("data");
-    public static AuthServer instance;
-
     public static final SerializationAdapter SERI_LIB;
     public static final HttpAdapter HTTP_LIB;
+    public static AuthServer instance;
 
     static {
         DIR.mkdir();
@@ -82,7 +80,17 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
             context.addToContext(userManager);
 
             logger.debug("Starting Rest server");
-            this.server = new WebkitServer(context, this.executor, URL_BASE, OS.current == OS.WINDOWS ? InetAddress.getLoopbackAddress() : InetAddress.getLocalHost(), PORT, Endpoint.values());
+            this.server = new WebkitServer(
+                    context,
+                    this.executor,
+                    URL_BASE,
+                    OS.current == OS.WINDOWS
+                            ? InetAddress.getLoopbackAddress()
+                            : InetAddress.getLocalHost(),
+                    PORT,
+                    SOCKET_PORT,
+                    Endpoint.values()
+            );
         } catch (UnknownHostException e) {
             throw new AssertionError(e);
         } catch (IOException e) {
