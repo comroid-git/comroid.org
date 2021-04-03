@@ -63,7 +63,22 @@ public enum Endpoint implements ServerEndpoint.This {
             }
         }
     },
-    ACCOUNT("account") {
+    PASSWORD_RESET("password-reset") {
+        @Override
+        public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            return new REST.Response(OK, "text/html", AuthServer.Resources.getPanel(""));
+        }
+
+        @Override
+        public REST.Response executePOST(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            body.use(EMAIL)
+                    .map(UniNode::asString)
+                    .ifPresent(target -> AuthServer.instance.sendEmail(target, mail -> mail
+                            .withPlainText("hello world")));
+            return new REST.Response(OK);
+        }
+    },
+    ACCOUNT("account%s", "#.+") {
         @Override
         public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             InputStreamReader accountPage = AuthServer.Resources.getPage("account");
