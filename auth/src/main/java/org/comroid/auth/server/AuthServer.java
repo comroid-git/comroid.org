@@ -42,7 +42,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
     static {
         DIR.mkdir();
         DATA.mkdir();
-        SERI_LIB = JacksonJSONAdapter.instance;
+        SERI_LIB = FastJSONLib.fastJsonLib;
         HTTP_LIB = new JavaHttpAdapter();
         MASTER_CONTEXT = ContextualProvider.create(SERI_LIB, HTTP_LIB);
     }

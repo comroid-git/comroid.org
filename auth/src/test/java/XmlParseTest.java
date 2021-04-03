@@ -1,5 +1,6 @@
-import org.comroid.uniform.adapter.xml.jackson.JacksonXMLAdapter;
-import org.comroid.uniform.node.UniNode;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -9,9 +10,17 @@ import java.util.stream.Collectors;
 
 public final class XmlParseTest {
     public static void main(String[] args) throws IOException {
-        ClassLoader classLoader = ClassLoader.getSystemClassLoader();
+        Document frame = Jsoup.parse(getResourceContent("org.comroid.webkit/frame.html"));
+        Document footer = Jsoup.parse(getResourceContent("org.comroid.webkit/part/footer.html"));
 
-        InputStream resource = classLoader.getResourceAsStream("org.comroid.webkit/frame.html");
+        Elements footerTag = frame.getElementsByTag("footer");
+        footerTag.html('\n' + footer.html());
+
+        System.out.println("frame = " + frame);
+    }
+
+    public static String getResourceContent(String resourceName) throws IOException {
+        InputStream resource = ClassLoader.getSystemClassLoader().getResourceAsStream(resourceName);
         System.out.println("resource = " + resource);
 
         String content;
@@ -21,8 +30,6 @@ public final class XmlParseTest {
         ) {
             content = br.lines().collect(Collectors.joining("\n"));
         }
-
-        UniNode node = JacksonXMLAdapter.instance.parse(content);
-        System.out.println("node = " + node);
+        return content;
     }
 }
