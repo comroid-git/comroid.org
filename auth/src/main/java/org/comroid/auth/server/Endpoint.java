@@ -73,6 +73,7 @@ public enum Endpoint implements ServerEndpoint.This {
         public REST.Response executePOST(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             body.use(EMAIL)
                     .map(UniNode::asString)
+                    .map(str -> str.replace("%40", "@"))
                     .ifPresent(target -> AuthServer.instance.sendEmail(target, mail -> mail
                             .withPlainText("hello world")));
             return new REST.Response(OK);
