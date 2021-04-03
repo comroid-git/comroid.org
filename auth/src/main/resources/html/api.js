@@ -1,5 +1,6 @@
 let loginPanel = `<iframe src="login"></iframe>`;
 let registerPanel = `<iframe src="register"></iframe>`;
+let isLoggedIn = false;
 
 function populateTag(data, tag, names, index) {
     if (names.length - 1 > index)
@@ -33,6 +34,7 @@ function initData() {
         return;
     } else {
         console.log("auth - Session found; ")
+        isLoggedIn = true;
 
         if (!isWidget)
             sessionNav().innerHTML = `<a href="logout">Logout</a>`;
