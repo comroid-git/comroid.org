@@ -29,6 +29,12 @@ public enum Endpoint implements ServerEndpoint.This {
             return new REST.Response(Polyfill.uri("account"), false);
         }
     },
+    FAVICON("favicon.ico") {
+        @Override
+        public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            return new REST.Response(Polyfill.uri("https://cdn.comroid.org/favicon.ico"));
+        }
+    },
     WIDGET("widget") {
         @Override
         public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
