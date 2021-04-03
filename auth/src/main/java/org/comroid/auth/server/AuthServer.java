@@ -9,10 +9,10 @@ import org.comroid.api.os.OS;
 import org.comroid.auth.user.UserManager;
 import org.comroid.common.io.FileHandle;
 import org.comroid.restless.adapter.java.JavaHttpAdapter;
-import org.comroid.restless.server.RestServer;
 import org.comroid.status.StatusConnection;
 import org.comroid.status.entity.Service;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
+import org.comroid.webkit.WebkitServer;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,13 +31,11 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
     public static final FileHandle DIR = new FileHandle("/srv/auth/", true);
     public static final FileHandle STATUS_CRED = DIR.createSubFile("status.cred");
     public static final FileHandle DATA = DIR.createSubDir("data");
-    public static final WebResources Resources;
     public static AuthServer instance;
 
     static {
         DIR.mkdir();
         DATA.mkdir();
-        Resources = new WebResources(ClassLoader.getSystemClassLoader());
         MASTER_CONTEXT = ContextualProvider.create(FastJSONLib.fastJsonLib, new JavaHttpAdapter());
     }
 
@@ -45,7 +43,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
     private final StatusConnection status;
     private final ContextualProvider context;
     private final UserManager userManager;
-    private final RestServer rest;
+    private final WebkitServer rest;
 
     public UserManager getUserManager() {
         return userManager;
@@ -75,7 +73,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
             context.addToContext(userManager);
 
             logger.debug("Starting Rest server");
-            this.rest = new RestServer(context, this.executor, URL_BASE, OS.current == OS.WINDOWS ? InetAddress.getLoopbackAddress() : InetAddress.getLocalHost(), PORT, Endpoint.values());
+            this.rest = new WebkitServer(context, this.executor, URL_BASE, OS.current == OS.WINDOWS ? InetAddress.getLoopbackAddress() : InetAddress.getLocalHost(), PORT, Endpoint.values());
         } catch (UnknownHostException e) {
             throw new AssertionError(e);
         } catch (IOException e) {
