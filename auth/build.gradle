@@ -49,6 +49,7 @@ dependencies {
     implementation 'org.apache.logging.log4j:log4j-api:2.11.0'
     runtimeOnly 'org.apache.logging.log4j:log4j-core:2.11.0'
 
-    // runtime adapter dependencies
-    implementation 'com.alibaba:fastjson:1.2.70'
+    // xml dependency
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.11.2'
+    testImplementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.11.2'
 }

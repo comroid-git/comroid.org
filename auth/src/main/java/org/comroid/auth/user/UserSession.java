@@ -34,7 +34,7 @@ public final class UserSession {
     }
 
     public UniObjectNode getSessionData() {
-        UniObjectNode data = FastJSONLib.fastJsonLib.createObjectNode();
+        UniObjectNode data = AuthServer.SERI_LIB.createObjectNode();
 
         UniObjectNode account = this.account.toObjectNode(data.putObject("account"));
         account.remove("login");

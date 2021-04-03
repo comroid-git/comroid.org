@@ -38,7 +38,7 @@ public enum Endpoint implements ServerEndpoint.This {
     WIDGET("widget") {
         @Override
         public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            return new REST.Response(OK, "text/html", AuthServer.Resources.getPage("widget"));
+            return new REST.Response(OK);
         }
     },
     API("api") {
@@ -52,8 +52,7 @@ public enum Endpoint implements ServerEndpoint.This {
                     return new REST.Response(OK, session.getSessionData());
 
                 String dataWrapper = String.format("let sessionData = JSON.parse('%s');", session.getSessionData().toSerializedString());
-                InputStreamReader api = AuthServer.Resources.getAPI();
-                Reader page = ReaderUtil.combine('\n', new StringReader(dataWrapper), api);
+                Reader page = ReaderUtil.combine('\n', new StringReader(dataWrapper));
 
                 return new REST.Response(OK, "application/javascript", page);
             } catch (RestEndpointException ignored) {
@@ -62,8 +61,7 @@ public enum Endpoint implements ServerEndpoint.This {
                     return new REST.Response(UNAUTHORIZED);
 
                 String dataWrapper = "let sessionData = undefined;";
-                InputStreamReader api = AuthServer.Resources.getAPI();
-                Reader page = ReaderUtil.combine('\n', new StringReader(dataWrapper), api);
+                Reader page = ReaderUtil.combine('\n', new StringReader(dataWrapper));
 
                 return new REST.Response(OK, "application/javascript", page);
             }
@@ -72,8 +70,7 @@ public enum Endpoint implements ServerEndpoint.This {
     ACCOUNT("account") {
         @Override
         public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            InputStreamReader accountPage = AuthServer.Resources.getPage("account");
-            return new REST.Response(OK, "text/html", accountPage);
+            return new REST.Response(OK);
         }
     },
     MODIFY_ACCOUNT("account/%s", "\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b") {
@@ -113,10 +110,9 @@ public enum Endpoint implements ServerEndpoint.This {
     REGISTRATION("register") {
         @Override
         public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            InputStreamReader registerPanel = AuthServer.Resources.getPanel("register");
             REST.Header.List response = new REST.Header.List();
             response.add(CommonHeaderNames.CACHE_CONTROL, "no-cache");
-            return new REST.Response(OK, "text/html", registerPanel, response);
+            return new REST.Response(OK, response);
         }
 
         @Override
@@ -140,10 +136,9 @@ public enum Endpoint implements ServerEndpoint.This {
     LOGIN("login") {
         @Override
         public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            InputStreamReader loginPanel = AuthServer.Resources.getPanel("login");
             REST.Header.List response = new REST.Header.List();
             response.add(CommonHeaderNames.CACHE_CONTROL, "no-cache");
-            return new REST.Response(OK, "text/html", loginPanel, response);
+            return new REST.Response(OK, response);
         }
 
         @Override

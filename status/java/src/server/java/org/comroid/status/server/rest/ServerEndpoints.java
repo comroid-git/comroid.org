@@ -2,11 +2,10 @@ package org.comroid.status.server.rest;
 
 import com.sun.net.httpserver.Headers;
 import org.comroid.restless.CommonHeaderNames;
-import org.comroid.restless.HTTPStatusCodes;
 import org.comroid.restless.REST;
 import org.comroid.restless.endpoint.AccessibleEndpoint;
-import org.comroid.restless.server.RestEndpointException;
-import org.comroid.restless.server.ServerEndpoint;
+import org.comroid.webkit.server.RestEndpointException;
+import org.comroid.webkit.server.ServerEndpoint;
 import org.comroid.status.entity.Service;
 import org.comroid.status.rest.Endpoint;
 import org.comroid.status.server.StatusServer;
@@ -17,7 +16,6 @@ import org.comroid.uniform.node.UniArrayNode;
 import org.comroid.uniform.node.UniNode;
 
 import java.io.FileNotFoundException;
-import java.util.function.Function;
 
 import static org.comroid.restless.HTTPStatusCodes.*;
 

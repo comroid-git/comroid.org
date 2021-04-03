@@ -33,17 +33,22 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
     public static final FileHandle DATA = DIR.createSubDir("data");
     public static AuthServer instance;
 
+    public static final FastJSONLib SERI_LIB;
+    public static final JavaHttpAdapter HTTP_LIB;
+
     static {
         DIR.mkdir();
         DATA.mkdir();
-        MASTER_CONTEXT = ContextualProvider.create(FastJSONLib.fastJsonLib, new JavaHttpAdapter());
+        SERI_LIB = FastJSONLib.fastJsonLib;
+        HTTP_LIB = new JavaHttpAdapter();
+        MASTER_CONTEXT = ContextualProvider.create(SERI_LIB, HTTP_LIB);
     }
 
     private final ScheduledExecutorService executor;
     private final StatusConnection status;
     private final ContextualProvider context;
     private final UserManager userManager;
-    private final WebkitServer rest;
+    private final WebkitServer server;
 
     public UserManager getUserManager() {
         return userManager;
@@ -73,7 +78,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
             context.addToContext(userManager);
 
             logger.debug("Starting Rest server");
-            this.rest = new WebkitServer(context, this.executor, URL_BASE, OS.current == OS.WINDOWS ? InetAddress.getLoopbackAddress() : InetAddress.getLocalHost(), PORT, Endpoint.values());
+            this.server = new WebkitServer(context, this.executor, URL_BASE, OS.current == OS.WINDOWS ? InetAddress.getLoopbackAddress() : InetAddress.getLocalHost(), PORT, Endpoint.values());
         } catch (UnknownHostException e) {
             throw new AssertionError(e);
         } catch (IOException e) {
@@ -95,7 +100,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
         try {
             status.stopPolling(Service.Status.OFFLINE)
                     .exceptionally(Polyfill.exceptionLogger(logger, "Could not stop Polling"));
-            rest.close();
+            server.close();
         } catch (Throwable t) {
             logger.error("Could not shutdown Rest Server gracefully", t);
         }

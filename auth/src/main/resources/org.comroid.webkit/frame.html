@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<!-- todo: Extract generation stuff -->
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width,initial-scale=1.0" name="viewport">
+    <meta content="comroid, account" name="keywords"/>
+    <meta content="index, follow" name="robots"/>
+
+    <link href="https://cdn.comroid.org/favicon.ico" rel="icon">
+    <link href="https://comroid.org/style.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Fira+Mono" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Sans&display=swap" rel="stylesheet">
+
+    <style>
+        a {
+            color: inherit !important;
+        }
+
+        a:visited {
+            color: inherit !important;
+        }
+    </style>
+
+    <script src="webkit/api" type="application/javascript"></script>
+    <script src="api" type="application/javascript"></script>
+    <script type="application/javascript">
+        function initPage() {
+            console.log("auth - Initializing Data");
+            initData();
+            console.log("auth - Session Loaded; Data: ", sessionData)
+        }
+    </script>
+
+    <title> comroid Account </title>
+</head>
+<!-- initialization should be automatic -->
+<body onload="initPage()">
+<header style="height: 150px !important;">
+    <h1><a href="https://comroid.org">comroid</a></h1>
+    <h2><a href="account">Manage your comroid Account</a></h2>
+    <p id="sessionNav">...</p>
+</header>
+<div id="content">
+    <h2>Your comroid Account</h2>
+    <p> Account ID: <a class="inject account.uuid"></a></p>
+    <p> E-Mail: <a class="inject account.email"></a></p>
+</div>
+<footer>By accessing this site, you consent to the use of Cookies.</footer>
+</body>
+</html>
