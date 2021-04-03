@@ -36,11 +36,13 @@ dependencies {
     if (isAutoDeploy) {
         implementation 'org.comroid:status-api:0.+'
         implementation 'org.comroid:restless:0.+'
+        implementation 'org.comroid:webkit:0.+'
     } else {
         implementation project(':status:status-api')
 
         implementation project(':guardian:uniform').sourceSets.java8compat.output.classesDirs
         implementation project(':guardian:restless').sourceSets.java11compat.output.classesDirs
+        implementation project(':guardian:webkit')
     }
 
     // logging dependencies
