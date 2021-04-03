@@ -26,15 +26,16 @@ public class WebSocketClientTest {
                 new REST.Header.List()
         ).join();
 
-        logger.info("Sending test data");
-        socket.send("penis");
-
         socket.getPacketPipeline()
                 .filterKey(t -> t == WebsocketPacket.Type.OPEN)
                 .peek(packet -> {
                     logger.info("sending response for OPEN packet");
                     socket.send("hello server");
                 });
+
+        logger.info("Sending test data");
+        socket.send("penis");
+
         socket.getPacketPipeline()
                 .peekBoth((t, p) -> logger.info("data received: {} - {}", t, p))
                 .filterKey(t -> t == WebsocketPacket.Type.ERROR)
