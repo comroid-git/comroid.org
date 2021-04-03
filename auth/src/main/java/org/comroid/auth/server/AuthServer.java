@@ -8,10 +8,13 @@ import org.comroid.api.UncheckedCloseable;
 import org.comroid.api.os.OS;
 import org.comroid.auth.user.UserManager;
 import org.comroid.common.io.FileHandle;
+import org.comroid.restless.HttpAdapter;
 import org.comroid.restless.adapter.java.JavaHttpAdapter;
 import org.comroid.status.StatusConnection;
 import org.comroid.status.entity.Service;
+import org.comroid.uniform.SerializationAdapter;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
+import org.comroid.uniform.adapter.json.jackson.JacksonJSONAdapter;
 import org.comroid.webkit.WebkitServer;
 
 import java.io.IOException;
@@ -33,13 +36,13 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
     public static final FileHandle DATA = DIR.createSubDir("data");
     public static AuthServer instance;
 
-    public static final FastJSONLib SERI_LIB;
-    public static final JavaHttpAdapter HTTP_LIB;
+    public static final SerializationAdapter SERI_LIB;
+    public static final HttpAdapter HTTP_LIB;
 
     static {
         DIR.mkdir();
         DATA.mkdir();
-        SERI_LIB = FastJSONLib.fastJsonLib;
+        SERI_LIB = JacksonJSONAdapter.instance;
         HTTP_LIB = new JavaHttpAdapter();
         MASTER_CONTEXT = ContextualProvider.create(SERI_LIB, HTTP_LIB);
     }
