@@ -6,6 +6,9 @@
     <meta content="width=device-width,initial-scale=1.0" name="viewport">
     <meta content="comroid, account" name="keywords"/>
     <meta content="index, follow" name="robots"/>
+    <meta content="kaleidox@comroid.org" name="author"/>
+    <meta content="comroid" name="publisher"/>
+    <meta content="comroid Account" name="description"/>
 
     <link href="https://cdn.comroid.org/favicon.ico" rel="icon">
     <link href="https://comroid.org/style.css" rel="stylesheet">
@@ -22,25 +25,11 @@
         }
     </style>
 
-    <script src="webkit/api" type="application/javascript"></script>
-    <script src="api" type="application/javascript"></script>
-    <script type="application/javascript">
-        function initPage() {
-            console.log("auth - Initializing Data");
-            initData();
-            console.log("auth - Session Loaded; Data: ", sessionData)
-        }
-    </script>
-
     <title> comroid Account </title>
 </head>
 <!-- initialization should be automatic -->
-<body onload="initPage()">
-<header style="height: 150px !important;">
-    <h1><a href="https://comroid.org">comroid</a></h1>
-    <h2><a href="account">Manage your comroid Account</a></h2>
-    <p id="sessionNav">...</p>
-</header>
+<body>
+<header style="height: 150px !important;" />
 <div id="content">
     <h2>Your comroid Account</h2>
     <p> Account ID: <a class="inject account.uuid"></a></p>

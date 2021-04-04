@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <data>
     <parts>
+        <header>part/header.html</header>
         <footer>part/footer.html</footer>
     </parts>
     <panels>
