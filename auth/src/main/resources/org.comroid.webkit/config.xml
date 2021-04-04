@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data>
+    <baseUrl>auth.comroid.org</baseUrl>
+    <test>
+        <id>xxx</id>
+        <status>xxx</status>
+    </test>
+    <test>
+        <id>xxx</id>
+        <status>xxx</status>
+    </test>
+</data>

@@ -49,9 +49,6 @@ dependencies {
     implementation 'org.apache.logging.log4j:log4j-api:2.11.0'
     runtimeOnly 'org.apache.logging.log4j:log4j-core:2.11.0'
 
-    // jsoup HTML parser library @ https://jsoup.org/
-    implementation 'org.jsoup:jsoup:1.13.1'
-
     // json dependency
     implementation 'com.alibaba:fastjson:1.2.71'
 /*
