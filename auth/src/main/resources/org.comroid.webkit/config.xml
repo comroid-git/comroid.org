@@ -5,5 +5,6 @@
     </parts>
     <panels>
         <home>panel/home.html</home>
+        <other>panel/other.html</other>
     </panels>
 </data>

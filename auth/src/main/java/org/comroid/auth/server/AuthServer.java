@@ -81,7 +81,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
             this.userManager = new UserManager(this);
             context.addToContext(userManager);
 
-            logger.debug("Starting Rest server");
+            logger.debug("Starting Webkit server");
             this.server = new WebkitServer(
                     context,
                     this.executor,
