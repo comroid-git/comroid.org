@@ -6,6 +6,7 @@
     </parts>
     <panels>
         <home>panel/home.html</home>
-        <other>panel/other.html</other>
+        <login>panel/login.html</login>
+        <register>panel/register.html</register>
     </panels>
 </data>
