@@ -27,7 +27,6 @@ import java.util.concurrent.ScheduledExecutorService;
 
 public final class AuthServer implements ContextualProvider.Underlying, UncheckedCloseable {
     //http://localhost:42000
-    //http://localhost:42000
     public static final Logger logger = LogManager.getLogger("AuthServer");
     public static final ContextualProvider MASTER_CONTEXT;
     public static final String URL_BASE = "https://auth.comroid.org/";
