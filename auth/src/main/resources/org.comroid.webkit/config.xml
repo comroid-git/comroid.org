@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <data>
-    <baseUrl>auth.comroid.org</baseUrl>
-    <test>
-        <id>xxx</id>
-        <status>xxx</status>
-    </test>
-    <test>
-        <id>xxx</id>
-        <status>xxx</status>
-    </test>
+    <parts>
+        <footer>part/footer.html</footer>
+    </parts>
+    <panels>
+        <home>panel/home.html</home>
+    </panels>
 </data>

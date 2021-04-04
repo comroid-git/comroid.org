@@ -14,6 +14,7 @@ import org.comroid.status.StatusConnection;
 import org.comroid.status.entity.Service;
 import org.comroid.uniform.SerializationAdapter;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
+import org.comroid.webkit.config.WebkitConfiguration;
 import org.comroid.webkit.server.WebkitServer;
 
 import java.io.IOException;
@@ -44,6 +45,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
         SERI_LIB = FastJSONLib.fastJsonLib;
         HTTP_LIB = new JavaHttpAdapter();
         MASTER_CONTEXT = ContextualProvider.create(SERI_LIB, HTTP_LIB);
+        WebkitConfiguration.initialize(MASTER_CONTEXT);
     }
 
     private final ScheduledExecutorService executor;
