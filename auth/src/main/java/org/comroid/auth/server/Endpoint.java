@@ -23,12 +23,6 @@ import static org.comroid.auth.user.UserAccount.EMAIL;
 import static org.comroid.restless.HTTPStatusCodes.*;
 
 public enum Endpoint implements ServerEndpoint.This {
-    HOME("") {
-        @Override
-        public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            return new REST.Response(Polyfill.uri("account"), false);
-        }
-    },
     FAVICON("favicon.ico") {
         @Override
         public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
