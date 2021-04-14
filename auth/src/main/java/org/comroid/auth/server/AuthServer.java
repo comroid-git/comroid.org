@@ -93,8 +93,6 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
                     SOCKET_PORT,
                     Endpoint.values()
             );
-
-            server.getSocket().onNewConnection(ws -> ws.sendText("id:content;<p>this is my body</p>"));
         } catch (UnknownHostException e) {
             throw new AssertionError(e);
         } catch (IOException e) {
