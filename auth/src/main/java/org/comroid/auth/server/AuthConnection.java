@@ -1,6 +1,7 @@
 package org.comroid.auth.server;
 
 import org.comroid.auth.user.UserSession;
+import org.comroid.mutatio.model.RefContainer;
 import org.comroid.restless.REST;
 import org.comroid.restless.server.RestEndpointException;
 import org.comroid.restless.socket.WebsocketPacket;
@@ -33,7 +34,10 @@ public final class AuthConnection extends WebkitConnection {
             this.session = session;
         }
 
-        on(WebsocketPacket.Type.CLOSE)
-                .peek(close -> this.session.connection.unset());
+        final RefContainer<WebsocketPacket.Type, WebsocketPacket> baselistener = on(WebsocketPacket.Type.CLOSE);
+        baselistener.peek(close -> {
+            this.session.connection.unset();
+            baselistener.close();
+        });
     }
 }
