@@ -26,7 +26,7 @@ public final class AuthConnection extends WebkitConnection {
         super(socketBase, headers, executor);
         UserSession session = null;
         try {
-            session = UserSession.findSession(headers.toJavaHeaders());
+            session = UserSession.findSession(headers);
             session.connection.set(this);
         } catch (RestEndpointException unauthorized) {
             session = null;

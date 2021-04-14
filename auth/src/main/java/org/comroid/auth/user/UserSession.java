@@ -6,6 +6,7 @@ import org.comroid.auth.server.AuthConnection;
 import org.comroid.auth.server.AuthServer;
 import org.comroid.mutatio.model.Ref;
 import org.comroid.mutatio.ref.Reference;
+import org.comroid.restless.REST;
 import org.comroid.restless.server.RestEndpointException;
 import org.comroid.uniform.node.UniNode;
 import org.comroid.uniform.node.UniObjectNode;
@@ -55,8 +56,16 @@ public final class UserSession {
         return String.format("%s=%s%s", UserSession.COOKIE_PREFIX, cookie, OS.current == OS.UNIX ? "; Domain=.comroid.org; Path=/" : "");
     }
 
+    public static UserSession findSession(REST.Header.List headers) {
+        return findSession(headers.getFirst(COOKIE));
+    }
+
     public static UserSession findSession(Headers headers) {
-        return Stream.of(headers.getFirst(COOKIE))
+        return findSession(headers.getFirst(COOKIE));
+    }
+
+    public static UserSession findSession(String cookie) {
+        return Stream.of(cookie)
                 .filter(Objects::nonNull)
                 .map(str -> str.split("; "))
                 .flatMap(Stream::of)
