@@ -33,8 +33,7 @@ public final class AuthConnection extends WebkitConnection {
             this.session = session;
         }
 
-        getPacketPipeline()
-                .filterKey(t -> t == WebsocketPacket.Type.CLOSE)
+        on(WebsocketPacket.Type.CLOSE)
                 .peek(close -> this.session.connection.unset());
     }
 }
