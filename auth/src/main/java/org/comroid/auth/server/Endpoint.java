@@ -127,14 +127,7 @@ public enum Endpoint implements ServerEndpoint.This {
             }
         }
     },
-    LOGIN("login") {
-        @Override
-        public REST.Response executeGET(ContextualProvider context, Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            REST.Header.List response = new REST.Header.List();
-            response.add(CommonHeaderNames.CACHE_CONTROL, "no-cache");
-            return new REST.Response(OK, response);
-        }
-
+    LOGIN("api/login") {
         @Override
         public REST.Response executePOST(ContextualProvider context, Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             try {
@@ -178,7 +171,7 @@ public enum Endpoint implements ServerEndpoint.This {
 
     @Override
     public String getUrlBase() {
-        return AuthServer.URL_BASE + "api/";
+        return AuthServer.URL_BASE;
     }
 
     @Override
