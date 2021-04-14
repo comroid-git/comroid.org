@@ -87,7 +87,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
                     context,
                     this.executor,
                     URL_BASE,
-                    OS.current == OS.WINDOWS
+                    OS.isWindows
                             ? InetAddress.getLoopbackAddress()
                             : InetAddress.getLocalHost(),
                     PORT,
