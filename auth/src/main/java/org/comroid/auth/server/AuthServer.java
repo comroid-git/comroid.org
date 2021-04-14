@@ -13,6 +13,7 @@ import org.comroid.mutatio.model.RefContainer;
 import org.comroid.restless.HttpAdapter;
 import org.comroid.restless.REST;
 import org.comroid.restless.adapter.java.JavaHttpAdapter;
+import org.comroid.restless.server.RestEndpointException;
 import org.comroid.status.StatusConnection;
 import org.comroid.status.entity.Service;
 import org.comroid.uniform.SerializationAdapter;
@@ -125,7 +126,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
             return session.connection.<Map<String, Object>>map(conn -> conn.properties)
                     .or(() -> Map.of("isValidSession", true, "sessionData", session.getSessionData()))
                     .assertion("internal error");
-        } catch (Throwable ignored) {
+        } catch (RestEndpointException unauthorized) {
             HashMap<String, Object> map = new HashMap<>();
             map.put("isValidSession", false);
             map.put("sessionData", null);
