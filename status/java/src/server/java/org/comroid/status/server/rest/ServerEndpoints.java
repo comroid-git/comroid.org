@@ -1,6 +1,7 @@
 package org.comroid.status.server.rest;
 
 import com.sun.net.httpserver.Headers;
+import org.comroid.api.ContextualProvider;
 import org.comroid.restless.CommonHeaderNames;
 import org.comroid.restless.REST;
 import org.comroid.restless.endpoint.AccessibleEndpoint;
@@ -22,7 +23,7 @@ import static org.comroid.restless.HTTPStatusCodes.*;
 public enum ServerEndpoints implements ServerEndpoint {
     LIST_SERVICES(Endpoint.LIST_SERVICES, false) {
         @Override
-        public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executeGET(ContextualProvider context, Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             final UniArrayNode services = StatusServer.ADAPTER_DEFINITION.serialization.createArrayNode();
 
             StatusServer.instance
@@ -40,7 +41,7 @@ public enum ServerEndpoints implements ServerEndpoint {
 
     SPECIFIC_SERVICE(Endpoint.SPECIFIC_SERVICE, true) {
         @Override
-        public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executeGET(ContextualProvider context, Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             return StatusServer.instance.getServiceByName(urlParams[0])
                     .map(service -> service.toObjectNode(StatusServer.ADAPTER_DEFINITION))
                     .map(node -> new ResponseBuilder()
@@ -51,7 +52,7 @@ public enum ServerEndpoints implements ServerEndpoint {
         }
 
         @Override
-        public REST.Response executePUT(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executePUT(ContextualProvider context, Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             if (StatusServer.instance.getEntityCache().containsKey(urlParams[0]))
                 throw new RestEndpointException(BAD_REQUEST, "Service " + urlParams[0] + " already exists!");
 
@@ -63,7 +64,7 @@ public enum ServerEndpoints implements ServerEndpoint {
         }
 
         @Override
-        public REST.Response executePATCH(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executePATCH(ContextualProvider context, Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             checkAdminAuthorization(headers);
 
             final LocalService service = requireLocalService(urlParams[0]);
@@ -76,7 +77,7 @@ public enum ServerEndpoints implements ServerEndpoint {
         }
 
         @Override
-        public REST.Response executeDELETE(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executeDELETE(ContextualProvider context, Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             checkAdminAuthorization(headers);
 
             final LocalService service = requireLocalService(urlParams[0]);
@@ -88,7 +89,7 @@ public enum ServerEndpoints implements ServerEndpoint {
     },
     SERVICE_STATUS_ICON(Endpoint.SERVICE_STATUS_ICON, false) {
         @Override
-        public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executeGET(ContextualProvider context, Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             return StatusServer.instance.getServiceByName(urlParams[0])
                     .map(Service::getStatus)
                     .map(StatusIcon::valueOf)
@@ -105,7 +106,7 @@ public enum ServerEndpoints implements ServerEndpoint {
     },
     UPDATE_SERVICE_STATUS(Endpoint.UPDATE_SERVICE_STATUS, false) {
         @Override
-        public REST.Response executePOST(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executePOST(ContextualProvider context, Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             final LocalService service = requireLocalService(urlParams[0]);
             checkAuthorization(headers, service);
 
@@ -126,7 +127,7 @@ public enum ServerEndpoints implements ServerEndpoint {
 
     POLL(Endpoint.POLL, false) {
         @Override
-        public REST.Response executePOST(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executePOST(ContextualProvider context, Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             final LocalService service = requireLocalService(urlParams[0]);
             checkAuthorization(headers, service);
 
@@ -146,7 +147,7 @@ public enum ServerEndpoints implements ServerEndpoint {
         }
 
         @Override
-        public REST.Response executeDELETE(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executeDELETE(ContextualProvider context, Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             final LocalService service = requireLocalService(urlParams[0]);
             checkAuthorization(headers, service);
 

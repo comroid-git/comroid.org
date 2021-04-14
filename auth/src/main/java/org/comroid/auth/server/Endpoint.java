@@ -1,6 +1,7 @@
 package org.comroid.auth.server;
 
 import com.sun.net.httpserver.Headers;
+import org.comroid.api.ContextualProvider;
 import org.comroid.api.Polyfill;
 import org.comroid.auth.user.UserAccount;
 import org.comroid.auth.user.UserSession;
@@ -14,7 +15,6 @@ import org.comroid.util.ReaderUtil;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.util.regex.Pattern;
@@ -25,19 +25,19 @@ import static org.comroid.restless.HTTPStatusCodes.*;
 public enum Endpoint implements ServerEndpoint.This {
     FAVICON("favicon.ico") {
         @Override
-        public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executeGET(ContextualProvider context, Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             return new REST.Response(Polyfill.uri("https://cdn.comroid.org/favicon.ico"));
         }
     },
     WIDGET("widget") {
         @Override
-        public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executeGET(ContextualProvider context, Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             return new REST.Response(OK);
         }
     },
     API("api") {
         @Override
-        public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executeGET(ContextualProvider context, Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             try {
                 UserSession session = UserSession.findSession(headers);
 
@@ -63,13 +63,13 @@ public enum Endpoint implements ServerEndpoint.This {
     },
     ACCOUNT("account") {
         @Override
-        public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executeGET(ContextualProvider context, Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             return new REST.Response(OK);
         }
     },
     MODIFY_ACCOUNT("account/%s", "\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b") {
         @Override
-        public REST.Response executePATCH(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executePATCH(ContextualProvider context, Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             try {
                 UserSession session = UserSession.findSession(headers);
                 UserAccount account = session.getAccount();
@@ -103,14 +103,14 @@ public enum Endpoint implements ServerEndpoint.This {
     },
     REGISTRATION("register") {
         @Override
-        public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executeGET(ContextualProvider context, Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             REST.Header.List response = new REST.Header.List();
             response.add(CommonHeaderNames.CACHE_CONTROL, "no-cache");
             return new REST.Response(OK, response);
         }
 
         @Override
-        public REST.Response executePOST(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executePOST(ContextualProvider context, Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             try {
                 String email = body.use(EMAIL)
                         .map(UniNode::asString)
@@ -129,14 +129,14 @@ public enum Endpoint implements ServerEndpoint.This {
     },
     LOGIN("login") {
         @Override
-        public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executeGET(ContextualProvider context, Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             REST.Header.List response = new REST.Header.List();
             response.add(CommonHeaderNames.CACHE_CONTROL, "no-cache");
             return new REST.Response(OK, response);
         }
 
         @Override
-        public REST.Response executePOST(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executePOST(ContextualProvider context, Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             try {
                 String email = body.use(EMAIL)
                         .map(UniNode::asString)
@@ -156,13 +156,13 @@ public enum Endpoint implements ServerEndpoint.This {
         }
 
         @Override
-        public REST.Response executeDELETE(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executeDELETE(ContextualProvider context, Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             return new REST.Response(Polyfill.uri("logout"));
         }
     },
     LOGOUT("logout") {
         @Override
-        public REST.Response executeGET(Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executeGET(ContextualProvider context, Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             UserSession session = UserSession.findSession(headers);
             AuthServer.instance.getUserManager().closeSession(session);
             REST.Header.List response = new REST.Header.List();
@@ -178,7 +178,7 @@ public enum Endpoint implements ServerEndpoint.This {
 
     @Override
     public String getUrlBase() {
-        return AuthServer.URL_BASE;
+        return AuthServer.URL_BASE + "api/";
     }
 
     @Override

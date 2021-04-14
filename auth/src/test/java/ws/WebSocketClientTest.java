@@ -26,14 +26,14 @@ public class WebSocketClientTest {
                 new REST.Header.List()
         ).join();
 
-        socket.getPacketPipeline()
+        socket.getEventPipeline()
                 .filterKey(t -> t == WebsocketPacket.Type.OPEN)
                 .peek(packet -> {
                     logger.info("WebSocket Opened! {}", packet);
                     socket.send("hello server");
                 });
 
-        socket.getPacketPipeline()
+        socket.getEventPipeline()
                 .peekBoth((t, p) -> logger.info("Client received: {} - {}", t, p))
                 .filterKey(t -> t == WebsocketPacket.Type.ERROR)
                 .peek(packet -> packet.getError().consume(e -> logger.error("Error Occurred", e)));

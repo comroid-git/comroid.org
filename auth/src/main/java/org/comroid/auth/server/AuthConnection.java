@@ -28,6 +28,7 @@ public final class AuthConnection extends WebkitConnection {
         try {
             session = UserSession.findSession(headers);
             session.connection.set(this);
+            setProperty("sessionData", session.getSessionData().toSerializedString());
         } catch (RestEndpointException unauthorized) {
             session = null;
         } finally {

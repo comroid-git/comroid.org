@@ -7,9 +7,11 @@ import org.comroid.api.Polyfill;
 import org.comroid.api.UncheckedCloseable;
 import org.comroid.api.os.OS;
 import org.comroid.auth.user.UserManager;
+import org.comroid.auth.user.UserSession;
 import org.comroid.common.io.FileHandle;
 import org.comroid.mutatio.model.RefContainer;
 import org.comroid.restless.HttpAdapter;
+import org.comroid.restless.REST;
 import org.comroid.restless.adapter.java.JavaHttpAdapter;
 import org.comroid.status.StatusConnection;
 import org.comroid.status.entity.Service;
@@ -23,6 +25,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -64,6 +68,10 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
         return context;
     }
 
+    public RefContainer<?, AuthConnection> getActiveConnections() {
+        return server.getActiveConnections().flatMap(AuthConnection.class);
+    }
+
     public AuthServer(ScheduledExecutorService executor) {
         logger.info("Booting up");
         try {
@@ -93,6 +101,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
                     PORT,
                     SOCKET_PORT,
                     AuthConnection::new,
+                    this::findPageProperties,
                     Endpoint.values()
             );
         } catch (UnknownHostException e) {
@@ -106,12 +115,22 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
         logger.info("Ready!");
     }
 
-    public RefContainer<?, AuthConnection> getActiveConnections() {
-        return server.getActiveConnections().flatMap(AuthConnection.class);
-    }
-
     public static void main(String[] args) {
         instance = new AuthServer(Executors.newScheduledThreadPool(8));
+    }
+
+    private Map<String, Object> findPageProperties(REST.Header.List headers) {
+        try {
+            UserSession session = UserSession.findSession(headers);
+            return session.connection.<Map<String, Object>>map(conn -> conn.properties)
+                    .or(() -> Map.of("isValidSession", true, "sessionData", session.getSessionData()))
+                    .assertion("internal error");
+        } catch (Throwable ignored) {
+            HashMap<String, Object> map = new HashMap<>();
+            map.put("isValidSession", false);
+            map.put("sessionData", null);
+            return map;
+        }
     }
 
     @Override
