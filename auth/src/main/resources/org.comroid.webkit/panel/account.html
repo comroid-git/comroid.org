@@ -1,0 +1,10 @@
+<h2>Your comroid Account</h2>
+<h3 style="color: darkred" when="!isValidSession">You are not logged in</h3>
+<div when="isValidSession">
+    <p> Account ID:
+        <t inject="sessionData.account.uuid"></t>
+    </p>
+    <p> E-Mail:
+        <t inject="sessionData.account.email"></t>
+    </p>
+</div>

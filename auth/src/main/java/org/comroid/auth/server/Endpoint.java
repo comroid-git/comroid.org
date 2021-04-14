@@ -35,38 +35,6 @@ public enum Endpoint implements ServerEndpoint.This {
             return new REST.Response(OK);
         }
     },
-    API("api") {
-        @Override
-        public REST.Response executeGET(ContextualProvider context, Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            try {
-                UserSession session = UserSession.findSession(headers);
-
-                String accept = headers.getFirst(CommonHeaderNames.ACCEPTED_CONTENT_TYPE);
-                if (accept != null && accept.equals("application/json"))
-                    return new REST.Response(OK, session.getSessionData());
-
-                String dataWrapper = String.format("let sessionData = JSON.parse('%s');", session.getSessionData().toSerializedString());
-                Reader page = ReaderUtil.combine('\n', new StringReader(dataWrapper));
-
-                return new REST.Response(OK, "application/javascript", page);
-            } catch (RestEndpointException ignored) {
-                String accept = headers.getFirst(CommonHeaderNames.ACCEPTED_CONTENT_TYPE);
-                if (accept != null && accept.equals("application/json"))
-                    return new REST.Response(UNAUTHORIZED);
-
-                String dataWrapper = "let sessionData = undefined;";
-                Reader page = ReaderUtil.combine('\n', new StringReader(dataWrapper));
-
-                return new REST.Response(OK, "application/javascript", page);
-            }
-        }
-    },
-    ACCOUNT("account") {
-        @Override
-        public REST.Response executeGET(ContextualProvider context, Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            return new REST.Response(OK);
-        }
-    },
     MODIFY_ACCOUNT("account/%s", "\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b") {
         @Override
         public REST.Response executePATCH(ContextualProvider context, Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
@@ -86,13 +54,13 @@ public enum Endpoint implements ServerEndpoint.This {
                     if (!body.use("previous_password")
                             .map(UniNode::asString)
                             .combine(email, UserAccount::encrypt)
-                            .test(account.login::contentEquals))
+                            .accumulate(email, (pw, mail) -> account.tryLogin(mail, pw)))
                         throw new RestEndpointException(UNAUTHORIZED, "Old Password wrong");
 
                     body.use("password")
                             .map(UniNode::asString)
                             .combine(email, UserAccount::encrypt)
-                            .consume(hash -> account.put(UserAccount.LOGIN, hash));
+                            .consume(account::putHash);
                 }
 
                 return new REST.Response(OK, account);
@@ -107,6 +75,7 @@ public enum Endpoint implements ServerEndpoint.This {
             try {
                 String email = body.use(EMAIL)
                         .map(UniNode::asString)
+                        .map(str -> str.replace("%40", "@"))
                         .requireNonNull("No Email provided");
                 String password = body.use("password")
                         .map(UniNode::asString)
@@ -126,6 +95,7 @@ public enum Endpoint implements ServerEndpoint.This {
             try {
                 String email = body.use(EMAIL)
                         .map(UniNode::asString)
+                        .map(str -> str.replace("%40", "@"))
                         .requireNonNull("No Email provided");
                 String password = body.use("password")
                         .map(UniNode::asString)

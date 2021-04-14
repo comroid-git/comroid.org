@@ -27,14 +27,10 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
             = Type.createBind("email")
             .extractAs(StandardValueType.STRING)
             .build();
-    public static final VarBind<UserAccount, String, String, String> LOGIN
-            = Type.createBind("login")
-            .extractAs(StandardValueType.STRING)
-            .build();
     public final Ref<UUID> id = getComputedReference(ID);
     public final Ref<String> email = getComputedReference(EMAIL);
-    public final Ref<String> login = getComputedReference(LOGIN);
     private final FileHandle dir;
+    private final FileHandle loginHashFile;
 
     @Override
     public UUID getUUID() {
@@ -58,17 +54,19 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
             obj.copyFrom(subFile.parse(context.requireFromContext(Serializer.class)));
         });
         this.dir = sourceDir;
+        this.loginHashFile = dir.createSubFile("login.hash");
     }
 
     UserAccount(UserManager context, UUID id, String email, String password) {
         super(context, obj -> {
             obj.put(ID, id.toString());
             obj.put(EMAIL, email);
-            obj.put(LOGIN, encrypt(email, password));
         });
         this.dir = UserManager.DIR.createSubDir(id.toString());
         dir.mkdir();
         dir.createSubFile("user.json").setContent(toSerializedString());
+        this.loginHashFile = dir.createSubFile("login.hash");
+        this.loginHashFile.setContent(encrypt(email, password));
     }
 
     public static String encrypt(String email, String password) {
@@ -85,6 +83,10 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
 
     public boolean tryLogin(String email, String password) {
         String result = encrypt(email, password);
-        return login.contentEquals(result);
+        return loginHashFile.getContent().equals(result);
+    }
+
+    public void putHash(String hash) {
+        loginHashFile.setContent(hash);
     }
 }

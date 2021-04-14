@@ -5,6 +5,7 @@ import org.comroid.mutatio.model.RefContainer;
 import org.comroid.restless.REST;
 import org.comroid.restless.server.RestEndpointException;
 import org.comroid.restless.socket.WebsocketPacket;
+import org.comroid.uniform.node.UniObjectNode;
 import org.comroid.webkit.socket.WebkitConnection;
 import org.java_websocket.WebSocket;
 
@@ -28,12 +29,20 @@ public final class AuthConnection extends WebkitConnection {
         try {
             session = UserSession.findSession(headers);
             session.connection.set(this);
+
             setProperty("sessionData", session.getSessionData().toSerializedString());
         } catch (RestEndpointException unauthorized) {
             session = null;
         } finally {
             this.session = session;
         }
+
+        // send session data
+        UniObjectNode eventData = session.getSessionData()
+                .surroundWithObject("sessionData")
+                .surroundWithObject("data");
+        eventData.put("type", "inject");
+        sendText(eventData);
 
         final RefContainer<WebsocketPacket.Type, WebsocketPacket> baselistener = on(WebsocketPacket.Type.CLOSE);
         baselistener.peek(close -> {

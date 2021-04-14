@@ -11,6 +11,7 @@ import org.comroid.restless.server.RestEndpointException;
 import org.comroid.uniform.node.UniNode;
 import org.comroid.uniform.node.UniObjectNode;
 
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -57,11 +58,11 @@ public final class UserSession {
     }
 
     public static UserSession findSession(REST.Header.List headers) {
-        return findSession(headers.getFirst(COOKIE));
+        return findSession(findCookie(headers.toJavaHeaders()));
     }
 
     public static UserSession findSession(Headers headers) {
-        return findSession(headers.getFirst(COOKIE));
+        return findSession(findCookie(headers));
     }
 
     public static UserSession findSession(String cookie) {
@@ -81,6 +82,16 @@ public final class UserSession {
                 .filter(Objects::nonNull)
                 .findAny()
                 .orElseThrow(() -> new RestEndpointException(UNAUTHORIZED));
+    }
+
+    private static String findCookie(Headers headers) {
+        if (!headers.containsKey(COOKIE))
+            return "";
+        return headers.get(COOKIE)
+                .stream()
+                .filter(UserSession::isAppCookie)
+                .findAny()
+                .orElse("");
     }
 
     public static boolean isAppCookie(String fullCookie) {
