@@ -37,17 +37,20 @@ public final class AuthConnection extends WebkitConnection {
             this.session = session;
         }
 
-        // send session data
-        UniObjectNode eventData = session.getSessionData()
-                .surroundWithObject("sessionData")
-                .surroundWithObject("data");
-        eventData.put("type", "inject");
-        sendText(eventData);
+        if (session != null) {
+            // unset connection in session
+            final RefContainer<WebsocketPacket.Type, WebsocketPacket> closeListener = on(WebsocketPacket.Type.CLOSE);
+            closeListener.peek(close -> {
+                this.session.connection.unset();
+                closeListener.close();
+            });
 
-        final RefContainer<WebsocketPacket.Type, WebsocketPacket> baselistener = on(WebsocketPacket.Type.CLOSE);
-        baselistener.peek(close -> {
-            this.session.connection.unset();
-            baselistener.close();
-        });
+            // send session data
+            UniObjectNode eventData = session.getSessionData()
+                    .surroundWithObject("sessionData")
+                    .surroundWithObject("data");
+            eventData.put("type", "inject");
+            sendText(eventData);
+        }
     }
 }
