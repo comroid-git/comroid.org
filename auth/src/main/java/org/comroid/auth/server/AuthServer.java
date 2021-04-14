@@ -8,6 +8,7 @@ import org.comroid.api.UncheckedCloseable;
 import org.comroid.api.os.OS;
 import org.comroid.auth.user.UserManager;
 import org.comroid.common.io.FileHandle;
+import org.comroid.mutatio.model.RefContainer;
 import org.comroid.restless.HttpAdapter;
 import org.comroid.restless.adapter.java.JavaHttpAdapter;
 import org.comroid.status.StatusConnection;
@@ -91,6 +92,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
                             : InetAddress.getLocalHost(),
                     PORT,
                     SOCKET_PORT,
+                    AuthConnection::new,
                     Endpoint.values()
             );
         } catch (UnknownHostException e) {
@@ -102,6 +104,10 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
         if (status != null && !status.isPolling() && !status.startPolling())
             throw new UnsupportedOperationException("Could not start polling server status");
         logger.info("Ready!");
+    }
+
+    public RefContainer<?, AuthConnection> getActiveConnections() {
+        return server.getActiveConnections().flatMap(AuthConnection.class);
     }
 
     public static void main(String[] args) {
