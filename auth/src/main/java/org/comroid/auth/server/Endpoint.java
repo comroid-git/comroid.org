@@ -101,14 +101,7 @@ public enum Endpoint implements ServerEndpoint.This {
             }
         }
     },
-    REGISTRATION("register") {
-        @Override
-        public REST.Response executeGET(ContextualProvider context, Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            REST.Header.List response = new REST.Header.List();
-            response.add(CommonHeaderNames.CACHE_CONTROL, "no-cache");
-            return new REST.Response(OK, response);
-        }
-
+    REGISTRATION("api/register") {
         @Override
         public REST.Response executePOST(ContextualProvider context, Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             try {
@@ -121,7 +114,7 @@ public enum Endpoint implements ServerEndpoint.This {
 
                 UserAccount account = AuthServer.instance.getUserManager().createAccount(email, password);
 
-                return new REST.Response(OK, account);
+                return Endpoint.forwardToWidgetOr(headers, new REST.Header.List(), "../", "account");
             } catch (Throwable t) {
                 throw new RestEndpointException(INTERNAL_SERVER_ERROR, "Could not create user account", t);
             }
@@ -142,7 +135,7 @@ public enum Endpoint implements ServerEndpoint.This {
 
                 REST.Header.List resp = new REST.Header.List();
                 resp.add("Set-Cookie", session.getCookie());
-                return forwardToWidgetOr(headers, resp, "account");
+                return forwardToWidgetOr(headers, resp, "../", "account");
             } catch (Throwable t) {
                 throw new RestEndpointException(INTERNAL_SERVER_ERROR, "Could not log in", t);
             }
@@ -153,7 +146,7 @@ public enum Endpoint implements ServerEndpoint.This {
             return new REST.Response(Polyfill.uri("logout"));
         }
     },
-    LOGOUT("logout") {
+    LOGOUT("api/logout") {
         @Override
         public REST.Response executeGET(ContextualProvider context, Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             UserSession session = UserSession.findSession(headers);
@@ -161,7 +154,7 @@ public enum Endpoint implements ServerEndpoint.This {
             REST.Header.List response = new REST.Header.List();
             response.add(CommonHeaderNames.CACHE_CONTROL, "no-cache");
             response.add("Set-Cookie", UserSession.NULL_COOKIE);
-            return forwardToWidgetOr(headers, response, "account");
+            return forwardToWidgetOr(headers, response, "../", "account");
         }
     };
 
@@ -196,11 +189,11 @@ public enum Endpoint implements ServerEndpoint.This {
     }
 
     @NotNull
-    private static REST.Response forwardToWidgetOr(Headers headers, REST.Header.List response, String other) {
+    private static REST.Response forwardToWidgetOr(Headers headers, REST.Header.List response, String prefix, String other) {
         String referrer = headers.getFirst(CommonHeaderNames.REFERER);
         referrer = referrer == null ? "" : referrer.substring(referrer.lastIndexOf('/') + 1);
         boolean isWidget = referrer.equals("widget");
-        response.add(CommonHeaderNames.REDIRECT_TARGET, isWidget ? "widget" : other);
+        response.add(CommonHeaderNames.REDIRECT_TARGET, prefix + (isWidget ? "widget" : other));
         return new REST.Response(MOVED_PERMANENTLY, response);
     }
 }
