@@ -2,7 +2,7 @@ package ws;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.comroid.webkit.server.WebsocketServer;
+import org.comroid.webkit.server.WebSocketServer;
 
 import java.io.*;
 import java.net.InetAddress;
@@ -20,7 +20,7 @@ public class WebSocketServerTest {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         logger.info("Starting Server");
-        WebsocketServer server = new WebsocketServer(
+        WebSocketServer server = new WebSocketServer(
                 null,
                 Executors.newScheduledThreadPool(8),
                 "localhost",
