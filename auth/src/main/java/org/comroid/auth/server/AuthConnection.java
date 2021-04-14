@@ -12,6 +12,10 @@ import java.util.concurrent.Executor;
 public final class AuthConnection extends WebkitConnection {
     private final UserSession session;
 
+    public boolean isLoggedIn() {
+        return session != null;
+    }
+
     public Optional<UserSession> getSession() {
         return Optional.ofNullable(session);
     }
