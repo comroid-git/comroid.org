@@ -2,9 +2,11 @@ package org.comroid.auth.user;
 
 import com.sun.net.httpserver.Headers;
 import org.comroid.api.os.OS;
+import org.comroid.auth.server.AuthConnection;
 import org.comroid.auth.server.AuthServer;
+import org.comroid.mutatio.model.Ref;
+import org.comroid.mutatio.ref.Reference;
 import org.comroid.restless.server.RestEndpointException;
-import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
 import org.comroid.uniform.node.UniNode;
 import org.comroid.uniform.node.UniObjectNode;
 
@@ -18,6 +20,7 @@ import static org.comroid.restless.HTTPStatusCodes.UNAUTHORIZED;
 public final class UserSession {
     public static final String COOKIE_PREFIX = "org.comroid.auth";
     public static final String NULL_COOKIE = wrapCookie("null");
+    public final Ref<AuthConnection> connection = Reference.create();
     private final UserAccount account;
     private final String cookie;
 

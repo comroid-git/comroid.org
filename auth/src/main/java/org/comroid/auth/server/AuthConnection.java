@@ -3,6 +3,7 @@ package org.comroid.auth.server;
 import org.comroid.auth.user.UserSession;
 import org.comroid.restless.REST;
 import org.comroid.restless.server.RestEndpointException;
+import org.comroid.restless.socket.WebsocketPacket;
 import org.comroid.webkit.socket.WebkitConnection;
 import org.java_websocket.WebSocket;
 
@@ -25,10 +26,15 @@ public final class AuthConnection extends WebkitConnection {
         UserSession session = null;
         try {
             session = UserSession.findSession(headers.toJavaHeaders());
+            session.connection.set(this);
         } catch (RestEndpointException unauthorized) {
             session = null;
         } finally {
             this.session = session;
         }
+
+        getPacketPipeline()
+                .filterKey(t -> t == WebsocketPacket.Type.CLOSE)
+                .peek(close -> this.session.connection.unset());
     }
 }
