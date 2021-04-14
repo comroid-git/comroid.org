@@ -19,6 +19,7 @@ import org.comroid.status.entity.Service;
 import org.comroid.uniform.SerializationAdapter;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
 import org.comroid.webkit.config.WebkitConfiguration;
+import org.comroid.webkit.model.PagePropertiesProvider;
 import org.comroid.webkit.server.WebkitServer;
 
 import java.io.IOException;
@@ -31,7 +32,7 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-public final class AuthServer implements ContextualProvider.Underlying, UncheckedCloseable {
+public final class AuthServer implements ContextualProvider.Underlying, UncheckedCloseable, PagePropertiesProvider {
     //http://localhost:42000
     public static final Logger logger = LogManager.getLogger("AuthServer");
     public static final ContextualProvider MASTER_CONTEXT;
@@ -120,7 +121,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
         instance = new AuthServer(Executors.newScheduledThreadPool(8));
     }
 
-    private Map<String, Object> findPageProperties(REST.Header.List headers) {
+    public Map<String, Object> findPageProperties(REST.Header.List headers) {
         try {
             UserSession session = UserSession.findSession(headers);
             return session.connection.<Map<String, Object>>map(conn -> conn.properties)

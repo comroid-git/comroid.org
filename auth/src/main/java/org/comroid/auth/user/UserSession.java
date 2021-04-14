@@ -54,7 +54,7 @@ public final class UserSession {
     }
 
     public static String wrapCookie(String cookie) {
-        return String.format("%s=%s%s", UserSession.COOKIE_PREFIX, cookie, OS.current == OS.UNIX ? "; Domain=.comroid.org; Path=/" : "");
+        return String.format("%s=%s; Max-Age=3600; Path=/%s", UserSession.COOKIE_PREFIX, cookie, OS.current == OS.UNIX ? "; Domain=.comroid.org" : "");
     }
 
     public static UserSession findSession(REST.Header.List headers) {
