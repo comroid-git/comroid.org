@@ -100,10 +100,10 @@ public final class AuthConnection extends WebkitConnection {
                         ) {
                             String panelData = br.lines().collect(Collectors.joining("\n"));
                             Document doc = Jsoup.parse(panelData);
-                            FrameBuilder.fabricateDocument(doc, host, pageProperties);
+                            String docString = FrameBuilder.fabricateDocumentToString(doc, host, pageProperties);
 
                             response.put("type", "changePanel");
-                            response.put("data", doc.toString());
+                            response.put("data", docString);
                             break;
                         } catch (Throwable e) {
                             logger.error("Could not read target panel " + target, e);
