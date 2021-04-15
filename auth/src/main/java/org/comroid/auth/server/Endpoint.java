@@ -37,7 +37,7 @@ public enum Endpoint implements ServerEndpoint.This {
     },
     MODIFY_ACCOUNT("account/%s", "\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b") {
         @Override
-        public REST.Response executePATCH(ContextualProvider context, Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executePOST(ContextualProvider context, Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             try {
                 UserSession session = UserSession.findSession(headers);
                 UserAccount account = session.getAccount();
