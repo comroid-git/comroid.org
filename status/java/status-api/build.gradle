@@ -57,7 +57,7 @@ dependencies {
 
     testImplementation 'junit:junit:4.13'
     testImplementation 'org.easymock:easymock:4.1'
-    testRuntimeOnly 'org.apache.logging.log4j:log4j-core:2.13.3'
+    testRuntimeOnly 'org.apache.logging.log4j:log4j-core:2.14.1'
     testRuntimeOnly 'com.squareup.okhttp3:okhttp:4.7.2'
     testRuntimeOnly 'com.alibaba:fastjson:1.2.76'
 }
