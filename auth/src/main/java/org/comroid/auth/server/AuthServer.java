@@ -10,6 +10,7 @@ import org.comroid.auth.user.UserManager;
 import org.comroid.auth.user.UserSession;
 import org.comroid.common.io.FileHandle;
 import org.comroid.mutatio.model.RefContainer;
+import org.comroid.mutatio.model.RefMap;
 import org.comroid.restless.HttpAdapter;
 import org.comroid.restless.REST;
 import org.comroid.restless.adapter.java.JavaHttpAdapter;
@@ -124,7 +125,11 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
     public Map<String, Object> findPageProperties(REST.Header.List headers) {
         try {
             UserSession session = UserSession.findSession(headers);
-            return session.connection.<Map<String, Object>>map(conn -> conn.properties)
+            return session.connection.<Map<String, Object>>map(conn -> {
+                AuthConnection conn1 = conn;
+                RefMap<String, Object> properties = conn1.properties;
+                return properties;
+            })
                     .or(() -> Map.of("isValidSession", true, "sessionData", session.getSessionData()))
                     .assertion("internal error");
         } catch (RestEndpointException unauthorized) {

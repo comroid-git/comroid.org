@@ -36,10 +36,16 @@ public final class AuthConnection extends WebkitConnection {
             this.session = session;
         }
         setProperty("isValidSession", session != null);
-        properties.getReference("sessionData", true)
-                .rebind(() -> this.session.getSessionData().toSerializedString());
 
         if (session != null) {
+            // set session data reference
+            UniObjectNode sessionData = this.session.getSessionData();
+            properties.put("sessionData", sessionData);
+            /*
+            properties.getReference("sessionData", true)
+                    .rebind(this.session::getSessionData);
+             */
+
             // unset connection in session
             final RefContainer<WebsocketPacket.Type, WebsocketPacket> closeListener = on(WebsocketPacket.Type.CLOSE);
             closeListener.peek(close -> {
