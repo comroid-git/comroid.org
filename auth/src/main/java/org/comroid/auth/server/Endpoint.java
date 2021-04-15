@@ -5,18 +5,15 @@ import org.comroid.api.ContextualProvider;
 import org.comroid.api.Polyfill;
 import org.comroid.auth.user.UserAccount;
 import org.comroid.auth.user.UserSession;
-import org.comroid.mutatio.ref.Reference;
+import org.comroid.mutatio.model.Ref;
 import org.comroid.restless.CommonHeaderNames;
 import org.comroid.restless.REST;
 import org.comroid.restless.server.RestEndpointException;
 import org.comroid.restless.server.ServerEndpoint;
 import org.comroid.uniform.node.UniNode;
-import org.comroid.util.ReaderUtil;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.Reader;
-import java.io.StringReader;
 import java.util.regex.Pattern;
 
 import static org.comroid.auth.user.UserAccount.EMAIL;
@@ -37,35 +34,35 @@ public enum Endpoint implements ServerEndpoint.This {
     },
     MODIFY_ACCOUNT("account/%s", "\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b") {
         @Override
-        public REST.Response executePATCH(ContextualProvider context, Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executePOST(ContextualProvider context, Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
             try {
                 UserSession session = UserSession.findSession(headers);
                 UserAccount account = session.getAccount();
 
-                if (account.getUUID().toString().equalsIgnoreCase(urlParams[0]))
-                    throw new RestEndpointException(UNAUTHORIZED, "Invalid Session Cookie");
+                if (!account.getUUID().toString().equalsIgnoreCase(urlParams[0]))
+                    throw new RestEndpointException(UNAUTHORIZED, "UUID Mismatch; Cookie Invalid");
 
-                account.updateFrom(body.asObjectNode());
-                if (body.has("password")) {
-                    Reference<String> email = body.use(EMAIL).map(UniNode::asString);
+                if (body.has("new_password")) {
+                    Ref<String> email = account.email;
 
-                    if (!body.has("previous_password"))
+                    if (!body.has("current_password"))
                         throw new RestEndpointException(BAD_REQUEST, "Old Password missing");
-                    if (!body.use("previous_password")
+                    if (!body.use("current_password")
                             .map(UniNode::asString)
-                            .combine(email, UserAccount::encrypt)
                             .accumulate(email, (pw, mail) -> account.tryLogin(mail, pw)))
                         throw new RestEndpointException(UNAUTHORIZED, "Old Password wrong");
 
-                    body.use("password")
+                    body.use("new_password")
                             .map(UniNode::asString)
-                            .combine(email, UserAccount::encrypt)
+                            .combine(email, (pw, mail) -> UserAccount.encrypt(mail, pw))
                             .consume(account::putHash);
-                }
+                } else account.updateFrom(body.asObjectNode());
 
-                return new REST.Response(OK, account);
-            } catch (RestEndpointException ignored) {
-                return new REST.Response(UNAUTHORIZED);
+                return Endpoint.forwardToWidgetOr(headers, new REST.Header.List(), "../", "account");
+            } catch (RestEndpointException ex) {
+                if (ex.getStatusCode() == UNAUTHORIZED)
+                    throw ex;
+                throw new RestEndpointException(UNAUTHORIZED, "Underlying Message: " + ex.getMessage(), ex);
             }
         }
     },

@@ -95,7 +95,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
 
             logger.debug("Starting Webkit server");
             this.server = new WebkitServer(
-                    context,
+                    this,
                     this.executor,
                     URL_BASE,
                     OS.isWindows
@@ -104,7 +104,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
                     PORT,
                     SOCKET_PORT,
                     AuthConnection::new,
-                    this::findPageProperties,
+                    this,
                     Endpoint.values()
             );
         } catch (UnknownHostException e) {
@@ -129,9 +129,12 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
                 AuthConnection conn1 = conn;
                 RefMap<String, Object> properties = conn1.properties;
                 return properties;
-            })
-                    .or(() -> Map.of("isValidSession", true, "sessionData", session.getSessionData()))
-                    .assertion("internal error");
+            }).or(() -> {
+                HashMap<String, Object> map = new HashMap<>();
+                map.put("isValidSession", true);
+                map.put("sessionData", session.getSessionData());
+                return map;
+            }).assertion("internal error");
         } catch (RestEndpointException unauthorized) {
             HashMap<String, Object> map = new HashMap<>();
             map.put("isValidSession", false);
