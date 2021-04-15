@@ -116,15 +116,19 @@ public enum Endpoint implements ServerEndpoint.This {
             return new REST.Response(Polyfill.uri("logout"));
         }
     },
-    LOGOUT("api/logout") {
+    LOGOUT("logout") {
         @Override
         public REST.Response executeGET(ContextualProvider context, Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            UserSession session = UserSession.findSession(headers);
-            AuthServer.instance.getUserManager().closeSession(session);
-            REST.Header.List response = new REST.Header.List();
-            response.add(CommonHeaderNames.CACHE_CONTROL, "no-cache");
-            response.add("Set-Cookie", UserSession.NULL_COOKIE);
-            return forwardToWidgetOr(headers, response, "../", "account");
+            try {
+                UserSession session = UserSession.findSession(headers);
+                AuthServer.instance.getUserManager().closeSession(session);
+                REST.Header.List response = new REST.Header.List();
+                response.add(CommonHeaderNames.CACHE_CONTROL, "no-cache");
+                response.add("Set-Cookie", UserSession.NULL_COOKIE);
+                return forwardToWidgetOr(headers, response, "", "home");
+            } catch (Throwable ignored) {
+                return new REST.Response(Polyfill.uri("home"));
+            }
         }
     };
 
