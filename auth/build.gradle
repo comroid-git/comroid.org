@@ -1,7 +1,7 @@
 apply plugin: 'application'
 
 group 'org.comroid'
-version '0.20'
+version '0.21-SNAPSHOT'
 
 apply from: 'gradle/vars.gradle'
 
