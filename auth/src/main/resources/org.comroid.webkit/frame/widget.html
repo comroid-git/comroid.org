@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title> comroid Auth Widget </title>
+
+    <meta charset="utf-8"/>
+    <meta content="width=device-width,initial-scale=1.0" name="viewport">
+    <meta content="comroid, account" name="keywords"/>
+    <meta content="index, follow" name="robots"/>
+    <meta content="kaleidox@comroid.org" name="author"/>
+    <meta content="comroid" name="publisher"/>
+    <meta content="comroid Account" name="description"/>
+
+    <link href="https://cdn.comroid.org/favicon.ico" rel="icon">
+    <link href="https://comroid.org/style.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Fira+Mono" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Sans&display=swap" rel="stylesheet">
+
+    <style>
+        html {
+            width: max-content !important;
+            height: max-content !important;
+        }
+
+        body {
+            font-family: "Fira Sans", sans-serif !important;
+            font-size: smaller !important;
+            background-color: #00274f;
+            color: #e3e3e3 !important;
+        }
+
+        a {
+            color: inherit !important;
+        }
+
+        a:visited {
+            color: inherit !important;
+        }
+    </style>
+</head>
+<body>
+<div panel="login" when="!isValidSession"/>
+<div panel="account" when="isValidSession"/>
+</body>
+</html>

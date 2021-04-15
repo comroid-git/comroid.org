@@ -2,6 +2,7 @@
 <data>
     <frames>
         <main>frame/main.html</main>
+        <widget>frame/widget.html</widget>
     </frames>
     <parts>
         <header>part/header.html</header>
