@@ -40,7 +40,7 @@ public enum Endpoint implements ServerEndpoint.This {
                 UserAccount account = session.getAccount();
 
                 if (account.getUUID().toString().equalsIgnoreCase(urlParams[0]))
-                    throw new RestEndpointException(UNAUTHORIZED, "Invalid Session Cookie");
+                    throw new RestEndpointException(UNAUTHORIZED, "UUID Mismatch; Cookie Invalid");
 
                 account.updateFrom(body.asObjectNode());
                 if (body.has("password")) {
