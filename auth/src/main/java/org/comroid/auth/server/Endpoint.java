@@ -11,12 +11,9 @@ import org.comroid.restless.REST;
 import org.comroid.restless.server.RestEndpointException;
 import org.comroid.restless.server.ServerEndpoint;
 import org.comroid.uniform.node.UniNode;
-import org.comroid.util.ReaderUtil;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.Reader;
-import java.io.StringReader;
 import java.util.regex.Pattern;
 
 import static org.comroid.auth.user.UserAccount.EMAIL;
@@ -64,8 +61,10 @@ public enum Endpoint implements ServerEndpoint.This {
                 }
 
                 return new REST.Response(OK, account);
-            } catch (RestEndpointException ignored) {
-                return new REST.Response(UNAUTHORIZED);
+            } catch (RestEndpointException ex) {
+                if (ex.getStatusCode() == UNAUTHORIZED)
+                    throw ex;
+                throw new RestEndpointException(UNAUTHORIZED, "Underlying Message: " + ex.getMessage(), ex);
             }
         }
 

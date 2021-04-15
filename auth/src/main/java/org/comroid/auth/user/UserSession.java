@@ -81,7 +81,7 @@ public final class UserSession {
                 })
                 .filter(Objects::nonNull)
                 .findAny()
-                .orElseThrow(() -> new RestEndpointException(UNAUTHORIZED));
+                .orElseThrow(() -> new RestEndpointException(UNAUTHORIZED, "Invalid Session Cookie"));
     }
 
     private static String findCookie(Headers headers) {
