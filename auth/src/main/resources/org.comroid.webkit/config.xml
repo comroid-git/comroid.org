@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <data>
+    <frames>
+        <main>frame/main.html</main>
+    </frames>
     <parts>
         <header>part/header.html</header>
         <footer>part/footer.html</footer>
