@@ -7,7 +7,6 @@
     </parts>
     <panels>
         <home>panel/home.html</home>
-        <error>panel/error.html</error>
         <account>panel/account.html</account>
         <change-password>panel/change-password.html</change-password>
         <login>panel/login.html</login>
