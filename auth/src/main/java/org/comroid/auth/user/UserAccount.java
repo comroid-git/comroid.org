@@ -83,7 +83,8 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
 
     public boolean tryLogin(String email, String password) {
         String result = encrypt(email, password);
-        return loginHashFile.getContent().equals(result);
+        boolean equals = loginHashFile.getContent().equals(result);
+        return equals;
     }
 
     public void putHash(String hash) {
