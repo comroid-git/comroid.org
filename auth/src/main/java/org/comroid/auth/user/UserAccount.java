@@ -1,5 +1,7 @@
 package org.comroid.auth.user;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.comroid.api.Serializer;
 import org.comroid.api.UUIDContainer;
 import org.comroid.auth.server.AuthServer;
@@ -13,6 +15,7 @@ import org.comroid.varbind.container.DataContainerBase;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.util.Arrays;
 import java.util.UUID;
 
 public final class UserAccount extends DataContainerBase<UserAccount> implements UUIDContainer {
@@ -27,14 +30,11 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
             = Type.createBind("email")
             .extractAs(StandardValueType.STRING)
             .build();
-    public static final VarBind<UserAccount, String, String, String> LOGIN
-            = Type.createBind("login")
-            .extractAs(StandardValueType.STRING)
-            .build();
+    private static final Logger logger = LogManager.getLogger();
     public final Ref<UUID> id = getComputedReference(ID);
     public final Ref<String> email = getComputedReference(EMAIL);
-    public final Ref<String> login = getComputedReference(LOGIN);
     private final FileHandle dir;
+    private final FileHandle loginHashFile;
 
     @Override
     public UUID getUUID() {
@@ -58,17 +58,19 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
             obj.copyFrom(subFile.parse(context.requireFromContext(Serializer.class)));
         });
         this.dir = sourceDir;
+        this.loginHashFile = dir.createSubFile("login.hash");
     }
 
     UserAccount(UserManager context, UUID id, String email, String password) {
         super(context, obj -> {
             obj.put(ID, id.toString());
             obj.put(EMAIL, email);
-            obj.put(LOGIN, encrypt(email, password));
         });
         this.dir = UserManager.DIR.createSubDir(id.toString());
         dir.mkdir();
         dir.createSubFile("user.json").setContent(toSerializedString());
+        this.loginHashFile = dir.createSubFile("login.hash");
+        this.loginHashFile.setContent(encrypt(email, password));
     }
 
     public static String encrypt(String email, String password) {
@@ -77,14 +79,33 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
             MessageDigest md = MessageDigest.getInstance("SHA-512");
             md.update(bytes);
             byte[] hashedPassword = md.digest(password.getBytes(StandardCharsets.US_ASCII));
-            return new String(hashedPassword);
+            String hash = new String(hashedPassword).replace('\r', '#').replace('\n', '#');
+            //logger.info("Encrypting: this.email = {}; this.hash = {}; password = {}", email, hash, password);
+            return hash;
         } catch (Throwable t) {
             throw new RuntimeException(t);
         }
     }
 
     public boolean tryLogin(String email, String password) {
-        String result = encrypt(email, password);
-        return login.contentEquals(result);
+        if (!this.email.contentEquals(email)) {
+            logger.error("Email Mismatch: {} / {}", this.email.get(), email);
+            return false;
+        }
+        String hash = encrypt(email, password);
+        String otherHash = this.loginHashFile.getContent();
+        String mail = this.email.get();
+        byte[] bytes1 = hash.getBytes(StandardCharsets.US_ASCII);
+        byte[] bytes2 = otherHash.getBytes(StandardCharsets.US_ASCII);
+        boolean equals = Arrays.equals(bytes1, bytes2);
+        //logger.info("Logging in: this.email = {}; this.hash = {}; password = {}", mail, hash, password);
+        //logger.info("Other Data: othr.email = {}; othr.hash = {}; equals = {}", email, otherHash, equals);
+        //logger.info("Array 1: {}", Arrays.toString(bytes1));
+        //logger.info("Array 2: {}", Arrays.toString(bytes2));
+        return equals;
+    }
+
+    public void putHash(String hash) {
+        loginHashFile.setContent(hash);
     }
 }
