@@ -1,7 +1,7 @@
 apply plugin: 'application'
 
 group 'org.comroid'
-version '0.10-SNAPSHOT'
+version '0.20'
 
 apply from: 'gradle/vars.gradle'
 
@@ -36,17 +36,24 @@ dependencies {
     if (isAutoDeploy) {
         implementation 'org.comroid:status-api:0.+'
         implementation 'org.comroid:restless:0.+'
+        implementation 'org.comroid:webkit:0.+'
     } else {
         implementation project(':status:status-api')
 
         implementation project(':guardian:uniform').sourceSets.java8compat.output.classesDirs
         implementation project(':guardian:restless').sourceSets.java11compat.output.classesDirs
+        implementation project(':guardian:webkit')
     }
 
     // logging dependencies
     implementation 'org.apache.logging.log4j:log4j-api:2.11.0'
-    runtimeOnly 'org.apache.logging.log4j:log4j-core:2.11.0'
 
-    // runtime adapter dependencies
-    implementation 'com.alibaba:fastjson:1.2.70'
+    // json dependency
+    implementation 'com.alibaba:fastjson:1.2.76'
+    //implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.0'
+/*
+    // xml dependency
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.11.2'
+    testImplementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.11.2'
+ */
 }

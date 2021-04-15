@@ -7,45 +7,60 @@ import org.comroid.api.Polyfill;
 import org.comroid.api.UncheckedCloseable;
 import org.comroid.api.os.OS;
 import org.comroid.auth.user.UserManager;
+import org.comroid.auth.user.UserSession;
 import org.comroid.common.io.FileHandle;
+import org.comroid.mutatio.model.RefContainer;
+import org.comroid.mutatio.model.RefMap;
+import org.comroid.restless.HttpAdapter;
+import org.comroid.restless.REST;
 import org.comroid.restless.adapter.java.JavaHttpAdapter;
-import org.comroid.restless.server.RestServer;
+import org.comroid.restless.server.RestEndpointException;
 import org.comroid.status.StatusConnection;
 import org.comroid.status.entity.Service;
+import org.comroid.uniform.SerializationAdapter;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
+import org.comroid.webkit.config.WebkitConfiguration;
+import org.comroid.webkit.model.PagePropertiesProvider;
+import org.comroid.webkit.server.WebkitServer;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-public final class AuthServer implements ContextualProvider.Underlying, UncheckedCloseable {
+public final class AuthServer implements ContextualProvider.Underlying, UncheckedCloseable, PagePropertiesProvider {
     //http://localhost:42000
     public static final Logger logger = LogManager.getLogger("AuthServer");
     public static final ContextualProvider MASTER_CONTEXT;
     public static final String URL_BASE = "https://auth.comroid.org/";
     public static final int PORT = 42000;
+    public static final int SOCKET_PORT = 42001;
     public static final FileHandle DIR = new FileHandle("/srv/auth/", true);
     public static final FileHandle STATUS_CRED = DIR.createSubFile("status.cred");
     public static final FileHandle DATA = DIR.createSubDir("data");
-    public static final WebResources Resources;
+    public static final SerializationAdapter SERI_LIB;
+    public static final HttpAdapter HTTP_LIB;
     public static AuthServer instance;
 
     static {
         DIR.mkdir();
         DATA.mkdir();
-        Resources = new WebResources(ClassLoader.getSystemClassLoader());
-        MASTER_CONTEXT = ContextualProvider.create(FastJSONLib.fastJsonLib, new JavaHttpAdapter());
+        SERI_LIB = FastJSONLib.fastJsonLib;
+        HTTP_LIB = new JavaHttpAdapter();
+        MASTER_CONTEXT = ContextualProvider.create(SERI_LIB, HTTP_LIB);
+        WebkitConfiguration.initialize(MASTER_CONTEXT);
     }
 
     private final ScheduledExecutorService executor;
     private final StatusConnection status;
     private final ContextualProvider context;
     private final UserManager userManager;
-    private final RestServer rest;
+    private final WebkitServer server;
 
     public UserManager getUserManager() {
         return userManager;
@@ -54,6 +69,10 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
     @Override
     public final ContextualProvider getUnderlyingContextualProvider() {
         return context;
+    }
+
+    public RefContainer<?, AuthConnection> getActiveConnections() {
+        return server.getActiveConnections().flatMap(AuthConnection.class);
     }
 
     public AuthServer(ScheduledExecutorService executor) {
@@ -74,8 +93,20 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
             this.userManager = new UserManager(this);
             context.addToContext(userManager);
 
-            logger.debug("Starting Rest server");
-            this.rest = new RestServer(context, this.executor, URL_BASE, OS.current == OS.WINDOWS ? InetAddress.getLoopbackAddress() : InetAddress.getLocalHost(), PORT, Endpoint.values());
+            logger.debug("Starting Webkit server");
+            this.server = new WebkitServer(
+                    context,
+                    this.executor,
+                    URL_BASE,
+                    OS.isWindows
+                            ? InetAddress.getLoopbackAddress()
+                            : InetAddress.getLocalHost(),
+                    PORT,
+                    SOCKET_PORT,
+                    AuthConnection::new,
+                    this::findPageProperties,
+                    Endpoint.values()
+            );
         } catch (UnknownHostException e) {
             throw new AssertionError(e);
         } catch (IOException e) {
@@ -91,13 +122,31 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
         instance = new AuthServer(Executors.newScheduledThreadPool(8));
     }
 
+    public Map<String, Object> findPageProperties(REST.Header.List headers) {
+        try {
+            UserSession session = UserSession.findSession(headers);
+            return session.connection.<Map<String, Object>>map(conn -> {
+                AuthConnection conn1 = conn;
+                RefMap<String, Object> properties = conn1.properties;
+                return properties;
+            })
+                    .or(() -> Map.of("isValidSession", true, "sessionData", session.getSessionData()))
+                    .assertion("internal error");
+        } catch (RestEndpointException unauthorized) {
+            HashMap<String, Object> map = new HashMap<>();
+            map.put("isValidSession", false);
+            map.put("sessionData", null);
+            return map;
+        }
+    }
+
     @Override
     public void close() {
         logger.info("Shutting down");
         try {
             status.stopPolling(Service.Status.OFFLINE)
                     .exceptionally(Polyfill.exceptionLogger(logger, "Could not stop Polling"));
-            rest.close();
+            server.close();
         } catch (Throwable t) {
             logger.error("Could not shutdown Rest Server gracefully", t);
         }

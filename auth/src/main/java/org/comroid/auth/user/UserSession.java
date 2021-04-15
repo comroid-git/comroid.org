@@ -2,12 +2,16 @@ package org.comroid.auth.user;
 
 import com.sun.net.httpserver.Headers;
 import org.comroid.api.os.OS;
+import org.comroid.auth.server.AuthConnection;
 import org.comroid.auth.server.AuthServer;
+import org.comroid.mutatio.model.Ref;
+import org.comroid.mutatio.ref.Reference;
+import org.comroid.restless.REST;
 import org.comroid.restless.server.RestEndpointException;
-import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
 import org.comroid.uniform.node.UniNode;
 import org.comroid.uniform.node.UniObjectNode;
 
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -18,6 +22,7 @@ import static org.comroid.restless.HTTPStatusCodes.UNAUTHORIZED;
 public final class UserSession {
     public static final String COOKIE_PREFIX = "org.comroid.auth";
     public static final String NULL_COOKIE = wrapCookie("null");
+    public final Ref<AuthConnection> connection = Reference.create();
     private final UserAccount account;
     private final String cookie;
 
@@ -34,7 +39,7 @@ public final class UserSession {
     }
 
     public UniObjectNode getSessionData() {
-        UniObjectNode data = FastJSONLib.fastJsonLib.createObjectNode();
+        UniObjectNode data = AuthServer.SERI_LIB.createObjectNode();
 
         UniObjectNode account = this.account.toObjectNode(data.putObject("account"));
         account.remove("login");
@@ -49,11 +54,19 @@ public final class UserSession {
     }
 
     public static String wrapCookie(String cookie) {
-        return String.format("%s=%s%s", UserSession.COOKIE_PREFIX, cookie, OS.current == OS.UNIX ? "; Domain=.comroid.org; Path=/" : "");
+        return String.format("%s=%s; Max-Age=3600; Path=/%s", UserSession.COOKIE_PREFIX, cookie, OS.current == OS.UNIX ? "; Domain=.comroid.org" : "");
+    }
+
+    public static UserSession findSession(REST.Header.List headers) {
+        return findSession(findCookie(headers.toJavaHeaders()));
     }
 
     public static UserSession findSession(Headers headers) {
-        return Stream.of(headers.getFirst(COOKIE))
+        return findSession(findCookie(headers));
+    }
+
+    public static UserSession findSession(String cookie) {
+        return Stream.of(cookie)
                 .filter(Objects::nonNull)
                 .map(str -> str.split("; "))
                 .flatMap(Stream::of)
@@ -69,6 +82,17 @@ public final class UserSession {
                 .filter(Objects::nonNull)
                 .findAny()
                 .orElseThrow(() -> new RestEndpointException(UNAUTHORIZED));
+    }
+
+    private static String findCookie(Headers headers) {
+        if (!headers.containsKey(COOKIE))
+            return "";
+        return headers.get(COOKIE)
+                .stream()
+                .flatMap(str -> Stream.of(str.split("[,;\\s]")).filter(s -> !s.isEmpty()))
+                .filter(UserSession::isAppCookie)
+                .findAny()
+                .orElse("");
     }
 
     public static boolean isAppCookie(String fullCookie) {

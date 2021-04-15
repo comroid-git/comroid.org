@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data>
+    <parts>
+        <header>part/header.html</header>
+        <footer>part/footer.html</footer>
+    </parts>
+    <panels>
+        <home>panel/home.html</home>
+        <account>panel/account.html</account>
+        <login>panel/login.html</login>
+        <register>panel/register.html</register>
+    </panels>
+</data>
