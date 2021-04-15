@@ -1,5 +1,6 @@
 package org.comroid.auth.server;
 
+import com.sun.net.httpserver.Headers;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
@@ -14,18 +15,20 @@ import org.comroid.mutatio.model.RefMap;
 import org.comroid.restless.HttpAdapter;
 import org.comroid.restless.REST;
 import org.comroid.restless.adapter.java.JavaHttpAdapter;
+import org.comroid.restless.endpoint.CompleteEndpoint;
 import org.comroid.restless.server.RestEndpointException;
 import org.comroid.status.StatusConnection;
 import org.comroid.status.entity.Service;
 import org.comroid.uniform.SerializationAdapter;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
+import org.comroid.uniform.node.UniNode;
+import org.comroid.uniform.node.UniObjectNode;
 import org.comroid.webkit.config.WebkitConfiguration;
+import org.comroid.webkit.frame.FrameBuilder;
 import org.comroid.webkit.model.PagePropertiesProvider;
 import org.comroid.webkit.server.WebkitServer;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.HashMap;
@@ -95,7 +98,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
 
             logger.debug("Starting Webkit server");
             this.server = new WebkitServer(
-                    context,
+                    this,
                     this.executor,
                     URL_BASE,
                     OS.isWindows
@@ -104,7 +107,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
                     PORT,
                     SOCKET_PORT,
                     AuthConnection::new,
-                    this::findPageProperties,
+                    this,
                     Endpoint.values()
             );
         } catch (UnknownHostException e) {

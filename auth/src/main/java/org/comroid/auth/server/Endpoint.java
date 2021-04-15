@@ -68,6 +68,11 @@ public enum Endpoint implements ServerEndpoint.This {
                 return new REST.Response(UNAUTHORIZED);
             }
         }
+
+        @Override
+        public boolean attemptRecovery() {
+            return true;
+        }
     },
     REGISTRATION("api/register") {
         @Override
