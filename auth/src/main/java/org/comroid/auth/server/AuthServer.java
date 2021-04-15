@@ -22,6 +22,8 @@ import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
 import org.comroid.webkit.config.WebkitConfiguration;
 import org.comroid.webkit.model.PagePropertiesProvider;
 import org.comroid.webkit.server.WebkitServer;
+import org.zalando.stups.tokens.AccessTokensBuilder;
+import org.zalando.stups.tokens.Tokens;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -107,6 +109,10 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
                     this,
                     Endpoint.values()
             );
+
+            AccessTokensBuilder tokens = Tokens.createAccessTokensWithUri(Polyfill.uri("auth.comroid.org"));
+
+            tokens.using
         } catch (UnknownHostException e) {
             throw new AssertionError(e);
         } catch (IOException e) {

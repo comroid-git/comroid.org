@@ -53,7 +53,7 @@ dependencies {
     //implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.0'
 
     // oauth2 helper dependencies
-    implementation 'com.networknt:light-4j:2.0.25'
+    implementation 'org.zalando.stups:tokens:0.13.0'
 
 /*
     // xml dependency
