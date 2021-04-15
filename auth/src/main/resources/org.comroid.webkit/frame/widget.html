@@ -63,7 +63,7 @@
 <body>
 <div panel="login" when="!isValidSession"/>
 <div panel="account" when="isValidSession"/>
-<div id="cookies">
+<div id="cookies" when="!isValidSession">
     <h2>By accessing this feature, you agree to the use of Cookies to store user-relevant data.</h2>
     <a onclick="document.getElementById('cookies').style.visibility = 'hidden'" style="cursor: pointer;">
         Okay, I don't care anyways
