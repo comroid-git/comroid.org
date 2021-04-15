@@ -89,6 +89,7 @@ public final class UserSession {
             return "";
         return headers.get(COOKIE)
                 .stream()
+                .flatMap(str -> Stream.of(str.split("[,;\\s]")).filter(s -> !s.isEmpty()))
                 .filter(UserSession::isAppCookie)
                 .findAny()
                 .orElse("");
