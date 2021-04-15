@@ -1,0 +1,14 @@
+<script type="application/javascript">
+    function checkPasswordsEqual(checkId1, checkId2, formId) {
+        let check1 = document.getElementById(checkId1);
+        let check2 = document.getElementById(checkId2);
+
+        const text1 = check1.textContent;
+        const text2 = check2.textContent;
+        console.debug(`Checking passwords ${text1} and ${text2}`);
+
+        if (text1 !== '' && text1 === text2)
+            document.getElementById(formId).submit();
+        else document.getElementById(checkId2 + '_error').style.display = 'block';
+    }
+</script>

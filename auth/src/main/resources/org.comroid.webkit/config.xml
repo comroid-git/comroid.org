@@ -3,10 +3,12 @@
     <parts>
         <header>part/header.html</header>
         <footer>part/footer.html</footer>
+        <loginUtils>part/loginUtils.html</loginUtils>
     </parts>
     <panels>
         <home>panel/home.html</home>
         <account>panel/account.html</account>
+        <change-password>panel/change-password.html</change-password>
         <login>panel/login.html</login>
         <register>panel/register.html</register>
     </panels>
