@@ -3,8 +3,8 @@
         let check1 = document.getElementById(checkId1);
         let check2 = document.getElementById(checkId2);
 
-        const text1 = check1.textContent;
-        const text2 = check2.textContent;
+        const text1 = check1.value;
+        const text2 = check2.value;
         console.debug(`Checking passwords ${text1} and ${text2}`);
 
         if (text1 !== '' && text1 === text2)
