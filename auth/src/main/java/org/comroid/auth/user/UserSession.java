@@ -42,8 +42,6 @@ public final class UserSession {
         UniObjectNode data = AuthServer.SERI_LIB.createObjectNode();
 
         UniObjectNode account = this.account.toObjectNode(data.putObject("account"));
-        account.remove("login");
-        account.compute("email", (k, str) -> ((UniNode) str).asString().replace("%40", "@"));
 
         return data;
     }
