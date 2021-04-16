@@ -11,6 +11,7 @@ import org.comroid.auth.user.UserSession;
 import org.comroid.common.io.FileHandle;
 import org.comroid.mutatio.model.RefContainer;
 import org.comroid.mutatio.model.RefMap;
+import org.comroid.oauth.server.OAuth2Server;
 import org.comroid.restless.HttpAdapter;
 import org.comroid.restless.REST;
 import org.comroid.restless.adapter.java.JavaHttpAdapter;
@@ -42,6 +43,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
     public static final String URL_BASE = "https://auth.comroid.org/";
     public static final int PORT = 42000;
     public static final int SOCKET_PORT = 42001;
+    public static final int OAUTH_PORT = 42002;
     public static final FileHandle DIR = new FileHandle("/srv/auth/", true);
     public static final FileHandle STATUS_CRED = DIR.createSubFile("status.cred");
     public static final FileHandle DATA = DIR.createSubDir("data");
@@ -110,9 +112,15 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
                     Endpoint.values()
             );
 
-            AccessTokensBuilder tokens = Tokens.createAccessTokensWithUri(Polyfill.uri("auth.comroid.org"));
-
-            tokens.using
+            new OAuth2Server(
+                    this,
+                    this.executor,
+                    URL_BASE + "oauth2/",
+                    OS.isWindows
+                            ? InetAddress.getLoopbackAddress()
+                            : InetAddress.getLocalHost(),
+                    OAUTH_PORT
+            );
         } catch (UnknownHostException e) {
             throw new AssertionError(e);
         } catch (IOException e) {

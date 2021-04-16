@@ -7,18 +7,24 @@ import org.comroid.api.UUIDContainer;
 import org.comroid.auth.server.AuthServer;
 import org.comroid.common.io.FileHandle;
 import org.comroid.mutatio.model.Ref;
+import org.comroid.mutatio.ref.KeyedReference;
+import org.comroid.oauth.OAuth;
+import org.comroid.oauth.user.OAuthBlob;
+import org.comroid.oauth.user.OAuthUser;
+import org.comroid.uniform.node.UniObjectNode;
 import org.comroid.util.StandardValueType;
 import org.comroid.varbind.annotation.RootBind;
 import org.comroid.varbind.bind.GroupBind;
 import org.comroid.varbind.bind.VarBind;
 import org.comroid.varbind.container.DataContainerBase;
+import org.zalando.stups.tokens.*;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.UUID;
 
-public final class UserAccount extends DataContainerBase<UserAccount> implements UUIDContainer {
+public final class UserAccount extends DataContainerBase<UserAccount> implements UUIDContainer, OAuth.UserProvider {
     @RootBind
     public static final GroupBind<UserAccount> Type = new GroupBind<>(AuthServer.MASTER_CONTEXT, "user-account");
     public static final VarBind<UserAccount, String, UUID, UUID> ID
@@ -30,9 +36,15 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
             = Type.createBind("email")
             .extractAs(StandardValueType.STRING)
             .build();
+    public static final VarBind<UserAccount, UniObjectNode, OAuthUser, OAuthUser> OAUTH
+            = Type.createBind("oauth")
+            .extractAsObject()
+            .andResolve(OAuthUser::new)
+            .build();
     private static final Logger logger = LogManager.getLogger();
     public final Ref<UUID> id = getComputedReference(ID);
     public final Ref<String> email = getComputedReference(EMAIL);
+    public final Ref<OAuthUser> oauth = getComputedReference(OAUTH);
     private final FileHandle dir;
     private final FileHandle loginHashFile;
 
@@ -44,6 +56,16 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
     @Override
     public String getName() {
         return email.assertion("Email not found");
+    }
+
+    @Override
+    public String getUsername() {
+        return email.get();
+    }
+
+    @Override
+    public String getPassword() {
+        return loginHashFile.getContent();
     }
 
     UserAccount(UserManager context, final FileHandle sourceDir) {
@@ -73,18 +95,22 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
         this.loginHashFile.setContent(encrypt(email, password));
     }
 
-    public static String encrypt(String email, String password) {
+    public static String encrypt(String saltName, String input) {
         try {
-            byte[] bytes = UserManager.getSalt(email);
+            byte[] bytes = UserManager.getSalt(saltName);
             MessageDigest md = MessageDigest.getInstance("SHA-512");
             md.update(bytes);
-            byte[] hashedPassword = md.digest(password.getBytes(StandardCharsets.US_ASCII));
+            byte[] hashedPassword = md.digest(input.getBytes(StandardCharsets.US_ASCII));
             String hash = new String(hashedPassword).replace('\r', '#').replace('\n', '#');
             //logger.info("Encrypting: this.email = {}; this.hash = {}; password = {}", email, hash, password);
             return hash;
         } catch (Throwable t) {
             throw new RuntimeException(t);
         }
+    }
+
+    public UserCredentialsProvider asUserCredentialsProvider() {
+        return () -> this;
     }
 
     public boolean tryLogin(String email, String password) {
@@ -107,5 +133,15 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
 
     public void putHash(String hash) {
         loginHashFile.setContent(hash);
+    }
+
+    @Override
+    public OAuthUser getOAuthUser() {
+        return oauth.assertion();
+    }
+
+    @Override
+    public UserCredentials get() throws CredentialsUnavailableException {
+        return this;
     }
 }

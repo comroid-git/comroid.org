@@ -42,6 +42,7 @@ public final class UserSession {
         UniObjectNode data = AuthServer.SERI_LIB.createObjectNode();
 
         UniObjectNode account = this.account.toObjectNode(data.putObject("account"));
+        account.remove("oauth");
 
         return data;
     }
