@@ -11,9 +11,12 @@ import org.comroid.restless.REST;
 import org.comroid.restless.server.RestEndpointException;
 import org.comroid.restless.server.ServerEndpoint;
 import org.comroid.uniform.node.UniNode;
+import org.comroid.webkit.frame.FrameBuilder;
+import org.comroid.webkit.model.PagePropertiesProvider;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import static org.comroid.auth.user.UserAccount.EMAIL;
@@ -29,7 +32,11 @@ public enum Endpoint implements ServerEndpoint.This {
     WIDGET("widget") {
         @Override
         public REST.Response executeGET(ContextualProvider context, Headers headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            return new REST.Response(OK);
+            Map<String, Object> pageProperties = context.requireFromContext(PagePropertiesProvider.class)
+                    .findPageProperties(REST.Header.List.of(headers));
+            FrameBuilder frame = new FrameBuilder("widget", new REST.Header.List(), pageProperties, false);
+
+            return new REST.Response(OK, "text/html", frame.toReader());
         }
     },
     MODIFY_ACCOUNT("account/%s", "\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b") {

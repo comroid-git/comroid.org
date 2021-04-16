@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <data>
+    <frames>
+        <main>frame/main.html</main>
+        <widget>frame/widget.html</widget>
+    </frames>
     <parts>
         <header>part/header.html</header>
         <footer>part/footer.html</footer>
