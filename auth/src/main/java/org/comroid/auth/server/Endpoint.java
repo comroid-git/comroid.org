@@ -23,13 +23,13 @@ import static org.comroid.auth.user.UserAccount.EMAIL;
 import static org.comroid.restless.HTTPStatusCodes.*;
 
 public enum Endpoint implements ServerEndpoint.This {
-    FAVICON("favicon.ico") {
+    FAVICON("/favicon.ico") {
         @Override
         public REST.Response executeGET(ContextualProvider context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             return new REST.Response(Polyfill.uri("https://cdn.comroid.org/favicon.ico"));
         }
     },
-    WIDGET("widget") {
+    WIDGET("/widget") {
         @Override
         public REST.Response executeGET(ContextualProvider context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             Map<String, Object> pageProperties = context.requireFromContext(PagePropertiesProvider.class)
@@ -39,7 +39,7 @@ public enum Endpoint implements ServerEndpoint.This {
             return new REST.Response(OK, "text/html", frame.toReader());
         }
     },
-    MODIFY_ACCOUNT("account/%s", "\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b") {
+    MODIFY_ACCOUNT("/account/%s", "\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b") {
         @Override
         public REST.Response executePOST(ContextualProvider context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             try {
@@ -73,7 +73,7 @@ public enum Endpoint implements ServerEndpoint.This {
             }
         }
     },
-    REGISTRATION("api/register") {
+    REGISTRATION("/api/register") {
         @Override
         public REST.Response executePOST(ContextualProvider context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             try {
@@ -93,7 +93,7 @@ public enum Endpoint implements ServerEndpoint.This {
             }
         }
     },
-    LOGIN("api/login") {
+    LOGIN("/api/login") {
         @Override
         public REST.Response executePOST(ContextualProvider context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             try {
@@ -120,7 +120,7 @@ public enum Endpoint implements ServerEndpoint.This {
             return new REST.Response(Polyfill.uri("logout"));
         }
     },
-    LOGOUT("logout") {
+    LOGOUT("/logout") {
         @Override
         public REST.Response executeGET(ContextualProvider context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             try {
