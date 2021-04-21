@@ -81,7 +81,9 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
             this.executor = executor;
 
             logger.debug("Registering shutdown Hook");
-            Runtime.getRuntime().addShutdownHook(new Thread(this::close));
+            Thread shutdownHook = new Thread(this::close);
+            shutdownHook.setPriority(Thread.MAX_PRIORITY);
+            Runtime.getRuntime().addShutdownHook(shutdownHook);
 
             if (OS.current == OS.UNIX) {
                 logger.debug("Initializing Status Connection...");
