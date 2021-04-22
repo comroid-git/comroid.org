@@ -82,84 +82,76 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
     public String getPassword() {
         return loginHashFile.getContent();
     }
-        public Set<Permit> getPermits () {
-            return permits.assertion("Permits not found");
-        }
 
-        UserAccount(UserManager context, final FileHandle sourceDir){
-            super(context, obj -> {
-                if (!sourceDir.isDirectory())
-                    throw new IllegalArgumentException(String.format("File is not a directory: %s", sourceDir));
-                if (!sourceDir.exists() && !sourceDir.mkdir())
-                    throw new IllegalArgumentException(String.format("Could not create user directory %s", sourceDir));
-                FileHandle subFile = sourceDir.createSubFile("user.json");
-                if (!subFile.exists())
-                    throw new IllegalArgumentException(String.format("Source directory has no user configuration: %s", sourceDir));
-                obj.copyFrom(subFile.parse(context.requireFromContext(Serializer.class)));
-            });
-            this.dir = sourceDir;
-            this.loginHashFile = dir.createSubFile("login.hash");
-        }
+    public Set<Permit> getPermits() {
+        return permits.assertion("Permits not found");
+    }
 
-        UserAccount(UserManager context, UUID id, String email, String password) {
-            super(context, obj -> {
-                obj.put(ID, id.toString());
-                obj.put(EMAIL, email);
-            });
-            this.dir = UserManager.DIR.createSubDir(id.toString());
-            dir.mkdir();
-            dir.createSubFile("user.json").setContent(toSerializedString());
-            this.loginHashFile = dir.createSubFile("login.hash");
-            this.loginHashFile.setContent(encrypt(email, password));
-        }
+    @Override
+    public OAuthUser getOAuthUser() {
+        return oauth.assertion();
+    }
 
-        public static String encrypt (String saltName, String input){
-            try {
-                byte[] bytes = UserManager.getSalt(saltName);
-                MessageDigest md = MessageDigest.getInstance("SHA-512");
-                md.update(bytes);
-                byte[] hashedPassword = md.digest(input.getBytes(StandardCharsets.US_ASCII));
-                String hash = new String(hashedPassword).replace('\r', '#').replace('\n', '#');
-                //logger.info("Encrypting: this.email = {}; this.hash = {}; password = {}", email, hash, password);
-                return hash;
-            } catch (Throwable t) {
-                throw new RuntimeException(t);
-            }
-        }
+    UserAccount(UserManager context, final FileHandle sourceDir) {
+        super(context, obj -> {
+            if (!sourceDir.isDirectory())
+                throw new IllegalArgumentException(String.format("File is not a directory: %s", sourceDir));
+            if (!sourceDir.exists() && !sourceDir.mkdir())
+                throw new IllegalArgumentException(String.format("Could not create user directory %s", sourceDir));
+            FileHandle subFile = sourceDir.createSubFile("user.json");
+            if (!subFile.exists())
+                throw new IllegalArgumentException(String.format("Source directory has no user configuration: %s", sourceDir));
+            obj.copyFrom(subFile.parse(context.requireFromContext(Serializer.class)));
+        });
+        this.dir = sourceDir;
+        this.loginHashFile = dir.createSubFile("login.hash");
+    }
 
-        public UserCredentialsProvider asUserCredentialsProvider () {
-            return () -> this;
-        }
+    UserAccount(UserManager context, UUID id, String email, String password) {
+        super(context, obj -> {
+            obj.put(ID, id.toString());
+            obj.put(EMAIL, email);
+        });
+        this.dir = UserManager.DIR.createSubDir(id.toString());
+        dir.mkdir();
+        dir.createSubFile("user.json").setContent(toSerializedString());
+        this.loginHashFile = dir.createSubFile("login.hash");
+        this.loginHashFile.setContent(encrypt(email, password));
+    }
 
-        public boolean tryLogin (String email, String password){
-            if (!this.email.contentEquals(email)) {
-                logger.error("Email Mismatch: {} / {}", this.email.get(), email);
-                return false;
-            }
-            String hash = encrypt(email, password);
-            String otherHash = this.loginHashFile.getContent();
-            String mail = this.email.get();
-            byte[] bytes1 = hash.getBytes(StandardCharsets.US_ASCII);
-            byte[] bytes2 = otherHash.getBytes(StandardCharsets.US_ASCII);
-            boolean equals = Arrays.equals(bytes1, bytes2);
-            //logger.info("Logging in: this.email = {}; this.hash = {}; password = {}", mail, hash, password);
-            //logger.info("Other Data: othr.email = {}; othr.hash = {}; equals = {}", email, otherHash, equals);
-            //logger.info("Array 1: {}", Arrays.toString(bytes1));
-            //logger.info("Array 2: {}", Arrays.toString(bytes2));
-            return equals;
-        }
-
-        public void putHash (String hash){
-            loginHashFile.setContent(hash);
-        }
-
-        @Override
-        public OAuthUser getOAuthUser () {
-            return oauth.assertion();
-        }
-
-        @Override
-        public UserCredentials get () throws CredentialsUnavailableException {
-            return this;
+    public static String encrypt(String saltName, String input) {
+        try {
+            byte[] bytes = UserManager.getSalt(saltName);
+            MessageDigest md = MessageDigest.getInstance("SHA-512");
+            md.update(bytes);
+            byte[] hashedPassword = md.digest(input.getBytes(StandardCharsets.US_ASCII));
+            String hash = new String(hashedPassword).replace('\r', '#').replace('\n', '#');
+            //logger.info("Encrypting: this.email = {}; this.hash = {}; password = {}", email, hash, password);
+            return hash;
+        } catch (Throwable t) {
+            throw new RuntimeException(t);
         }
     }
+
+    public boolean tryLogin(String email, String password) {
+        if (!this.email.contentEquals(email)) {
+            logger.error("Email Mismatch: {} / {}", this.email.get(), email);
+            return false;
+        }
+        String hash = encrypt(email, password);
+        String otherHash = this.loginHashFile.getContent();
+        String mail = this.email.get();
+        byte[] bytes1 = hash.getBytes(StandardCharsets.US_ASCII);
+        byte[] bytes2 = otherHash.getBytes(StandardCharsets.US_ASCII);
+        boolean equals = Arrays.equals(bytes1, bytes2);
+        //logger.info("Logging in: this.email = {}; this.hash = {}; password = {}", mail, hash, password);
+        //logger.info("Other Data: othr.email = {}; othr.hash = {}; equals = {}", email, otherHash, equals);
+        //logger.info("Array 1: {}", Arrays.toString(bytes1));
+        //logger.info("Array 2: {}", Arrays.toString(bytes2));
+        return equals;
+    }
+
+    public void putHash(String hash) {
+        loginHashFile.setContent(hash);
+    }
+}
