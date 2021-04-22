@@ -1,5 +1,7 @@
 package org.comroid.oauth.rest;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.StreamSupplier;
 import org.comroid.auth.server.AuthServer;
@@ -16,11 +18,13 @@ public enum OAuthEndpoint implements ServerEndpoint.This {
     AUTHORIZE("/authorize") {
         @Override
         public REST.Response executeGET(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            return super.executeGET(context, headers, urlParams, body);
+            logger.debug("Received authorization request with body:\n{}", body.toSerializedString());
+            return null;
         }
     };
 
     public static final StreamSupplier<ServerEndpoint> values = StreamSupplier.of(values());
+    private static final Logger logger = LogManager.getLogger();
     private final String extension;
     private final String[] regExp;
     private final Pattern pattern;
