@@ -38,7 +38,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 public final class AuthServer implements ContextualProvider.Underlying, UncheckedCloseable, PagePropertiesProvider {
     //http://localhost:42000
-    public static final Logger logger = LogManager.getLogger("AuthServer");
+    public static final Logger logger = LogManager.getLogger();
     public static final ContextualProvider MASTER_CONTEXT;
     public static final String URL_BASE = "https://auth.comroid.org/";
     public static final int PORT = 42000;
@@ -85,7 +85,9 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
             this.executor = executor;
 
             logger.debug("Registering shutdown Hook");
-            Runtime.getRuntime().addShutdownHook(new Thread(this::close));
+            Thread shutdownHook = new Thread(this::close);
+            shutdownHook.setPriority(Thread.MAX_PRIORITY);
+            Runtime.getRuntime().addShutdownHook(shutdownHook);
 
             if (OS.current == OS.UNIX) {
                 logger.debug("Initializing Status Connection...");

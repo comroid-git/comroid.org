@@ -93,6 +93,8 @@ public final class AuthConnection extends WebkitConnection {
                 switch (split[1]) {
                     case "changePanel":
                         String target = data.get("target").asString();
+                        pageProperties.put("frame", target);
+
                         try (
                                 InputStream is = WebkitConfiguration.get().getPanel(target);
                                 InputStreamReader isr = new InputStreamReader(is);
