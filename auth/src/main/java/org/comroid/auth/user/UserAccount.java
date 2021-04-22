@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.comroid.api.Serializer;
 import org.comroid.api.UUIDContainer;
+import org.comroid.auth.model.PermitCarrier;
 import org.comroid.auth.server.AuthServer;
 import org.comroid.common.io.FileHandle;
 import org.comroid.mutatio.model.Ref;
@@ -21,7 +22,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
 
-public final class UserAccount extends DataContainerBase<UserAccount> implements UUIDContainer {
+public final class UserAccount extends DataContainerBase<UserAccount> implements UUIDContainer, PermitCarrier {
     @RootBind
     public static final GroupBind<UserAccount> Type = new GroupBind<>(AuthServer.MASTER_CONTEXT, "user-account");
     public static final VarBind<UserAccount, String, UUID, UUID> ID
@@ -64,6 +65,7 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
         return email.assertion("Email not found");
     }
 
+    @Override
     public Set<Permit> getPermits() {
         return permits.assertion("Permits not found");
     }

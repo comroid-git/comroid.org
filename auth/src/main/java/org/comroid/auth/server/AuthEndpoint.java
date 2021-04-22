@@ -4,6 +4,7 @@ import org.comroid.api.Polyfill;
 import org.comroid.api.StreamSupplier;
 import org.comroid.auth.service.Service;
 import org.comroid.auth.service.ServiceManager;
+import org.comroid.auth.user.Permit;
 import org.comroid.auth.user.UserAccount;
 import org.comroid.auth.user.UserSession;
 import org.comroid.mutatio.model.Ref;
@@ -24,6 +25,7 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 import static org.comroid.auth.user.UserAccount.EMAIL;
+import static org.comroid.auth.user.UserAccount.PERMIT;
 import static org.comroid.restless.HTTPStatusCodes.*;
 
 public enum AuthEndpoint implements ServerEndpoint.This {
@@ -145,6 +147,8 @@ public enum AuthEndpoint implements ServerEndpoint.This {
             final AuthServer server = context.requireFromContext(AuthServer.class);
             final ServiceManager serviceManager = server.getServiceManager();
             UUID uuid = urlParams[0].equals("0") ? null : UUID.fromString(urlParams[0]);
+
+            UserSession.findSession(headers).checkPermits(Permit.ADMIN);
 
             context.getLogger().debug("POSTing Service with ID {} and body {}", uuid, body);
             UniObjectNode data = body.asObjectNode();

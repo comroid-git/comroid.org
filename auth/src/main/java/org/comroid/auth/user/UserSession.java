@@ -2,6 +2,7 @@ package org.comroid.auth.user;
 
 import com.sun.net.httpserver.Headers;
 import org.comroid.api.os.OS;
+import org.comroid.auth.model.PermitCarrier;
 import org.comroid.auth.server.AuthConnection;
 import org.comroid.auth.server.AuthServer;
 import org.comroid.mutatio.model.Ref;
@@ -13,13 +14,14 @@ import org.comroid.uniform.node.UniObjectNode;
 
 import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
 import static org.comroid.restless.CommonHeaderNames.COOKIE;
 import static org.comroid.restless.HTTPStatusCodes.UNAUTHORIZED;
 
-public final class UserSession {
+public final class UserSession implements PermitCarrier {
     public static final String COOKIE_PREFIX = "org.comroid.auth";
     public static final String NULL_COOKIE = wrapCookie("null");
     public final Ref<AuthConnection> connection = Reference.create();
@@ -45,6 +47,11 @@ public final class UserSession {
         account.remove("oauth");
 
         return data;
+    }
+
+    @Override
+    public Set<Permit> getPermits() {
+        return getAccount().getPermits();
     }
 
     UserSession(UserAccount account) {
