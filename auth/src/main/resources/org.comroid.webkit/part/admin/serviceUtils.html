@@ -35,13 +35,20 @@
         injectServices(table, services);
     }
 
-    document.addEventListener('frameReady', e => {
+    function reload() {
+        sendCommand('admin/listServices');
+    }
+
+    function initialize() {
         console.debug('initializing services')
 
         // event listeners
         document.addEventListener('listServices', e => listServicesEvent(e.detail['services']));
+        document.addEventListener('webkit/refresh', reload);
 
         // initiate
-        sendCommand('admin/listServices');
-    })
+        reload();
+    }
+
+    document.addEventListener('frameReady', initialize)
 </script>
