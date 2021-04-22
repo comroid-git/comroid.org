@@ -6,8 +6,17 @@
     <script type="application/javascript">
         function handleCustomEvent(type, data) {
             console.log("custom event", type, data);
+
+            switch (type) {
+                case 'listServices':
+                    // inject list of services to table
+                    break;
+                case 'listUsers':
+                    // inject list of users to table
+                    break;
+            }
         }
     </script>
-    hello admin
-    <button command="admin/listServices">test action</button>
+    <button command="admin/listServices">Edit Services</button>
+    <button command="admin/listUsers">Edit Users</button>
 </div>

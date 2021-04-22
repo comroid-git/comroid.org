@@ -8,6 +8,7 @@
         <header>part/header.html</header>
         <footer>part/footer.html</footer>
         <loginUtils>part/loginUtils.html</loginUtils>
+        <adminUtils>part/adminUtils.html</adminUtils>
     </parts>
     <panels>
         <!-- Main Panels -->

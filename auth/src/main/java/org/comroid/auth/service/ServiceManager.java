@@ -9,6 +9,7 @@ import org.comroid.common.io.FileHandle;
 import org.comroid.uniform.node.UniObjectNode;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,6 +24,10 @@ public final class ServiceManager implements ContextualProvider.Underlying {
     @Override
     public ContextualProvider getUnderlyingContextualProvider() {
         return context;
+    }
+
+    public Collection<Service> getServices() {
+        return services.values();
     }
 
     public ServiceManager(AuthServer server) {
