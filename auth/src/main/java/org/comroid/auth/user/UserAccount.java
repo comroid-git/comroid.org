@@ -7,9 +7,6 @@ import org.comroid.api.UUIDContainer;
 import org.comroid.auth.server.AuthServer;
 import org.comroid.common.io.FileHandle;
 import org.comroid.mutatio.model.Ref;
-import org.comroid.oauth.OAuth;
-import org.comroid.oauth.user.OAuthUser;
-import org.comroid.uniform.node.UniObjectNode;
 import org.comroid.util.Bitmask;
 import org.comroid.util.StandardValueType;
 import org.comroid.varbind.annotation.RootBind;
@@ -24,7 +21,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
 
-public final class UserAccount extends DataContainerBase<UserAccount> implements UUIDContainer, OAuth.UserProvider {
+public final class UserAccount extends DataContainerBase<UserAccount> implements UUIDContainer {
     @RootBind
     public static final GroupBind<UserAccount> Type = new GroupBind<>(AuthServer.MASTER_CONTEXT, "user-account");
     public static final VarBind<UserAccount, String, UUID, UUID> ID
@@ -36,11 +33,6 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
             = Type.createBind("email")
             .extractAs(StandardValueType.STRING)
             .build();
-    public static final VarBind<UserAccount, UniObjectNode, OAuthUser, OAuthUser> OAUTH
-            = Type.createBind("oauth")
-            .extractAsObject()
-            .andResolve(OAuthUser::new)
-            .build();
     public static final VarBind<UserAccount, Integer, Set<Permit>, Set<Permit>> PERMIT
             = Type.createBind("permit")
             .extractAs(StandardValueType.INTEGER)
@@ -51,7 +43,6 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
     private static final Logger logger = LogManager.getLogger();
     public final Ref<UUID> id = getComputedReference(ID);
     public final Ref<String> email = getComputedReference(EMAIL);
-    public final Ref<OAuthUser> oauth = getComputedReference(OAUTH);
     public final Ref<Set<Permit>> permits = getComputedReference(PERMIT);
     private final FileHandle dir;
     private final FileHandle loginHashFile;
@@ -73,23 +64,8 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
         return email.assertion("Email not found");
     }
 
-    @Override
-    public String getUsername() {
-        return email.get();
-    }
-
-    @Override
-    public String getPassword() {
-        return loginHashFile.getContent();
-    }
-
     public Set<Permit> getPermits() {
         return permits.assertion("Permits not found");
-    }
-
-    @Override
-    public OAuthUser getOAuthUser() {
-        return oauth.assertion();
     }
 
     UserAccount(UserManager context, final FileHandle sourceDir) {
