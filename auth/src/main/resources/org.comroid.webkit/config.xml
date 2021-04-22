@@ -5,10 +5,15 @@
         <widget>frame/widget.html</widget>
     </frames>
     <parts>
-        <header>part/header.html</header>
-        <footer>part/footer.html</footer>
+        <!-- Common Parts -->
+        <header>part/common/header.html</header>
+        <footer>part/common/footer.html</footer>
+
+        <!-- Admin Parts -->
+        <serviceUtils>part/admin/serviceUtils.html</serviceUtils>
+
+        <!-- Other Parts -->
         <loginUtils>part/loginUtils.html</loginUtils>
-        <adminUtils>part/adminUtils.html</adminUtils>
     </parts>
     <panels>
         <!-- Main Panels -->

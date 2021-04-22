@@ -6,8 +6,8 @@
             case 'listServices':
                 // inject list of services to table
                 break;
-            case 'listUsers':
-                // inject list of users to table
+            default:
+                console.log("Unknown Service event: ", type, data);
                 break;
         }
     }
