@@ -16,19 +16,6 @@
         })
     }
 
-    function handleCustomEvent(type, data) {
-        console.log("custom event", type, data);
-
-        switch (type) {
-            case 'listServices':
-
-                break;
-            default:
-                console.log("Unknown Service event: ", type, data);
-                break;
-        }
-    }
-
     function listServicesEvent(services) {
         // inject list of services to table
         console.debug('injecting services:', services.length);
@@ -36,12 +23,12 @@
     }
 
     function reload() {
-        console.debug("Reloading Service Utilities")
+        console.info("Reloading Service Utilities")
         sendCommand('admin/listServices');
     }
 
     function initialize() {
-        console.debug("Initializing Service Utilities")
+        console.info("Initializing Service Utilities")
 
         // event listeners
         document.addEventListener('listServices', e => listServicesEvent(e.detail['services']));
