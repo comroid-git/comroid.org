@@ -1,8 +1,8 @@
 package org.comroid.auth.server;
 
-import com.sun.net.httpserver.Headers;
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.Polyfill;
+import org.comroid.api.StreamSupplier;
 import org.comroid.auth.user.UserAccount;
 import org.comroid.auth.user.UserSession;
 import org.comroid.mutatio.model.Ref;
@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 import static org.comroid.auth.user.UserAccount.EMAIL;
 import static org.comroid.restless.HTTPStatusCodes.*;
 
-public enum Endpoint implements ServerEndpoint.This {
+public enum AuthEndpoint implements ServerEndpoint.This {
     FAVICON("/favicon.ico") {
         @Override
         public REST.Response executeGET(ContextualProvider context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
@@ -65,7 +65,7 @@ public enum Endpoint implements ServerEndpoint.This {
                             .consume(account::putHash);
                 } else account.updateFrom(body.asObjectNode());
 
-                return Endpoint.forwardToWidgetOr(headers, new REST.Header.List(), "../", "account");
+                return AuthEndpoint.forwardToWidgetOr(headers, new REST.Header.List(), "../", "account");
             } catch (RestEndpointException ex) {
                 if (ex.getStatusCode() == UNAUTHORIZED)
                     throw ex;
@@ -87,7 +87,7 @@ public enum Endpoint implements ServerEndpoint.This {
 
                 UserAccount account = AuthServer.instance.getUserManager().createAccount(email, password);
 
-                return Endpoint.forwardToWidgetOr(headers, new REST.Header.List(), "../", "account");
+                return AuthEndpoint.forwardToWidgetOr(headers, new REST.Header.List(), "../", "account");
             } catch (Throwable t) {
                 throw new RestEndpointException(INTERNAL_SERVER_ERROR, "Could not create user account", t);
             }
@@ -136,6 +136,7 @@ public enum Endpoint implements ServerEndpoint.This {
         }
     };
 
+    public static final StreamSupplier<ServerEndpoint> values = StreamSupplier.of(values());
     private final String extension;
     private final String[] regex;
     private final Pattern pattern;
@@ -160,7 +161,7 @@ public enum Endpoint implements ServerEndpoint.This {
         return pattern;
     }
 
-    Endpoint(String extension, @Language("RegExp") String... regex) {
+    AuthEndpoint(String extension, @Language("RegExp") String... regex) {
         this.extension = extension;
         this.regex = regex;
         this.pattern = buildUrlPattern();

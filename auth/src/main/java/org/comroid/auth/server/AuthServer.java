@@ -4,7 +4,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.Polyfill;
-import org.comroid.api.StreamSupplier;
 import org.comroid.api.UncheckedCloseable;
 import org.comroid.api.os.OS;
 import org.comroid.auth.user.UserManager;
@@ -12,7 +11,7 @@ import org.comroid.auth.user.UserSession;
 import org.comroid.common.io.FileHandle;
 import org.comroid.mutatio.model.RefContainer;
 import org.comroid.mutatio.model.RefMap;
-import org.comroid.oauth.server.OAuth2Server;
+import org.comroid.oauth.rest.OAuthEndpoint;
 import org.comroid.restless.HttpAdapter;
 import org.comroid.restless.REST;
 import org.comroid.restless.adapter.java.JavaHttpAdapter;
@@ -25,8 +24,6 @@ import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
 import org.comroid.webkit.config.WebkitConfiguration;
 import org.comroid.webkit.model.PagePropertiesProvider;
 import org.comroid.webkit.server.WebkitServer;
-import org.zalando.stups.tokens.AccessTokensBuilder;
-import org.zalando.stups.tokens.Tokens;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -42,10 +39,9 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
     //http://localhost:42000
     public static final Logger logger = LogManager.getLogger();
     public static final ContextualProvider MASTER_CONTEXT;
-    public static final String URL_BASE = "https://auth.comroid.org/";
+    public static final String URL_BASE = "https://auth.comroid.org";
     public static final int PORT = 42000;
     public static final int SOCKET_PORT = 42001;
-    public static final int OAUTH_PORT = 42002;
     public static final FileHandle DIR = new FileHandle("/srv/auth/", true);
     public static final FileHandle STATUS_CRED = DIR.createSubFile("status.cred");
     public static final FileHandle DATA = DIR.createSubDir("data");
@@ -113,17 +109,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
                     SOCKET_PORT,
                     AuthConnection::new,
                     this,
-                    StreamSupplier.of(Endpoint.values())
-            );
-
-            new OAuth2Server(
-                    this,
-                    this.executor,
-                    URL_BASE + "oauth2/",
-                    OS.isWindows
-                            ? InetAddress.getLoopbackAddress()
-                            : InetAddress.getLocalHost(),
-                    OAUTH_PORT
+                    AuthEndpoint.values.append(OAuthEndpoint.values)
             );
         } catch (UnknownHostException e) {
             throw new AssertionError(e);
