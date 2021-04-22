@@ -121,6 +121,10 @@ public final class AuthConnection extends WebkitConnection {
                 break;
             default:
                 logger.error("Unknown Command received: {}", commandName);
+                response.put("type", "error");
+                UniObjectNode errorData = response.putObject("data");
+                errorData.put("error", "Unknown Command");
+                errorData.put("detail", commandName);
                 break;
         }
 

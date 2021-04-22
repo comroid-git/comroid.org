@@ -3,5 +3,11 @@
 <h4 style="color: darkred" when="isValidSession && (sessionData['account']['permit'] & 4) == 0">
     You are not permitted to access this page</h4>
 <div when="isValidSession && (sessionData['account']['permit'] & 4) != 0">
+    <script type="application/javascript">
+        function handleCustomEvent(type, data) {
+            console.log("custom event", type, data);
+        }
+    </script>
     hello admin
+    <button command="test/action">test action</button>
 </div>
