@@ -50,6 +50,14 @@ footer {
     color: #e3e3e3;
 }
 
+table {
+    width: 100%;
+}
+
+table, th, td {
+    border: 1px solid black;
+}
+
 /* Navigation der Seite:
 	Realisierung als Flex-Box, um die Navigation nach Implementierung weiterer Seiten problemlos erweitern zu können */
 
