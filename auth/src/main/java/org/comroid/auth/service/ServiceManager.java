@@ -3,8 +3,10 @@ package org.comroid.auth.service;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
+import org.comroid.api.Rewrapper;
 import org.comroid.auth.server.AuthServer;
 import org.comroid.common.io.FileHandle;
+import org.comroid.uniform.node.UniObjectNode;
 
 import java.io.File;
 import java.util.Map;
@@ -41,5 +43,19 @@ public final class ServiceManager implements ContextualProvider.Underlying {
                 .map(dir -> new Service(this, dir))
                 .forEach(account -> services.put(account.getUUID(), account));
         logger.info("Loading finished; loaded {} services", services.size());
+    }
+
+    public boolean hasService(UUID uuid) {
+        return services.containsKey(uuid);
+    }
+
+    public Service createService(UniObjectNode initialData) {
+        Service service = new Service(this, initialData);
+        services.put(service.getUUID(), service);
+        return service;
+    }
+
+    public Rewrapper<Service> getService(final UUID uuid) {
+        return () -> services.getOrDefault(uuid, null);
     }
 }
