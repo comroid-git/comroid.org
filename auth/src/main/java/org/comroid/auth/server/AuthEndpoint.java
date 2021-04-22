@@ -144,13 +144,15 @@ public enum AuthEndpoint implements ServerEndpoint.This {
         public REST.Response executePOST(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             final AuthServer server = context.requireFromContext(AuthServer.class);
             final ServiceManager serviceManager = server.getServiceManager();
-            final UUID uuid = UUID.fromString(urlParams[0]);
+            UUID uuid = urlParams[0].equals("0") ? null : UUID.fromString(urlParams[0]);
 
             context.getLogger().debug("POSTing Service with ID {} and body {}", uuid, body);
             UniObjectNode data = body.asObjectNode();
             if (!Service.Type.isValidData(data))
                 // throw if data is not valid
                 throw new RestEndpointException(BAD_REQUEST, "Service Data is invalid");
+            if (uuid == null)
+                uuid = Service.ID.getFrom(data);
 
             // check if service exists
             Service service;
