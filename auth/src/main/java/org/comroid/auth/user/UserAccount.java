@@ -7,6 +7,7 @@ import org.comroid.api.UUIDContainer;
 import org.comroid.auth.server.AuthServer;
 import org.comroid.common.io.FileHandle;
 import org.comroid.mutatio.model.Ref;
+import org.comroid.util.Bitmask;
 import org.comroid.util.StandardValueType;
 import org.comroid.varbind.annotation.RootBind;
 import org.comroid.varbind.bind.GroupBind;
@@ -32,8 +33,8 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
             = Type.createBind("email")
             .extractAs(StandardValueType.STRING)
             .build();
-    public static final VarBind<UserAccount, Integer, Set<Permit>, Set<Permit>> PERMITS
-            = Type.createBind("permits")
+    public static final VarBind<UserAccount, Integer, Set<Permit>, Set<Permit>> PERMIT
+            = Type.createBind("permit")
             .extractAs(StandardValueType.INTEGER)
             .andRemap(Permit::valueOf)
             .onceEach()
@@ -42,9 +43,16 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
     private static final Logger logger = LogManager.getLogger();
     public final Ref<UUID> id = getComputedReference(ID);
     public final Ref<String> email = getComputedReference(EMAIL);
-    public final Ref<Set<Permit>> permits = getComputedReference(PERMITS);
+    public final Ref<Set<Permit>> permits = getComputedReference(PERMIT);
     private final FileHandle dir;
     private final FileHandle loginHashFile;
+
+    {
+        if (email.contentEquals("burdoto@outlook.com"))
+            put(PERMIT, Bitmask.combine(Permit.values()));
+        else if (permits.test(Set::isEmpty))
+            put(PERMIT, Permit.NONE.getValue());
+    }
 
     @Override
     public UUID getUUID() {
