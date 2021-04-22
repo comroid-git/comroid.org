@@ -14,8 +14,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 public final class UserManager implements ContextualProvider.Underlying, UncheckedCloseable {
-    public static final FileHandle DIR = AuthServer.DIR.createSubDir("users");
-    public static final FileHandle SALTS = AuthServer.DIR.createSubDir("salts");
+    public static final FileHandle DIR = AuthServer.DATA.createSubDir("users");
+    public static final FileHandle SALTS = AuthServer.DATA.createSubDir("salts");
     private static final Logger logger = LogManager.getLogger();
     private static final Map<String, byte[]> salts = new ConcurrentHashMap<>();
 
