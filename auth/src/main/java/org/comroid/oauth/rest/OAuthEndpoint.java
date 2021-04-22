@@ -2,7 +2,6 @@ package org.comroid.oauth.rest;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.comroid.api.ContextualProvider;
 import org.comroid.api.StreamSupplier;
 import org.comroid.auth.server.AuthServer;
 import org.comroid.restless.REST;
@@ -31,12 +30,12 @@ public enum OAuthEndpoint implements ServerEndpoint.This {
 
     @Override
     public String getUrlBase() {
-        return AuthServer.URL_BASE + "/oauth2";
+        return AuthServer.URL_BASE;
     }
 
     @Override
     public String getUrlExtension() {
-        return extension;
+        return "/oauth2" + extension;
     }
 
     @Override
