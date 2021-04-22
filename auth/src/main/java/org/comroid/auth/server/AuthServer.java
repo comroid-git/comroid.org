@@ -11,7 +11,6 @@ import org.comroid.auth.user.UserManager;
 import org.comroid.auth.user.UserSession;
 import org.comroid.common.io.FileHandle;
 import org.comroid.mutatio.model.RefContainer;
-import org.comroid.mutatio.model.RefMap;
 import org.comroid.oauth.rest.OAuthEndpoint;
 import org.comroid.restless.HttpAdapter;
 import org.comroid.restless.REST;
@@ -138,24 +137,23 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
     }
 
     public Map<String, Object> findPageProperties(REST.Header.List headers) {
+        Map<String, Object> map;
         try {
             UserSession session = UserSession.findSession(headers);
-            return session.connection.<Map<String, Object>>map(conn -> {
-                AuthConnection conn1 = conn;
-                RefMap<String, Object> properties = conn1.properties;
-                return properties;
-            }).or(() -> {
-                HashMap<String, Object> map = new HashMap<>();
-                map.put("isValidSession", true);
-                map.put("sessionData", session.getSessionData());
-                return map;
-            }).assertion("internal error");
+            map = session.connection.<Map<String, Object>>map(conn -> conn.properties)
+                    .or(() -> {
+                        Map<String, Object> o = new HashMap<>();
+                        o.put("isValidSession", true);
+                        o.put("sessionData", session.getSessionData());
+                        return o;
+                    }).assertion("internal error");
         } catch (RestEndpointException unauthorized) {
-            HashMap<String, Object> map = new HashMap<>();
+            map = new HashMap<>();
             map.put("isValidSession", false);
             map.put("sessionData", null);
-            return map;
         }
+
+        return map;
     }
 
     @Override

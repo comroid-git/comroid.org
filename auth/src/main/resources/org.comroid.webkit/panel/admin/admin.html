@@ -1,0 +1,7 @@
+<h2>Authentication Server Administration</h2>
+<h3 style="color: darkred" when="!isValidSession">You are not logged in</h3>
+<h4 style="color: darkred" when="isValidSession && (sessionData['account']['permit'] & 4) == 0">
+    You are not permitted to access this page</h4>
+<div when="isValidSession && (sessionData['account']['permit'] & 4) != 0">
+    hello admin
+</div>
