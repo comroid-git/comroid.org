@@ -2,13 +2,14 @@
     const table = document.getElementById('serviceTable');
 
     function injectServices(table, services) {
-        services.forEach(service => {
+        services.forEach(serviceId => {
             let serviceRow = document.createElement('tr');
             let serviceIdBox = document.createElement('td');
             let serviceNameBox = document.createElement('td');
 
-            serviceIdBox.textContent = service['uuid'];
-            serviceNameBox.textContent = service['name'];
+            serviceIdBox.textContent = serviceId;
+            serviceIdBox.setAttribute('inject', `adminData.service.${serviceId}.id`)
+            serviceNameBox.setAttribute('inject', `adminData.service.${serviceId}.name`)
 
             console.debug('appending children to table for', service['name']);
             serviceRow.append(serviceIdBox, serviceNameBox);
@@ -23,12 +24,12 @@
     }
 
     function reload() {
-        console.info("Reloading Service Utilities")
+        console.info('Reloading Service Utilities')
         sendCommand('admin/listServices');
     }
 
     function initialize() {
-        console.info("Initializing Service Utilities")
+        console.info('Initializing Service Utilities')
 
         // event listeners
         document.addEventListener('listServices', e => listServicesEvent(e.detail['services']));

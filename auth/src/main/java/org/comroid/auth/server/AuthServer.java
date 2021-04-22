@@ -7,6 +7,7 @@ import org.comroid.api.Polyfill;
 import org.comroid.api.UncheckedCloseable;
 import org.comroid.api.os.OS;
 import org.comroid.auth.service.ServiceManager;
+import org.comroid.auth.user.Permit;
 import org.comroid.auth.user.UserManager;
 import org.comroid.auth.user.UserSession;
 import org.comroid.common.io.FileHandle;
@@ -21,6 +22,7 @@ import org.comroid.status.entity.Service;
 import org.comroid.uniform.Context;
 import org.comroid.uniform.SerializationAdapter;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
+import org.comroid.varbind.container.DataContainer;
 import org.comroid.webkit.config.WebkitConfiguration;
 import org.comroid.webkit.model.PagePropertiesProvider;
 import org.comroid.webkit.server.WebkitServer;
@@ -30,7 +32,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -136,6 +140,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
         instance = new AuthServer(Executors.newScheduledThreadPool(8));
     }
 
+    @Override
     public Map<String, Object> findPageProperties(REST.Header.List headers) {
         Map<String, Object> map;
         try {
@@ -147,6 +152,17 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
                         o.put("sessionData", session.getSessionData());
                         return o;
                     }).assertion("internal error");
+
+            if (session.hasPermits(Permit.ADMIN)) {
+                Map<String, Object> adminData = new HashMap<>();
+                List<Object> services = new ArrayList<>();
+                serviceManager.getServices()
+                        .stream()
+                        .map(DataContainer::toUniNode)
+                        .forEach(services::add);
+                adminData.put("service", services);
+                map.put("adminData", adminData);
+            }
         } catch (RestEndpointException unauthorized) {
             map = new HashMap<>();
             map.put("isValidSession", false);

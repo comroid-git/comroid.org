@@ -55,7 +55,7 @@ public final class Service extends DataContainerBase<Service> implements UUIDCon
                 throw new IllegalArgumentException(String.format("File is not a directory: %s", sourceDir));
             if (!sourceDir.exists() && !sourceDir.mkdir())
                 throw new IllegalArgumentException(String.format("Could not create user directory %s", sourceDir));
-            FileHandle subFile = sourceDir.createSubFile("user.json");
+            FileHandle subFile = sourceDir.createSubFile("service.json");
             if (!subFile.exists())
                 throw new IllegalArgumentException(String.format("Source directory has no user configuration: %s", sourceDir));
             obj.copyFrom(subFile.parse(context.requireFromContext(Serializer.class)));
@@ -65,6 +65,6 @@ public final class Service extends DataContainerBase<Service> implements UUIDCon
 
     protected Service(ContextualProvider context, @Nullable UniObjectNode initialData) {
         super(context, initialData);
-        this.dir = UserManager.DIR.createSubDir(id.toString());
+        this.dir = DIR.createSubDir(id.toString());
     }
 }

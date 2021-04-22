@@ -1,6 +1,6 @@
 <h2>Authentication Server Administration</h2>
 <h3>Services</h3>
-<invalidAccess />
+<invalidAccess/>
 <div when="isValidSession && (sessionData['account']['permit'] & 4) != 0">
     <table id="serviceTable">
         <tr>
@@ -8,6 +8,17 @@
             <th style="width: auto;">Service Name</th>
         </tr>
     </table>
+    <br/>
+    <button onclick="document.getElementById('createService').style.visibility = 'visible';">Create new Service...
+    </button>
+    <div id="createService" style="visibility: hidden;">
+        <form action="api/service/00000000-0000-0000-0000-000000000000" method="post">
+            <label for="name">Service Name:</label>
+            <input id="name" name="name" type="text"/>
+            <br/>
+            <input content="Create Service" type="submit">
+        </form>
+    </div>
 
-    <serviceUtils />
+    <serviceUtils/>
 </div>

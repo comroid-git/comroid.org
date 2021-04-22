@@ -3,6 +3,8 @@ package org.comroid.auth.server;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
+import org.comroid.api.UUIDContainer;
+import org.comroid.auth.service.Service;
 import org.comroid.auth.service.ServiceManager;
 import org.comroid.auth.user.Permit;
 import org.comroid.auth.user.UserManager;
@@ -14,6 +16,7 @@ import org.comroid.restless.socket.WebsocketPacket;
 import org.comroid.uniform.node.UniArrayNode;
 import org.comroid.uniform.node.UniNode;
 import org.comroid.uniform.node.UniObjectNode;
+import org.comroid.util.StandardValueType;
 import org.comroid.varbind.container.DataContainer;
 import org.comroid.webkit.socket.WebkitConnection;
 import org.java_websocket.WebSocket;
@@ -21,6 +24,7 @@ import org.java_websocket.WebSocket;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.UUID;
 
 public final class AuthConnection extends WebkitConnection {
     private static final Logger logger = LogManager.getLogger();
@@ -88,20 +92,22 @@ public final class AuthConnection extends WebkitConnection {
             case "admin":
                 switch (commandName) {
                     case "listUsers":
-                        UniArrayNode users = response.putArray("users");
+                        UniArrayNode users = response.putArray("user");
                         requireFromContext(UserManager.class)
                                 .getUsers()
                                 .stream()
-                                .map(DataContainer::toUniNode)
-                                .forEach(users::add);
+                                .map(UUIDContainer::getUUID)
+                                .map(UUID::toString)
+                                .forEach(id -> users.add(StandardValueType.STRING, id));
                         break;
                     case "listServices":
-                        UniArrayNode services = response.putArray("services");
+                        UniArrayNode services = response.putArray("service");
                         requireFromContext(ServiceManager.class)
                                 .getServices()
                                 .stream()
-                                .map(DataContainer::toUniNode)
-                                .forEach(services::add);
+                                .map(UUIDContainer::getUUID)
+                                .map(UUID::toString)
+                                .forEach(id -> services.add(StandardValueType.STRING, id));
                         break;
                     default:
                         throw new NoSuchElementException("Unknown Admin Command: " + commandName);
