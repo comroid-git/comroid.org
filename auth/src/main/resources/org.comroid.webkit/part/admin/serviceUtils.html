@@ -1,4 +1,6 @@
 <script type="application/javascript" when="isValidSession && (sessionData['account']['permit'] & 4) != 0">
+    const table = document.getElementById('serviceTable');
+
     function injectServices(table, services) {
         services.forEach(service => {
             let serviceRow = document.createElement('tr');
@@ -19,12 +21,6 @@
 
         switch (type) {
             case 'listServices':
-                // inject list of services to table
-                let table = document.getElementById('serviceTable');
-                let services = data['services'];
-
-                console.debug('injecting services:', services.length);
-                injectServices(table, services);
 
                 break;
             default:
@@ -33,5 +29,19 @@
         }
     }
 
-    sendCommand('admin/listServices');
+    function listServicesEvent(services) {
+        // inject list of services to table
+        console.debug('injecting services:', services.length);
+        injectServices(table, services);
+    }
+
+    document.addEventListener('frameReady', e => {
+        console.debug('initializing services')
+
+        // event listeners
+        document.addEventListener('listServices', e => listServicesEvent(e.detail['services']));
+
+        // initiate
+        sendCommand('admin/listServices');
+    })
 </script>

@@ -3,7 +3,8 @@
 <h4 style="color: darkred" when="isValidSession && (sessionData['account']['permit'] & 4) == 0">
     You are not permitted to access this page</h4>
 <div when="isValidSession && (sessionData['account']['permit'] & 4) != 0">
-    <serviceUtils />
     <button command="admin/listServices">Edit Services</button>
     <button command="admin/listUsers">Edit Users</button>
+
+    <serviceUtils />
 </div>

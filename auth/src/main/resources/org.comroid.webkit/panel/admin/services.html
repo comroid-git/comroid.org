@@ -1,12 +1,13 @@
-<h2>Authentication Server Administration - Services</h2>
+<h2>Authentication Server Administration</h2>
+<h3>Services</h3>
 <invalidAccess />
 <div when="isValidSession && (sessionData['account']['permit'] & 4) != 0">
-    <serviceUtils />
-
     <table id="serviceTable">
         <tr>
-            <th>Service ID</th>
-            <th>Service Name</th>
+            <th style="width: 15%;">Service ID</th>
+            <th style="width: auto;">Service Name</th>
         </tr>
     </table>
+
+    <serviceUtils />
 </div>
