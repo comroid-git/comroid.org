@@ -92,7 +92,7 @@ public final class AuthConnection extends WebkitConnection {
             case "admin":
                 switch (commandName) {
                     case "listUsers":
-                        UniArrayNode users = response.putArray("user");
+                        UniArrayNode users = response.putArray("users");
                         requireFromContext(UserManager.class)
                                 .getUsers()
                                 .stream()
@@ -101,7 +101,7 @@ public final class AuthConnection extends WebkitConnection {
                                 .forEach(id -> users.add(StandardValueType.STRING, id));
                         break;
                     case "listServices":
-                        UniArrayNode services = response.putArray("service");
+                        UniArrayNode services = response.putArray("services");
                         requireFromContext(ServiceManager.class)
                                 .getServices()
                                 .stream()

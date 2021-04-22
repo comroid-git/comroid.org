@@ -17,6 +17,7 @@ import org.comroid.varbind.container.DataContainerBase;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
+import java.util.logging.FileHandler;
 
 public final class Service extends DataContainerBase<Service> implements UUIDContainer, Named {
     @RootBind
@@ -35,6 +36,7 @@ public final class Service extends DataContainerBase<Service> implements UUIDCon
             .onceEach()
             .setRequired()
             .build();
+    public static final FileHandle DIR = AuthServer.DATA.createSubDir("services");
     public final Ref<UUID> id = getComputedReference(ID);
     public final Ref<String> name = getComputedReference(NAME);
     private final FileHandle dir;
@@ -54,10 +56,10 @@ public final class Service extends DataContainerBase<Service> implements UUIDCon
             if (!sourceDir.isDirectory())
                 throw new IllegalArgumentException(String.format("File is not a directory: %s", sourceDir));
             if (!sourceDir.exists() && !sourceDir.mkdir())
-                throw new IllegalArgumentException(String.format("Could not create user directory %s", sourceDir));
+                throw new IllegalArgumentException(String.format("Could not create service directory %s", sourceDir));
             FileHandle subFile = sourceDir.createSubFile("service.json");
             if (!subFile.exists())
-                throw new IllegalArgumentException(String.format("Source directory has no user configuration: %s", sourceDir));
+                throw new IllegalArgumentException(String.format("Source directory has no service configuration: %s", sourceDir));
             obj.copyFrom(subFile.parse(context.requireFromContext(Serializer.class)));
         });
         this.dir = sourceDir;
@@ -66,5 +68,6 @@ public final class Service extends DataContainerBase<Service> implements UUIDCon
     protected Service(ContextualProvider context, @Nullable UniObjectNode initialData) {
         super(context, initialData);
         this.dir = DIR.createSubDir(id.toString());
+        dir.createSubFile("service.json").setContent(toSerializedString());
     }
 }

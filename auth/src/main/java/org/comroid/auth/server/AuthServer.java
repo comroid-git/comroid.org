@@ -155,11 +155,9 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
 
             if (session.hasPermits(Permit.ADMIN)) {
                 Map<String, Object> adminData = new HashMap<>();
-                List<Object> services = new ArrayList<>();
-                serviceManager.getServices()
-                        .stream()
-                        .map(DataContainer::toUniNode)
-                        .forEach(services::add);
+                Map<String, Object> services = new HashMap<>();
+                serviceManager.getServices().forEach(service ->
+                        services.put(service.getUUID().toString(), service.toUniNode()));
                 adminData.put("service", services);
                 map.put("adminData", adminData);
             }
