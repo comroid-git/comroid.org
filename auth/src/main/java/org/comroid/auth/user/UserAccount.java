@@ -16,6 +16,8 @@ import org.comroid.varbind.container.DataContainerBase;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Set;
 import java.util.UUID;
 
 public final class UserAccount extends DataContainerBase<UserAccount> implements UUIDContainer {
@@ -30,9 +32,17 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
             = Type.createBind("email")
             .extractAs(StandardValueType.STRING)
             .build();
+    public static final VarBind<UserAccount, Integer, Set<Permit>, Set<Permit>> PERMITS
+            = Type.createBind("permits")
+            .extractAs(StandardValueType.INTEGER)
+            .andRemap(Permit::valueOf)
+            .onceEach()
+            .setDefaultValue(Collections::emptySet)
+            .build();
     private static final Logger logger = LogManager.getLogger();
     public final Ref<UUID> id = getComputedReference(ID);
     public final Ref<String> email = getComputedReference(EMAIL);
+    public final Ref<Set<Permit>> permits = getComputedReference(PERMITS);
     private final FileHandle dir;
     private final FileHandle loginHashFile;
 
@@ -44,6 +54,10 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
     @Override
     public String getName() {
         return email.assertion("Email not found");
+    }
+
+    public Set<Permit> getPermits() {
+        return permits.assertion("Permits not found");
     }
 
     UserAccount(UserManager context, final FileHandle sourceDir) {
