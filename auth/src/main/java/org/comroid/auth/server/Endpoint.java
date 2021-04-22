@@ -10,6 +10,7 @@ import org.comroid.restless.CommonHeaderNames;
 import org.comroid.restless.REST;
 import org.comroid.restless.server.RestEndpointException;
 import org.comroid.restless.server.ServerEndpoint;
+import org.comroid.uniform.Context;
 import org.comroid.uniform.node.UniNode;
 import org.comroid.webkit.frame.FrameBuilder;
 import org.comroid.webkit.model.PagePropertiesProvider;
@@ -25,13 +26,13 @@ import static org.comroid.restless.HTTPStatusCodes.*;
 public enum Endpoint implements ServerEndpoint.This {
     FAVICON("/favicon.ico") {
         @Override
-        public REST.Response executeGET(ContextualProvider context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executeGET(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             return new REST.Response(Polyfill.uri("https://cdn.comroid.org/favicon.ico"));
         }
     },
     WIDGET("/widget") {
         @Override
-        public REST.Response executeGET(ContextualProvider context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executeGET(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             Map<String, Object> pageProperties = context.requireFromContext(PagePropertiesProvider.class)
                     .findPageProperties(headers);
             FrameBuilder frame = new FrameBuilder("widget", new REST.Header.List(), pageProperties, false);
@@ -41,7 +42,7 @@ public enum Endpoint implements ServerEndpoint.This {
     },
     MODIFY_ACCOUNT("/account/%s", "\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b") {
         @Override
-        public REST.Response executePOST(ContextualProvider context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executePOST(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             try {
                 UserSession session = UserSession.findSession(headers);
                 UserAccount account = session.getAccount();
@@ -75,7 +76,7 @@ public enum Endpoint implements ServerEndpoint.This {
     },
     REGISTRATION("/api/register") {
         @Override
-        public REST.Response executePOST(ContextualProvider context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executePOST(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             try {
                 String email = body.use(EMAIL)
                         .map(UniNode::asString)
@@ -95,7 +96,7 @@ public enum Endpoint implements ServerEndpoint.This {
     },
     LOGIN("/api/login") {
         @Override
-        public REST.Response executePOST(ContextualProvider context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executePOST(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             try {
                 String email = body.use(EMAIL)
                         .map(UniNode::asString)
@@ -116,13 +117,13 @@ public enum Endpoint implements ServerEndpoint.This {
         }
 
         @Override
-        public REST.Response executeDELETE(ContextualProvider context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executeDELETE(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             return new REST.Response(Polyfill.uri("logout"));
         }
     },
     LOGOUT("/logout") {
         @Override
-        public REST.Response executeGET(ContextualProvider context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executeGET(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             try {
                 UserSession session = UserSession.findSession(headers);
                 AuthServer.instance.getUserManager().closeSession(session);
