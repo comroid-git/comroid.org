@@ -47,7 +47,7 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
     private final FileHandle dir;
     private final FileHandle loginHashFile;
 
-    {
+    { // prepare object
         if (email.contentEquals("burdoto@outlook.com"))
             put(PERMIT, Bitmask.combine(Permit.values()));
         else if (permits.test(Set::isEmpty))
