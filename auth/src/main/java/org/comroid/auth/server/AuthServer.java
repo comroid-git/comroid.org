@@ -6,6 +6,7 @@ import org.comroid.api.ContextualProvider;
 import org.comroid.api.Polyfill;
 import org.comroid.api.UncheckedCloseable;
 import org.comroid.api.os.OS;
+import org.comroid.auth.service.ServiceManager;
 import org.comroid.auth.user.UserManager;
 import org.comroid.auth.user.UserSession;
 import org.comroid.common.io.FileHandle;
@@ -62,6 +63,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
     private final StatusConnection status;
     private final ContextualProvider context;
     private final UserManager userManager;
+    private final ServiceManager serviceManager;
     private final WebkitServer server;
 
     public UserManager getUserManager() {
@@ -96,6 +98,10 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
             logger.debug("Starting UserManager");
             this.userManager = new UserManager(this);
             context.addToContext(userManager);
+
+            logger.debug("Starting ServiceManager");
+            this.serviceManager = new ServiceManager(this);
+            context.addToContext(serviceManager);
 
             logger.debug("Starting Webkit server");
             this.server = new WebkitServer(
