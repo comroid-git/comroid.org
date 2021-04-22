@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.Polyfill;
+import org.comroid.api.StreamSupplier;
 import org.comroid.api.UncheckedCloseable;
 import org.comroid.api.os.OS;
 import org.comroid.auth.user.UserManager;
@@ -17,6 +18,7 @@ import org.comroid.restless.adapter.java.JavaHttpAdapter;
 import org.comroid.restless.server.RestEndpointException;
 import org.comroid.status.StatusConnection;
 import org.comroid.status.entity.Service;
+import org.comroid.uniform.Context;
 import org.comroid.uniform.SerializationAdapter;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
 import org.comroid.webkit.config.WebkitConfiguration;
@@ -97,7 +99,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
 
             logger.debug("Starting Webkit server");
             this.server = new WebkitServer(
-                    this,
+                    this.upgrade(Context.class),
                     this.executor,
                     URL_BASE,
                     OS.isWindows
@@ -107,7 +109,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
                     SOCKET_PORT,
                     AuthConnection::new,
                     this,
-                    Endpoint.values()
+                    StreamSupplier.of(Endpoint.values())
             );
         } catch (UnknownHostException e) {
             throw new AssertionError(e);
