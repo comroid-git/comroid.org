@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-import static org.comroid.api.Upgradeable.logger;
 import static org.comroid.auth.user.UserAccount.EMAIL;
 import static org.comroid.restless.HTTPStatusCodes.*;
 
@@ -147,7 +146,7 @@ public enum AuthEndpoint implements ServerEndpoint.This {
             final ServiceManager serviceManager = server.getServiceManager();
             final UUID uuid = UUID.fromString(urlParams[0]);
 
-            logger.debug("POSTing Service with ID {} and body {}", uuid, body);
+            context.getLogger().debug("POSTing Service with ID {} and body {}", uuid, body);
             UniObjectNode data = body.asObjectNode();
             if (!Service.Type.isValidData(data))
                 // throw if data is not valid
@@ -159,11 +158,11 @@ public enum AuthEndpoint implements ServerEndpoint.This {
                 // update existing service
                 service = serviceManager.getService(uuid).assertion();
                 service.updateFrom(data);
-                logger.info("Service {} data was updated: {}", service, service.toUniNode());
+                context.getLogger().info("Service {} data was updated: {}", service, service.toUniNode());
             } else {
                 // create service
                 service = serviceManager.createService(data);
-                logger.info("Service {} was created", service);
+                context.getLogger().info("Service {} was created", service);
             }
             return forwardToWidgetOr(headers, new REST.Header.List(), "../../", "service/" + uuid);
         }
