@@ -91,7 +91,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
                 logger.debug("Initializing Status Connection...");
                 this.status = new StatusConnection(MASTER_CONTEXT, "auth-server", STATUS_CRED.getContent(true), executor);
             } else this.status = null;
-            this.context = MASTER_CONTEXT.plus("Auth Server", executor);
+            this.context = MASTER_CONTEXT.plus("Auth Server", this, executor);
 
             logger.debug("Starting UserManager");
             this.userManager = new UserManager(this);
@@ -99,7 +99,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
 
             logger.debug("Starting Webkit server");
             this.server = new WebkitServer(
-                    this.upgrade(Context.class),
+                    context.upgrade(Context.class),
                     this.executor,
                     URL_BASE,
                     OS.isWindows
