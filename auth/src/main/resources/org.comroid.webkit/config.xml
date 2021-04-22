@@ -4,11 +4,6 @@
         <main>frame/main.html</main>
         <widget>frame/widget.html</widget>
     </frames>
-    <parts>
-        <header>part/header.html</header>
-        <footer>part/footer.html</footer>
-        <loginUtils>part/loginUtils.html</loginUtils>
-    </parts>
     <panels>
         <!-- Main Panels -->
         <home>panel/main/home.html</home>
@@ -21,6 +16,19 @@
 
         <!-- Admin Panels -->
         <admin>panel/admin/admin.html</admin>
+        <services>panel/admin/services.html</services>
         <service>panel/admin/service.html</service>
     </panels>
+    <parts>
+        <!-- Common Parts -->
+        <header>part/common/header.html</header>
+        <footer>part/common/footer.html</footer>
+
+        <!-- Admin Parts -->
+        <serviceUtils>part/admin/serviceUtils.html</serviceUtils>
+        <invalidAccess>part/admin/invalidAccess.html</invalidAccess>
+
+        <!-- Other Parts -->
+        <loginUtils>part/loginUtils.html</loginUtils>
+    </parts>
 </data>

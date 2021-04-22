@@ -3,7 +3,7 @@
     <Appenders>
         <Console name="console" target="SYSTEM_OUT">
             <PatternLayout disableAnsi="false"
-                           pattern="%highlight{%d{HH:mm:ss.SSS} [%t] %-5level %logger{36}}{FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=none, DEBUG=green bold, TRACE=blue} - %msg%n"/>
+                           pattern="%highlight{%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n}{FATAL=red blink, ERROR=red, WARN=yellow bold, INFO=none, DEBUG=green bold, TRACE=blue, ALL=magenta bold}"/>
         </Console>
         <File name="logfile" filename="/srv/auth/latest.log">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>

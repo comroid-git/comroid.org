@@ -1,8 +1,10 @@
 package org.comroid.auth.server;
 
-import com.sun.net.httpserver.Headers;
-import org.comroid.api.ContextualProvider;
 import org.comroid.api.Polyfill;
+import org.comroid.api.StreamSupplier;
+import org.comroid.auth.service.Service;
+import org.comroid.auth.service.ServiceManager;
+import org.comroid.auth.user.Permit;
 import org.comroid.auth.user.UserAccount;
 import org.comroid.auth.user.UserSession;
 import org.comroid.mutatio.model.Ref;
@@ -12,18 +14,21 @@ import org.comroid.restless.server.RestEndpointException;
 import org.comroid.restless.server.ServerEndpoint;
 import org.comroid.uniform.Context;
 import org.comroid.uniform.node.UniNode;
+import org.comroid.uniform.node.UniObjectNode;
 import org.comroid.webkit.frame.FrameBuilder;
 import org.comroid.webkit.model.PagePropertiesProvider;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.regex.Pattern;
 
 import static org.comroid.auth.user.UserAccount.EMAIL;
+import static org.comroid.auth.user.UserAccount.PERMIT;
 import static org.comroid.restless.HTTPStatusCodes.*;
 
-public enum Endpoint implements ServerEndpoint.This {
+public enum AuthEndpoint implements ServerEndpoint.This {
     FAVICON("/favicon.ico") {
         @Override
         public REST.Response executeGET(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
@@ -40,7 +45,7 @@ public enum Endpoint implements ServerEndpoint.This {
             return new REST.Response(OK, "text/html", frame.toReader());
         }
     },
-    MODIFY_ACCOUNT("/account/%s", "\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b") {
+    MODIFY_ACCOUNT("/account/%s", AuthServer.UUID_PATTERN) {
         @Override
         public REST.Response executePOST(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             try {
@@ -66,7 +71,7 @@ public enum Endpoint implements ServerEndpoint.This {
                             .consume(account::putHash);
                 } else account.updateFrom(body.asObjectNode());
 
-                return Endpoint.forwardToWidgetOr(headers, new REST.Header.List(), "../", "account");
+                return AuthEndpoint.forwardToWidgetOr(headers, new REST.Header.List(), "../", "account");
             } catch (RestEndpointException ex) {
                 if (ex.getStatusCode() == UNAUTHORIZED)
                     throw ex;
@@ -88,7 +93,7 @@ public enum Endpoint implements ServerEndpoint.This {
 
                 UserAccount account = AuthServer.instance.getUserManager().createAccount(email, password);
 
-                return Endpoint.forwardToWidgetOr(headers, new REST.Header.List(), "../", "account");
+                return AuthEndpoint.forwardToWidgetOr(headers, new REST.Header.List(), "../", "account");
             } catch (Throwable t) {
                 throw new RestEndpointException(INTERNAL_SERVER_ERROR, "Could not create user account", t);
             }
@@ -135,8 +140,42 @@ public enum Endpoint implements ServerEndpoint.This {
                 return new REST.Response(Polyfill.uri("home"));
             }
         }
+    },
+    SERVICE_API("/api/service/%s", AuthServer.UUID_PATTERN) {
+        @Override
+        public REST.Response executePOST(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            final AuthServer server = context.requireFromContext(AuthServer.class);
+            final ServiceManager serviceManager = server.getServiceManager();
+            UUID uuid = urlParams[0].equals("00000000-0000-0000-0000-000000000000") ? null : UUID.fromString(urlParams[0]);
+
+            UserSession.findSession(headers).checkPermits(Permit.ADMIN);
+
+            context.getLogger().debug("POSTing Service with ID {} and body {}", uuid, body);
+            UniObjectNode data = body.asObjectNode();
+            if (!Service.Type.isValidData(data))
+                if (uuid == null) {
+                    uuid = UUID.randomUUID();
+                    data.put(Service.ID, uuid.toString());
+                } else// throw if data is not valid
+                    throw new RestEndpointException(BAD_REQUEST, "Service Data is invalid");
+
+            // check if service exists
+            Service service;
+            if (serviceManager.hasService(uuid)) {
+                // update existing service
+                service = serviceManager.getService(uuid).assertion();
+                service.updateFrom(data);
+                context.getLogger().info("Service {} data was updated: {}", service, service.toUniNode());
+            } else {
+                // create service
+                service = serviceManager.createService(data);
+                context.getLogger().info("Service {} was created", service);
+            }
+            return forwardToWidgetOr(headers, new REST.Header.List(), "../../", "service/" + uuid);
+        }
     };
 
+    public static final StreamSupplier<ServerEndpoint> values = StreamSupplier.of(values());
     private final String extension;
     private final String[] regex;
     private final Pattern pattern;
@@ -161,7 +200,7 @@ public enum Endpoint implements ServerEndpoint.This {
         return pattern;
     }
 
-    Endpoint(String extension, @Language("RegExp") String... regex) {
+    AuthEndpoint(String extension, @Language("RegExp") String... regex) {
         this.extension = extension;
         this.regex = regex;
         this.pattern = buildUrlPattern();

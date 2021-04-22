@@ -4,14 +4,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.Polyfill;
-import org.comroid.api.StreamSupplier;
 import org.comroid.api.UncheckedCloseable;
 import org.comroid.api.os.OS;
+import org.comroid.auth.service.ServiceManager;
+import org.comroid.auth.user.Permit;
 import org.comroid.auth.user.UserManager;
 import org.comroid.auth.user.UserSession;
 import org.comroid.common.io.FileHandle;
 import org.comroid.mutatio.model.RefContainer;
-import org.comroid.mutatio.model.RefMap;
+import org.comroid.oauth.rest.OAuthEndpoint;
 import org.comroid.restless.HttpAdapter;
 import org.comroid.restless.REST;
 import org.comroid.restless.adapter.java.JavaHttpAdapter;
@@ -21,6 +22,7 @@ import org.comroid.status.entity.Service;
 import org.comroid.uniform.Context;
 import org.comroid.uniform.SerializationAdapter;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
+import org.comroid.varbind.container.DataContainer;
 import org.comroid.webkit.config.WebkitConfiguration;
 import org.comroid.webkit.model.PagePropertiesProvider;
 import org.comroid.webkit.server.WebkitServer;
@@ -30,7 +32,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -39,7 +43,8 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
     //http://localhost:42000
     public static final Logger logger = LogManager.getLogger();
     public static final ContextualProvider MASTER_CONTEXT;
-    public static final String URL_BASE = "https://auth.comroid.org/";
+    public static final String UUID_PATTERN = "\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b";
+    public static final String URL_BASE = "https://auth.comroid.org";
     public static final int PORT = 42000;
     public static final int SOCKET_PORT = 42001;
     public static final FileHandle DIR = new FileHandle("/srv/auth/", true);
@@ -62,10 +67,15 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
     private final StatusConnection status;
     private final ContextualProvider context;
     private final UserManager userManager;
+    private final ServiceManager serviceManager;
     private final WebkitServer server;
 
     public UserManager getUserManager() {
         return userManager;
+    }
+
+    public ServiceManager getServiceManager() {
+        return serviceManager;
     }
 
     @Override
@@ -87,7 +97,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
             shutdownHook.setPriority(Thread.MAX_PRIORITY);
             Runtime.getRuntime().addShutdownHook(shutdownHook);
 
-            if (OS.current == OS.UNIX) {
+            if (OS.isUnix) {
                 logger.debug("Initializing Status Connection...");
                 this.status = new StatusConnection(MASTER_CONTEXT, "auth-server", STATUS_CRED.getContent(true), executor);
             } else this.status = null;
@@ -96,6 +106,10 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
             logger.debug("Starting UserManager");
             this.userManager = new UserManager(this);
             context.addToContext(userManager);
+
+            logger.debug("Starting ServiceManager");
+            this.serviceManager = new ServiceManager(this);
+            context.addToContext(serviceManager);
 
             logger.debug("Starting Webkit server");
             this.server = new WebkitServer(
@@ -109,7 +123,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
                     SOCKET_PORT,
                     AuthConnection::new,
                     this,
-                    StreamSupplier.of(Endpoint.values())
+                    AuthEndpoint.values.append(OAuthEndpoint.values)
             );
         } catch (UnknownHostException e) {
             throw new AssertionError(e);
@@ -126,25 +140,34 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
         instance = new AuthServer(Executors.newScheduledThreadPool(8));
     }
 
+    @Override
     public Map<String, Object> findPageProperties(REST.Header.List headers) {
+        Map<String, Object> map;
         try {
             UserSession session = UserSession.findSession(headers);
-            return session.connection.<Map<String, Object>>map(conn -> {
-                AuthConnection conn1 = conn;
-                RefMap<String, Object> properties = conn1.properties;
-                return properties;
-            }).or(() -> {
-                HashMap<String, Object> map = new HashMap<>();
-                map.put("isValidSession", true);
-                map.put("sessionData", session.getSessionData());
-                return map;
-            }).assertion("internal error");
+            map = session.connection.<Map<String, Object>>map(conn -> conn.properties)
+                    .or(() -> {
+                        Map<String, Object> o = new HashMap<>();
+                        o.put("isValidSession", true);
+                        o.put("sessionData", session.getSessionData());
+                        return o;
+                    }).assertion("internal error");
+
+            if (session.hasPermits(Permit.ADMIN)) {
+                Map<String, Object> adminData = new HashMap<>();
+                Map<String, Object> services = new HashMap<>();
+                serviceManager.getServices().forEach(service ->
+                        services.put(service.getUUID().toString(), service.toUniNode()));
+                adminData.put("service", services);
+                map.put("adminData", adminData);
+            }
         } catch (RestEndpointException unauthorized) {
-            HashMap<String, Object> map = new HashMap<>();
+            map = new HashMap<>();
             map.put("isValidSession", false);
             map.put("sessionData", null);
-            return map;
         }
+
+        return map;
     }
 
     @Override

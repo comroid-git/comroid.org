@@ -3,28 +3,28 @@ package org.comroid.auth.server;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
+import org.comroid.api.UUIDContainer;
+import org.comroid.auth.service.Service;
+import org.comroid.auth.service.ServiceManager;
+import org.comroid.auth.user.Permit;
+import org.comroid.auth.user.UserManager;
 import org.comroid.auth.user.UserSession;
 import org.comroid.mutatio.model.RefContainer;
 import org.comroid.restless.REST;
 import org.comroid.restless.server.RestEndpointException;
 import org.comroid.restless.socket.WebsocketPacket;
+import org.comroid.uniform.node.UniArrayNode;
 import org.comroid.uniform.node.UniNode;
 import org.comroid.uniform.node.UniObjectNode;
-import org.comroid.uniform.node.UniValueNode;
-import org.comroid.webkit.config.WebkitConfiguration;
-import org.comroid.webkit.frame.FrameBuilder;
-import org.comroid.webkit.model.PagePropertiesProvider;
+import org.comroid.util.StandardValueType;
+import org.comroid.varbind.container.DataContainer;
 import org.comroid.webkit.socket.WebkitConnection;
 import org.java_websocket.WebSocket;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.UUID;
 
 public final class AuthConnection extends WebkitConnection {
     private static final Logger logger = LogManager.getLogger();
@@ -78,52 +78,43 @@ public final class AuthConnection extends WebkitConnection {
     }
 
     @Override
-    protected void handleCommand(UniNode command) {
-        logger.trace("Incoming command: {}", command);
-        String commandName = command.get("type").asString();
-        String[] split = commandName.split("/");
+    protected void handleCommand(
+            Map<String, Object> pageProperties,
+            String commandCategory,
+            String commandName,
+            UniNode data,
+            UniObjectNode response
+    ) {
+        if (!isLoggedIn() || !session.getAccount().getPermits().contains(Permit.ADMIN))
+            return;
 
-        UniNode data = command.wrap("data").orElse(UniValueNode.NULL);
-        UniObjectNode response = findSerializer().createObjectNode().asObjectNode();
-        Map<String, Object> pageProperties = requireFromContext(PagePropertiesProvider.class)
-                .findPageProperties(getHeaders());
-
-        switch (split[0]) {
-            case "action":
-                switch (split[1]) {
-                    case "changePanel":
-                        String target = data.get("target").asString();
-                        pageProperties.put("frame", target);
-
-                        try (
-                                InputStream is = WebkitConfiguration.get().getPanel(target);
-                                InputStreamReader isr = new InputStreamReader(is);
-                                BufferedReader br = new BufferedReader(isr)
-                        ) {
-                            String panelData = br.lines().collect(Collectors.joining("\n"));
-                            Document doc = Jsoup.parse(panelData);
-                            String docString = FrameBuilder.fabricateDocumentToString(doc, host, pageProperties);
-
-                            response.put("type", "changePanel");
-                            response.put("data", docString);
-                            break;
-                        } catch (Throwable e) {
-                            logger.error("Could not read target panel " + target, e);
-                        }
-                    case "refresh":
-                        response.put("type", "inject");
-                        UniObjectNode eventData = response.putObject("data");
-                        eventData.putAll(pageProperties);
+        switch (commandCategory) {
+            case "admin":
+                switch (commandName) {
+                    case "listUsers":
+                        UniArrayNode users = response.putArray("users");
+                        requireFromContext(UserManager.class)
+                                .getUsers()
+                                .stream()
+                                .map(UUIDContainer::getUUID)
+                                .map(UUID::toString)
+                                .forEach(id -> users.add(StandardValueType.STRING, id));
+                        break;
+                    case "listServices":
+                        UniArrayNode services = response.putArray("services");
+                        requireFromContext(ServiceManager.class)
+                                .getServices()
+                                .stream()
+                                .map(UUIDContainer::getUUID)
+                                .map(UUID::toString)
+                                .forEach(id -> services.add(StandardValueType.STRING, id));
                         break;
                     default:
-                        logger.error("Unknown action: {}", split[1]);
+                        throw new NoSuchElementException("Unknown Admin Command: " + commandName);
                 }
                 break;
             default:
-                logger.error("Unknown Command received: {}", commandName);
-                break;
+                throw new NoSuchElementException("Unknown Command: " + commandCategory + "/" + commandName);
         }
-
-        sendText(response);
     }
 }

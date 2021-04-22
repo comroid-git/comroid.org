@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.comroid.api.Serializer;
 import org.comroid.api.UUIDContainer;
+import org.comroid.auth.model.PermitCarrier;
 import org.comroid.auth.server.AuthServer;
 import org.comroid.common.io.FileHandle;
 import org.comroid.mutatio.model.Ref;
@@ -21,7 +22,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
 
-public final class UserAccount extends DataContainerBase<UserAccount> implements UUIDContainer {
+public final class UserAccount extends DataContainerBase<UserAccount> implements UUIDContainer, PermitCarrier {
     @RootBind
     public static final GroupBind<UserAccount> Type = new GroupBind<>(AuthServer.MASTER_CONTEXT, "user-account");
     public static final VarBind<UserAccount, String, UUID, UUID> ID
@@ -64,6 +65,7 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
         return email.assertion("Email not found");
     }
 
+    @Override
     public Set<Permit> getPermits() {
         return permits.assertion("Permits not found");
     }
@@ -95,12 +97,12 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
         this.loginHashFile.setContent(encrypt(email, password));
     }
 
-    public static String encrypt(String email, String password) {
+    public static String encrypt(String saltName, String input) {
         try {
-            byte[] bytes = UserManager.getSalt(email);
+            byte[] bytes = UserManager.getSalt(saltName);
             MessageDigest md = MessageDigest.getInstance("SHA-512");
             md.update(bytes);
-            byte[] hashedPassword = md.digest(password.getBytes(StandardCharsets.US_ASCII));
+            byte[] hashedPassword = md.digest(input.getBytes(StandardCharsets.US_ASCII));
             String hash = new String(hashedPassword).replace('\r', '#').replace('\n', '#');
             //logger.info("Encrypting: this.email = {}; this.hash = {}; password = {}", email, hash, password);
             return hash;

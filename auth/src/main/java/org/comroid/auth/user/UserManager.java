@@ -8,6 +8,7 @@ import org.comroid.auth.server.AuthServer;
 import org.comroid.common.io.FileHandle;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,6 +32,10 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
     @Override
     public ContextualProvider getUnderlyingContextualProvider() {
         return context;
+    }
+
+    public Collection<UserAccount> getUsers() {
+        return accounts.values();
     }
 
     public UserManager(AuthServer server) {
@@ -60,7 +65,7 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
                 return f.getContent(false).getBytes();
             if (!f.exists() && !f.validateExists())
                 throw new RuntimeException();
-            String base = root + UUID.randomUUID().toString();
+            String base = root + UUID.randomUUID();
             f.setContent(base);
             return base.getBytes();
         });
