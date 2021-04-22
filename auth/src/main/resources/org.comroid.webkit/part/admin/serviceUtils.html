@@ -36,11 +36,12 @@
     }
 
     function reload() {
+        console.debug("Reloading Service Utilities")
         sendCommand('admin/listServices');
     }
 
     function initialize() {
-        console.debug('initializing services')
+        console.debug("Initializing Service Utilities")
 
         // event listeners
         document.addEventListener('listServices', e => listServicesEvent(e.detail['services']));
