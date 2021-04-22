@@ -149,10 +149,10 @@ public enum AuthEndpoint implements ServerEndpoint.This {
             context.getLogger().debug("POSTing Service with ID {} and body {}", uuid, body);
             UniObjectNode data = body.asObjectNode();
             if (!Service.Type.isValidData(data))
-                // throw if data is not valid
-                throw new RestEndpointException(BAD_REQUEST, "Service Data is invalid");
-            if (uuid == null)
-                uuid = Service.ID.getFrom(data);
+                if (uuid == null)
+                    uuid = UUID.randomUUID();
+                else// throw if data is not valid
+                    throw new RestEndpointException(BAD_REQUEST, "Service Data is invalid");
 
             // check if service exists
             Service service;
