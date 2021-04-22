@@ -1,22 +1,8 @@
 <h2>Authentication Server Administration</h2>
-<h3 style="color: darkred" when="!isValidSession">You are not logged in</h3>
-<h4 style="color: darkred" when="isValidSession && (sessionData['account']['permit'] & 4) == 0">
-    You are not permitted to access this page</h4>
+<invalidAccess />
 <div when="isValidSession && (sessionData['account']['permit'] & 4) != 0">
-    <script type="application/javascript">
-        function handleCustomEvent(type, data) {
-            console.log("custom event", type, data);
-
-            switch (type) {
-                case 'listServices':
-                    // inject list of services to table
-                    break;
-                case 'listUsers':
-                    // inject list of users to table
-                    break;
-            }
-        }
-    </script>
-    <button command="admin/listServices">Edit Services</button>
-    <button command="admin/listUsers">Edit Users</button>
+    <a href="services">Manage Services</a>
+    <br />
+    <br />
+    <a href="users">Manage Users</a>
 </div>

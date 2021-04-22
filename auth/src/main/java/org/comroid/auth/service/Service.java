@@ -28,15 +28,15 @@ public final class Service extends DataContainerBase<Service> implements UUIDCon
             .onceEach()
             .setRequired()
             .build();
-    public static final VarBind<Service, String, String, String> DISPLAY_NAME
-            = Type.createBind("display-name")
+    public static final VarBind<Service, String, String, String> NAME
+            = Type.createBind("name")
             .extractAs(StandardValueType.STRING)
             .asIdentities()
             .onceEach()
             .setRequired()
             .build();
     public final Ref<UUID> id = getComputedReference(ID);
-    public final Ref<String> displayName = getComputedReference(DISPLAY_NAME);
+    public final Ref<String> name = getComputedReference(NAME);
     private final FileHandle dir;
 
     @Override
@@ -46,7 +46,7 @@ public final class Service extends DataContainerBase<Service> implements UUIDCon
 
     @Override
     public String getName() {
-        return displayName.assertion("Display Name");
+        return name.assertion("Display Name");
     }
 
     protected Service(ContextualProvider context, final FileHandle sourceDir) {

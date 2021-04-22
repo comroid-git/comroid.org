@@ -1,14 +1,37 @@
-<script type="application/javascript">
+<script type="application/javascript" when="isValidSession && (sessionData['account']['permit'] & 4) != 0">
+    function injectServices(table, services) {
+        services.forEach(service => {
+            let serviceRow = document.createElement('tr');
+            let serviceIdBox = document.createElement('td');
+            let serviceNameBox = document.createElement('td');
+
+            serviceIdBox.textContent = service['uuid'];
+            serviceNameBox.textContent = service['name'];
+
+            console.debug('appending children to table for', service['name']);
+            serviceRow.append(serviceIdBox, serviceNameBox);
+            table.append(serviceRow);
+        })
+    }
+
     function handleCustomEvent(type, data) {
         console.log("custom event", type, data);
 
         switch (type) {
             case 'listServices':
                 // inject list of services to table
+                let table = document.getElementById('serviceTable');
+                let services = data['services'];
+
+                console.debug('injecting services:', services.length);
+                injectServices(table, services);
+
                 break;
             default:
                 console.log("Unknown Service event: ", type, data);
                 break;
         }
     }
+
+    sendCommand('admin/listServices');
 </script>

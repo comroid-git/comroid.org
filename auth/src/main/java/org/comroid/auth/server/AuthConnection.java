@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
 import org.comroid.auth.service.ServiceManager;
+import org.comroid.auth.user.Permit;
 import org.comroid.auth.user.UserManager;
 import org.comroid.auth.user.UserSession;
 import org.comroid.mutatio.model.RefContainer;
@@ -80,6 +81,9 @@ public final class AuthConnection extends WebkitConnection {
             UniNode data,
             UniObjectNode response
     ) {
+        if (!isLoggedIn() || !session.getAccount().getPermits().contains(Permit.ADMIN))
+            return;
+
         switch (commandCategory) {
             case "admin":
                 switch (commandName) {
