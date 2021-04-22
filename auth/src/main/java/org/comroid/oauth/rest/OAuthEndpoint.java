@@ -1,14 +1,24 @@
 package org.comroid.oauth.rest;
 
+import org.comroid.api.ContextualProvider;
 import org.comroid.api.StreamSupplier;
 import org.comroid.auth.server.AuthServer;
+import org.comroid.restless.REST;
+import org.comroid.restless.server.RestEndpointException;
 import org.comroid.restless.server.ServerEndpoint;
+import org.comroid.uniform.Context;
+import org.comroid.uniform.node.UniNode;
 import org.intellij.lang.annotations.Language;
 
 import java.util.regex.Pattern;
 
 public enum OAuthEndpoint implements ServerEndpoint.This {
-    AUTHORIZE("/authorize");
+    AUTHORIZE("/authorize") {
+        @Override
+        public REST.Response executeGET(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            return super.executeGET(context, headers, urlParams, body);
+        }
+    };
 
     public static final StreamSupplier<ServerEndpoint> values = StreamSupplier.of(values());
     private final String extension;
