@@ -97,13 +97,13 @@ public enum OAuthEndpoint implements ServerEndpoint.This {
             return true;
         }
     },
-    DISCOVERY_OAUTH(".well-known/oauth-authorization-server") {
+    DISCOVERY_OAUTH("/.well-known/oauth-authorization-server") {
         @Override
         public REST.Response executeGET(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             return discoveryResponse();
         }
     },
-    DISCOVERY_OPENID(".well-known/openid-configuration") {
+    DISCOVERY_OPENID("/.well-known/openid-configuration") {
         @Override
         public REST.Response executeGET(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             return discoveryResponse();
