@@ -3,12 +3,14 @@
     <frames>
         <main>frame/main.html</main>
         <widget>frame/widget.html</widget>
+        <quickAction>frame/quickAction.html</quickAction>
     </frames>
     <panels>
         <!-- Main Panels -->
         <home>panel/main/home.html</home>
         <login>panel/main/login.html</login>
         <register>panel/main/register.html</register>
+        <flowLogin>panel/main/flowLogin.html</flowLogin>
 
         <!-- Account related Panels -->
         <account>panel/user/account.html</account>

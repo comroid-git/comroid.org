@@ -41,8 +41,8 @@ iframe {
 }
 
 footer {
-    width: 100%;
-    margin-top: auto;
+    width: max-content;
+    margin: auto;
     text-align: center;
     height: auto;
     background-color: #00274f;
