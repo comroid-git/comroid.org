@@ -98,6 +98,7 @@ public final class OAuthAuthorizationToken extends DataContainerBase<OAuthAuthor
     private static String generateCode(UserAccount userAccount, Service service, String userAgent) {
         String code = String.format("%s-%s", userAccount.getUUID(), service.getUUID());
         code = UserAccount.encrypt(code, code + '-' + UUID.randomUUID());
+        code = code.replace('+', 'x').replace('=', 'x').replace('/', 'x');
         return Base64.encodeBytes(code.getBytes());
     }
 }
