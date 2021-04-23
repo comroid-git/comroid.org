@@ -1,0 +1,8 @@
+{
+  "issuer": "https://auth.comroid.org",
+  "authorization_endpoint": "https://auth.comroid.org/oauth2/authorize",
+  "token_endpoint": "https://auth.comroid.org/oauth2/token",
+  "userinfo_endpoint": "https://auth.comroid.org/oauth2/userInfo",
+  "grant_types_supported": [ "authorization_code" ],
+  "token_endpoint_auth_methods_supported": [ "authorization_code" ],
+}

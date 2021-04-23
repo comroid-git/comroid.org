@@ -17,16 +17,21 @@ import org.comroid.oauth.rest.request.TokenRequest;
 import org.comroid.oauth.user.OAuthAuthorization;
 import org.comroid.restless.CommonHeaderNames;
 import org.comroid.restless.HTTPStatusCodes;
+import org.comroid.restless.MimeType;
 import org.comroid.restless.REST;
 import org.comroid.restless.body.URIQueryEditor;
 import org.comroid.restless.server.RestEndpointException;
 import org.comroid.restless.server.ServerEndpoint;
 import org.comroid.uniform.Context;
 import org.comroid.uniform.node.UniNode;
+import org.comroid.webkit.frame.FrameBuilder;
 import org.intellij.lang.annotations.Language;
 
+import java.io.InputStreamReader;
 import java.util.UUID;
 import java.util.regex.Pattern;
+
+import static org.comroid.restless.HTTPStatusCodes.OK;
 
 // fixme fixme fixme
 public enum OAuthEndpoint implements ServerEndpoint.This {
@@ -77,19 +82,31 @@ public enum OAuthEndpoint implements ServerEndpoint.This {
                     .findOAuthAuthorization(tokenRequest.getCode());
             OAuthAuthorization.AccessToken accessToken = authorization.createAccessToken();
 
-            return new REST.Response(HTTPStatusCodes.OK, accessToken);
+            return new REST.Response(OK, accessToken);
         }
     },
     USER_INFO("/userInfo") {
         @Override
         public REST.Response executeGET(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             UserAccount account = context.requireFromContext(UserManager.class).findOAuthSession(headers);
-            return new REST.Response(HTTPStatusCodes.OK, account);
+            return new REST.Response(OK, account);
         }
 
         @Override
         public boolean allowMemberAccess() {
             return true;
+        }
+    },
+    DISCOVERY_OAUTH(".well-known/oauth-authorization-server") {
+        @Override
+        public REST.Response executeGET(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            return discoveryResponse();
+        }
+    },
+    DISCOVERY_OPENID(".well-known/openid-configuration") {
+        @Override
+        public REST.Response executeGET(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            return discoveryResponse();
         }
     };
 
@@ -123,5 +140,9 @@ public enum OAuthEndpoint implements ServerEndpoint.This {
         this.extension = extension;
         this.regExp = regExp;
         this.pattern = buildUrlPattern();
+    }
+
+    public static REST.Response discoveryResponse() {
+        return new REST.Response(OK, MimeType.JSON, new InputStreamReader(FrameBuilder.getResource("oauth-discovery.json")));
     }
 }
