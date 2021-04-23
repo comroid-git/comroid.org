@@ -207,7 +207,10 @@ public final class OAuthAuthorization extends DataContainerBase<OAuthAuthorizati
         }
 
         public boolean isExpired() {
-            return createdAt.plus(getExpirationDuration()).isAfter(Instant.now());
+            Instant plus = createdAt.plus(getExpirationDuration());
+            boolean after = plus.isAfter(Instant.now());
+            logger.info("expiry check; createdAT = {}; plus = {}; after? {}", createdAt, plus, after);
+            return after;
         }
 
         @Override
