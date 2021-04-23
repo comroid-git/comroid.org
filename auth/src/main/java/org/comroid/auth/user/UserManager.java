@@ -122,6 +122,8 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
 
     public UserAccount findOAuthSession(REST.Header.List headers) throws RestEndpointException {
         final String token = findToken(headers);
+        // fixme remove logging
+        logger.trace("Searching OAuth Access Session for token {}", token);
         return accounts.values()
                 .stream()
                 .flatMap(account -> account.findAccessToken(token).stream())

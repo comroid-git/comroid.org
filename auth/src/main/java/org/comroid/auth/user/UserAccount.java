@@ -12,7 +12,6 @@ import org.comroid.common.io.FileHandle;
 import org.comroid.mutatio.model.Ref;
 import org.comroid.oauth.user.OAuthAuthorization;
 import org.comroid.oauth.user.OAuthUserTokens;
-import org.comroid.restless.HTTPStatusCodes;
 import org.comroid.restless.server.RestEndpointException;
 import org.comroid.uniform.Context;
 import org.comroid.util.Bitmask;
@@ -144,7 +143,7 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
                 .filter(OAuthAuthorization.AccessToken::isValid)
                 .filter(access -> access.checkToken(token))
                 .findAny()
-                .orElseThrow(() -> new RestEndpointException(HTTPStatusCodes.UNAUTHORIZED, "Invalid Token"));
+                .orElse(null);
     }
 
     public boolean tryLogin(String email, String password) {
