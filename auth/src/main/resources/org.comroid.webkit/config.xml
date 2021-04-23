@@ -3,6 +3,7 @@
     <frames>
         <main>frame/main.html</main>
         <widget>frame/widget.html</widget>
+        <quickAction>frame/quickAction.html</quickAction>
     </frames>
     <panels>
         <!-- Main Panels -->
