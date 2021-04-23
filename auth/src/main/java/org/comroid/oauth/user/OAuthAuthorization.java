@@ -115,8 +115,6 @@ public final class OAuthAuthorization extends DataContainerBase<OAuthAuthorizati
 
     private static String generateCode(UserAccount userAccount, Service service, String userAgent) {
         String code = String.format("%s-%s-%s", userAccount.getUUID(), service.getUUID(), UUID.randomUUID());
-        // fixme Remove log statement
-        logger.trace("Generated auth code: {}", code);
         return code;
         //return Base64.encodeBytes(code.getBytes());
     }
@@ -126,8 +124,6 @@ public final class OAuthAuthorization extends DataContainerBase<OAuthAuthorizati
         Service service = authorization.getService();
         String code = String.format("%s-%s-%s", userAccount.getUUID(), service.getUUID(), UUID.randomUUID());
         code = Base64.encodeBytes(code.getBytes());
-        // fixme Remove log statement
-        logger.trace("Generated access token: {}", code);
         return code;
     }
 
