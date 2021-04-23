@@ -1,0 +1,13 @@
+<h2>Login to your comroid Account</h2>
+<p>You are authorizing <b inject="flow.resourceName"/> to access the following data:</p>
+<form action="oauth2/authorize/login" method="post">
+    <label for="emailInput">E-Mail</label>
+    <input id="emailInput" name="email" title="E-Mail" type="text">
+    <br/>
+    <label for="passwordInput">Password</label>
+    <input id="passwordInput" name="password" title="Password" type="password">
+    <br/>
+    <input name="requestId" readonly="readonly" value="$[flow.requestId]">
+    <button type="submit">Login now</button>
+</form>
+<p>Need an account? <a href="register">Register here</a></p>
