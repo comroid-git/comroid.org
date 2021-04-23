@@ -56,7 +56,6 @@ public enum OAuthEndpoint implements ServerEndpoint.This {
                 OAuthAuthorizationToken authorization = account.createOAuthSession(context, service, userAgent);
 
                 // assemble redirect uri
-
                 query.put("code", authorization.getCode());
                 if (authenticationRequest.state.isNonNull())
                     query.put("state", authenticationRequest.getState());
@@ -68,6 +67,14 @@ public enum OAuthEndpoint implements ServerEndpoint.This {
             }
 
             return new REST.Response(HTTPStatusCodes.FOUND, query.toURI());
+        }
+    },
+    TOKEN("/token") {
+        @Override
+        public REST.Response executePOST(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            // fixme
+            logger.debug("Received token request with body:\n{}", body.toSerializedString());
+            return null;
         }
     };
 
