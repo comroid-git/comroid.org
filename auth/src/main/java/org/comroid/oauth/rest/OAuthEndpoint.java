@@ -96,18 +96,6 @@ public enum OAuthEndpoint implements ServerEndpoint.This {
         public boolean allowMemberAccess() {
             return true;
         }
-    },
-    DISCOVERY_OAUTH("/.well-known/oauth-authorization-server") {
-        @Override
-        public REST.Response executeGET(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            return discoveryResponse();
-        }
-    },
-    DISCOVERY_OPENID("/.well-known/openid-configuration") {
-        @Override
-        public REST.Response executeGET(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            return discoveryResponse();
-        }
     };
 
     public static final StreamSupplier<ServerEndpoint> values = StreamSupplier.of(values());
@@ -140,9 +128,5 @@ public enum OAuthEndpoint implements ServerEndpoint.This {
         this.extension = extension;
         this.regExp = regExp;
         this.pattern = buildUrlPattern();
-    }
-
-    public static REST.Response discoveryResponse() {
-        return new REST.Response(OK, MimeType.JSON, new InputStreamReader(FrameBuilder.getResource("oauth-discovery.json")));
     }
 }

@@ -9,6 +9,7 @@ import org.comroid.auth.user.UserAccount;
 import org.comroid.auth.user.UserSession;
 import org.comroid.mutatio.model.Ref;
 import org.comroid.restless.CommonHeaderNames;
+import org.comroid.restless.MimeType;
 import org.comroid.restless.REST;
 import org.comroid.restless.server.RestEndpointException;
 import org.comroid.restless.server.ServerEndpoint;
@@ -20,11 +21,11 @@ import org.comroid.webkit.model.PagePropertiesProvider;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-import static org.comroid.api.ContextualProvider.requireFromContexts;
 import static org.comroid.auth.user.UserAccount.EMAIL;
 import static org.comroid.restless.HTTPStatusCodes.*;
 
@@ -197,6 +198,18 @@ public enum AuthEndpoint implements ServerEndpoint.This {
             }
             return forwardToWidgetOr(headers, new REST.Header.List(), "../../", "service/" + uuid);
         }
+    },
+    DISCOVERY_OAUTH("/.well-known/oauth-authorization-server") {
+        @Override
+        public REST.Response executeGET(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            return discoveryResponse();
+        }
+    },
+    DISCOVERY_OPENID("/.well-known/openid-configuration") {
+        @Override
+        public REST.Response executeGET(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            return discoveryResponse();
+        }
     };
 
     public static final StreamSupplier<ServerEndpoint> values = StreamSupplier.of(values());
@@ -228,6 +241,10 @@ public enum AuthEndpoint implements ServerEndpoint.This {
         this.extension = extension;
         this.regex = regex;
         this.pattern = buildUrlPattern();
+    }
+
+    public static REST.Response discoveryResponse() {
+        return new REST.Response(OK, MimeType.JSON, new InputStreamReader(FrameBuilder.getResource("oauth-discovery.json")));
     }
 
     @NotNull
