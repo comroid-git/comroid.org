@@ -139,13 +139,9 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
     }
 
     public Rewrapper<OAuthAuthorization.AccessToken> findAccessToken(final String token) throws RestEndpointException {
-        logger.info("looking for access token {}; active tokens {}", token, accessTokens);
         return () -> accessTokens.stream()
-                .peek(x -> System.out.printf("first check: %s\n", x))
                 .filter(OAuthAuthorization.AccessToken::isValid)
-                .peek(x -> System.out.printf("second check: %s\n", x))
                 .filter(access -> access.checkToken(token))
-                .peek(x -> System.out.printf("found: %s\n", x))
                 .findAny()
                 .orElse(null);
     }

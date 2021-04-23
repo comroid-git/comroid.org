@@ -213,13 +213,7 @@ public final class OAuthAuthorization extends DataContainerBase<OAuthAuthorizati
 
         @Override
         public boolean isValid() {
-            boolean expired = isExpired();
-            boolean valid = authorization.isValid();
-            boolean done = invalidation.isDone();
-            boolean cancelled = invalidation.isCancelled();
-            boolean b = !expired && valid && !done && !cancelled;
-            logger.info("isValid? {}: expired = {}; authValid = {}; invDone = {}; invCancel = {}", b,expired,valid,done,cancelled);
-            return b;
+            return !isExpired() && authorization.isValid() && !invalidation.isDone() && !invalidation.isCancelled();
         }
 
         private AccessToken(Context context, final OAuthAuthorization authorization, @Nullable Duration expiration) {
@@ -239,9 +233,7 @@ public final class OAuthAuthorization extends DataContainerBase<OAuthAuthorizati
         }
 
         public boolean checkToken(String token) {
-            boolean b = this.token.contentEquals(token);
-            logger.info("equals? {}", b);
-            return b;
+            return this.token.contentEquals(token);
         }
     }
 }
