@@ -12,6 +12,8 @@ import org.comroid.common.io.FileHandle;
 import org.comroid.mutatio.model.Ref;
 import org.comroid.oauth.user.OAuthAuthorization;
 import org.comroid.oauth.user.OAuthUserTokens;
+import org.comroid.restless.HTTPStatusCodes;
+import org.comroid.restless.server.RestEndpointException;
 import org.comroid.uniform.Context;
 import org.comroid.util.Bitmask;
 import org.comroid.util.StandardValueType;
@@ -19,6 +21,7 @@ import org.comroid.varbind.annotation.RootBind;
 import org.comroid.varbind.bind.GroupBind;
 import org.comroid.varbind.bind.VarBind;
 import org.comroid.varbind.container.DataContainerBase;
+import org.jetbrains.annotations.ApiStatus.Internal;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -54,12 +57,13 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
     private final FileHandle loginHashFile;
     private final OAuthUserTokens userInfo;
     private final HashSet<OAuthAuthorization> authorizationTokens;
+    private final HashSet<OAuthAuthorization.AccessToken> accessTokens;
 
     {
         if (email.contentEquals("burdoto@outlook.com"))
             put(PERMIT, Bitmask.combine(Permit.values()));
         else if (permits.test(Set::isEmpty))
-            put(PERMIT, Permit.NONE.getValue());
+            put(PERMIT, Permit.EMAIL.getValue());
     }
 
     public FileHandle getDirectory() {
@@ -96,6 +100,7 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
         this.loginHashFile = dir.createSubFile("login.hash");
         this.userInfo = new OAuthUserTokens(upgrade(Context.class), this); // prepare object
         this.authorizationTokens = new HashSet<>();
+        this.accessTokens = new HashSet<>();
     }
 
     UserAccount(UserManager context, UUID id, String email, String password) {
@@ -110,6 +115,7 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
         this.loginHashFile.setContent(encrypt(email, password));
         this.userInfo = new OAuthUserTokens(upgrade(Context.class), this); // prepare object
         this.authorizationTokens = new HashSet<>();
+        this.accessTokens = new HashSet<>();
     }
 
     public static String encrypt(String saltName, String input) {
@@ -131,6 +137,14 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
                 .filter(authorization -> authorization.code.contentEquals(code))
                 .findAny()
                 .orElse(null);
+    }
+
+    public Rewrapper<OAuthAuthorization.AccessToken> findAccessToken(final String token) throws RestEndpointException {
+        return () -> accessTokens.stream()
+                .filter(OAuthAuthorization.AccessToken::isValid)
+                .filter(access -> access.checkToken(token))
+                .findAny()
+                .orElseThrow(() -> new RestEndpointException(HTTPStatusCodes.UNAUTHORIZED, "Invalid Token"));
     }
 
     public boolean tryLogin(String email, String password) {
@@ -159,5 +173,10 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
         OAuthAuthorization oAuthAuthorization = new OAuthAuthorization(context, this, service, userAgent, scopes);
         authorizationTokens.add(oAuthAuthorization);
         return oAuthAuthorization;
+    }
+
+    @Internal
+    public boolean addAccessToken(OAuthAuthorization.AccessToken accessToken) {
+        return accessTokens.add(accessToken);
     }
 }

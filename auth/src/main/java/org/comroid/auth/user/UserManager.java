@@ -8,7 +8,9 @@ import org.comroid.api.UncheckedCloseable;
 import org.comroid.auth.server.AuthServer;
 import org.comroid.common.io.FileHandle;
 import org.comroid.oauth.user.OAuthAuthorization;
+import org.comroid.restless.CommonHeaderNames;
 import org.comroid.restless.HTTPStatusCodes;
+import org.comroid.restless.REST;
 import org.comroid.restless.server.RestEndpointException;
 
 import java.io.File;
@@ -116,6 +118,27 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
                 .flatMap(account -> account.findAuthorization(authorizationCode).stream())
                 .findAny()
                 .orElseThrow(() -> new RestEndpointException(HTTPStatusCodes.UNAUTHORIZED, "Invalid Token used"));
+    }
+
+    public UserAccount findOAuthSession(REST.Header.List headers) throws RestEndpointException {
+        final String token = findToken(headers);
+        return accounts.values()
+                .stream()
+                .flatMap(account -> account.findAccessToken(token).stream())
+                .findAny()
+                .map(OAuthAuthorization.AccessToken::getAuthorization)
+                .map(OAuthAuthorization::getAccount)
+                .orElseThrow(() -> new RestEndpointException(HTTPStatusCodes.UNAUTHORIZED, "Could not authenticate using token"));
+    }
+
+    private String findToken(REST.Header.List headers) {
+        String token = headers.getFirst(CommonHeaderNames.AUTHORIZATION);
+
+        if (token == null)
+            throw new RestEndpointException(HTTPStatusCodes.UNAUTHORIZED, "No Token found");
+        if (!token.startsWith(OAuthAuthorization.BEARER_PREFIX))
+            throw new RestEndpointException(HTTPStatusCodes.UNAUTHORIZED, "Invalid Token type");
+        return token.substring(OAuthAuthorization.BEARER_PREFIX.length());
     }
 
     public boolean closeSession(UserSession session) {

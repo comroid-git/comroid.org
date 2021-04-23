@@ -18,6 +18,7 @@ import org.java_websocket.util.Base64;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
+import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
@@ -66,6 +67,7 @@ public final class OAuthAuthorization extends DataContainerBase<OAuthAuthorizati
             .onceEach()
             .setRequired()
             .build();
+    public static final String BEARER_PREFIX = "Bearer ";
     private static final Logger logger = LogManager.getLogger();
     public final Ref<Service> service = getComputedReference(SERVICE);
     public final Ref<UserAccount> account = getComputedReference(ACCOUNT);
@@ -134,7 +136,10 @@ public final class OAuthAuthorization extends DataContainerBase<OAuthAuthorizati
     }
 
     public AccessToken createAccessToken() {
-        return new AccessToken(upgrade(Context.class), this, Duration.ofHours(12));
+        AccessToken accessToken = new AccessToken(upgrade(Context.class), this, Duration.ofHours(12));
+        if (!getAccount().addAccessToken(accessToken))
+            throw new IllegalStateException("Could not add AccessToken to User");
+        return accessToken;
     }
 
     public static final class AccessToken extends DataContainerBase<AccessToken> implements ValidityStage {
@@ -171,13 +176,42 @@ public final class OAuthAuthorization extends DataContainerBase<OAuthAuthorizati
                         .toArray(String[]::new)))
                 .setRequired()
                 .build();
+        public final Ref<String> token = getComputedReference(TOKEN);
+        public final Ref<String> type = getComputedReference(TYPE);
+        public final Ref<Duration> expiresAfter = getComputedReference(EXPIRES_IN);
+        public final Ref<Permit.Set> scopes = getComputedReference(SCOPES);
         private final OAuthAuthorization authorization;
         // fixme temp
         private final CompletableFuture<Void> invalidation = new CompletableFuture<>();
+        private final Instant createdAt;
+
+        public OAuthAuthorization getAuthorization() {
+            return authorization;
+        }
+
+        public String getToken() {
+            return token.assertion("token");
+        }
+
+        public String getType() {
+            return type.assertion("type");
+        }
+
+        public Duration getExpirationDuration() {
+            return expiresAfter.assertion("expiry");
+        }
+
+        public Permit.Set getScopes() {
+            return scopes.assertion("scopes");
+        }
+
+        public boolean isExpired() {
+            return createdAt.plus(getExpirationDuration()).isAfter(Instant.now());
+        }
 
         @Override
         public boolean isValid() {
-            return authorization.isValid() && !invalidation.isDone() && !invalidation.isCancelled();
+            return !isExpired() && authorization.isValid() && !invalidation.isDone() && !invalidation.isCancelled();
         }
 
         private AccessToken(Context context, final OAuthAuthorization authorization, @Nullable Duration expiration) {
@@ -188,11 +222,16 @@ public final class OAuthAuthorization extends DataContainerBase<OAuthAuthorizati
                 obj.put(SCOPES, authorization.getScopes().toString());
             });
             this.authorization = authorization;
+            this.createdAt = Instant.now();
         }
 
         @Override
         public boolean invalidate() {
             return invalidation.complete(null);
+        }
+
+        public boolean checkToken(String token) {
+            return this.token.contentEquals(token);
         }
     }
 }

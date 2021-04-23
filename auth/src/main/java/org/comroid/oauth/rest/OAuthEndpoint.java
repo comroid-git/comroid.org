@@ -85,6 +85,21 @@ public enum OAuthEndpoint implements ServerEndpoint.This {
 
             return new REST.Response(HTTPStatusCodes.OK, accessToken);
         }
+    },
+    USER_INFO("/userInfo") {
+        @Override
+        public REST.Response executeGET(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            // fixme
+            logger.debug("Received userInfo request with body:\n{}", body.toSerializedString());
+
+            UserAccount account = context.requireFromContext(UserManager.class).findOAuthSession(headers);
+            return new REST.Response(HTTPStatusCodes.OK, account);
+        }
+
+        @Override
+        public boolean allowMemberAccess() {
+            return true;
+        }
     };
 
     public static final StreamSupplier<ServerEndpoint> values = StreamSupplier.of(values());
