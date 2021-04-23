@@ -78,6 +78,7 @@ public enum OAuthEndpoint implements ServerEndpoint.This {
                     Map<String, Object> flow = new HashMap<>();
                     flow.put("requestId", requestId);
                     flow.put("resourceName", service.getName());
+                    flow.put("scopes", authenticationRequest.getScopes());
                     frame.setProperty("flow", flow);
 
                     return new REST.Response(OK, "text/html", frame.toReader());
