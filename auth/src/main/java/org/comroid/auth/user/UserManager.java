@@ -3,9 +3,15 @@ package org.comroid.auth.user;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
+import org.comroid.api.Rewrapper;
 import org.comroid.api.UncheckedCloseable;
 import org.comroid.auth.server.AuthServer;
 import org.comroid.common.io.FileHandle;
+import org.comroid.oauth.user.OAuthAuthorization;
+import org.comroid.restless.CommonHeaderNames;
+import org.comroid.restless.HTTPStatusCodes;
+import org.comroid.restless.REST;
+import org.comroid.restless.server.RestEndpointException;
 
 import java.io.File;
 import java.util.Collection;
@@ -106,11 +112,44 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
         return session;
     }
 
+    public OAuthAuthorization findOAuthAuthorization(final String authorizationCode) throws RestEndpointException {
+        return accounts.values()
+                .stream()
+                .flatMap(account -> account.findAuthorization(authorizationCode).stream())
+                .findAny()
+                .orElseThrow(() -> new RestEndpointException(HTTPStatusCodes.UNAUTHORIZED, "Invalid Token used"));
+    }
+
+    public UserAccount findOAuthSession(REST.Header.List headers) throws RestEndpointException {
+        final String token = findToken(headers);
+        return accounts.values()
+                .stream()
+                .flatMap(account -> account.findAccessToken(token).stream())
+                .findAny()
+                .map(OAuthAuthorization.AccessToken::getAuthorization)
+                .map(OAuthAuthorization::getAccount)
+                .orElseThrow(() -> new RestEndpointException(HTTPStatusCodes.UNAUTHORIZED, "Could not authenticate using token"));
+    }
+
+    private String findToken(REST.Header.List headers) {
+        String token = headers.getFirst(CommonHeaderNames.AUTHORIZATION);
+
+        if (token == null)
+            throw new RestEndpointException(HTTPStatusCodes.UNAUTHORIZED, "No Token found");
+        if (!token.startsWith(OAuthAuthorization.BEARER_PREFIX))
+            throw new RestEndpointException(HTTPStatusCodes.UNAUTHORIZED, "Invalid Token type");
+        return token.substring(OAuthAuthorization.BEARER_PREFIX.length());
+    }
+
     public boolean closeSession(UserSession session) {
         return sessions.remove(session.getCookie()) != session;
     }
 
     @Override
     public void close() {
+    }
+
+    public Rewrapper<UserAccount> getUser(UUID uuid) {
+        return () -> accounts.getOrDefault(uuid, null);
     }
 }

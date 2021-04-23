@@ -2,23 +2,30 @@ package org.comroid.auth.user;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.comroid.api.Rewrapper;
 import org.comroid.api.Serializer;
 import org.comroid.api.UUIDContainer;
 import org.comroid.auth.model.PermitCarrier;
 import org.comroid.auth.server.AuthServer;
+import org.comroid.auth.service.Service;
 import org.comroid.common.io.FileHandle;
 import org.comroid.mutatio.model.Ref;
+import org.comroid.oauth.user.OAuthAuthorization;
+import org.comroid.oauth.user.OAuthUserTokens;
+import org.comroid.restless.server.RestEndpointException;
+import org.comroid.uniform.Context;
 import org.comroid.util.Bitmask;
 import org.comroid.util.StandardValueType;
 import org.comroid.varbind.annotation.RootBind;
 import org.comroid.varbind.bind.GroupBind;
 import org.comroid.varbind.bind.VarBind;
 import org.comroid.varbind.container.DataContainerBase;
+import org.jetbrains.annotations.ApiStatus.Internal;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -34,25 +41,32 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
             = Type.createBind("email")
             .extractAs(StandardValueType.STRING)
             .build();
-    public static final VarBind<UserAccount, Integer, Set<Permit>, Set<Permit>> PERMIT
+    public static final VarBind<UserAccount, Integer, Permit.Set, Permit.Set> PERMIT
             = Type.createBind("permit")
             .extractAs(StandardValueType.INTEGER)
             .andRemap(Permit::valueOf)
             .onceEach()
-            .setDefaultValue(Collections::emptySet)
+            .setDefaultValue(c -> new Permit.Set())
             .build();
     private static final Logger logger = LogManager.getLogger();
     public final Ref<UUID> id = getComputedReference(ID);
     public final Ref<String> email = getComputedReference(EMAIL);
-    public final Ref<Set<Permit>> permits = getComputedReference(PERMIT);
+    public final Ref<Permit.Set> permits = getComputedReference(PERMIT);
     private final FileHandle dir;
     private final FileHandle loginHashFile;
+    private final OAuthUserTokens userInfo;
+    private final HashSet<OAuthAuthorization> authorizationTokens;
+    private final HashSet<OAuthAuthorization.AccessToken> accessTokens;
 
-    { // prepare object
+    {
         if (email.contentEquals("burdoto@outlook.com"))
             put(PERMIT, Bitmask.combine(Permit.values()));
         else if (permits.test(Set::isEmpty))
-            put(PERMIT, Permit.NONE.getValue());
+            put(PERMIT, Permit.EMAIL.getValue());
+    }
+
+    public FileHandle getDirectory() {
+        return dir;
     }
 
     @Override
@@ -66,7 +80,7 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
     }
 
     @Override
-    public Set<Permit> getPermits() {
+    public Permit.Set getPermits() {
         return permits.assertion("Permits not found");
     }
 
@@ -83,6 +97,9 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
         });
         this.dir = sourceDir;
         this.loginHashFile = dir.createSubFile("login.hash");
+        this.userInfo = new OAuthUserTokens(upgrade(Context.class), this); // prepare object
+        this.authorizationTokens = new HashSet<>();
+        this.accessTokens = new HashSet<>();
     }
 
     UserAccount(UserManager context, UUID id, String email, String password) {
@@ -95,6 +112,9 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
         dir.createSubFile("user.json").setContent(toSerializedString());
         this.loginHashFile = dir.createSubFile("login.hash");
         this.loginHashFile.setContent(encrypt(email, password));
+        this.userInfo = new OAuthUserTokens(upgrade(Context.class), this); // prepare object
+        this.authorizationTokens = new HashSet<>();
+        this.accessTokens = new HashSet<>();
     }
 
     public static String encrypt(String saltName, String input) {
@@ -109,6 +129,21 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
         } catch (Throwable t) {
             throw new RuntimeException(t);
         }
+    }
+
+    public Rewrapper<OAuthAuthorization> findAuthorization(final String code) {
+        return () -> authorizationTokens.stream()
+                .filter(authorization -> authorization.code.contentEquals(code))
+                .findAny()
+                .orElse(null);
+    }
+
+    public Rewrapper<OAuthAuthorization.AccessToken> findAccessToken(final String token) throws RestEndpointException {
+        return () -> accessTokens.stream()
+                .filter(OAuthAuthorization.AccessToken::isValid)
+                .filter(access -> access.checkToken(token))
+                .findAny()
+                .orElse(null);
     }
 
     public boolean tryLogin(String email, String password) {
@@ -131,5 +166,16 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
 
     public void putHash(String hash) {
         loginHashFile.setContent(hash);
+    }
+
+    public OAuthAuthorization createOAuthSession(Context context, Service service, String userAgent, Permit.Set scopes) {
+        OAuthAuthorization oAuthAuthorization = new OAuthAuthorization(context, this, service, userAgent, scopes);
+        authorizationTokens.add(oAuthAuthorization);
+        return oAuthAuthorization;
+    }
+
+    @Internal
+    public boolean addAccessToken(OAuthAuthorization.AccessToken accessToken) {
+        return accessTokens.add(accessToken);
     }
 }

@@ -24,8 +24,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+import static org.comroid.api.ContextualProvider.requireFromContexts;
 import static org.comroid.auth.user.UserAccount.EMAIL;
-import static org.comroid.auth.user.UserAccount.PERMIT;
 import static org.comroid.restless.HTTPStatusCodes.*;
 
 public enum AuthEndpoint implements ServerEndpoint.This {
@@ -142,6 +142,30 @@ public enum AuthEndpoint implements ServerEndpoint.This {
         }
     },
     SERVICE_API("/api/service/%s", AuthServer.UUID_PATTERN) {
+        @Override
+        public REST.Response executeGET(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            UUID uuid;
+            try {
+                uuid = UUID.fromString(urlParams[0]);
+            } catch (Exception e) {
+                throw new RestEndpointException(BAD_REQUEST, "Malformed ID: " + urlParams[0], e);
+            }
+            // validate permission
+            UserSession.findSession(headers).checkPermits(Permit.DEV);
+
+            // get service
+            Service service = AuthServer.instance.getServiceManager()
+                    .getService(uuid)
+                    .orElseThrow(() -> new RestEndpointException(NOT_FOUND, "Service with ID " + uuid + " not found"));
+
+            return new REST.Response(OK, service);
+        }
+
+        @Override
+        public boolean allowMemberAccess() {
+            return true;
+        }
+
         @Override
         public REST.Response executePOST(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             final AuthServer server = context.requireFromContext(AuthServer.class);
