@@ -1,5 +1,7 @@
 package org.comroid.oauth.user;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.comroid.auth.server.AuthServer;
 import org.comroid.auth.service.Service;
 import org.comroid.auth.user.Permit;
@@ -60,6 +62,7 @@ public final class OAuthAuthorizationToken extends DataContainerBase<OAuthAuthor
             .onceEach()
             .setRequired()
             .build();
+    private static final Logger logger = LogManager.getLogger();
     public final Ref<Service> service = getComputedReference(SERVICE);
     public final Ref<UserAccount> account = getComputedReference(ACCOUNT);
     public final Ref<Permit.Set> scopes = getComputedReference(SCOPES);
@@ -99,6 +102,7 @@ public final class OAuthAuthorizationToken extends DataContainerBase<OAuthAuthor
         String code = String.format("%s-%s", userAccount.getUUID(), service.getUUID());
         code = UserAccount.encrypt(code, code + '-' + UUID.randomUUID());
         code = code.replace('+', 'x').replace('=', 'x').replace('/', 'x');
+        logger.trace("Generated auth code: {}", code);
         return Base64.encodeBytes(code.getBytes());
     }
 }
