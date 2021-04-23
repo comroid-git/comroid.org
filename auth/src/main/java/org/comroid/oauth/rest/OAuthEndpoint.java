@@ -95,7 +95,7 @@ public enum OAuthEndpoint implements ServerEndpoint.This {
     AUTHORIZE_LOGIN("/authorize/login") {
         @Override
         public REST.Response executePOST(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            String email = body.get("email").asString();
+            String email = body.get("email").asString(str -> str.replace("%40", "@"));
             String login = body.get("password").asString();
 
             UUID requestId = body.get("requestId").asString(UUID::fromString);
