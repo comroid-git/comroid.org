@@ -5,6 +5,7 @@ import org.comroid.api.ValueBox;
 import org.comroid.api.ValueType;
 import org.comroid.util.Bitmask;
 import org.comroid.util.StandardValueType;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
 import java.util.stream.Collectors;
@@ -50,6 +51,11 @@ public enum Permit implements BitmaskEnum<Permit> {
                     .map(Permit::getName)
                     .map(String::toLowerCase)
                     .toArray(String[]::new));
+        }
+
+        @Override
+        public @NotNull Permit[] toArray() {
+            return super.toArray(new Permit[0]);
         }
     }
 }

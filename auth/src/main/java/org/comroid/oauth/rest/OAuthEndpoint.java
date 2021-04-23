@@ -56,7 +56,7 @@ public enum OAuthEndpoint implements ServerEndpoint.This {
                 final String userAgent = headers.getFirst(CommonHeaderNames.USER_AGENT);
 
                 // create oauth blob for user with this service + user agent
-                OAuthAuthorization authorization = account.createOAuthSession(context, service, userAgent);
+                OAuthAuthorization authorization = account.createOAuthSession(context, service, userAgent, authenticationRequest.getScopes());
 
                 // assemble redirect uri
                 query.put("code", authorization.getCode());

@@ -100,12 +100,13 @@ public final class OAuthAuthorization extends DataContainerBase<OAuthAuthorizati
         return !invalidation.isDone() && !invalidation.isCancelled();
     }
 
-    public OAuthAuthorization(Context context, final UserAccount userAccount, final Service service, final String userAgent) {
+    public OAuthAuthorization(Context context, UserAccount userAccount, Service service, String userAgent, Permit.Set scopes) {
         super(context, obj -> {
             obj.put(ACCOUNT, userAccount.getUUID().toString());
             obj.put(SERVICE, service.getUUID().toString());
             obj.put(USER_AGENT, userAgent);
             obj.put(CODE, generateCode(userAccount, service, userAgent));
+            obj.put(SCOPES, scopes.toString());
         });
     }
 

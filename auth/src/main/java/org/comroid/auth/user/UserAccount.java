@@ -155,8 +155,8 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
         loginHashFile.setContent(hash);
     }
 
-    public OAuthAuthorization createOAuthSession(Context context, Service service, String userAgent) {
-        OAuthAuthorization oAuthAuthorization = new OAuthAuthorization(context, this, service, userAgent);
+    public OAuthAuthorization createOAuthSession(Context context, Service service, String userAgent, Permit.Set scopes) {
+        OAuthAuthorization oAuthAuthorization = new OAuthAuthorization(context, this, service, userAgent, scopes);
         authorizationTokens.add(oAuthAuthorization);
         return oAuthAuthorization;
     }
