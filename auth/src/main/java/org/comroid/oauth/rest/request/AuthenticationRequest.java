@@ -18,6 +18,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 public class AuthenticationRequest extends DataContainerBase<AuthenticationRequest> {
+    public static final String SCOPE_SPLIT_PATTERN = "[\\s+]";
     @RootBind
     public static final GroupBind<AuthenticationRequest> Type
             = new GroupBind<>(AuthServer.MASTER_CONTEXT, "authentication-request");
@@ -45,7 +46,7 @@ public class AuthenticationRequest extends DataContainerBase<AuthenticationReque
     public static final VarBind<AuthenticationRequest, String, String[], Permit.Set> SCOPES
             = Type.createBind("scope")
             .extractAs(StandardValueType.STRING)
-            .andRemap(str -> str.split(" "))
+            .andRemap(str -> str.split(SCOPE_SPLIT_PATTERN))
             .reformatRefs(refs -> Permit.valueOf(refs
                     .streamValues()
                     .flatMap(Stream::of)

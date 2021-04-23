@@ -8,6 +8,7 @@ import org.comroid.auth.user.Permit;
 import org.comroid.auth.user.UserAccount;
 import org.comroid.mutatio.model.Ref;
 import org.comroid.oauth.model.ValidityStage;
+import org.comroid.oauth.rest.request.AuthenticationRequest;
 import org.comroid.uniform.Context;
 import org.comroid.util.StandardValueType;
 import org.comroid.varbind.annotation.RootBind;
@@ -46,7 +47,7 @@ public final class OAuthAuthorization extends DataContainerBase<OAuthAuthorizati
     public static final VarBind<OAuthAuthorization, String, String[], Permit.Set> SCOPES
             = Type.createBind("scope")
             .extractAs(StandardValueType.STRING)
-            .andRemap(str -> str.split(" "))
+            .andRemap(str -> str.split(AuthenticationRequest.SCOPE_SPLIT_PATTERN))
             .reformatRefs(refs -> Permit.valueOf(refs
                     .streamValues()
                     .flatMap(Stream::of)
@@ -169,7 +170,7 @@ public final class OAuthAuthorization extends DataContainerBase<OAuthAuthorizati
         public static final VarBind<AccessToken, String, String[], Permit.Set> SCOPES
                 = Type.createBind("scope")
                 .extractAs(StandardValueType.STRING)
-                .andRemap(str -> str.split(" "))
+                .andRemap(str -> str.split(AuthenticationRequest.SCOPE_SPLIT_PATTERN))
                 .reformatRefs(refs -> Permit.valueOf(refs
                         .streamValues()
                         .flatMap(Stream::of)
