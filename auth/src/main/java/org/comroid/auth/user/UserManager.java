@@ -3,6 +3,7 @@ package org.comroid.auth.user;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
+import org.comroid.api.Rewrapper;
 import org.comroid.api.UncheckedCloseable;
 import org.comroid.auth.server.AuthServer;
 import org.comroid.common.io.FileHandle;
@@ -112,5 +113,9 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
 
     @Override
     public void close() {
+    }
+
+    public Rewrapper<UserAccount> getUser(UUID uuid) {
+        return () -> accounts.getOrDefault(uuid, null);
     }
 }

@@ -6,8 +6,12 @@ import org.comroid.api.Serializer;
 import org.comroid.api.UUIDContainer;
 import org.comroid.auth.model.PermitCarrier;
 import org.comroid.auth.server.AuthServer;
+import org.comroid.auth.service.Service;
 import org.comroid.common.io.FileHandle;
 import org.comroid.mutatio.model.Ref;
+import org.comroid.oauth.user.OAuthAuthorizationToken;
+import org.comroid.oauth.user.OAuthUserTokens;
+import org.comroid.uniform.Context;
 import org.comroid.util.Bitmask;
 import org.comroid.util.StandardValueType;
 import org.comroid.varbind.annotation.RootBind;
@@ -17,10 +21,7 @@ import org.comroid.varbind.container.DataContainerBase;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public final class UserAccount extends DataContainerBase<UserAccount> implements UUIDContainer, PermitCarrier {
     @RootBind
@@ -47,12 +48,18 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
     public final Ref<Set<Permit>> permits = getComputedReference(PERMIT);
     private final FileHandle dir;
     private final FileHandle loginHashFile;
+    private final OAuthUserTokens userInfo = new OAuthUserTokens(upgrade(Context.class), this);
+    private final HashSet<OAuthAuthorizationToken> authorizationTokens = new HashSet<>();
 
     { // prepare object
         if (email.contentEquals("burdoto@outlook.com"))
             put(PERMIT, Bitmask.combine(Permit.values()));
         else if (permits.test(Set::isEmpty))
             put(PERMIT, Permit.NONE.getValue());
+    }
+
+    public FileHandle getDirectory() {
+        return dir;
     }
 
     @Override
@@ -131,5 +138,9 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
 
     public void putHash(String hash) {
         loginHashFile.setContent(hash);
+    }
+
+    public OAuthAuthorizationToken createOAuthSession(Context context, Service service, String userAgent) {
+        OAuthAuthorizationToken oAuthAuthorizationToken = new OAuthAuthorizationToken(context, this, service, userAgent);
     }
 }
