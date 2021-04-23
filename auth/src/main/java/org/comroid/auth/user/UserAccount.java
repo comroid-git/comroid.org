@@ -35,17 +35,17 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
             = Type.createBind("email")
             .extractAs(StandardValueType.STRING)
             .build();
-    public static final VarBind<UserAccount, Integer, Set<Permit>, Set<Permit>> PERMIT
+    public static final VarBind<UserAccount, Integer, Permit.Set, Permit.Set> PERMIT
             = Type.createBind("permit")
             .extractAs(StandardValueType.INTEGER)
             .andRemap(Permit::valueOf)
             .onceEach()
-            .setDefaultValue(Collections::emptySet)
+            .setDefaultValue(c -> new Permit.Set())
             .build();
     private static final Logger logger = LogManager.getLogger();
     public final Ref<UUID> id = getComputedReference(ID);
     public final Ref<String> email = getComputedReference(EMAIL);
-    public final Ref<Set<Permit>> permits = getComputedReference(PERMIT);
+    public final Ref<Permit.Set> permits = getComputedReference(PERMIT);
     private final FileHandle dir;
     private final FileHandle loginHashFile;
     private final OAuthUserTokens userInfo = new OAuthUserTokens(upgrade(Context.class), this);
@@ -73,7 +73,7 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
     }
 
     @Override
-    public Set<Permit> getPermits() {
+    public Permit.Set getPermits() {
         return permits.assertion("Permits not found");
     }
 
@@ -142,5 +142,7 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
 
     public OAuthAuthorizationToken createOAuthSession(Context context, Service service, String userAgent) {
         OAuthAuthorizationToken oAuthAuthorizationToken = new OAuthAuthorizationToken(context, this, service, userAgent);
+        authorizationTokens.add(oAuthAuthorizationToken);
+        return oAuthAuthorizationToken;
     }
 }

@@ -2,6 +2,7 @@ package org.comroid.oauth.rest;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.comroid.api.Polyfill;
 import org.comroid.api.StreamSupplier;
 import org.comroid.auth.server.AuthServer;
 import org.comroid.auth.service.Service;
@@ -11,8 +12,8 @@ import org.comroid.auth.user.UserAccount;
 import org.comroid.auth.user.UserSession;
 import org.comroid.common.info.MessageSupplier;
 import org.comroid.oauth.rest.request.AuthenticationRequest;
+import org.comroid.oauth.user.OAuthAuthorizationToken;
 import org.comroid.restless.CommonHeaderNames;
-import org.comroid.restless.HTTPStatusCodes;
 import org.comroid.restless.REST;
 import org.comroid.restless.server.RestEndpointException;
 import org.comroid.restless.server.ServerEndpoint;
@@ -20,6 +21,7 @@ import org.comroid.uniform.Context;
 import org.comroid.uniform.node.UniNode;
 import org.intellij.lang.annotations.Language;
 
+import java.net.URI;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -49,9 +51,21 @@ public enum OAuthEndpoint implements ServerEndpoint.This {
                 final String userAgent = headers.getFirst(CommonHeaderNames.USER_AGENT);
 
                 // create oauth blob for user with this service + user agent
-                account.createOAuthSession(context, service, userAgent);
+                OAuthAuthorizationToken authorization = account.createOAuthSession(context, service, userAgent);
+
+                // assemble redirect uri
+                URI redirectURI = authenticationRequest.getRedirectURI();
+                String base = redirectURI.toString();
+                String extraArgs = String.format("%scode=%s%s",
+                        redirectURI.getQuery() == null ? '?' : '&',
+                        authorization.getCode(),
+                        authenticationRequest.state.isNonNull() ? "&state=" + authenticationRequest.getState() : "");
+                redirectURI = Polyfill.uri(base + extraArgs);
+
+                return new REST.Response(redirectURI);
             } catch (Exception e) {
                 logger.warn("Could not authorize OAuth session; aborting", e);
+
             }
         }
     };

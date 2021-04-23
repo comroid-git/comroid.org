@@ -36,6 +36,10 @@ public enum Permit implements BitmaskEnum<Permit> {
             return StandardValueType.INTEGER;
         }
 
+        public Set() {
+            this(new HashSet<>());
+        }
+
         public Set(java.util.Set<Permit> values) {
             super(values);
         }

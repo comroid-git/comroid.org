@@ -4,6 +4,7 @@ import org.comroid.auth.server.AuthServer;
 import org.comroid.auth.service.Service;
 import org.comroid.auth.user.Permit;
 import org.comroid.auth.user.UserAccount;
+import org.comroid.mutatio.model.Ref;
 import org.comroid.uniform.Context;
 import org.comroid.util.StandardValueType;
 import org.comroid.varbind.annotation.RootBind;
@@ -59,6 +60,31 @@ public final class OAuthAuthorizationToken extends DataContainerBase<OAuthAuthor
             .onceEach()
             .setRequired()
             .build();
+    public final Ref<Service> service = getComputedReference(SERVICE);
+    public final Ref<UserAccount> account = getComputedReference(ACCOUNT);
+    public final Ref<Permit.Set> scopes = getComputedReference(SCOPES);
+    public final Ref<String> userAgent = getComputedReference(USER_AGENT);
+    public final Ref<String> code = getComputedReference(CODE);
+
+    public Service getService() {
+        return service.assertion("service");
+    }
+
+    public UserAccount getAccount() {
+        return account.assertion("user account");
+    }
+
+    public Permit.Set getScopes() {
+        return scopes.assertion("scopes");
+    }
+
+    public String getUserAgent() {
+        return userAgent.assertion("user agent");
+    }
+
+    public String getCode() {
+        return code.assertion("code");
+    }
 
     public OAuthAuthorizationToken(Context context, final UserAccount userAccount, final Service service, final String userAgent) {
         super(context, obj -> {
