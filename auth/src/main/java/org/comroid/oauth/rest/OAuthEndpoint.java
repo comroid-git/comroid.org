@@ -33,9 +33,6 @@ public enum OAuthEndpoint implements ServerEndpoint.This {
     AUTHORIZE("/authorize") {
         @Override
         public REST.Response executeGET(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            // fixme
-            logger.debug("Received authorization request with body:\n{}", body.toSerializedString());
-
             AuthenticationRequest authenticationRequest = new AuthenticationRequest(context, body.asObjectNode());
             URIQueryEditor query = new URIQueryEditor(authenticationRequest.getRedirectURI());
             logger.debug("Got {}", authenticationRequest);
@@ -75,9 +72,6 @@ public enum OAuthEndpoint implements ServerEndpoint.This {
     TOKEN("/token") {
         @Override
         public REST.Response executePOST(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            // fixme
-            logger.debug("Received token request with body:\n{}", body.toSerializedString());
-
             TokenRequest.AuthorizationCodeGrant tokenRequest = new TokenRequest.AuthorizationCodeGrant(context, body.asObjectNode());
             OAuthAuthorization authorization = context.requireFromContext(UserManager.class)
                     .findOAuthAuthorization(tokenRequest.getCode());
@@ -89,9 +83,6 @@ public enum OAuthEndpoint implements ServerEndpoint.This {
     USER_INFO("/userInfo") {
         @Override
         public REST.Response executeGET(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            // fixme
-            logger.debug("Received userInfo request with body:\n{}", body.toSerializedString());
-
             UserAccount account = context.requireFromContext(UserManager.class).findOAuthSession(headers);
             return new REST.Response(HTTPStatusCodes.OK, account);
         }
