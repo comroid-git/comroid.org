@@ -122,9 +122,10 @@ public final class OAuthAuthorization extends DataContainerBase<OAuthAuthorizati
         UserAccount userAccount = authorization.getAccount();
         Service service = authorization.getService();
         String code = String.format("%s-%s-%s", userAccount.getUUID(), service.getUUID(), UUID.randomUUID());
+        code = Base64.encodeBytes(code.getBytes());
         // fixme Remove log statement
         logger.trace("Generated access token: {}", code);
-        return Base64.encodeBytes(code.getBytes());
+        return code;
     }
 
     @Override
