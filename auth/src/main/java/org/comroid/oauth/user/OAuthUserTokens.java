@@ -23,6 +23,8 @@ public final class OAuthUserTokens extends DataContainerBase<OAuthUserTokens> im
     public OAuthUserTokens(final Context context, final UserAccount userAccount) {
         super(context, obj -> {
             String content = userAccount.getDirectory().createSubFile("oauth.json").getContent();
+            if (content.isEmpty())
+                return;
             UniNode data = context.parse(MimeType.JSON, content);
             obj.copyFrom(data);
         });

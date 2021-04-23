@@ -48,10 +48,10 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
     public final Ref<Permit.Set> permits = getComputedReference(PERMIT);
     private final FileHandle dir;
     private final FileHandle loginHashFile;
-    private final OAuthUserTokens userInfo = new OAuthUserTokens(upgrade(Context.class), this);
-    private final HashSet<OAuthAuthorizationToken> authorizationTokens = new HashSet<>();
+    private final OAuthUserTokens userInfo;
+    private final HashSet<OAuthAuthorizationToken> authorizationTokens;
 
-    { // prepare object
+    {
         if (email.contentEquals("burdoto@outlook.com"))
             put(PERMIT, Bitmask.combine(Permit.values()));
         else if (permits.test(Set::isEmpty))
@@ -90,6 +90,8 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
         });
         this.dir = sourceDir;
         this.loginHashFile = dir.createSubFile("login.hash");
+        this.userInfo = new OAuthUserTokens(upgrade(Context.class), this); // prepare object
+        this.authorizationTokens = new HashSet<>();
     }
 
     UserAccount(UserManager context, UUID id, String email, String password) {
@@ -102,6 +104,8 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
         dir.createSubFile("user.json").setContent(toSerializedString());
         this.loginHashFile = dir.createSubFile("login.hash");
         this.loginHashFile.setContent(encrypt(email, password));
+        this.userInfo = new OAuthUserTokens(upgrade(Context.class), this); // prepare object
+        this.authorizationTokens = new HashSet<>();
     }
 
     public static String encrypt(String saltName, String input) {
