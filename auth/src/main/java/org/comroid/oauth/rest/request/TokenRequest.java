@@ -21,7 +21,7 @@ public abstract class TokenRequest extends DataContainerBase<TokenRequest> {
     public static final VarBind<TokenRequest, String, GrantType, GrantType> GRANT_TYPE
             = Type.createBind("grant_type")
             .extractAs(StandardValueType.STRING)
-            .andRemap(GrantType::valueOf)
+            .andRemap(name -> GrantType.valueOf(name.toUpperCase()))
             .onceEach()
             .setRequired()
             .build();
