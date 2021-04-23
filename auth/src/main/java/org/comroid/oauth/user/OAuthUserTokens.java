@@ -11,6 +11,7 @@ import org.comroid.varbind.container.DataContainerBase;
 
 import java.io.Closeable;
 
+@Deprecated
 public final class OAuthUserTokens extends DataContainerBase<OAuthUserTokens> implements Closeable {
     @RootBind
     public static final GroupBind<OAuthUserTokens> Type
