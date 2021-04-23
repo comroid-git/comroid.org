@@ -26,6 +26,7 @@ import org.intellij.lang.annotations.Language;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
+// fixme fixme fixme
 public enum OAuthEndpoint implements ServerEndpoint.This {
     AUTHORIZE("/authorize") {
         @Override
