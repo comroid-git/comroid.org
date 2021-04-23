@@ -8,11 +8,13 @@ import org.comroid.auth.service.Service;
 import org.comroid.auth.service.ServiceManager;
 import org.comroid.auth.user.Permit;
 import org.comroid.auth.user.UserAccount;
+import org.comroid.auth.user.UserManager;
 import org.comroid.auth.user.UserSession;
 import org.comroid.common.info.MessageSupplier;
 import org.comroid.oauth.model.OAuthError;
 import org.comroid.oauth.rest.request.AuthenticationRequest;
-import org.comroid.oauth.user.OAuthAuthorizationToken;
+import org.comroid.oauth.rest.request.TokenRequest;
+import org.comroid.oauth.user.OAuthAuthorization;
 import org.comroid.restless.CommonHeaderNames;
 import org.comroid.restless.HTTPStatusCodes;
 import org.comroid.restless.REST;
@@ -54,7 +56,7 @@ public enum OAuthEndpoint implements ServerEndpoint.This {
                 final String userAgent = headers.getFirst(CommonHeaderNames.USER_AGENT);
 
                 // create oauth blob for user with this service + user agent
-                OAuthAuthorizationToken authorization = account.createOAuthSession(context, service, userAgent);
+                OAuthAuthorization authorization = account.createOAuthSession(context, service, userAgent);
 
                 // assemble redirect uri
                 query.put("code", authorization.getCode());
@@ -75,7 +77,13 @@ public enum OAuthEndpoint implements ServerEndpoint.This {
         public REST.Response executePOST(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             // fixme
             logger.debug("Received token request with body:\n{}", body.toSerializedString());
-            return null;
+
+            TokenRequest.AuthorizationCodeGrant tokenRequest = new TokenRequest.AuthorizationCodeGrant(context, body.asObjectNode());
+            OAuthAuthorization authorization = context.requireFromContext(UserManager.class)
+                    .findOAuthAuthorization(tokenRequest.getCode());
+            OAuthAuthorization.AccessToken accessToken = authorization.createAccessToken();
+
+            return new REST.Response(HTTPStatusCodes.OK, accessToken);
         }
     };
 

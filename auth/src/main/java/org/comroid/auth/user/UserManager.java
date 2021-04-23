@@ -7,6 +7,9 @@ import org.comroid.api.Rewrapper;
 import org.comroid.api.UncheckedCloseable;
 import org.comroid.auth.server.AuthServer;
 import org.comroid.common.io.FileHandle;
+import org.comroid.oauth.user.OAuthAuthorization;
+import org.comroid.restless.HTTPStatusCodes;
+import org.comroid.restless.server.RestEndpointException;
 
 import java.io.File;
 import java.util.Collection;
@@ -105,6 +108,14 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
         if (session == null)
             throw new IllegalArgumentException("No session found with given cookie");
         return session;
+    }
+
+    public OAuthAuthorization findOAuthAuthorization(final String authorizationCode) throws RestEndpointException {
+        return accounts.values()
+                .stream()
+                .flatMap(account -> account.findAuthorization(authorizationCode).stream())
+                .findAny()
+                .orElseThrow(() -> new RestEndpointException(HTTPStatusCodes.UNAUTHORIZED, "Invalid Token used"));
     }
 
     public boolean closeSession(UserSession session) {

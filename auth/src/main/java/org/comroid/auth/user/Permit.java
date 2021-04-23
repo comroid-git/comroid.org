@@ -43,5 +43,13 @@ public enum Permit implements BitmaskEnum<Permit> {
         public Set(java.util.Set<Permit> values) {
             super(values);
         }
+
+        @Override
+        public String toString() {
+            return String.join(" ", stream()
+                    .map(Permit::getName)
+                    .map(String::toLowerCase)
+                    .toArray(String[]::new));
+        }
     }
 }

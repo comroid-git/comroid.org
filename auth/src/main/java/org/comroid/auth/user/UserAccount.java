@@ -2,6 +2,7 @@ package org.comroid.auth.user;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.comroid.api.Rewrapper;
 import org.comroid.api.Serializer;
 import org.comroid.api.UUIDContainer;
 import org.comroid.auth.model.PermitCarrier;
@@ -9,7 +10,7 @@ import org.comroid.auth.server.AuthServer;
 import org.comroid.auth.service.Service;
 import org.comroid.common.io.FileHandle;
 import org.comroid.mutatio.model.Ref;
-import org.comroid.oauth.user.OAuthAuthorizationToken;
+import org.comroid.oauth.user.OAuthAuthorization;
 import org.comroid.oauth.user.OAuthUserTokens;
 import org.comroid.uniform.Context;
 import org.comroid.util.Bitmask;
@@ -21,7 +22,10 @@ import org.comroid.varbind.container.DataContainerBase;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 public final class UserAccount extends DataContainerBase<UserAccount> implements UUIDContainer, PermitCarrier {
     @RootBind
@@ -49,7 +53,7 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
     private final FileHandle dir;
     private final FileHandle loginHashFile;
     private final OAuthUserTokens userInfo;
-    private final HashSet<OAuthAuthorizationToken> authorizationTokens;
+    private final HashSet<OAuthAuthorization> authorizationTokens;
 
     {
         if (email.contentEquals("burdoto@outlook.com"))
@@ -122,6 +126,13 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
         }
     }
 
+    public Rewrapper<OAuthAuthorization> findAuthorization(final String code) {
+        return () -> authorizationTokens.stream()
+                .filter(authorization -> authorization.code.contentEquals(code))
+                .findAny()
+                .orElse(null);
+    }
+
     public boolean tryLogin(String email, String password) {
         if (!this.email.contentEquals(email)) {
             logger.error("Email Mismatch: {} / {}", this.email.get(), email);
@@ -144,9 +155,9 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
         loginHashFile.setContent(hash);
     }
 
-    public OAuthAuthorizationToken createOAuthSession(Context context, Service service, String userAgent) {
-        OAuthAuthorizationToken oAuthAuthorizationToken = new OAuthAuthorizationToken(context, this, service, userAgent);
-        authorizationTokens.add(oAuthAuthorizationToken);
-        return oAuthAuthorizationToken;
+    public OAuthAuthorization createOAuthSession(Context context, Service service, String userAgent) {
+        OAuthAuthorization oAuthAuthorization = new OAuthAuthorization(context, this, service, userAgent);
+        authorizationTokens.add(oAuthAuthorization);
+        return oAuthAuthorization;
     }
 }
