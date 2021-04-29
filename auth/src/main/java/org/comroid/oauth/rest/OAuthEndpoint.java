@@ -184,11 +184,13 @@ public enum OAuthEndpoint implements ServerEndpoint.This {
     }
 
     private static String completeAuthorization(UserAccount account, AuthenticationRequest request, Context context, Service service, String userAgent) {
+        final Permit.Set permits = Permit.valueOf(request.getScopes().toArray(new String[0]));
+
         // validate account has scopes as permit
-        account.checkPermits(request.getScopes().toArray(new Permit[0]));
+        account.checkPermits(permits);
 
         // create oauth blob for user with this service + user agent
-        OAuthAuthorization authorization = account.createOAuthSession(context, service, userAgent, request.getScopes());
+        OAuthAuthorization authorization = account.createOAuthSession(context, service, userAgent, permits);
         return authorization.getCode();
     }
 }

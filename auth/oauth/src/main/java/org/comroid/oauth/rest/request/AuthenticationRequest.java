@@ -2,9 +2,8 @@ package org.comroid.oauth.rest.request;
 
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.Polyfill;
-import org.comroid.auth.server.AuthServer;
-import org.comroid.auth.user.Permit;
 import org.comroid.mutatio.model.Ref;
+import org.comroid.oauth.OAuth;
 import org.comroid.uniform.node.UniObjectNode;
 import org.comroid.util.StandardValueType;
 import org.comroid.varbind.annotation.RootBind;
@@ -14,14 +13,17 @@ import org.comroid.varbind.container.DataContainerBase;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
+import java.util.Collections;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class AuthenticationRequest extends DataContainerBase<AuthenticationRequest> {
     public static final String SCOPE_SPLIT_PATTERN = "[\\s+]";
     @RootBind
     public static final GroupBind<AuthenticationRequest> Type
-            = new GroupBind<>(AuthServer.MASTER_CONTEXT, "authentication-request");
+            = new GroupBind<>(OAuth.CONTEXT, "authentication-request");
     public static final VarBind<AuthenticationRequest, String, String, String> RESPONSE_TYPE
             = Type.createBind("response_type")
             .extractAs(StandardValueType.STRING)
@@ -43,14 +45,14 @@ public class AuthenticationRequest extends DataContainerBase<AuthenticationReque
             .onceEach()
             .setRequired()
             .build();
-    public static final VarBind<AuthenticationRequest, String, String[], Permit.Set> SCOPES
+    public static final VarBind<AuthenticationRequest, String, String[], Set<String>> SCOPES
             = Type.createBind("scope")
             .extractAs(StandardValueType.STRING)
             .andRemap(str -> str.split(SCOPE_SPLIT_PATTERN))
-            .reformatRefs(refs -> Permit.valueOf(refs
+            .reformatRefs(refs -> Collections.unmodifiableSet(refs
                     .streamValues()
                     .flatMap(Stream::of)
-                    .toArray(String[]::new)))
+                    .collect(Collectors.toSet())))
             .setRequired()
             .build();
     public static final VarBind<AuthenticationRequest, String, String, String> STATE
@@ -60,7 +62,7 @@ public class AuthenticationRequest extends DataContainerBase<AuthenticationReque
     public final Ref<String> responseType = getComputedReference(RESPONSE_TYPE);
     public final Ref<UUID> clientId = getComputedReference(CLIENT_ID);
     public final Ref<URI> redirectUri = getComputedReference(REDIRECT_URI);
-    public final Ref<Permit.Set> scopes = getComputedReference(SCOPES);
+    public final Ref<Set<String>> scopes = getComputedReference(SCOPES);
     public final Ref<String> state = getComputedReference(STATE);
 
     {
@@ -76,7 +78,7 @@ public class AuthenticationRequest extends DataContainerBase<AuthenticationReque
         return redirectUri.assertion("redirect_uri");
     }
 
-    public Permit.Set getScopes() {
+    public Set<String> getScopes() {
         return scopes.assertion("scope");
     }
 

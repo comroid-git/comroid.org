@@ -37,7 +37,9 @@ dependencies {
         implementation 'org.comroid:status-api:0.+'
         implementation 'org.comroid:restless:0.+'
         implementation 'org.comroid:webkit:0.+'
+        implementation project(':oauth')
     } else {
+        implementation project(':auth:oauth')
         implementation project(':status:status-api')
 
         implementation project(':guardian:uniform').sourceSets.java8compat.output.classesDirs

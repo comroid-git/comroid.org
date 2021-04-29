@@ -1,0 +1,58 @@
+apply plugin: 'java-library'
+
+group 'org.comroid'
+version '0.21.1-SNAPSHOT'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+tasks.findByName('wrapper')?.configure {
+    gradleVersion = '6.2'
+    distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
+}
+
+configurations {
+    compileClasspath {
+        resolutionStrategy.activateDependencyLocking()
+    }
+}
+
+
+compileJava.options.encoding = 'UTF-8'
+
+repositories {
+    mavenLocal()
+    maven {
+        url "https://maven.jetbrains.space/comroid/release"
+        credentials.username "Anonymous.User"
+        credentials.password "anonymous"
+    }
+    maven {
+        url "https://maven.jetbrains.space/comroid/repo"
+        credentials.username "Anonymous.User"
+        credentials.password "anonymous"
+    }
+    jcenter()
+    maven { url 'https://www.jitpack.io' }
+}
+
+dependencies {
+    api 'org.jetbrains:annotations:20.1.0'
+
+    if (isAutoDeploy) {
+        implementation 'org.comroid:restless:0.+'
+        implementation 'org.comroid:webkit:0.+'
+    } else {
+        implementation project(':guardian:uniform').sourceSets.java8compat.output.classesDirs
+        implementation project(':guardian:restless').sourceSets.java11compat.output.classesDirs
+        implementation project(':guardian:webkit')
+    }
+
+    // logging dependencies
+    implementation 'org.apache.logging.log4j:log4j-api:2.11.0'
+    testImplementation 'org.apache.logging.log4j:log4j-core:2.11.0'
+
+    testImplementation 'junit:junit:4.13'
+    testImplementation 'org.easymock:easymock:4.1'
+    testImplementation 'org.codehaus.groovy:groovy:3.0.0-rc-2'
+}

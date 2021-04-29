@@ -1,10 +1,10 @@
 package org.comroid.oauth.rest.request;
 
+import org.comroid.oauth.OAuth;
+import org.comroid.oauth.model.GrantType;
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.Polyfill;
-import org.comroid.auth.server.AuthServer;
 import org.comroid.mutatio.model.Ref;
-import org.comroid.oauth.model.GrantType;
 import org.comroid.uniform.node.UniObjectNode;
 import org.comroid.util.StandardValueType;
 import org.comroid.varbind.annotation.RootBind;
@@ -17,7 +17,7 @@ import java.net.URI;
 
 public abstract class TokenRequest extends DataContainerBase<TokenRequest> {
     public static final GroupBind<TokenRequest> Type
-            = new GroupBind<>(AuthServer.MASTER_CONTEXT, "token-request");
+            = new GroupBind<>(OAuth.CONTEXT, "token-request");
     public static final VarBind<TokenRequest, String, GrantType, GrantType> GRANT_TYPE
             = Type.createBind("grant_type")
             .extractAs(StandardValueType.STRING)
