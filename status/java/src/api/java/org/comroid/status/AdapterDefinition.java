@@ -7,7 +7,7 @@ import org.comroid.uniform.SerializationAdapter;
 
 @Deprecated
 public final class AdapterDefinition extends ContextualProvider.Base {
-    public static final String URL_BASE = "https://api.status.comroid.org/";
+    public static final String URL_BASE = "https://api.status.comroid.org";
     public static final Reference<AdapterDefinition> instance = Reference.create();
     public final SerializationAdapter<?, ?, ?> serialization;
     public final HttpAdapter http;

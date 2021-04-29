@@ -8,23 +8,23 @@ import org.intellij.lang.annotations.Language;
 import java.util.regex.Pattern;
 
 public enum Endpoint implements AccessibleEndpoint {
-    LIST_SERVICES("services"),
+    LIST_SERVICES("/services"),
 
     SPECIFIC_SERVICE(
-            "service/%s",
+            "/service/%s",
             Service.NAME_REGEX
     ),
     SERVICE_STATUS_ICON(
-            "service/%s/statusicon",
+            "/service/%s/statusicon",
             Service.NAME_REGEX
     ),
     UPDATE_SERVICE_STATUS(
-            "service/%s/status",
+            "/service/%s/status",
             Service.NAME_REGEX
     ),
 
     POLL(
-            "service/%s/poll",
+            "/service/%s/poll",
             Service.NAME_REGEX
     );
 
