@@ -6,6 +6,7 @@ import org.comroid.mutatio.model.Ref;
 import org.comroid.oauth.OAuth;
 import org.comroid.oauth.client.Client;
 import org.comroid.oauth.client.ClientProvider;
+import org.comroid.oauth.model.UserInfoProvider;
 import org.comroid.oauth.model.ValidityStage;
 import org.comroid.oauth.resource.Resource;
 import org.comroid.oauth.resource.ResourceProvider;
@@ -29,7 +30,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public final class OAuthAuthorization extends DataContainerBase<OAuthAuthorization> implements ValidityStage {
+public final class OAuthAuthorization extends DataContainerBase<OAuthAuthorization> implements ValidityStage, UserInfoProvider {
     @RootBind
     public static final GroupBind<OAuthAuthorization> Type
             = new GroupBind<>(OAuth.CONTEXT, "oauth-session");
@@ -108,7 +109,7 @@ public final class OAuthAuthorization extends DataContainerBase<OAuthAuthorizati
         return !invalidation.isDone() && !invalidation.isCancelled();
     }
 
-    public UniNode getClientData() {
+    public UniNode getUserInfo() {
         return getClient().getUserInfo();
     }
 

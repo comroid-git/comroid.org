@@ -54,7 +54,6 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
     public final Ref<Permit.Set> permits = getComputedReference(PERMIT);
     private final FileHandle dir;
     private final FileHandle loginHashFile;
-    private final OAuthUserTokens userInfo;
     private final HashSet<OAuthAuthorization> authorizationTokens;
     private final HashSet<OAuthAuthorization.AccessToken> accessTokens;
 
@@ -84,6 +83,16 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
         return permits.assertion("Permits not found");
     }
 
+    @Override
+    public UniNode getUserInfo() {
+        return toUniNode();
+    }
+
+    @Override
+    public FileHandle getDataDirectory() {
+        return dir;
+    }
+
     UserAccount(UserManager context, final FileHandle sourceDir) {
         super(context, obj -> {
             if (!sourceDir.isDirectory())
@@ -97,7 +106,6 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
         });
         this.dir = sourceDir;
         this.loginHashFile = dir.createSubFile("login.hash");
-        this.userInfo = new OAuthUserTokens(upgrade(Context.class), this); // prepare object
         this.authorizationTokens = new HashSet<>();
         this.accessTokens = new HashSet<>();
     }
@@ -112,7 +120,6 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
         dir.createSubFile("user.json").setContent(toSerializedString());
         this.loginHashFile = dir.createSubFile("login.hash");
         this.loginHashFile.setContent(encrypt(email, password));
-        this.userInfo = new OAuthUserTokens(upgrade(Context.class), this); // prepare object
         this.authorizationTokens = new HashSet<>();
         this.accessTokens = new HashSet<>();
     }
@@ -180,13 +187,14 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
     }
 
     @Override
-    public UniNode getUserInfo() {
-        return toUniNode();
+    public boolean checkScopes(Set<String> scopes) {
+        checkPermits(Permit.valueOf(scopes.toArray(new String[0])));
+        return true;
     }
 
     @Override
-    public FileHandle getDataDirectory() {
-        return dir;
+    public OAuthAuthorization createAuthorization(Context context, Resource resource, String userAgent, Set<String> scopes) {
+        return createOAuthSession(context, (Service) resource, userAgent, Permit.valueOf(scopes.toArray(new String[0])));
     }
 
     @Override

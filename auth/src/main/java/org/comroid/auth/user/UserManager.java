@@ -143,6 +143,13 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
         return () -> accounts.getOrDefault(uuid, null);
     }
 
+    @Override
+    public UserAccount loginClient(String email, String login) {
+        return AuthServer.instance.getUserManager()
+                .loginUser(email, login)
+                .getAccount();
+    }
+
     private String findToken(REST.Header.List headers) {
         String token = headers.getFirst(CommonHeaderNames.AUTHORIZATION);
 

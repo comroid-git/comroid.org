@@ -59,6 +59,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
         HTTP_LIB = new JavaHttpAdapter();
         MASTER_CONTEXT = ContextualProvider.create(SERI_LIB, HTTP_LIB);
         WebkitConfiguration.initialize(MASTER_CONTEXT);
+        OAuth.URL_BASE = URL_BASE;
     }
 
     private final ScheduledExecutorService executor;

@@ -15,4 +15,6 @@ public interface ClientProvider {
     boolean hasClient(UUID uuid);
 
     Rewrapper<? extends Client> findClient(UUID uuid);
+
+    Client loginClient(String email, String login);
 }

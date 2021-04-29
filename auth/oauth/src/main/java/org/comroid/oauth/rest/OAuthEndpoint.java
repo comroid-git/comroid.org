@@ -3,13 +3,8 @@ package org.comroid.oauth.rest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.comroid.api.StreamSupplier;
-import org.comroid.auth.server.AuthServer;
-import org.comroid.auth.service.Service;
-import org.comroid.auth.service.ServiceManager;
-import org.comroid.auth.user.Permit;
-import org.comroid.auth.user.UserAccount;
-import org.comroid.auth.user.UserManager;
-import org.comroid.auth.user.UserSession;
+import org.comroid.oauth.OAuth;
+import org.comroid.oauth.client.Client;
 import org.comroid.oauth.client.ClientProvider;
 import org.comroid.oauth.model.OAuthError;
 import org.comroid.oauth.resource.Resource;
@@ -32,6 +27,7 @@ import org.intellij.lang.annotations.Language;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
@@ -63,8 +59,10 @@ public enum OAuthEndpoint implements ServerEndpoint.This {
 
             try {
                 // find session & account
-                final UserSession session = UserSession.findSession(headers);
-                final UserAccount account = session.getAccount();
+                Client account = context.requireFromContext(ClientProvider.class)
+                        .findAccessToken(headers)
+                        .getAuthorization()
+                        .getClient();
 
                 String authorizationCode = completeAuthorization(account, authenticationRequest, context, service, userAgent);
 
@@ -112,9 +110,10 @@ public enum OAuthEndpoint implements ServerEndpoint.This {
             AuthenticationRequest authenticationRequest = loginRequests.getOrDefault(requestId, null);
             URIQueryEditor query = new URIQueryEditor(authenticationRequest.getRedirectURI());
 
-            UserSession session;
+            Client client;
             try {
-                session = AuthServer.instance.getUserManager().loginUser(email, login);
+                client = context.requireFromContext(ClientProvider.class)
+                        .loginClient(email, login);
             } catch (RestEndpointException e) {
                 query.put("error", OAuthError.UNAUTHORIZED_CLIENT.getValue());
                 return new REST.Response(FOUND, query.toURI());
@@ -126,7 +125,7 @@ public enum OAuthEndpoint implements ServerEndpoint.This {
                     .orElseThrow(() -> new RestEndpointException(UNAUTHORIZED, "Service with ID " + clientID + " not found"));
             String userAgent = headers.getFirst(CommonHeaderNames.USER_AGENT);
 
-            String code = OAuthEndpoint.completeAuthorization(session.getAccount(), authenticationRequest, context, service, userAgent);
+            String code = OAuthEndpoint.completeAuthorization(client, authenticationRequest, context, service, userAgent);
 
             // assemble redirect uri
             query.put("code", code);
@@ -153,7 +152,7 @@ public enum OAuthEndpoint implements ServerEndpoint.This {
             UniNode accountData = context.requireFromContext(ClientProvider.class)
                     .findAccessToken(headers)
                     .getAuthorization()
-                    .getUserData();
+                    .getUserInfo();
             return new REST.Response(OK, accountData);
         }
 
@@ -172,7 +171,7 @@ public enum OAuthEndpoint implements ServerEndpoint.This {
 
     @Override
     public String getUrlBase() {
-        return AuthServer.URL_BASE;
+        return OAuth.URL_BASE;
     }
 
     @Override
@@ -196,14 +195,16 @@ public enum OAuthEndpoint implements ServerEndpoint.This {
         this.pattern = buildUrlPattern();
     }
 
-    private static String completeAuthorization(UserAccount account, AuthenticationRequest request, Context context, Service service, String userAgent) {
-        final Permit.Set permits = Permit.valueOf(request.getScopes().toArray(new String[0]));
+    private static String completeAuthorization(Client client, AuthenticationRequest request, Context context, Resource resource, String userAgent) {
+        Set<String> scopes = request.getScopes();
 
+        // fixme
         // validate account has scopes as permit
-        account.checkPermits(permits);
+        if (!client.checkScopes(scopes))
+            throw new RestEndpointException(UNAUTHORIZED, "Scope check invalid");
 
         // create oauth blob for user with this service + user agent
-        OAuthAuthorization authorization = account.createOAuthSession(context, service, userAgent, permits);
+        OAuthAuthorization authorization = client.createAuthorization(context, resource, userAgent, scopes);
         return authorization.getCode();
     }
 }
