@@ -42,7 +42,7 @@ public final class UserSession implements PermitCarrier {
         UniObjectNode data = AuthServer.SERI_LIB.createObjectNode();
 
         UniObjectNode account = this.account.toObjectNode(data.putObject("account"));
-        account.remove("org/comroid/oauth");
+        account.remove("org/comroid/webkit/oauth");
 
         return data;
     }
