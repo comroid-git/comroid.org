@@ -58,7 +58,6 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
         SERI_LIB = FastJSONLib.fastJsonLib;
         HTTP_LIB = new JavaHttpAdapter();
         MASTER_CONTEXT = ContextualProvider.create(SERI_LIB, HTTP_LIB);
-        OAuth.CONTEXT = MASTER_CONTEXT;
         WebkitConfiguration.initialize(MASTER_CONTEXT);
     }
 
@@ -101,6 +100,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
                 this.status = new StatusConnection(MASTER_CONTEXT, "auth-server", STATUS_CRED.getContent(true), executor);
             } else this.status = null;
             this.context = MASTER_CONTEXT.plus("Auth Server", this, executor);
+            OAuth.CONTEXT = context;
 
             logger.debug("Starting UserManager");
             this.userManager = new UserManager(this);
