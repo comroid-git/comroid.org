@@ -6,14 +6,6 @@ import org.comroid.api.ContextualProvider;
 import org.comroid.api.Junction;
 import org.comroid.common.exception.AssertionException;
 import org.comroid.common.io.FileHandle;
-import org.comroid.common.java.JITAssistant;
-import org.comroid.crystalshard.Context;
-import org.comroid.crystalshard.DiscordAPI;
-import org.comroid.crystalshard.entity.user.User;
-import org.comroid.crystalshard.model.message.embed.EmbedBuilder;
-import org.comroid.crystalshard.model.presence.UserStatus;
-import org.comroid.crystalshard.ui.annotation.Option;
-import org.comroid.crystalshard.ui.annotation.SlashCommand;
 import org.comroid.mutatio.ref.Reference;
 import org.comroid.restless.REST;
 import org.comroid.restless.adapter.okhttp.v4.OkHttp4Adapter;
@@ -34,17 +26,14 @@ import org.comroid.varbind.container.DataContainerBuilder;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.Comparator;
-import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 public class StatusServer implements ContextualProvider.Underlying, Closeable {
     //http://localhost:42641/services
 
-    public static final AdapterDefinition ADAPTER_DEFINITION;
+    public static final AdapterDefinition CONTEXT;
     private static final Logger logger = LogManager.getLogger();
     public static final FileHandle PATH_BASE = new FileHandle("/home/comroid/srv_status/", true); // server path base
     public static final FileHandle DATA_DIR = PATH_BASE.createSubDir("data");
@@ -54,14 +43,14 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
     public static final FileHandle CACHE_FILE = DATA_DIR.createSubFile("cache.json");
     public static final int PORT = 42641; // hardcoded in server, do not change
     public static final ThreadGroup THREAD_GROUP = new ThreadGroup("comroid Status Server");
-    public static final DiscordAPI DISCORD;
+    //fixme public static final DiscordAPI DISCORD;
     public static final String ADMIN_TOKEN_NAME = "admin$access$token";
     public static StatusServer instance;
 
     static {
-        ADAPTER_DEFINITION = AdapterDefinition.initialize(FastJSONLib.fastJsonLib, new OkHttp4Adapter());
-        DiscordAPI.SERIALIZATION = ADAPTER_DEFINITION.serialization;
-        DISCORD = new DiscordAPI(ADAPTER_DEFINITION.http);
+        CONTEXT = AdapterDefinition.initialize(FastJSONLib.fastJsonLib, new OkHttp4Adapter());
+        //fixme DiscordAPI.SERIALIZATION = ADAPTER_DEFINITION.serialization;
+        //fixme DISCORD = new DiscordAPI(ADAPTER_DEFINITION.http);
 
         logger.debug("Preparing classes...");
         AssertionException.expect(3, LocalService.GROUP.streamAllChildren().count(), (x, y) -> x < y, "LocalService children count");
@@ -75,7 +64,7 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
     private final FileCache<String, Entity> entityCache;
     private final RestServer server;
    // private final DiscordBotBase bot;
-    private final Reference<UserStatus> userStatusSupplier;
+    //fixme  private final Reference<UserStatus> userStatusSupplier;
 
     public final FileCache<String, Entity> getEntityCache() {
         return entityCache;
@@ -91,7 +80,7 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
 
     @Override
     public ContextualProvider getUnderlyingContextualProvider() {
-        return ADAPTER_DEFINITION;
+        return CONTEXT;
     }
 
     private StatusServer(ScheduledExecutorService executor, InetAddress host, int port) throws IOException {
@@ -106,11 +95,11 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
          */
             this.threadPool = executor;
 
-            this.rest = new REST(ADAPTER_DEFINITION, threadPool);
+            this.rest = new REST(CONTEXT, threadPool);
             logger.debug("REST Client created: {}", rest);
 
             this.entityCache = new FileCache<>(
-                    this,
+                    CONTEXT,
                     StatusServer::resolveEntity,
                     Entity.NAME,
                     Junction.identity(),
@@ -126,7 +115,7 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
                             .count());
 
             logger.debug("Starting REST Server...");
-            this.server = new RestServer(ADAPTER_DEFINITION.serialization, executor, AdapterDefinition.URL_BASE, host, port, ServerEndpoints.values());
+            this.server = new RestServer(CONTEXT, executor, AdapterDefinition.URL_BASE, host, port, ServerEndpoints.values());
             server.addCommonHeader("Access-Control-Allow-Origin", "*");
 
             entityCache.flatMap(LocalService.class)
@@ -142,7 +131,7 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
             logger.debug("Status Server ready! {}", server);
 
             //this.bot = new DiscordBotBase(DISCORD, BOT_TOKEN.getContent(true));
-
+/*fixme
             // we need to show the 'least-available' status for quick information
             // ... from the entity cache ...
             this.userStatusSupplier = StatusServer.instance.getEntityCache()
@@ -196,7 +185,7 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
 
                 logger.debug("Updating presence to: {} - {}", useStatus, str);
                // bot.updatePresence(useStatus, str);
-            }, 5, 30, TimeUnit.SECONDS);
+            }, 5, 30, TimeUnit.SECONDS);*/
             /*
             final InteractionCore core = bot.getInteractionCore();
             final CommandSetup commands = core.getCommands();
@@ -264,7 +253,7 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
             throw new RuntimeException("Could not shut down status server properly", e);
         }
     }
-
+/*fixme
     public static final class Commands {
         @SlashCommand(name = "service", description = "Modify or view Service information")
         public static final class ServiceBlob {
@@ -332,5 +321,5 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
                 return String.format("Created new Service: %s '%s'", service.getDisplayName(), service.getName());
             }
         }
-    }
+    }*/
 }
