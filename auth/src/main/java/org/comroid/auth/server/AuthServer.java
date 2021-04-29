@@ -97,8 +97,12 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
             Runtime.getRuntime().addShutdownHook(shutdownHook);
 
             if (OS.isUnix) {
-                logger.debug("Initializing Status Connection...");
-                this.status = new StatusConnection(MASTER_CONTEXT, "auth-server", STATUS_CRED.getContent(true), executor);
+                try {
+                    logger.debug("Initializing Status Connection...");
+                    this.status = new StatusConnection(MASTER_CONTEXT, "auth-server", STATUS_CRED.getContent(true), executor);
+                } catch (Throwable t) {
+                    logger.error("Initializing Status Connection failed", t);
+                }
             } else this.status = null;
             this.context = MASTER_CONTEXT.plus("Auth Server", this, executor);
             OAuth.CONTEXT = context;
