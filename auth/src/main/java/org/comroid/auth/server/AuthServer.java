@@ -102,7 +102,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
                     logger.debug("Initializing Status Connection...");
                     status = new StatusConnection(MASTER_CONTEXT, "auth-server", STATUS_CRED.getContent(true), executor);
                 } catch (Throwable t) {
-                    logger.error("Initializing Status Connection failed", t);
+                    logger.error("Could not initialize Status Connection", t);
                 } finally {
                     this.status = status;
                 }
