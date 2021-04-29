@@ -7,7 +7,8 @@ import org.comroid.api.Rewrapper;
 import org.comroid.api.UncheckedCloseable;
 import org.comroid.auth.server.AuthServer;
 import org.comroid.common.io.FileHandle;
-import org.comroid.oauth.user.OAuthAuthorization;
+import org.comroid.webkit.oauth.client.ClientProvider;
+import org.comroid.webkit.oauth.user.OAuthAuthorization;
 import org.comroid.restless.CommonHeaderNames;
 import org.comroid.restless.HTTPStatusCodes;
 import org.comroid.restless.REST;
@@ -20,7 +21,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
-public final class UserManager implements ContextualProvider.Underlying, UncheckedCloseable {
+public final class UserManager implements ContextualProvider.Underlying, UncheckedCloseable, ClientProvider {
     public static final FileHandle DIR = AuthServer.DATA.createSubDir("users");
     public static final FileHandle SALTS = AuthServer.DATA.createSubDir("salts");
     private static final Logger logger = LogManager.getLogger();
@@ -112,7 +113,8 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
         return session;
     }
 
-    public OAuthAuthorization findOAuthAuthorization(final String authorizationCode) throws RestEndpointException {
+    @Override
+    public OAuthAuthorization findAuthorization(final String authorizationCode) throws RestEndpointException {
         return accounts.values()
                 .stream()
                 .flatMap(account -> account.findAuthorization(authorizationCode).stream())
@@ -120,15 +122,31 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
                 .orElseThrow(() -> new RestEndpointException(HTTPStatusCodes.UNAUTHORIZED, "Invalid Token used"));
     }
 
-    public UserAccount findOAuthSession(REST.Header.List headers) throws RestEndpointException {
+    @Override
+    public OAuthAuthorization.AccessToken findAccessToken(REST.Header.List headers) throws RestEndpointException {
         final String token = findToken(headers);
         return accounts.values()
                 .stream()
                 .flatMap(account -> account.findAccessToken(token).stream())
                 .findAny()
-                .map(OAuthAuthorization.AccessToken::getAuthorization)
-                .map(OAuthAuthorization::getAccount)
                 .orElseThrow(() -> new RestEndpointException(HTTPStatusCodes.UNAUTHORIZED, "Could not authenticate using token"));
+    }
+
+    @Override
+    public boolean hasClient(UUID uuid) {
+        return accounts.containsKey(uuid);
+    }
+
+    @Override
+    public Rewrapper<UserAccount> findClient(UUID uuid) {
+        return () -> accounts.getOrDefault(uuid, null);
+    }
+
+    @Override
+    public UserAccount loginClient(String email, String login) {
+        return AuthServer.instance.getUserManager()
+                .loginUser(email, login)
+                .getAccount();
     }
 
     private String findToken(REST.Header.List headers) {

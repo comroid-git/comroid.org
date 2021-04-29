@@ -12,7 +12,8 @@ import org.comroid.auth.user.UserManager;
 import org.comroid.auth.user.UserSession;
 import org.comroid.common.io.FileHandle;
 import org.comroid.mutatio.model.RefContainer;
-import org.comroid.oauth.rest.OAuthEndpoint;
+import org.comroid.webkit.oauth.OAuth;
+import org.comroid.webkit.oauth.rest.OAuthEndpoint;
 import org.comroid.restless.HttpAdapter;
 import org.comroid.restless.REST;
 import org.comroid.restless.adapter.java.JavaHttpAdapter;
@@ -22,7 +23,6 @@ import org.comroid.status.entity.Service;
 import org.comroid.uniform.Context;
 import org.comroid.uniform.SerializationAdapter;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
-import org.comroid.varbind.container.DataContainer;
 import org.comroid.webkit.config.WebkitConfiguration;
 import org.comroid.webkit.model.PagePropertiesProvider;
 import org.comroid.webkit.server.WebkitServer;
@@ -32,9 +32,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -61,6 +59,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
         HTTP_LIB = new JavaHttpAdapter();
         MASTER_CONTEXT = ContextualProvider.create(SERI_LIB, HTTP_LIB);
         WebkitConfiguration.initialize(MASTER_CONTEXT);
+        OAuth.URL_BASE = URL_BASE;
     }
 
     private final ScheduledExecutorService executor;
@@ -98,10 +97,18 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
             Runtime.getRuntime().addShutdownHook(shutdownHook);
 
             if (OS.isUnix) {
-                logger.debug("Initializing Status Connection...");
-                this.status = new StatusConnection(MASTER_CONTEXT, "auth-server", STATUS_CRED.getContent(true), executor);
+                StatusConnection status = null;
+                try {
+                    logger.debug("Initializing Status Connection...");
+                    status = new StatusConnection(MASTER_CONTEXT, "auth-server", STATUS_CRED.getContent(true), executor);
+                } catch (Throwable t) {
+                    logger.error("Could not initialize Status Connection", t);
+                } finally {
+                    this.status = status;
+                }
             } else this.status = null;
             this.context = MASTER_CONTEXT.plus("Auth Server", this, executor);
+            OAuth.CONTEXT = context;
 
             logger.debug("Starting UserManager");
             this.userManager = new UserManager(this);

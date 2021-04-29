@@ -57,5 +57,11 @@ public enum Permit implements BitmaskEnum<Permit> {
         public @NotNull Permit[] toArray() {
             return super.toArray(new Permit[0]);
         }
+
+        public String[] toStringArray() {
+            return stream().map(Enum::name)
+                    .map(String::toLowerCase)
+                    .toArray(String[]::new);
+        }
     }
 }
