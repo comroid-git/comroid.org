@@ -4,23 +4,23 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.comroid.api.Rewrapper;
 import org.comroid.api.Serializer;
-import org.comroid.api.UUIDContainer;
 import org.comroid.auth.model.PermitCarrier;
 import org.comroid.auth.server.AuthServer;
 import org.comroid.auth.service.Service;
 import org.comroid.common.io.FileHandle;
 import org.comroid.mutatio.model.Ref;
+import org.comroid.oauth.client.Client;
+import org.comroid.oauth.resource.Resource;
 import org.comroid.oauth.user.OAuthAuthorization;
-import org.comroid.oauth.user.OAuthUserTokens;
 import org.comroid.restless.server.RestEndpointException;
 import org.comroid.uniform.Context;
+import org.comroid.uniform.node.UniNode;
 import org.comroid.util.Bitmask;
 import org.comroid.util.StandardValueType;
 import org.comroid.varbind.annotation.RootBind;
 import org.comroid.varbind.bind.GroupBind;
 import org.comroid.varbind.bind.VarBind;
 import org.comroid.varbind.container.DataContainerBase;
-import org.jetbrains.annotations.ApiStatus.Internal;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -29,7 +29,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-public final class UserAccount extends DataContainerBase<UserAccount> implements UUIDContainer, PermitCarrier {
+public final class UserAccount extends DataContainerBase<UserAccount> implements PermitCarrier, Client {
     @RootBind
     public static final GroupBind<UserAccount> Type = new GroupBind<>(AuthServer.MASTER_CONTEXT, "user-account");
     public static final VarBind<UserAccount, String, UUID, UUID> ID
@@ -169,13 +169,28 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
     }
 
     public OAuthAuthorization createOAuthSession(Context context, Service service, String userAgent, Permit.Set scopes) {
-        OAuthAuthorization oAuthAuthorization = new OAuthAuthorization(context, this, service, userAgent, scopes);
+        OAuthAuthorization oAuthAuthorization = new OAuthAuthorization(context, this, service, userAgent, scopes.toStringArray());
         authorizationTokens.add(oAuthAuthorization);
         return oAuthAuthorization;
     }
 
-    @Internal
+    @Override
     public boolean addAccessToken(OAuthAuthorization.AccessToken accessToken) {
         return accessTokens.add(accessToken);
+    }
+
+    @Override
+    public UniNode getUserInfo() {
+        return toUniNode();
+    }
+
+    @Override
+    public FileHandle getDataDirectory() {
+        return dir;
+    }
+
+    @Override
+    public String generateAuthorizationToken(Resource resource, String userAgent) {
+        return String.format("%s-%s-%s", getUUID(), resource.getUUID(), UUID.randomUUID());
     }
 }

@@ -156,7 +156,7 @@ public enum AuthEndpoint implements ServerEndpoint.This {
 
             // get service
             Service service = AuthServer.instance.getServiceManager()
-                    .getService(uuid)
+                    .getResource(uuid)
                     .orElseThrow(() -> new RestEndpointException(NOT_FOUND, "Service with ID " + uuid + " not found"));
 
             return new REST.Response(OK, service);
@@ -186,9 +186,9 @@ public enum AuthEndpoint implements ServerEndpoint.This {
 
             // check if service exists
             Service service;
-            if (serviceManager.hasService(uuid)) {
+            if (serviceManager.hasResource(uuid)) {
                 // update existing service
-                service = serviceManager.getService(uuid).assertion();
+                service = serviceManager.getResource(uuid).assertion();
                 service.updateFrom(data);
                 context.getLogger().info("Service {} data was updated: {}", service, service.toUniNode());
             } else {

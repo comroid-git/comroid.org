@@ -10,7 +10,10 @@ import org.comroid.auth.user.Permit;
 import org.comroid.auth.user.UserAccount;
 import org.comroid.auth.user.UserManager;
 import org.comroid.auth.user.UserSession;
+import org.comroid.oauth.client.ClientProvider;
 import org.comroid.oauth.model.OAuthError;
+import org.comroid.oauth.resource.Resource;
+import org.comroid.oauth.resource.ResourceProvider;
 import org.comroid.oauth.rest.request.AuthenticationRequest;
 import org.comroid.oauth.rest.request.TokenRequest;
 import org.comroid.oauth.user.OAuthAuthorization;
@@ -46,10 +49,16 @@ public enum OAuthEndpoint implements ServerEndpoint.This {
             logger.debug("Got {}", authenticationRequest);
 
             // find service by client id
-            final ServiceManager serviceManager = context.requireFromContext(ServiceManager.class);
+            final ResourceProvider resourceProvider = context.requireFromContext(ResourceProvider.class);
             final UUID clientID = authenticationRequest.getClientID();
-            final Service service = serviceManager.getService(clientID)
-                    .orElseThrow(() -> new RestEndpointException(UNAUTHORIZED, "Service with ID " + clientID + " not found"));
+
+            if (!resourceProvider.hasResource(clientID)) {
+                query.put("error", OAuthError.INVALID_REQUEST);
+                return query.toResponse(FOUND);
+            }
+
+            final Resource service = resourceProvider.getResource(clientID)
+                    .orElseThrow(() -> new RestEndpointException(UNAUTHORIZED, "Resource with ID " + clientID + " not found"));
             final String userAgent = headers.getFirst(CommonHeaderNames.USER_AGENT);
 
             try {
@@ -112,7 +121,8 @@ public enum OAuthEndpoint implements ServerEndpoint.This {
             }
 
             UUID clientID = authenticationRequest.getClientID();
-            Service service = AuthServer.instance.getServiceManager().getService(clientID)
+            Resource service = context.requireFromContext(ResourceProvider.class)
+                    .getResource(clientID)
                     .orElseThrow(() -> new RestEndpointException(UNAUTHORIZED, "Service with ID " + clientID + " not found"));
             String userAgent = headers.getFirst(CommonHeaderNames.USER_AGENT);
 
@@ -130,8 +140,8 @@ public enum OAuthEndpoint implements ServerEndpoint.This {
         @Override
         public REST.Response executePOST(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             TokenRequest.AuthorizationCodeGrant tokenRequest = new TokenRequest.AuthorizationCodeGrant(context, body.asObjectNode());
-            OAuthAuthorization authorization = context.requireFromContext(UserManager.class)
-                    .findOAuthAuthorization(tokenRequest.getCode());
+            OAuthAuthorization authorization = context.requireFromContext(ClientProvider.class)
+                    .findAuthorization(tokenRequest.getCode());
             OAuthAuthorization.AccessToken accessToken = authorization.createAccessToken();
 
             return new REST.Response(OK, accessToken);
@@ -140,8 +150,11 @@ public enum OAuthEndpoint implements ServerEndpoint.This {
     USER_INFO("/userInfo") {
         @Override
         public REST.Response executeGET(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            UserAccount account = context.requireFromContext(UserManager.class).findOAuthSession(headers);
-            return new REST.Response(OK, account);
+            UniNode accountData = context.requireFromContext(ClientProvider.class)
+                    .findAccessToken(headers)
+                    .getAuthorization()
+                    .getUserData();
+            return new REST.Response(OK, accountData);
         }
 
         @Override

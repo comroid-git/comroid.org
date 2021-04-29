@@ -6,6 +6,7 @@ import org.comroid.api.ContextualProvider;
 import org.comroid.api.Rewrapper;
 import org.comroid.auth.server.AuthServer;
 import org.comroid.common.io.FileHandle;
+import org.comroid.oauth.resource.ResourceProvider;
 import org.comroid.uniform.node.UniObjectNode;
 
 import java.io.File;
@@ -15,7 +16,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
-public final class ServiceManager implements ContextualProvider.Underlying {
+public final class ServiceManager implements ContextualProvider.Underlying, ResourceProvider {
     public static final FileHandle DIR = AuthServer.DATA.createSubDir("services");
     private static final Logger logger = LogManager.getLogger();
     private final Map<UUID, Service> services = new ConcurrentHashMap<>();
@@ -50,7 +51,8 @@ public final class ServiceManager implements ContextualProvider.Underlying {
         logger.info("Loading finished; loaded {} services", services.size());
     }
 
-    public boolean hasService(UUID uuid) {
+    @Override
+    public boolean hasResource(UUID uuid) {
         return services.containsKey(uuid);
     }
 
@@ -60,7 +62,8 @@ public final class ServiceManager implements ContextualProvider.Underlying {
         return service;
     }
 
-    public Rewrapper<Service> getService(final UUID uuid) {
+    @Override
+    public Rewrapper<Service> getResource(final UUID uuid) {
         return () -> services.getOrDefault(uuid, null);
     }
 }
