@@ -116,6 +116,8 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
 
     @Override
     public OAuthAuthorization findAuthorization(final String authorizationCode) throws RestEndpointException {
+        if (authorizationCode == null)
+            throw new IllegalArgumentException("authorization code cannot be null");
         return accounts.values()
                 .stream()
                 .flatMap(account -> account.findAuthorization(authorizationCode).stream())
@@ -125,6 +127,8 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
 
     @Override
     public OAuthAuthorization.AccessToken findAccessToken(final String token) throws RestEndpointException {
+        if (token == null)
+            throw new IllegalArgumentException("token cannot be null");
         return accounts.values()
                 .stream()
                 .flatMap(account -> account.findAccessToken(token).stream())
