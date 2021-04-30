@@ -5,11 +5,9 @@ import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.Polyfill;
 import org.comroid.common.io.FileHandle;
-import org.comroid.mutatio.model.RefList;
 import org.comroid.mutatio.model.RefOPs;
 import org.comroid.mutatio.ref.FutureReference;
 import org.comroid.mutatio.ref.Reference;
-import org.comroid.mutatio.span.Span;
 import org.comroid.restless.REST;
 import org.comroid.restless.body.BodyBuilderType;
 import org.comroid.status.entity.Service;
@@ -17,7 +15,6 @@ import org.comroid.status.rest.Endpoint;
 import org.comroid.uniform.SerializationAdapter;
 import org.comroid.uniform.cache.ProvidedCache;
 import org.comroid.uniform.node.UniObjectNode;
-import org.comroid.util.StandardValueType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.NoSuchElementException;
@@ -27,8 +24,8 @@ import java.util.function.Function;
 import static org.comroid.restless.CommonHeaderNames.AUTHORIZATION;
 
 public final class StatusConnection implements ContextualProvider.Underlying {
-    public static ContextualProvider CONTEXT;
     public static final Logger Logger = LogManager.getLogger("StatusConnection");
+    public static ContextualProvider CONTEXT;
     private final Logger logger;
     @Nullable
     private final String serviceName;
@@ -109,29 +106,26 @@ public final class StatusConnection implements ContextualProvider.Underlying {
         return (polling = true);
     }
 
-    public CompletableFuture<Service> stopPolling(Service.Status newStatus) {
+    public CompletableFuture<?> stopPolling(Service.Status newStatus) {
         if (!polling)
             return Polyfill.failedFuture(new RuntimeException("Connection is not polling!"));
         if (serviceName == null)
             throw new NoSuchElementException("No service name defined");
-        return rest.request(Service.Type)
+        return rest.request()
                 .method(REST.Method.DELETE)
                 .endpoint(Endpoint.POLL.complete(serviceName))
                 .addHeader(AUTHORIZATION, token)
                 .buildBody(BodyBuilderType.OBJECT, obj -> obj.put(Service.STATUS, newStatus))
-                .execute$autoCache(Service.NAME, serviceCache)
-                .thenApply(services -> {
-                    polling = false;
-                    return services.getAny();
-                });
+                .execute()
+                .thenAccept(services -> polling = false);
     }
 
-    private CompletableFuture<Service> sendPoll() {
+    private CompletableFuture<?> sendPoll() {
         logger.debug("Sending Poll");
 
         if (serviceName == null)
             throw new NoSuchElementException("No service name defined");
-        return rest.request(Service.Type)
+        return rest.request()
                 .method(REST.Method.POST)
                 .endpoint(Endpoint.POLL.complete(serviceName))
                 .addHeader(AUTHORIZATION, token)
@@ -139,9 +133,7 @@ public final class StatusConnection implements ContextualProvider.Underlying {
                     obj.put(Service.STATUS, Service.Status.ONLINE);
                     obj.put("expected", refreshTimeout);
                     obj.put("timeout", crashedTimeout);
-                })
-                .execute$autoCache(Service.NAME, serviceCache)
-                .thenApply(RefOPs::getAny);
+                }).execute();
     }
 
     public CompletableFuture<Service> updateStatus(Service.Status status) {

@@ -7,12 +7,15 @@ import org.comroid.api.Rewrapper;
 import org.comroid.api.UncheckedCloseable;
 import org.comroid.auth.server.AuthServer;
 import org.comroid.common.io.FileHandle;
-import org.comroid.webkit.oauth.client.ClientProvider;
-import org.comroid.webkit.oauth.user.OAuthAuthorization;
 import org.comroid.restless.CommonHeaderNames;
 import org.comroid.restless.HTTPStatusCodes;
 import org.comroid.restless.REST;
 import org.comroid.restless.server.RestEndpointException;
+import org.comroid.util.Pair;
+import org.comroid.webkit.oauth.client.Client;
+import org.comroid.webkit.oauth.client.ClientProvider;
+import org.comroid.webkit.oauth.model.ValidityStage;
+import org.comroid.webkit.oauth.user.OAuthAuthorization;
 
 import java.io.File;
 import java.util.Collection;
@@ -115,6 +118,8 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
 
     @Override
     public OAuthAuthorization findAuthorization(final String authorizationCode) throws RestEndpointException {
+        if (authorizationCode == null)
+            throw new IllegalArgumentException("authorization code cannot be null");
         return accounts.values()
                 .stream()
                 .flatMap(account -> account.findAuthorization(authorizationCode).stream())
@@ -124,6 +129,8 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
 
     @Override
     public OAuthAuthorization.AccessToken findAccessToken(final String token) throws RestEndpointException {
+        if (token == null)
+            throw new IllegalArgumentException("token cannot be null");
         return accounts.values()
                 .stream()
                 .flatMap(account -> account.findAccessToken(token).stream())
@@ -137,15 +144,28 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
     }
 
     @Override
+    public Rewrapper<UserAccount> findClient(REST.Header.List headers) {
+        return () -> UserSession.findSession(headers).getAccount();
+    }
+
+    @Override
     public Rewrapper<UserAccount> findClient(UUID uuid) {
         return () -> accounts.getOrDefault(uuid, null);
     }
 
     @Override
-    public UserAccount loginClient(String email, String login) {
-        return AuthServer.instance.getUserManager()
-                .loginUser(email, login)
-                .getAccount();
+    public Pair<Client, String> loginClient(String email, String login) {
+        UserSession session = AuthServer.instance.getUserManager()
+                .loginUser(email, login);
+        return new Pair<>(session.getAccount(), session.getCookie());
+    }
+
+    @Override
+    public ValidityStage findValidityStage(String token) {
+        return accounts.values().stream()
+                .flatMap(acc -> acc.findToken(token))
+                .findAny()
+                .orElse(null);
     }
 
     private String findToken(REST.Header.List headers) {

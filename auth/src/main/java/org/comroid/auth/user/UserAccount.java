@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 public final class UserAccount extends DataContainerBase<UserAccount> implements PermitCarrier, Client, FileProcessor {
     @RootBind
@@ -90,7 +91,12 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
 
     @Override
     public UniNode getUserInfo() {
-        return toUniNode();
+        UniObjectNode data = toUniNode();
+
+        data.put("sub", getUUID());
+        data.put("email_verified", false);
+
+        return data;
     }
 
     @Override
@@ -233,5 +239,9 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
     @Override
     public String generateAuthorizationToken(Resource resource, String userAgent) {
         return String.format("%s-%s-%s", getUUID(), resource.getUUID(), UUID.randomUUID());
+    }
+
+    public Stream<OAuthAuthorization.AccessToken> findToken(String token) {
+        return accessTokens.stream().filter(it -> it.token.contentEquals(token));
     }
 }
