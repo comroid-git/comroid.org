@@ -96,7 +96,10 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
             shutdownHook.setPriority(Thread.MAX_PRIORITY);
             Runtime.getRuntime().addShutdownHook(shutdownHook);
 
-            if (OS.isUnix) {
+            this.context = MASTER_CONTEXT.plus("Auth Server", this, executor);
+            StatusConnection.CONTEXT = context.upgrade(Context.class);
+            OAuth.CONTEXT = context;
+            if (!OS.isUnix) {
                 StatusConnection status = null;
                 try {
                     logger.debug("Initializing Status Connection...");
@@ -107,8 +110,6 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
                     this.status = status;
                 }
             } else this.status = null;
-            this.context = MASTER_CONTEXT.plus("Auth Server", this, executor);
-            OAuth.CONTEXT = context;
 
             logger.debug("Starting UserManager");
             this.userManager = new UserManager(this);

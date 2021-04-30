@@ -1,6 +1,6 @@
 package org.comroid.auth.user;
 
-import org.comroid.api.BitmaskEnum;
+import org.comroid.api.BitmaskAttribute;
 import org.comroid.api.ValueBox;
 import org.comroid.api.ValueType;
 import org.comroid.util.Bitmask;
@@ -12,11 +12,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
-public enum Permit implements BitmaskEnum<Permit> {
+public enum Permit implements BitmaskAttribute<Permit> {
     EMAIL, DEV, ADMIN;
 
     public static Set valueOf(int mask) {
-        return new Set(BitmaskEnum.valueOf(mask, Permit.class));
+        return new Set(BitmaskAttribute.valueOf(mask, Permit.class));
     }
 
     public static Set valueOf(String... scopes) {

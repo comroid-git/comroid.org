@@ -3,7 +3,6 @@ package org.comroid.status.server.entity;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
-import org.comroid.api.IntEnum;
 import org.comroid.common.io.FileHandle;
 import org.comroid.mutatio.ref.Reference;
 import org.comroid.status.entity.Entity;

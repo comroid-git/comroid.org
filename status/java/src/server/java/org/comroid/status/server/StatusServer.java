@@ -11,6 +11,7 @@ import org.comroid.restless.REST;
 import org.comroid.restless.adapter.okhttp.v4.OkHttp4Adapter;
 import org.comroid.restless.server.RestServer;
 import org.comroid.status.AdapterDefinition;
+import org.comroid.status.StatusConnection;
 import org.comroid.status.entity.Entity;
 import org.comroid.status.entity.Service;
 import org.comroid.status.server.auth.TokenCore;
@@ -49,6 +50,7 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
 
     static {
         CONTEXT = AdapterDefinition.initialize(FastJSONLib.fastJsonLib, new OkHttp4Adapter());
+        StatusConnection.CONTEXT = CONTEXT;
         //fixme DiscordAPI.SERIALIZATION = ADAPTER_DEFINITION.serialization;
         //fixme DISCORD = new DiscordAPI(ADAPTER_DEFINITION.http);
 

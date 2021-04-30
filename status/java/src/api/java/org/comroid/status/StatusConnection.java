@@ -27,9 +27,9 @@ import java.util.function.Function;
 import static org.comroid.restless.CommonHeaderNames.AUTHORIZATION;
 
 public final class StatusConnection implements ContextualProvider.Underlying {
+    public static ContextualProvider CONTEXT;
     public static final Logger Logger = LogManager.getLogger("StatusConnection");
     private final Logger logger;
-    private final ContextualProvider context;
     @Nullable
     private final String serviceName;
     private final String token;
@@ -67,7 +67,7 @@ public final class StatusConnection implements ContextualProvider.Underlying {
 
     @Override
     public ContextualProvider getUnderlyingContextualProvider() {
-        return context;
+        return CONTEXT;
     }
 
     public StatusConnection(ContextualProvider context, FileHandle tokenFile) {
@@ -80,15 +80,14 @@ public final class StatusConnection implements ContextualProvider.Underlying {
 
     public StatusConnection(ContextualProvider context, @Nullable String serviceName, String token, ScheduledExecutorService executor) {
         this.logger = serviceName == null ? Logger : LogManager.getLogger(String.format("StatusConnection(%s)", serviceName));
-        this.context = context.plus("StatusConnection", this);
         this.serviceName = serviceName;
         this.token = token;
         this.executor = executor;
         logger.debug("Building Cache...");
         this.serviceCache = new ProvidedCache<>(context, 250, ForkJoinPool.commonPool(), this::requestServiceByName);
-        this.context.addToContext(executor, serviceCache);
-        this.rest = new REST(this.context, executor);
-        this.context.addToContext(rest);
+        CONTEXT.addToContext(executor, serviceCache);
+        this.rest = new REST(CONTEXT, executor);
+        CONTEXT.addToContext(rest);
         this.ownService = new FutureReference<>(requestServiceByName(serviceName)
                 .exceptionally(exceptionLogger("Could not request own service")));
     }

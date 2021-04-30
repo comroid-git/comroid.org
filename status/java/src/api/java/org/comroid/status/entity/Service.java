@@ -1,6 +1,6 @@
 package org.comroid.status.entity;
 
-import org.comroid.api.IntEnum;
+import org.comroid.api.IntegerAttribute;
 import org.comroid.api.Polyfill;
 import org.comroid.api.WrappedFormattable;
 import org.comroid.restless.REST;
@@ -9,7 +9,6 @@ import org.comroid.status.StatusConnection;
 import org.comroid.status.rest.Endpoint;
 import org.comroid.util.StandardValueType;
 import org.comroid.uniform.node.UniObjectNode;
-import org.comroid.varbind.annotation.Location;
 import org.comroid.varbind.annotation.RootBind;
 import org.comroid.varbind.bind.GroupBind;
 import org.comroid.varbind.bind.VarBind;
@@ -40,12 +39,12 @@ public interface Service extends Entity, WrappedFormattable {
     }
 
     @Override
-    default String getDefaultFormattedName() {
+    default String getPrimaryName() {
         return getDisplayName();
     }
 
     @Override
-    default String getAlternateFormattedName() {
+    default String getAlternateName() {
         return getName();
     }
 
@@ -53,7 +52,7 @@ public interface Service extends Entity, WrappedFormattable {
 
     CompletableFuture<Service> updateStatus(Status status);
 
-    enum Status implements IntEnum {
+    enum Status implements IntegerAttribute {
         UNKNOWN(0),
 
         OFFLINE(1),
