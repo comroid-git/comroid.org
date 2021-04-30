@@ -104,6 +104,10 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
         return dir;
     }
 
+    public UserDataStorage getDataStorage() {
+        return dataStorage;
+    }
+
     UserAccount(UserManager context, final FileHandle sourceDir) {
         super(context, obj -> {
             if (!sourceDir.isDirectory())

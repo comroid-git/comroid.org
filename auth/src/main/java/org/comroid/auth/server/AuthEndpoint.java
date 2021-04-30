@@ -18,6 +18,8 @@ import org.comroid.uniform.node.UniNode;
 import org.comroid.uniform.node.UniObjectNode;
 import org.comroid.webkit.frame.FrameBuilder;
 import org.comroid.webkit.model.PagePropertiesProvider;
+import org.comroid.webkit.oauth.client.ClientProvider;
+import org.comroid.webkit.oauth.user.OAuthAuthorization;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 
@@ -78,6 +80,41 @@ public enum AuthEndpoint implements ServerEndpoint.This {
                     throw ex;
                 throw new RestEndpointException(UNAUTHORIZED, "Underlying Message: " + ex.getMessage(), ex);
             }
+        }
+    },
+    MODIFY_ACCOUNT_DATA_STORAGE("/account/%s/data/%s", AuthServer.UUID_PATTERN, "[\\w][\\w\\d-_]+") {
+        @Override
+        public REST.Response executeGET(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            ClientProvider clientProvider = context.requireFromContext(ClientProvider.class);
+            OAuthAuthorization.AccessToken accessToken = clientProvider.findAccessToken(headers);
+
+            if (!accessToken.getScopes().contains("storage"))
+                throw new RestEndpointException(UNAUTHORIZED, "Missing scope: storage");
+
+            UUID clientId = UUID.fromString(urlParams[0]);
+            UserAccount account = clientProvider.findClient(clientId).into(UserAccount.class);
+            if (account == null)
+                throw new RestEndpointException(INTERNAL_SERVER_ERROR, "Internal Server Error: Invalid Client type");
+
+            UniNode storageData = account.getDataStorage().getData(urlParams[1]);
+            return new REST.Response(OK, storageData);
+        }
+
+        @Override
+        public REST.Response executePOST(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            ClientProvider clientProvider = context.requireFromContext(ClientProvider.class);
+            OAuthAuthorization.AccessToken accessToken = clientProvider.findAccessToken(headers);
+
+            if (!accessToken.getScopes().contains("storage"))
+                throw new RestEndpointException(UNAUTHORIZED, "Missing scope: storage");
+
+            UUID clientId = UUID.fromString(urlParams[0]);
+            UserAccount account = clientProvider.findClient(clientId).into(UserAccount.class);
+            if (account == null)
+                throw new RestEndpointException(INTERNAL_SERVER_ERROR, "Internal Server Error: Invalid Client type");
+
+            UniNode storageData = account.getDataStorage().putData(urlParams[1], body);
+            return new REST.Response(OK, storageData);
         }
     },
     REGISTRATION("/api/register") {
