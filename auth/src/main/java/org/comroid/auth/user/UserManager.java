@@ -142,6 +142,11 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
     }
 
     @Override
+    public Rewrapper<UserAccount> findClient(REST.Header.List headers) {
+        return () -> UserSession.findSession(headers).getAccount();
+    }
+
+    @Override
     public Rewrapper<UserAccount> findClient(UUID uuid) {
         return () -> accounts.getOrDefault(uuid, null);
     }
