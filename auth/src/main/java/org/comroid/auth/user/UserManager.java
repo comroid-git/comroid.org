@@ -123,8 +123,7 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
     }
 
     @Override
-    public OAuthAuthorization.AccessToken findAccessToken(REST.Header.List headers) throws RestEndpointException {
-        final String token = findToken(headers);
+    public OAuthAuthorization.AccessToken findAccessToken(final String token) throws RestEndpointException {
         return accounts.values()
                 .stream()
                 .flatMap(account -> account.findAccessToken(token).stream())
