@@ -12,6 +12,7 @@ import org.comroid.auth.user.UserManager;
 import org.comroid.auth.user.UserSession;
 import org.comroid.common.io.FileHandle;
 import org.comroid.mutatio.model.RefContainer;
+import org.comroid.status.AdapterDefinition;
 import org.comroid.webkit.oauth.OAuth;
 import org.comroid.webkit.oauth.rest.OAuthEndpoint;
 import org.comroid.restless.HttpAdapter;
@@ -97,9 +98,9 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
             Runtime.getRuntime().addShutdownHook(shutdownHook);
 
             this.context = MASTER_CONTEXT.plus("Auth Server", this, executor);
-            StatusConnection.CONTEXT = context.upgrade(Context.class);
-            OAuth.CONTEXT = context;
-            if (!OS.isUnix) {
+            StatusConnection.CONTEXT = context.plus("Auth Server - Status Connection");
+            OAuth.CONTEXT = context.plus("Auth Server - OAuth");
+            if (OS.isUnix) {
                 StatusConnection status = null;
                 try {
                     logger.debug("Initializing Status Connection...");
