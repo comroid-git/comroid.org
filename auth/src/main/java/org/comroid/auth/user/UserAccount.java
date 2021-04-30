@@ -186,8 +186,11 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
 
     public Rewrapper<OAuthAuthorization.AccessToken> findAccessToken(final String token) throws RestEndpointException {
         return () -> accessTokens.stream()
-                .filter(OAuthAuthorization.AccessToken::isValid)
-                .filter(access -> access.checkToken(token))
+                //.filter(OAuthAuthorization.AccessToken::isValid)
+                .filter(access -> {
+                    logger.trace("checking token {} with valid?{} access token {}", token, access.isValid(), access);
+                    return access.checkToken(token);
+                })
                 .findAny()
                 .orElse(null);
     }
