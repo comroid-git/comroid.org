@@ -8,20 +8,24 @@ import org.comroid.auth.model.PermitCarrier;
 import org.comroid.auth.server.AuthServer;
 import org.comroid.auth.service.Service;
 import org.comroid.common.io.FileHandle;
+import org.comroid.common.io.FileProcessor;
 import org.comroid.mutatio.model.Ref;
-import org.comroid.webkit.oauth.client.Client;
-import org.comroid.webkit.oauth.resource.Resource;
-import org.comroid.webkit.oauth.user.OAuthAuthorization;
+import org.comroid.restless.MimeType;
 import org.comroid.restless.server.RestEndpointException;
 import org.comroid.uniform.Context;
 import org.comroid.uniform.node.UniNode;
+import org.comroid.uniform.node.UniObjectNode;
 import org.comroid.util.Bitmask;
 import org.comroid.util.StandardValueType;
 import org.comroid.varbind.annotation.RootBind;
 import org.comroid.varbind.bind.GroupBind;
 import org.comroid.varbind.bind.VarBind;
 import org.comroid.varbind.container.DataContainerBase;
+import org.comroid.webkit.oauth.client.Client;
+import org.comroid.webkit.oauth.resource.Resource;
+import org.comroid.webkit.oauth.user.OAuthAuthorization;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Arrays;
@@ -29,7 +33,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-public final class UserAccount extends DataContainerBase<UserAccount> implements PermitCarrier, Client {
+public final class UserAccount extends DataContainerBase<UserAccount> implements PermitCarrier, Client, FileProcessor {
     @RootBind
     public static final GroupBind<UserAccount> Type = new GroupBind<>(AuthServer.MASTER_CONTEXT, "user-account");
     public static final VarBind<UserAccount, String, UUID, UUID> ID
@@ -56,6 +60,7 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
     private final FileHandle loginHashFile;
     private final HashSet<OAuthAuthorization> authorizationTokens;
     private final HashSet<OAuthAuthorization.AccessToken> accessTokens;
+    private final UserDataStorage dataStorage;
 
     {
         if (email.contentEquals("burdoto@outlook.com"))
@@ -89,8 +94,18 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
     }
 
     @Override
+    @Deprecated
     public FileHandle getDataDirectory() {
+        return getFile();
+    }
+
+    @Override
+    public FileHandle getFile() {
         return dir;
+    }
+
+    public UserDataStorage getDataStorage() {
+        return dataStorage;
     }
 
     UserAccount(UserManager context, final FileHandle sourceDir) {
@@ -108,6 +123,8 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
         this.loginHashFile = dir.createSubFile("login.hash");
         this.authorizationTokens = new HashSet<>();
         this.accessTokens = new HashSet<>();
+        this.dataStorage = new UserDataStorage(this);
+        addChildren(dataStorage);
     }
 
     UserAccount(UserManager context, UUID id, String email, String password) {
@@ -122,6 +139,8 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
         this.loginHashFile.setContent(encrypt(email, password));
         this.authorizationTokens = new HashSet<>();
         this.accessTokens = new HashSet<>();
+        this.dataStorage = new UserDataStorage(this);
+        addChildren(dataStorage);
     }
 
     public static String encrypt(String saltName, String input) {
@@ -136,6 +155,20 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
         } catch (Throwable t) {
             throw new RuntimeException(t);
         }
+    }
+
+    @Override
+    public int storeData() throws IOException {
+        String string = toSerializedString();
+        dir.createSubFile("user.json").setContent(string);
+        return 1;
+    }
+
+    @Override
+    public int reloadData() throws IOException {
+        String data = dir.createSubFile("user.json").getContent();
+        UniObjectNode obj = (UniObjectNode) findSerializer(MimeType.JSON).parse(data);
+        return updateFrom(obj).size();
     }
 
     public Rewrapper<OAuthAuthorization> findAuthorization(final String code) {

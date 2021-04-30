@@ -6,6 +6,7 @@ import org.comroid.auth.service.Service;
 import org.comroid.auth.service.ServiceManager;
 import org.comroid.auth.user.Permit;
 import org.comroid.auth.user.UserAccount;
+import org.comroid.auth.user.UserDataStorage;
 import org.comroid.auth.user.UserSession;
 import org.comroid.mutatio.model.Ref;
 import org.comroid.restless.CommonHeaderNames;
@@ -18,6 +19,8 @@ import org.comroid.uniform.node.UniNode;
 import org.comroid.uniform.node.UniObjectNode;
 import org.comroid.webkit.frame.FrameBuilder;
 import org.comroid.webkit.model.PagePropertiesProvider;
+import org.comroid.webkit.oauth.client.ClientProvider;
+import org.comroid.webkit.oauth.user.OAuthAuthorization;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 
@@ -78,6 +81,21 @@ public enum AuthEndpoint implements ServerEndpoint.This {
                     throw ex;
                 throw new RestEndpointException(UNAUTHORIZED, "Underlying Message: " + ex.getMessage(), ex);
             }
+        }
+    },
+    MODIFY_ACCOUNT_DATA_STORAGE("/account/%s/data/%s", AuthServer.UUID_PATTERN, "[\\w][\\w\\d-_]+") {
+        @Override
+        public REST.Response executeGET(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            UserDataStorage dataStorage = obtainDataStorage(context, headers, UUID.fromString(urlParams[0]));
+            UniNode storageData = dataStorage.getData(urlParams[1]);
+            return new REST.Response(OK, storageData);
+        }
+
+        @Override
+        public REST.Response executePOST(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            UserDataStorage dataStorage = obtainDataStorage(context, headers, UUID.fromString(urlParams[0]));
+            UniNode storageData = dataStorage.putData(urlParams[1], body);
+            return new REST.Response(OK, storageData);
         }
     },
     REGISTRATION("/api/register") {
@@ -211,6 +229,20 @@ public enum AuthEndpoint implements ServerEndpoint.This {
             return discoveryResponse();
         }
     };
+
+    private static UserDataStorage obtainDataStorage(Context context, REST.Header.List headers, UUID clientId) {
+        ClientProvider clientProvider = context.requireFromContext(ClientProvider.class);
+        OAuthAuthorization.AccessToken accessToken = clientProvider.findAccessToken(headers);
+
+        if (!accessToken.getScopes().contains("storage"))
+            throw new RestEndpointException(UNAUTHORIZED, "Missing scope: storage");
+
+        UserAccount account = clientProvider.findClient(clientId).into(UserAccount.class);
+        if (account == null)
+            throw new RestEndpointException(INTERNAL_SERVER_ERROR, "Internal Server Error: Invalid Client type");
+
+        return account.getDataStorage();
+    }
 
     public static final StreamSupplier<ServerEndpoint> values = StreamSupplier.of(values());
     private final String extension;
