@@ -11,6 +11,8 @@ import org.comroid.restless.CommonHeaderNames;
 import org.comroid.restless.HTTPStatusCodes;
 import org.comroid.restless.REST;
 import org.comroid.restless.server.RestEndpointException;
+import org.comroid.util.Pair;
+import org.comroid.webkit.oauth.client.Client;
 import org.comroid.webkit.oauth.client.ClientProvider;
 import org.comroid.webkit.oauth.model.ValidityStage;
 import org.comroid.webkit.oauth.user.OAuthAuthorization;
@@ -152,10 +154,10 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
     }
 
     @Override
-    public UserAccount loginClient(String email, String login) {
-        return AuthServer.instance.getUserManager()
-                .loginUser(email, login)
-                .getAccount();
+    public Pair<Client, String> loginClient(String email, String login) {
+        UserSession session = AuthServer.instance.getUserManager()
+                .loginUser(email, login);
+        return new Pair<>(session.getAccount(), session.getCookie());
     }
 
     @Override
