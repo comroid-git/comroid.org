@@ -22,7 +22,6 @@ import org.comroid.varbind.bind.GroupBind;
 import org.comroid.varbind.bind.VarBind;
 import org.comroid.varbind.container.DataContainerBase;
 import org.comroid.webkit.oauth.client.Client;
-import org.comroid.webkit.oauth.model.ValidityStage;
 import org.comroid.webkit.oauth.resource.Resource;
 import org.comroid.webkit.oauth.user.OAuthAuthorization;
 
@@ -92,7 +91,12 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
 
     @Override
     public UniNode getUserInfo() {
-        return toUniNode();
+        UniObjectNode data = toUniNode();
+
+        data.put("sub", getUUID());
+        data.put("email_verified", false);
+
+        return data;
     }
 
     @Override
