@@ -139,10 +139,7 @@ public enum ServerEndpoints implements ServerEndpoint {
 
             service.receivePoll(newStatus, expected, timeout);
 
-            return new ResponseBuilder(body)
-                    .setStatusCode(200)
-                    .setBody(service)
-                    .build();
+            return new REST.Response(OK);
         }
 
         @Override
@@ -157,10 +154,7 @@ public enum ServerEndpoints implements ServerEndpoint {
 
             service.discardPoll(newStatus);
 
-            return new ResponseBuilder(body)
-                    .setStatusCode(200)
-                    .setBody(service)
-                    .build();
+            return new REST.Response(OK, service);
         }
     };
 
