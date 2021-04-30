@@ -7,12 +7,13 @@ import org.comroid.api.Rewrapper;
 import org.comroid.api.UncheckedCloseable;
 import org.comroid.auth.server.AuthServer;
 import org.comroid.common.io.FileHandle;
-import org.comroid.webkit.oauth.client.ClientProvider;
-import org.comroid.webkit.oauth.user.OAuthAuthorization;
 import org.comroid.restless.CommonHeaderNames;
 import org.comroid.restless.HTTPStatusCodes;
 import org.comroid.restless.REST;
 import org.comroid.restless.server.RestEndpointException;
+import org.comroid.webkit.oauth.client.ClientProvider;
+import org.comroid.webkit.oauth.model.ValidityStage;
+import org.comroid.webkit.oauth.user.OAuthAuthorization;
 
 import java.io.File;
 import java.util.Collection;
@@ -146,6 +147,14 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
         return AuthServer.instance.getUserManager()
                 .loginUser(email, login)
                 .getAccount();
+    }
+
+    @Override
+    public ValidityStage findValidityStage(String token) {
+        return accounts.values().stream()
+                .flatMap(acc -> acc.findToken(token))
+                .findAny()
+                .orElse(null);
     }
 
     private String findToken(REST.Header.List headers) {

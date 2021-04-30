@@ -22,6 +22,7 @@ import org.comroid.varbind.bind.GroupBind;
 import org.comroid.varbind.bind.VarBind;
 import org.comroid.varbind.container.DataContainerBase;
 import org.comroid.webkit.oauth.client.Client;
+import org.comroid.webkit.oauth.model.ValidityStage;
 import org.comroid.webkit.oauth.resource.Resource;
 import org.comroid.webkit.oauth.user.OAuthAuthorization;
 
@@ -32,6 +33,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 public final class UserAccount extends DataContainerBase<UserAccount> implements PermitCarrier, Client, FileProcessor {
     @RootBind
@@ -233,5 +235,9 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
     @Override
     public String generateAuthorizationToken(Resource resource, String userAgent) {
         return String.format("%s-%s-%s", getUUID(), resource.getUUID(), UUID.randomUUID());
+    }
+
+    public Stream<OAuthAuthorization.AccessToken> findToken(String token) {
+        return accessTokens.stream().filter(it -> it.token.contentEquals(token));
     }
 }
