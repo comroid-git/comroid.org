@@ -5,15 +5,15 @@ import org.comroid.api.Serializer;
 import org.comroid.auth.server.AuthServer;
 import org.comroid.common.io.FileHandle;
 import org.comroid.mutatio.model.Ref;
-import org.comroid.webkit.oauth.client.Client;
-import org.comroid.webkit.oauth.resource.Resource;
-import org.comroid.webkit.oauth.user.OAuthAuthorization;
 import org.comroid.uniform.node.UniObjectNode;
 import org.comroid.util.StandardValueType;
 import org.comroid.varbind.annotation.RootBind;
 import org.comroid.varbind.bind.GroupBind;
 import org.comroid.varbind.bind.VarBind;
 import org.comroid.varbind.container.DataContainerBase;
+import org.comroid.webkit.oauth.client.Client;
+import org.comroid.webkit.oauth.resource.Resource;
+import org.comroid.webkit.oauth.user.OAuthAuthorization;
 import org.java_websocket.util.Base64;
 import org.jetbrains.annotations.Nullable;
 
@@ -40,6 +40,7 @@ public final class Service extends DataContainerBase<Service> implements Resourc
     public final Ref<UUID> id = getComputedReference(ID);
     public final Ref<String> name = getComputedReference(NAME);
     private final FileHandle dir;
+    private final FileHandle secretFile;
 
     @Override
     public UUID getUUID() {
@@ -49,6 +50,11 @@ public final class Service extends DataContainerBase<Service> implements Resourc
     @Override
     public String getName() {
         return name.assertion("Display Name");
+    }
+
+    @Override
+    public String getSecret() {
+        return secretFile.getContent();
     }
 
     protected Service(ContextualProvider context, final FileHandle sourceDir) {
@@ -63,12 +69,22 @@ public final class Service extends DataContainerBase<Service> implements Resourc
             obj.copyFrom(subFile.parse(context.requireFromContext(Serializer.class)));
         });
         this.dir = sourceDir;
+        this.secretFile = dir.createSubFile("secret.cred");
+        initiateSecret();
     }
 
     protected Service(ContextualProvider context, @Nullable UniObjectNode initialData) {
         super(context, initialData);
         this.dir = DIR.createSubDir(id.toString());
+        this.secretFile = dir.createSubFile("secret.cred");
+        initiateSecret();
         dir.createSubFile("service.json").setContent(toSerializedString());
+    }
+
+    private void initiateSecret() {
+        String content = secretFile.getContent();
+        if (content == null || content.isEmpty())
+            secretFile.setContent(UUID.randomUUID().toString().replace("-", ""));
     }
 
     @Override
