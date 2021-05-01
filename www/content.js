@@ -22,6 +22,10 @@ const pages = {
         'display_name': "Projects",
         'path': 'part/projects.html'
     },
+    'guardian': {
+        'display_name': "Guardian Framework",
+        'path': 'part/guardian.html'
+    },
     'status': {
         'display_name': "Status Page",
         'path': 'https://status.comroid.org/slim'
