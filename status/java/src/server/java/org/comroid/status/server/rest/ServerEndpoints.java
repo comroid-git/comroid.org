@@ -140,7 +140,7 @@ public enum ServerEndpoints implements ServerEndpoint {
 
             service.receivePoll(newStatus, expected, timeout);
 
-            return new REST.Response(201);
+            return new REST.Response(NO_CONTENT);
         }
 
         @Override
