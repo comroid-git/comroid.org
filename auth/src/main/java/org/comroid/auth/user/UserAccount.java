@@ -101,6 +101,10 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
         return username.assertion("Username not found");
     }
 
+    public String getEmail() {
+        return email.assertion("Email not found");
+    }
+
     @Override
     public Permit.Set getPermits() {
         return permits.assertion("Permits not found");
