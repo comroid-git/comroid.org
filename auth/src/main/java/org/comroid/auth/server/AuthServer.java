@@ -135,9 +135,13 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
                     AuthEndpoint.values.append(OAuthEndpoint.values)
             );
         } catch (UnknownHostException e) {
-            throw new AssertionError(e);
+            logger.fatal("Unknown Host; Shutting down", e);
+            System.exit(1);
+            return;
         } catch (IOException e) {
-            throw new RuntimeException("Could not start Auth Server", e);
+            logger.fatal("Could not start Auth server; Shutting down", e);
+            System.exit(1);
+            return;
         }
 
         if (status != null && !status.isPolling() && !status.startPolling())
