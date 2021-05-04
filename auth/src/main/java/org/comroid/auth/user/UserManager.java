@@ -4,13 +4,20 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.Rewrapper;
+import org.comroid.api.UUIDContainer;
 import org.comroid.api.UncheckedCloseable;
 import org.comroid.auth.server.AuthServer;
 import org.comroid.common.io.FileHandle;
+import org.comroid.common.io.FileProcessor;
 import org.comroid.restless.CommonHeaderNames;
 import org.comroid.restless.HTTPStatusCodes;
+import org.comroid.restless.MimeType;
 import org.comroid.restless.REST;
 import org.comroid.restless.server.RestEndpointException;
+import org.comroid.uniform.Context;
+import org.comroid.uniform.node.UniArrayNode;
+import org.comroid.uniform.node.UniNode;
+import org.comroid.uniform.node.UniObjectNode;
 import org.comroid.util.Pair;
 import org.comroid.webkit.oauth.client.Client;
 import org.comroid.webkit.oauth.client.ClientProvider;
@@ -18,13 +25,15 @@ import org.comroid.webkit.oauth.model.ValidityStage;
 import org.comroid.webkit.oauth.user.OAuthAuthorization;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
-public final class UserManager implements ContextualProvider.Underlying, UncheckedCloseable, ClientProvider {
+public final class UserManager extends UUIDContainer.Base
+        implements ContextualProvider.Underlying, UncheckedCloseable, ClientProvider, FileProcessor {
     public static final FileHandle DIR = AuthServer.DATA.createSubDir("users");
     public static final FileHandle SALTS = AuthServer.DATA.createSubDir("salts");
     private static final Logger logger = LogManager.getLogger();
@@ -46,6 +55,11 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
 
     public Collection<UserAccount> getUsers() {
         return accounts.values();
+    }
+
+    @Override
+    public FileHandle getFile() {
+        return DIR;
     }
 
     public UserManager(AuthServer server) {
@@ -179,7 +193,46 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
     }
 
     public void closeSession(UserSession session) {
-        sessions.remove(session.getCookie());
+        UserSession old = sessions.remove(session.getCookie());
+        session.close();
+    }
+
+    @Override
+    public int storeData() throws IOException {
+        final Context context = this.context.upgrade(Context.class);
+
+        UniObjectNode manager = context.createObjectNode();
+
+        UniArrayNode cookieSessions = manager.putArray("cookieSessions");
+        sessions.values().stream()
+                .filter(UserSession::isValid)
+                .map(UserSession::toUniNode)
+                .forEach(cookieSessions::add);
+
+        FileHandle file = DIR.getParentFile().createSubFile("userManager.json");
+        file.setContent(manager);
+
+        return 1;
+    }
+
+    @Override
+    public int reloadData() throws IOException {
+        final Context context = this.context.upgrade(Context.class);
+
+        FileHandle file = DIR.getParentFile().createSubFile("userManager.json");
+        String content = file.getContent();
+        if (content.isEmpty())
+            return 0;
+        UniObjectNode data = context.parse(MimeType.JSON, content).asObjectNode();
+
+        data.get("cookieSessions")
+                .asArrayNode()
+                .stream()
+                .map(UniNode::asObjectNode)
+                .map(sessionData -> UserSession.parse(this, sessionData))
+                .forEach(session -> sessions.put(session.getCookie(), session));
+
+        return 1;
     }
 
     @Override
