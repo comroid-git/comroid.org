@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public final class AuthServer implements ContextualProvider.Underlying, UncheckedCloseable, PagePropertiesProvider {
     //http://localhost:42000
@@ -118,6 +119,15 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
             logger.debug("Starting ServiceManager");
             this.serviceManager = new ServiceManager(this);
             context.addToContext(serviceManager);
+
+            executor.scheduleAtFixedRate(() -> {
+                try {
+                    logger.info("Storing all data");
+                    userManager.storeData();
+                } catch (IOException e) {
+                    logger.error("Error when storing data", e);
+                }
+            }, 2, 5, TimeUnit.MINUTES);
 
             logger.debug("Starting Webkit server");
             this.server = new WebkitServer(
