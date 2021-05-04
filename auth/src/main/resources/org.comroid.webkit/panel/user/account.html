@@ -4,6 +4,9 @@
     <p> Account ID:
         <t inject="sessionData.account.uuid"></t>
     </p>
+    <p when="sessionData.account.username != null"> Username:
+        <t inject="sessionData.account.username"></t>
+    </p>
     <p> E-Mail:
         <t inject="sessionData.account.email"></t>
     </p>
