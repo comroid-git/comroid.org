@@ -196,6 +196,9 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
     private void reloadOauthTokens() {
         FileHandle oauthFile = dir.createSubFile("oauth.json");
         String content = oauthFile.getContent();
+        if (content.isEmpty())
+            return;
+
         Context context = upgrade(Context.class);
         UniObjectNode oauthData = context.parse(MimeType.JSON, content).asObjectNode();
 
