@@ -12,9 +12,6 @@ import org.comroid.auth.user.UserManager;
 import org.comroid.auth.user.UserSession;
 import org.comroid.common.io.FileHandle;
 import org.comroid.mutatio.model.RefContainer;
-import org.comroid.status.AdapterDefinition;
-import org.comroid.webkit.oauth.OAuth;
-import org.comroid.webkit.oauth.rest.OAuthEndpoint;
 import org.comroid.restless.HttpAdapter;
 import org.comroid.restless.REST;
 import org.comroid.restless.adapter.java.JavaHttpAdapter;
@@ -26,6 +23,8 @@ import org.comroid.uniform.SerializationAdapter;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
 import org.comroid.webkit.config.WebkitConfiguration;
 import org.comroid.webkit.model.PagePropertiesProvider;
+import org.comroid.webkit.oauth.OAuth;
+import org.comroid.webkit.oauth.rest.OAuthEndpoint;
 import org.comroid.webkit.server.WebkitServer;
 
 import java.io.IOException;
@@ -187,8 +186,9 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
     public void close() {
         logger.info("Shutting down");
         try {
-            status.stopPolling(Service.Status.OFFLINE)
-                    .exceptionally(Polyfill.exceptionLogger(logger, "Could not stop Polling"));
+            if (status != null && status.isPolling())
+                status.stopPolling(Service.Status.OFFLINE)
+                        .exceptionally(Polyfill.exceptionLogger(logger, "Could not stop Polling"));
             server.close();
         } catch (Throwable t) {
             logger.error("Could not shutdown Rest Server gracefully", t);
