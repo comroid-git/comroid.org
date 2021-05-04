@@ -10,6 +10,7 @@ import org.comroid.auth.service.Service;
 import org.comroid.common.io.FileHandle;
 import org.comroid.common.io.FileProcessor;
 import org.comroid.mutatio.model.Ref;
+import org.comroid.mutatio.ref.ReferenceList;
 import org.comroid.restless.MimeType;
 import org.comroid.restless.exception.RestEndpointException;
 import org.comroid.uniform.Context;
@@ -92,8 +93,12 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
         else if (permits.test(Set::isEmpty))
             put(PERMIT, Permit.EMAIL.getValue());
 
-        if (getPermits().contains(Permit.DEV) && getInternalEmail() == null)
-            put(INTERNAL_EMAIL, username.into(usr -> usr + "@comroid.org"));
+        if (getPermits().contains(Permit.DEV))
+            if (getEmail().endsWith("@comroid.org"))
+                // force internal email override by org-email
+                getExtractionReference(INTERNAL_EMAIL).rebind(email.map(ReferenceList::of));
+            else if (username.test(user -> !user.contains("@"))) // else create new org-email
+                put(INTERNAL_EMAIL, username.into(usr -> usr + "@comroid.org"));
     }
 
     public FileHandle getDirectory() {
