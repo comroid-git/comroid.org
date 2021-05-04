@@ -125,6 +125,9 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
                         posteIoLogin.get("username").asString(),
                         posteIoLogin.get("password").asString()
                 );
+
+                posteIO.requestDomains().thenAcceptAsync(System.out::println).exceptionally(Polyfill.exceptionLogger(logger, "Poste Domains"));
+                posteIO.requestInboxes().thenAcceptAsync(System.out::println).exceptionally(Polyfill.exceptionLogger(logger, "Poste Inboxes"));
             } else this.posteIO = null;
 
             logger.debug("Starting UserManager");
