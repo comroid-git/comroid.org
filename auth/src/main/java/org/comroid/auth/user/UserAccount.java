@@ -30,10 +30,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Stream;
 
 public final class UserAccount extends DataContainerBase<UserAccount> implements PermitCarrier, Client, FileProcessor {
@@ -98,7 +95,7 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
                 // force internal email override by org-email
                 getExtractionReference(INTERNAL_EMAIL).rebind(email.map(ReferenceList::of));
             else if (username.test(user -> !user.contains("@"))) // else create new org-email
-                put(INTERNAL_EMAIL, username.into(usr -> usr + "@comroid.org"));
+                put(INTERNAL_EMAIL, username.into(usr -> usr.toLowerCase() + "@comroid.org"));
     }
 
     public FileHandle getDirectory() {
