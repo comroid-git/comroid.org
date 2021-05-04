@@ -30,7 +30,10 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 public final class UserAccount extends DataContainerBase<UserAccount> implements PermitCarrier, Client, FileProcessor {
@@ -67,6 +70,7 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
             .onceEach()
             .setDefaultValue(c -> new Permit.Set())
             .build();
+    public static final String ORG_EMAIL_SUFFIX = "@comroid.org";
     private static final Logger logger = LogManager.getLogger();
     public final Ref<UUID> id = getComputedReference(ID);
     public final Ref<String> username = getComputedReference(USERNAME);
@@ -91,11 +95,11 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
             put(PERMIT, Permit.EMAIL.getValue());
 
         if (getPermits().contains(Permit.DEV))
-            if (getEmail().endsWith("@comroid.org"))
+            if (getEmail().endsWith(ORG_EMAIL_SUFFIX))
                 // force internal email override by org-email
                 getExtractionReference(INTERNAL_EMAIL).rebind(email.map(ReferenceList::of));
             else if (username.test(user -> !user.contains("@"))) // else create new org-email
-                put(INTERNAL_EMAIL, username.into(usr -> usr.toLowerCase() + "@comroid.org"));
+                put(INTERNAL_EMAIL, username.into(usr -> usr.toLowerCase() + ORG_EMAIL_SUFFIX));
     }
 
     public FileHandle getDirectory() {
