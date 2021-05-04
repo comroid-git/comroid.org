@@ -1,6 +1,7 @@
 package org.comroid.status.server.rest;
 
 import org.comroid.restless.CommonHeaderNames;
+import org.comroid.restless.HTTPStatusCodes;
 import org.comroid.restless.REST;
 import org.comroid.restless.endpoint.AccessibleEndpoint;
 import org.comroid.restless.server.RestEndpointException;
@@ -139,7 +140,7 @@ public enum ServerEndpoints implements ServerEndpoint {
 
             service.receivePoll(newStatus, expected, timeout);
 
-            return new REST.Response(OK);
+            return new REST.Response(201);
         }
 
         @Override
