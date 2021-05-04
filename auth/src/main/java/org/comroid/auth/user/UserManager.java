@@ -178,12 +178,16 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
         return token.substring(OAuthAuthorization.BEARER_PREFIX.length());
     }
 
-    public boolean closeSession(UserSession session) {
-        return sessions.remove(session.getCookie()) != session;
+    public void closeSession(UserSession session) {
+        sessions.remove(session.getCookie());
     }
 
     @Override
     public void close() {
+        for (UserSession session : sessions.values())
+            closeSession(session);
+        for (UserAccount account : accounts.values())
+            account.close();
     }
 
     public Rewrapper<UserAccount> getUser(UUID uuid) {
