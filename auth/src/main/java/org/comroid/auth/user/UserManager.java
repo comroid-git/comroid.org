@@ -10,7 +10,7 @@ import org.comroid.common.io.FileHandle;
 import org.comroid.restless.CommonHeaderNames;
 import org.comroid.restless.HTTPStatusCodes;
 import org.comroid.restless.REST;
-import org.comroid.restless.server.RestEndpointException;
+import org.comroid.restless.exception.RestEndpointException;
 import org.comroid.util.Pair;
 import org.comroid.webkit.oauth.client.Client;
 import org.comroid.webkit.oauth.client.ClientProvider;

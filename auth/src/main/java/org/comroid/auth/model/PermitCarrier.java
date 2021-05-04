@@ -2,7 +2,7 @@ package org.comroid.auth.model;
 
 import org.comroid.auth.user.Permit;
 import org.comroid.restless.HTTPStatusCodes;
-import org.comroid.restless.server.RestEndpointException;
+import org.comroid.restless.exception.RestEndpointException;
 
 import java.util.Collection;
 import java.util.Set;
