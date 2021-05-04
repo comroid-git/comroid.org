@@ -11,7 +11,7 @@ import org.comroid.common.io.FileHandle;
 import org.comroid.common.io.FileProcessor;
 import org.comroid.mutatio.model.Ref;
 import org.comroid.restless.MimeType;
-import org.comroid.restless.server.RestEndpointException;
+import org.comroid.restless.exception.RestEndpointException;
 import org.comroid.uniform.Context;
 import org.comroid.uniform.node.UniNode;
 import org.comroid.uniform.node.UniObjectNode;

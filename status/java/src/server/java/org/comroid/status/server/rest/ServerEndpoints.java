@@ -4,7 +4,7 @@ import org.comroid.restless.CommonHeaderNames;
 import org.comroid.restless.HTTPStatusCodes;
 import org.comroid.restless.REST;
 import org.comroid.restless.endpoint.AccessibleEndpoint;
-import org.comroid.restless.server.RestEndpointException;
+import org.comroid.restless.exception.RestEndpointException;
 import org.comroid.restless.server.ServerEndpoint;
 import org.comroid.status.entity.Service;
 import org.comroid.status.rest.Endpoint;

@@ -15,7 +15,7 @@ import org.comroid.mutatio.model.RefContainer;
 import org.comroid.restless.HttpAdapter;
 import org.comroid.restless.REST;
 import org.comroid.restless.adapter.java.JavaHttpAdapter;
-import org.comroid.restless.server.RestEndpointException;
+import org.comroid.restless.exception.RestEndpointException;
 import org.comroid.status.StatusConnection;
 import org.comroid.status.entity.Service;
 import org.comroid.uniform.Context;

@@ -8,7 +8,7 @@ import org.comroid.auth.server.AuthServer;
 import org.comroid.mutatio.model.Ref;
 import org.comroid.mutatio.ref.Reference;
 import org.comroid.restless.REST;
-import org.comroid.restless.server.RestEndpointException;
+import org.comroid.restless.exception.RestEndpointException;
 import org.comroid.uniform.node.UniObjectNode;
 
 import java.util.Objects;
