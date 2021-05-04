@@ -225,14 +225,17 @@ public final class UserManager extends UUIDContainer.Base
             return 0;
         UniObjectNode data = context.parse(MimeType.JSON, content).asObjectNode();
 
+        final int[] c = new int[]{0};
         data.get("cookieSessions")
                 .asArrayNode()
                 .stream()
                 .map(UniNode::asObjectNode)
                 .map(sessionData -> UserSession.parse(this, sessionData))
+                .peek(x -> c[0]++)
                 .forEach(session -> sessions.put(session.getCookie(), session));
+        logger.debug("Loaded {} sessions from file", c[0]);
 
-        return 1;
+        return c[0];
     }
 
     @Override
