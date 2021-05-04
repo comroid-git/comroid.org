@@ -24,6 +24,7 @@ import org.comroid.varbind.container.DataContainerBase;
 import org.comroid.webkit.oauth.client.Client;
 import org.comroid.webkit.oauth.resource.Resource;
 import org.comroid.webkit.oauth.user.OAuthAuthorization;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -57,6 +58,10 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
             .onceEach()
             .setDefaultValue(() -> false)
             .build();
+    public static final VarBind<UserAccount, String, String, String> INTERNAL_EMAIL
+            = Type.createBind("internal_email")
+            .extractAs(StandardValueType.STRING)
+            .build();
     public static final VarBind<UserAccount, Integer, Permit.Set, Permit.Set> PERMIT
             = Type.createBind("permit")
             .extractAs(StandardValueType.INTEGER)
@@ -69,6 +74,7 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
     public final Ref<String> username = getComputedReference(USERNAME);
     public final Ref<String> email = getComputedReference(EMAIL);
     public final Ref<Boolean> emailVerified = getComputedReference(EMAIL_VERIFIED);
+    public final Ref<String> internalEmail = getComputedReference(INTERNAL_EMAIL);
     public final Ref<Permit.Set> permits = getComputedReference(PERMIT);
     private final FileHandle dir;
     private final FileHandle loginHashFile;
@@ -85,6 +91,9 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
             put(PERMIT, Bitmask.combine(Permit.values()));
         else if (permits.test(Set::isEmpty))
             put(PERMIT, Permit.EMAIL.getValue());
+
+        if (getPermits().contains(Permit.DEV) && getInternalEmail() == null)
+            put(INTERNAL_EMAIL, username.into(usr -> usr + "@comroid.org"));
     }
 
     public FileHandle getDirectory() {
@@ -103,6 +112,10 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
 
     public String getEmail() {
         return email.assertion("Email not found");
+    }
+
+    public @Nullable String getInternalEmail() {
+        return internalEmail.get();
     }
 
     @Override
