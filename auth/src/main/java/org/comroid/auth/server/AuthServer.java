@@ -12,7 +12,9 @@ import org.comroid.auth.user.UserManager;
 import org.comroid.auth.user.UserSession;
 import org.comroid.common.io.FileHandle;
 import org.comroid.mutatio.model.RefContainer;
+import org.comroid.poste.PosteIO;
 import org.comroid.restless.HttpAdapter;
+import org.comroid.restless.MimeType;
 import org.comroid.restless.REST;
 import org.comroid.restless.adapter.java.JavaHttpAdapter;
 import org.comroid.restless.exception.RestEndpointException;
@@ -21,6 +23,7 @@ import org.comroid.status.entity.Service;
 import org.comroid.uniform.Context;
 import org.comroid.uniform.SerializationAdapter;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
+import org.comroid.uniform.node.UniNode;
 import org.comroid.webkit.config.WebkitConfiguration;
 import org.comroid.webkit.model.PagePropertiesProvider;
 import org.comroid.webkit.oauth.OAuth;
@@ -65,6 +68,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
     private final ScheduledExecutorService executor;
     private final StatusConnection status;
     private final ContextualProvider context;
+    private final PosteIO posteIO;
     private final UserManager userManager;
     private final ServiceManager serviceManager;
     private final WebkitServer server;
@@ -99,6 +103,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
             this.context = MASTER_CONTEXT.plus("Auth Server", this, executor);
             StatusConnection.CONTEXT = context.plus("Auth Server - Status Connection");
             OAuth.CONTEXT = context.plus("Auth Server - OAuth");
+            PosteIO.CONTEXT = context;
             if (OS.isUnix) {
                 StatusConnection status = null;
                 try {
@@ -110,6 +115,17 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
                     this.status = status;
                 }
             } else this.status = null;
+
+            String content = DIR.createSubFile("posteio.json").getContent();
+            if (content != null && !content.isEmpty()) {
+                logger.info("Starting poste.io Connection");
+                UniNode posteIoLogin = context.upgrade(Context.class).parse(MimeType.JSON, content);
+                this.posteIO = new PosteIO(
+                        "mail.comroid.org",
+                        posteIoLogin.get("username").asString(),
+                        posteIoLogin.get("password").asString()
+                );
+            } else this.posteIO = null;
 
             logger.debug("Starting UserManager");
             this.userManager = new UserManager(this);
