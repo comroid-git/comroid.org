@@ -46,6 +46,13 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
             = Type.createBind("email")
             .extractAs(StandardValueType.STRING)
             .build();
+    public static final VarBind<UserAccount, Boolean, Boolean, Boolean> EMAIL_VERIFIED
+            = Type.createBind("email_verified")
+            .extractAs(StandardValueType.BOOLEAN)
+            .asIdentities()
+            .onceEach()
+            .setDefaultValue(() -> false)
+            .build();
     public static final VarBind<UserAccount, Integer, Permit.Set, Permit.Set> PERMIT
             = Type.createBind("permit")
             .extractAs(StandardValueType.INTEGER)
@@ -56,6 +63,7 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
     private static final Logger logger = LogManager.getLogger();
     public final Ref<UUID> id = getComputedReference(ID);
     public final Ref<String> email = getComputedReference(EMAIL);
+    public final Ref<Boolean> emailVerified = getComputedReference(EMAIL_VERIFIED);
     public final Ref<Permit.Set> permits = getComputedReference(PERMIT);
     private final FileHandle dir;
     private final FileHandle loginHashFile;
@@ -94,7 +102,7 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
         UniObjectNode data = toUniNode();
 
         data.put("sub", getUUID());
-        data.put("email_verified", false);
+        //data.put("email_verified", false);
 
         return data;
     }
@@ -112,6 +120,10 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
 
     public UserDataStorage getDataStorage() {
         return dataStorage;
+    }
+
+    public boolean isEmailVerified() {
+        return emailVerified.assertion("emailVerified");
     }
 
     UserAccount(UserManager context, final FileHandle sourceDir) {
