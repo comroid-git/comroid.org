@@ -4,7 +4,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.UUIDContainer;
-import org.comroid.auth.service.Service;
 import org.comroid.auth.service.ServiceManager;
 import org.comroid.auth.user.Permit;
 import org.comroid.auth.user.UserManager;
@@ -17,7 +16,6 @@ import org.comroid.uniform.node.UniArrayNode;
 import org.comroid.uniform.node.UniNode;
 import org.comroid.uniform.node.UniObjectNode;
 import org.comroid.util.StandardValueType;
-import org.comroid.varbind.container.DataContainer;
 import org.comroid.webkit.socket.WebkitConnection;
 import org.java_websocket.WebSocket;
 
