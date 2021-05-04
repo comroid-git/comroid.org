@@ -225,6 +225,7 @@ public final class UserManager extends UUIDContainer.Base
             return 0;
         UniObjectNode data = context.parse(MimeType.JSON, content).asObjectNode();
 
+        // fixme This should work lol
         final int[] c = new int[]{0};
         data.get("cookieSessions")
                 .asArrayNode()
