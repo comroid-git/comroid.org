@@ -42,6 +42,10 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
             .extractAs(StandardValueType.STRING)
             .andRemap(UUID::fromString)
             .build();
+    public static final VarBind<UserAccount, String, String, String> USERNAME
+            = Type.createBind("username")
+            .extractAs(StandardValueType.STRING)
+            .build();
     public static final VarBind<UserAccount, String, String, String> EMAIL
             = Type.createBind("email")
             .extractAs(StandardValueType.STRING)
@@ -62,6 +66,7 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
             .build();
     private static final Logger logger = LogManager.getLogger();
     public final Ref<UUID> id = getComputedReference(ID);
+    public final Ref<String> username = getComputedReference(USERNAME);
     public final Ref<String> email = getComputedReference(EMAIL);
     public final Ref<Boolean> emailVerified = getComputedReference(EMAIL_VERIFIED);
     public final Ref<Permit.Set> permits = getComputedReference(PERMIT);
@@ -72,6 +77,10 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
     private final UserDataStorage dataStorage;
 
     {
+        // use Email as Username if no username is provided
+        if (username.isNull())
+            username.rebind(email);
+
         if (email.contentEquals("burdoto@outlook.com"))
             put(PERMIT, Bitmask.combine(Permit.values()));
         else if (permits.test(Set::isEmpty))
@@ -89,7 +98,7 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
 
     @Override
     public String getName() {
-        return email.assertion("Email not found");
+        return username.assertion("Username not found");
     }
 
     @Override
