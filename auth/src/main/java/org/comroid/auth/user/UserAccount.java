@@ -13,6 +13,7 @@ import org.comroid.mutatio.model.Ref;
 import org.comroid.restless.MimeType;
 import org.comroid.restless.server.RestEndpointException;
 import org.comroid.uniform.Context;
+import org.comroid.uniform.node.UniArrayNode;
 import org.comroid.uniform.node.UniNode;
 import org.comroid.uniform.node.UniObjectNode;
 import org.comroid.util.Bitmask;
@@ -20,6 +21,7 @@ import org.comroid.util.StandardValueType;
 import org.comroid.varbind.annotation.RootBind;
 import org.comroid.varbind.bind.GroupBind;
 import org.comroid.varbind.bind.VarBind;
+import org.comroid.varbind.container.DataContainer;
 import org.comroid.varbind.container.DataContainerBase;
 import org.comroid.webkit.oauth.client.Client;
 import org.comroid.webkit.oauth.resource.Resource;
@@ -129,6 +131,7 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
         this.loginHashFile = dir.createSubFile("login.hash");
         this.authorizationTokens = new HashSet<>();
         this.accessTokens = new HashSet<>();
+        reloadOauthTokens();
         this.dataStorage = new UserDataStorage(this);
         addChildren(dataStorage);
     }
@@ -145,6 +148,7 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
         this.loginHashFile.setContent(encrypt(email, password));
         this.authorizationTokens = new HashSet<>();
         this.accessTokens = new HashSet<>();
+        reloadOauthTokens();
         this.dataStorage = new UserDataStorage(this);
         addChildren(dataStorage);
     }
@@ -167,6 +171,17 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
     public int storeData() throws IOException {
         String string = toSerializedString();
         dir.createSubFile("user.json").setContent(string);
+
+        UniObjectNode oauth = upgrade(Context.class).createObjectNode();
+
+        UniArrayNode authorizations = oauth.putArray("authorizations");
+        authorizationTokens.stream()
+                .filter(OAuthAuthorization::isValid)
+                .map(DataContainer::toUniNode)
+                .forEach(authorizations::add);
+
+        dir.createSubFile("oauth.json").setContent(oauth);
+
         return 1;
     }
 
@@ -174,7 +189,20 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
     public int reloadData() throws IOException {
         String data = dir.createSubFile("user.json").getContent();
         UniObjectNode obj = (UniObjectNode) findSerializer(MimeType.JSON).parse(data);
+        reloadOauthTokens();
         return updateFrom(obj).size();
+    }
+
+    private void reloadOauthTokens() {
+        FileHandle oauthFile = dir.createSubFile("oauth.json");
+        String content = oauthFile.getContent();
+        Context context = upgrade(Context.class);
+        UniObjectNode oauthData = context.parse(MimeType.JSON, content).asObjectNode();
+
+        UniArrayNode authorizations = oauthData.get("authorizations").asArrayNode();
+        authorizations.stream()
+                .map(data -> new OAuthAuthorization(context, data))
+                .forEach(authorizationTokens::add);
     }
 
     public Rewrapper<OAuthAuthorization> findAuthorization(final String code) {
