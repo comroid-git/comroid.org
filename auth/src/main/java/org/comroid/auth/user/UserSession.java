@@ -1,6 +1,7 @@
 package org.comroid.auth.user;
 
 import com.sun.net.httpserver.Headers;
+import org.comroid.api.os.OS;
 import org.comroid.auth.model.PermitCarrier;
 import org.comroid.auth.server.AuthConnection;
 import org.comroid.auth.server.AuthServer;
@@ -44,7 +45,7 @@ public final class UserSession implements PermitCarrier, CookieProvider {
 
     @Override
     public @Nullable String getDefaultCookieDomain() {
-        return ".comroid.org";
+        return OS.isWindows ? null : ".comroid.org";
     }
 
     @Override
