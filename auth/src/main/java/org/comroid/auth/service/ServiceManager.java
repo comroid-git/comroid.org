@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.Rewrapper;
+import org.comroid.auth.ComroidAuthServer;
 import org.comroid.auth.server.AuthServer;
 import org.comroid.common.io.FileHandle;
 import org.comroid.webkit.oauth.resource.ResourceProvider;
@@ -19,7 +20,6 @@ import java.util.stream.Stream;
 public final class ServiceManager implements ContextualProvider.Underlying, ResourceProvider {
     public static final FileHandle DIR = AuthServer.DATA.createSubDir("services");
     private static final Logger logger = LogManager.getLogger();
-    private final Map<UUID, Service> services = new ConcurrentHashMap<>();
     private final ContextualProvider context;
 
     @Override
@@ -28,7 +28,7 @@ public final class ServiceManager implements ContextualProvider.Underlying, Reso
     }
 
     public Collection<Service> getServices() {
-        return services.values();
+        return ComroidAuthServer.getServices();
     }
 
     public ServiceManager(AuthServer server) {
@@ -47,23 +47,23 @@ public final class ServiceManager implements ContextualProvider.Underlying, Reso
                 })
                 .map(FileHandle::new)
                 .map(dir -> new FileBasedService(this, dir))
-                .forEach(account -> services.put(account.getUUID(), account));
-        logger.info("Loading finished; loaded {} services", services.size());
+                .forEach(ComroidAuthServer::addServiceToCache);
+        logger.info("Loading finished; loaded {} services", ComroidAuthServer.getServices().size());
     }
 
     @Override
     public boolean hasResource(UUID uuid) {
-        return services.containsKey(uuid);
+        return ComroidAuthServer.hasService(uuid);
     }
 
     public Service createService(UniObjectNode initialData) {
         Service service = new FileBasedService(this, initialData);
-        services.put(service.getUUID(), service);
+        ComroidAuthServer.addServiceToCache(service);
         return service;
     }
 
     @Override
     public Rewrapper<Service> getResource(final UUID uuid) {
-        return () -> services.getOrDefault(uuid, null);
+        return ComroidAuthServer.getService(uuid);
     }
 }

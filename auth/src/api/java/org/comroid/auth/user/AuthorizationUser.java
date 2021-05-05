@@ -6,7 +6,11 @@ import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.EMailAddress;
 import org.comroid.api.Polyfill;
+import org.comroid.auth.ComroidAuthServer;
 import org.comroid.auth.model.AuthEntity;
+import org.comroid.auth.rest.AuthEndpoint;
+import org.comroid.auth.service.DataBasedService;
+import org.comroid.auth.service.Service;
 import org.comroid.auth.user.User;
 import org.comroid.common.info.MessageSupplier;
 import org.comroid.mutatio.model.Ref;
@@ -16,6 +20,7 @@ import org.comroid.restless.HTTPStatusCodes;
 import org.comroid.restless.REST;
 import org.comroid.restless.body.BodyBuilderType;
 import org.comroid.uniform.model.Serializable;
+import org.comroid.uniform.node.UniArrayNode;
 import org.comroid.uniform.node.UniNode;
 import org.comroid.uniform.node.UniObjectNode;
 import org.comroid.util.StandardValueType;
@@ -31,9 +36,12 @@ import org.comroid.webkit.oauth.user.OAuthAuthorization;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public abstract class AuthorizationUser extends DataContainerBase<AuthEntity> implements ValidityStage, CookieProvider, User {
     @RootBind
@@ -207,6 +215,27 @@ public abstract class AuthorizationUser extends DataContainerBase<AuthEntity> im
                     UniNode data = response.getBody().into(Serializable::toUniNode);
                     updateFrom(data.asObjectNode());
                     return this;
+                });
+    }
+
+    public final CompletableFuture<List<Service>> requestServices() {
+        return getFromContext(REST.class)
+                .orElseGet(() -> new REST(this))
+                .request()
+                .method(REST.Method.GET)
+                .endpoint(AuthEndpoint.SERVICES)
+                .addHeader(CommonHeaderNames.AUTHORIZATION, getToken())
+                .execute()
+                .thenApply(response -> {
+                    if (response.getStatusCode() != HTTPStatusCodes.OK)
+                        throw response.toException();
+                    return response.getBody()
+                            .into(Serializable::toUniNode)
+                            .stream()
+                            .map(UniNode::asObjectNode)
+                            .map(data -> new DataBasedService(this, data))
+                            .peek(ComroidAuthServer::addServiceToCache)
+                            .collect(Collectors.toList());
                 });
     }
 }
