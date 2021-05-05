@@ -26,6 +26,7 @@ import org.comroid.webkit.oauth.model.ValidityStage;
 import org.comroid.webkit.oauth.rest.OAuthEndpoint;
 import org.comroid.webkit.oauth.rest.request.TokenRevocationRequest;
 import org.comroid.webkit.oauth.user.OAuthAuthorization;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -124,7 +125,7 @@ public abstract class AuthorizationUser extends DataContainerBase<AuthorizationU
         return cookie.assertion("cookie");
     }
 
-    public AuthorizationUser(ContextualProvider context, Consumer<UniObjectNode> initialDataBuilder) {
+    public AuthorizationUser(ContextualProvider context, @Nullable Consumer<UniObjectNode> initialDataBuilder) {
         super(context, initialDataBuilder);
 
         this.initialValidation = validateUserInfo().exceptionally(Polyfill
