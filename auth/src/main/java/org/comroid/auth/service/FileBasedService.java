@@ -14,9 +14,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
-public final class FileBasedService extends DataContainerBase<AuthEntity> implements Service {
+public final class FileBasedService extends DataBasedService {
     @RootBind
-    public static final GroupBind<Service> Type = Service.Type.subGroup("auth-service");
+    public static final GroupBind<Service> Type = Service.Type.subGroup("file-service");
     public static final FileHandle DIR = AuthServer.DATA.createSubDir("services");
     public final Ref<UUID> id = getComputedReference(ID);
     public final Ref<String> name = getComputedReference(NAME);

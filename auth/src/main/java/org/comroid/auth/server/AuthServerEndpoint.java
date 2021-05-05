@@ -3,6 +3,7 @@ package org.comroid.auth.server;
 import org.comroid.api.EMailAddress;
 import org.comroid.api.Polyfill;
 import org.comroid.api.StreamSupplier;
+import org.comroid.auth.rest.AuthEndpoint;
 import org.comroid.auth.service.FileBasedService;
 import org.comroid.auth.service.Service;
 import org.comroid.auth.service.ServiceManager;
@@ -17,6 +18,7 @@ import org.comroid.restless.REST;
 import org.comroid.restless.exception.RestEndpointException;
 import org.comroid.restless.server.ServerEndpoint;
 import org.comroid.uniform.Context;
+import org.comroid.uniform.node.UniArrayNode;
 import org.comroid.uniform.node.UniNode;
 import org.comroid.uniform.node.UniObjectNode;
 import org.comroid.webkit.frame.FrameBuilder;
@@ -160,6 +162,27 @@ public enum AuthServerEndpoint implements ServerEndpoint.This {
             } catch (Throwable ignored) {
                 return new REST.Response(Polyfill.uri("home"));
             }
+        }
+    },
+    SERVICES(AuthEndpoint.SERVICES) {
+        @Override
+        public REST.Response executeGET(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
+            AuthServer server = context.requireFromContext(AuthServer.class);
+            if (!server.getUserManager()
+                    .findAccessToken(headers)
+                    .getScopes()
+                    .contains("admin"))
+                throw new RestEndpointException(UNAUTHORIZED, "Missing Permit: admin");
+            UniArrayNode array = context.createArrayNode();
+            server.getServiceManager()
+                    .getServices()
+                    .stream()
+                    .map(service -> {
+                        UniObjectNode data = service.toUniNode();
+                        data.put("secret", service.getSecret());
+                        return data;
+                    }).forEach(array::add);
+            return new REST.Response(OK, array);
         }
     },
     SERVICE_API(org.comroid.auth.rest.AuthEndpoint.SERVICE_API) {
