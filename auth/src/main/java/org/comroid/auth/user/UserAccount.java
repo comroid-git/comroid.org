@@ -2,9 +2,9 @@ package org.comroid.auth.user;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.comroid.api.EMailAddress;
 import org.comroid.api.Rewrapper;
 import org.comroid.api.Serializer;
-import org.comroid.auth.model.PermitCarrier;
 import org.comroid.auth.server.AuthServer;
 import org.comroid.auth.service.Service;
 import org.comroid.common.io.FileHandle;
@@ -48,9 +48,10 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
             = Type.createBind("username")
             .extractAs(StandardValueType.STRING)
             .build();
-    public static final VarBind<UserAccount, String, String, String> EMAIL
+    public static final VarBind<UserAccount, String, EMailAddress, EMailAddress> EMAIL
             = Type.createBind("email")
             .extractAs(StandardValueType.STRING)
+            .andRemap(EMailAddress::parse)
             .build();
     public static final VarBind<UserAccount, Boolean, Boolean, Boolean> EMAIL_VERIFIED
             = Type.createBind("email_verified")
@@ -74,7 +75,7 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
     private static final Logger logger = LogManager.getLogger();
     public final Ref<UUID> id = getComputedReference(ID);
     public final Ref<String> username = getComputedReference(USERNAME);
-    public final Ref<String> email = getComputedReference(EMAIL);
+    public final Ref<EMailAddress> email = getComputedReference(EMAIL);
     public final Ref<Boolean> emailVerified = getComputedReference(EMAIL_VERIFIED);
     public final Ref<String> internalEmail = getComputedReference(INTERNAL_EMAIL);
     public final Ref<Permit.Set> permits = getComputedReference(PERMIT);
@@ -87,17 +88,17 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
     {
         // use Email as Username if no username is provided
         if (username.isNull())
-            username.rebind(email);
+            username.rebind(email.map(EMailAddress::toString));
 
         if (email.contentEquals("burdoto@outlook.com"))
             put(PERMIT, Bitmask.combine(Permit.values()));
-        else if (permits.test(Set::isEmpty))
+        else if (permits.testIfPresent(HashSet::isEmpty))
             put(PERMIT, Bitmask.combine(Permit.EMAIL, Permit.STORAGE));
 
         if (getPermits().contains(Permit.DEV))
             if (getEmail().endsWith(ORG_EMAIL_SUFFIX))
                 // force internal email override by org-email
-                getExtractionReference(INTERNAL_EMAIL).rebind(email.map(ReferenceList::of));
+                getExtractionReference(INTERNAL_EMAIL).rebind(email.map(EMailAddress::toString).map(ReferenceList::of));
             else if (username.test(user -> !user.contains("@"))) // else create new org-email
                 put(INTERNAL_EMAIL, username.into(usr -> usr.toLowerCase() + ORG_EMAIL_SUFFIX));
     }
@@ -117,7 +118,7 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
     }
 
     public String getEmail() {
-        return email.assertion("Email not found");
+        return email.assertion("Email not found").toString();
     }
 
     public @Nullable String getInternalEmail() {
@@ -243,7 +244,7 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
         }
         String hash = encrypt(email.toString(), password);
         String otherHash = this.loginHashFile.getContent();
-        String mail = this.email.get();
+        String mail = this.email.into(EMailAddress::toString);
         byte[] bytes1 = hash.getBytes(StandardCharsets.US_ASCII);
         byte[] bytes2 = otherHash.getBytes(StandardCharsets.US_ASCII);
         boolean equals = Arrays.equals(bytes1, bytes2);

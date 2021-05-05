@@ -1,4 +1,4 @@
-package org.comroid.auth.model;
+package org.comroid.auth.user;
 
 import org.comroid.auth.user.Permit;
 import org.comroid.restless.HTTPStatusCodes;
