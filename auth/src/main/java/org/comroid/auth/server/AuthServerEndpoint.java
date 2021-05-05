@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
 import static org.comroid.auth.user.UserAccount.EMAIL;
 import static org.comroid.restless.HTTPStatusCodes.*;
 
-public enum AuthEndpoint implements ServerEndpoint.This {
+public enum AuthServerEndpoint implements ServerEndpoint.This {
     FAVICON("/favicon.ico") {
         @Override
         public REST.Response executeGET(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
@@ -49,7 +49,7 @@ public enum AuthEndpoint implements ServerEndpoint.This {
             return new REST.Response(OK, "text/html", frame.toReader());
         }
     },
-    MODIFY_ACCOUNT("/account/%s", AuthServer.UUID_PATTERN) {
+    MODIFY_ACCOUNT(org.comroid.auth.rest.AuthEndpoint.MODIFY_ACCOUNT) {
         @Override
         public REST.Response executePOST(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             try {
@@ -75,7 +75,7 @@ public enum AuthEndpoint implements ServerEndpoint.This {
                             .consume(account::putHash);
                 } else account.updateFrom(body.asObjectNode());
 
-                return AuthEndpoint.forwardToWidgetOr(headers, new REST.Header.List(), "../", "account");
+                return AuthServerEndpoint.forwardToWidgetOr(headers, new REST.Header.List(), "../", "account");
             } catch (RestEndpointException ex) {
                 if (ex.getStatusCode() == UNAUTHORIZED)
                     throw ex;
@@ -83,7 +83,7 @@ public enum AuthEndpoint implements ServerEndpoint.This {
             }
         }
     },
-    MODIFY_ACCOUNT_DATA_STORAGE("/account/%s/data/%s", AuthServer.UUID_PATTERN, "[\\w][\\w\\d-_]+") {
+    MODIFY_ACCOUNT_DATA_STORAGE(org.comroid.auth.rest.AuthEndpoint.MODIFY_ACCOUNT_DATA_STORAGE) {
         @Override
         public REST.Response executeGET(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             UserDataStorage dataStorage = obtainDataStorage(context, headers, UUID.fromString(urlParams[0]));
@@ -112,7 +112,7 @@ public enum AuthEndpoint implements ServerEndpoint.This {
 
                 UserAccount account = AuthServer.instance.getUserManager().createAccount(email, password);
 
-                return AuthEndpoint.forwardToWidgetOr(headers, new REST.Header.List(), "../", "account");
+                return AuthServerEndpoint.forwardToWidgetOr(headers, new REST.Header.List(), "../", "account");
             } catch (Throwable t) {
                 throw new RestEndpointException(INTERNAL_SERVER_ERROR, "Could not create user account", t);
             }
@@ -160,7 +160,7 @@ public enum AuthEndpoint implements ServerEndpoint.This {
             }
         }
     },
-    SERVICE_API("/api/service/%s", AuthServer.UUID_PATTERN) {
+    SERVICE_API(org.comroid.auth.rest.AuthEndpoint.SERVICE_API) {
         @Override
         public REST.Response executeGET(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             UUID uuid;
@@ -230,20 +230,6 @@ public enum AuthEndpoint implements ServerEndpoint.This {
         }
     };
 
-    private static UserDataStorage obtainDataStorage(Context context, REST.Header.List headers, UUID clientId) {
-        ClientProvider clientProvider = context.requireFromContext(ClientProvider.class);
-        OAuthAuthorization.AccessToken accessToken = clientProvider.findAccessToken(headers);
-
-        if (!accessToken.getScopes().contains("storage"))
-            throw new RestEndpointException(UNAUTHORIZED, "Missing scope: storage");
-
-        UserAccount account = clientProvider.findClient(clientId).into(UserAccount.class);
-        if (account == null)
-            throw new RestEndpointException(INTERNAL_SERVER_ERROR, "Internal Server Error: Invalid Client type");
-
-        return account.getDataStorage();
-    }
-
     public static final StreamSupplier<ServerEndpoint> values = StreamSupplier.of(values());
     private final String extension;
     private final String[] regex;
@@ -269,10 +255,28 @@ public enum AuthEndpoint implements ServerEndpoint.This {
         return pattern;
     }
 
-    AuthEndpoint(String extension, @Language("RegExp") String... regex) {
+    AuthServerEndpoint(org.comroid.auth.rest.AuthEndpoint endpoint) {
+        this(endpoint.getUrlExtension(), endpoint.getRegExpGroups());
+    }
+
+    AuthServerEndpoint(String extension, @Language("RegExp") String... regex) {
         this.extension = extension;
         this.regex = regex;
         this.pattern = buildUrlPattern();
+    }
+
+    private static UserDataStorage obtainDataStorage(Context context, REST.Header.List headers, UUID clientId) {
+        ClientProvider clientProvider = context.requireFromContext(ClientProvider.class);
+        OAuthAuthorization.AccessToken accessToken = clientProvider.findAccessToken(headers);
+
+        if (!accessToken.getScopes().contains("storage"))
+            throw new RestEndpointException(UNAUTHORIZED, "Missing scope: storage");
+
+        UserAccount account = clientProvider.findClient(clientId).into(UserAccount.class);
+        if (account == null)
+            throw new RestEndpointException(INTERNAL_SERVER_ERROR, "Internal Server Error: Invalid Client type");
+
+        return account.getDataStorage();
     }
 
     public static REST.Response discoveryResponse() {
