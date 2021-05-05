@@ -1,5 +1,6 @@
 package org.comroid.auth.server;
 
+import org.comroid.api.EMailAddress;
 import org.comroid.api.Polyfill;
 import org.comroid.api.StreamSupplier;
 import org.comroid.auth.service.Service;
@@ -60,7 +61,7 @@ public enum AuthEndpoint implements ServerEndpoint.This {
                     throw new RestEndpointException(UNAUTHORIZED, "UUID Mismatch; Cookie Invalid");
 
                 if (body.has("new_password")) {
-                    Ref<String> email = account.email;
+                    Ref<EMailAddress> email = account.email;
 
                     if (!body.has("current_password"))
                         throw new RestEndpointException(BAD_REQUEST, "Old Password missing");
@@ -71,7 +72,7 @@ public enum AuthEndpoint implements ServerEndpoint.This {
 
                     body.use("new_password")
                             .map(UniNode::asString)
-                            .combine(email, (pw, mail) -> UserAccount.encrypt(mail, pw))
+                            .combine(email, (pw, mail) -> UserAccount.encrypt(mail.toString(), pw))
                             .consume(account::putHash);
                 } else account.updateFrom(body.asObjectNode());
 
@@ -122,9 +123,9 @@ public enum AuthEndpoint implements ServerEndpoint.This {
         @Override
         public REST.Response executePOST(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             try {
-                String email = body.use(EMAIL)
+                EMailAddress email = body.use(EMAIL)
                         .map(UniNode::asString)
-                        .map(str -> str.replace("%40", "@"))
+                        .map(EMailAddress::parse)
                         .requireNonNull("No Email provided");
                 String password = body.use("password")
                         .map(UniNode::asString)

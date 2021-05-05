@@ -236,12 +236,12 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
                 .orElse(null);
     }
 
-    public boolean tryLogin(String email, String password) {
+    public boolean tryLogin(EMailAddress email, String password) {
         if (!this.email.contentEquals(email)) {
             logger.error("Email Mismatch: {} / {}", this.email.get(), email);
             return false;
         }
-        String hash = encrypt(email, password);
+        String hash = encrypt(email.toString(), password);
         String otherHash = this.loginHashFile.getContent();
         String mail = this.email.get();
         byte[] bytes1 = hash.getBytes(StandardCharsets.US_ASCII);
