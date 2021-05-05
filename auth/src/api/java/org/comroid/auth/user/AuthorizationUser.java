@@ -36,7 +36,7 @@ import java.util.function.Consumer;
 
 public abstract class AuthorizationUser extends DataContainerBase<User> implements ValidityStage, CookieProvider, User {
     @RootBind
-    public static final GroupBind<AuthorizationUser> Type = new GroupBind<>("authorization-user");
+    public static final GroupBind<AuthorizationUser> Type = User.Type.subGroup("authorization-user");
     public static final VarBind<AuthorizationUser, String, String, String> AUTHORIZATION_CODE
             = Type.createBind("authorization-code")
             .extractAs(StandardValueType.STRING)

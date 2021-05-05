@@ -40,7 +40,7 @@ import java.util.stream.Stream;
 
 public final class UserAccount extends DataContainerBase<User> implements PermitCarrier, Client, FileProcessor, User {
     @RootBind
-    public static final GroupBind<UserAccount> Type = new GroupBind<>(AuthServer.MASTER_CONTEXT, "user-account");
+    public static final GroupBind<UserAccount> Type = User.Type.subGroup("user-account");
     public static final VarBind<UserAccount, Boolean, Boolean, Boolean> EMAIL_VERIFIED
             = Type.createBind("email_verified")
             .extractAs(StandardValueType.BOOLEAN)
