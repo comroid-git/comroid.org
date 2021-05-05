@@ -1,7 +1,6 @@
 package org.comroid.auth.user;
 
 import com.sun.net.httpserver.Headers;
-import org.comroid.api.os.OS;
 import org.comroid.auth.model.PermitCarrier;
 import org.comroid.auth.server.AuthConnection;
 import org.comroid.auth.server.AuthServer;
@@ -10,7 +9,10 @@ import org.comroid.mutatio.ref.Reference;
 import org.comroid.restless.REST;
 import org.comroid.restless.exception.RestEndpointException;
 import org.comroid.uniform.node.UniObjectNode;
+import org.comroid.webkit.model.CookieProvider;
+import org.jetbrains.annotations.Nullable;
 
+import java.time.Duration;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -19,9 +21,9 @@ import java.util.stream.Stream;
 import static org.comroid.restless.CommonHeaderNames.COOKIE;
 import static org.comroid.restless.HTTPStatusCodes.UNAUTHORIZED;
 
-public final class UserSession implements PermitCarrier {
+public final class UserSession implements PermitCarrier, CookieProvider {
     public static final String COOKIE_PREFIX = "org.comroid.auth";
-    public static final String NULL_COOKIE = wrapCookie("null");
+    public static final String NULL_COOKIE = CookieProvider.assembleCookie(COOKIE_PREFIX, "null");
     public final Ref<AuthConnection> connection = Reference.create();
     private final UserAccount account;
     private final String cookie;
@@ -30,12 +32,29 @@ public final class UserSession implements PermitCarrier {
         return account;
     }
 
+    @Override
     public String getPlainCookie() {
         return cookie;
     }
 
-    public String getCookie() {
-        return wrapCookie(cookie);
+    @Override
+    public @Nullable Duration getDefaultCookieMaxAge() {
+        return Duration.ofHours(6);
+    }
+
+    @Override
+    public @Nullable String getDefaultCookieDomain() {
+        return ".comroid.org";
+    }
+
+    @Override
+    public @Nullable String getDefaultCookiePath() {
+        return "/";
+    }
+
+    @Override
+    public String getCookiePrefix() {
+        return COOKIE_PREFIX;
     }
 
     public UniObjectNode getSessionData() {
@@ -55,10 +74,6 @@ public final class UserSession implements PermitCarrier {
     UserSession(UserAccount account) {
         this.account = account;
         this.cookie = generateCookie();
-    }
-
-    public static String wrapCookie(String cookie) {
-        return String.format("%s=%s; Max-Age=3600; Path=/%s", UserSession.COOKIE_PREFIX, cookie, OS.current == OS.UNIX ? "; Domain=.comroid.org" : "");
     }
 
     public static UserSession findSession(REST.Header.List headers) {
