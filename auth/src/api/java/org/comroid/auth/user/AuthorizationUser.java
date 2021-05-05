@@ -1,7 +1,11 @@
 package org.comroid.auth.user;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.EMailAddress;
+import org.comroid.api.Polyfill;
 import org.comroid.common.info.MessageSupplier;
 import org.comroid.mutatio.model.Ref;
 import org.comroid.mutatio.ref.ReferenceList;
@@ -66,6 +70,7 @@ public abstract class AuthorizationUser extends DataContainerBase<AuthorizationU
             .extractAs(StandardValueType.STRING)
             .andRemap(EMailAddress::parse)
             .build();
+    private static final Logger logger = LogManager.getLogger();
     public final Ref<String> cookie = getComputedReference(COOKIE);
     public final Ref<Instant> expiry = getComputedReference(EXPIRY);
     public final Ref<UUID> uuid = getComputedReference(ID);
@@ -74,6 +79,11 @@ public abstract class AuthorizationUser extends DataContainerBase<AuthorizationU
     public final Ref<String> authCode = getComputedReference(AUTHORIZATION_CODE);
     public final Ref<OAuthAuthorization.AccessToken> accessToken = getComputedReference(CURRENT_ACCESS_TOKEN);
     protected final CompletableFuture<Void> invalidation = new CompletableFuture<>();
+    private final CompletableFuture<? extends AuthorizationUser> initialValidation;
+
+    public CompletableFuture<? extends AuthorizationUser> getInitialValidation() {
+        return initialValidation;
+    }
 
     public final String getAuthCode() {
         return authCode.assertion("auth code");
@@ -116,6 +126,9 @@ public abstract class AuthorizationUser extends DataContainerBase<AuthorizationU
 
     public AuthorizationUser(ContextualProvider context, Consumer<UniObjectNode> initialDataBuilder) {
         super(context, initialDataBuilder);
+
+        this.initialValidation = validateUserInfo().exceptionally(Polyfill
+                .exceptionLogger(logger, Level.FATAL, "Could not validate " + this));
     }
 
     private MessageSupplier unavailableMessage(String fieldName) {
