@@ -7,7 +7,7 @@ import org.comroid.api.ContextualProvider;
 import org.comroid.api.EMailAddress;
 import org.comroid.api.Polyfill;
 import org.comroid.auth.model.AuthEntity;
-import org.comroid.auth.model.User;
+import org.comroid.auth.user.User;
 import org.comroid.common.info.MessageSupplier;
 import org.comroid.mutatio.model.Ref;
 import org.comroid.mutatio.ref.ReferenceList;
