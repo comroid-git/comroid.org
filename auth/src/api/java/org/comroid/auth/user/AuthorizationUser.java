@@ -1,4 +1,4 @@
-package org.comroid.auth;
+package org.comroid.auth.user;
 
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.EMailAddress;
