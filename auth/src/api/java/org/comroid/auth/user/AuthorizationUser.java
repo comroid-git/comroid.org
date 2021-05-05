@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.EMailAddress;
 import org.comroid.api.Polyfill;
+import org.comroid.auth.model.User;
 import org.comroid.common.info.MessageSupplier;
 import org.comroid.mutatio.model.Ref;
 import org.comroid.mutatio.ref.ReferenceList;
@@ -33,7 +34,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
-public abstract class AuthorizationUser extends DataContainerBase<AuthorizationUser> implements ValidityStage, CookieProvider {
+public abstract class AuthorizationUser extends DataContainerBase<User> implements ValidityStage, CookieProvider, User {
     @RootBind
     public static final GroupBind<AuthorizationUser> Type = new GroupBind<>("authorization-user");
     public static final VarBind<AuthorizationUser, String, String, String> AUTHORIZATION_CODE
@@ -56,20 +57,6 @@ public abstract class AuthorizationUser extends DataContainerBase<AuthorizationU
             = Type.createBind("expiry")
             .extractAs(StandardValueType.LONG)
             .andRemap(Instant::ofEpochMilli)
-            .build();
-    public static final VarBind<AuthorizationUser, String, UUID, UUID> ID
-            = Type.createBind("uuid")
-            .extractAs(StandardValueType.STRING)
-            .andRemap(UUID::fromString)
-            .build();
-    public static final VarBind<AuthorizationUser, String, String, String> USERNAME
-            = Type.createBind("username")
-            .extractAs(StandardValueType.STRING)
-            .build();
-    public static final VarBind<AuthorizationUser, String, EMailAddress, EMailAddress> EMAIL
-            = Type.createBind("email")
-            .extractAs(StandardValueType.STRING)
-            .andRemap(EMailAddress::parse)
             .build();
     private static final Logger logger = LogManager.getLogger();
     public final Ref<String> cookie = getComputedReference(COOKIE);
@@ -98,14 +85,17 @@ public abstract class AuthorizationUser extends DataContainerBase<AuthorizationU
         return !invalidation.isDone() && getToken() != null && expiry.test(it -> it.isAfter(Instant.now()));
     }
 
+    @Override
     public final UUID getUUID() {
         return uuid.requireNonNull(unavailableMessage("UUID"));
     }
 
+    @Override
     public final String getUsername() {
         return username.requireNonNull(unavailableMessage("Username"));
     }
 
+    @Override
     public final EMailAddress getEMailAddress() {
         return email.requireNonNull(unavailableMessage("EMail"));
     }
