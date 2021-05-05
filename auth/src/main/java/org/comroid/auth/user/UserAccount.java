@@ -5,6 +5,8 @@ import org.apache.logging.log4j.Logger;
 import org.comroid.api.EMailAddress;
 import org.comroid.api.Rewrapper;
 import org.comroid.api.Serializer;
+import org.comroid.auth.model.PermitCarrier;
+import org.comroid.auth.model.User;
 import org.comroid.auth.server.AuthServer;
 import org.comroid.auth.service.Service;
 import org.comroid.common.io.FileHandle;
@@ -36,23 +38,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-public final class UserAccount extends DataContainerBase<UserAccount> implements PermitCarrier, Client, FileProcessor {
+public final class UserAccount extends DataContainerBase<User> implements PermitCarrier, Client, FileProcessor, User {
     @RootBind
-    public static final GroupBind<UserAccount> Type = new GroupBind<>(AuthServer.MASTER_CONTEXT, "user-account");
-    public static final VarBind<UserAccount, String, UUID, UUID> ID
-            = Type.createBind("uuid")
-            .extractAs(StandardValueType.STRING)
-            .andRemap(UUID::fromString)
-            .build();
-    public static final VarBind<UserAccount, String, String, String> USERNAME
-            = Type.createBind("username")
-            .extractAs(StandardValueType.STRING)
-            .build();
-    public static final VarBind<UserAccount, String, EMailAddress, EMailAddress> EMAIL
-            = Type.createBind("email")
-            .extractAs(StandardValueType.STRING)
-            .andRemap(EMailAddress::parse)
-            .build();
+    public static final GroupBind<UserAccount> Type = User.Type.subGroup("user-account");
     public static final VarBind<UserAccount, Boolean, Boolean, Boolean> EMAIL_VERIFIED
             = Type.createBind("email_verified")
             .extractAs(StandardValueType.BOOLEAN)
@@ -92,13 +80,15 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
 
         if (email.contentEquals("burdoto@outlook.com"))
             put(PERMIT, Bitmask.combine(Permit.values()));
-        else if (permits.testIfPresent(HashSet::isEmpty))
+        else if (permits.test(Set::isEmpty))
             put(PERMIT, Bitmask.combine(Permit.EMAIL, Permit.STORAGE));
 
         if (getPermits().contains(Permit.DEV))
             if (getEmail().endsWith(ORG_EMAIL_SUFFIX))
                 // force internal email override by org-email
-                getExtractionReference(INTERNAL_EMAIL).rebind(email.map(EMailAddress::toString).map(ReferenceList::of));
+                getExtractionReference(INTERNAL_EMAIL)
+                        .rebind(email.map(EMailAddress::toString)
+                                .map(ReferenceList::of));
             else if (username.test(user -> !user.contains("@"))) // else create new org-email
                 put(INTERNAL_EMAIL, username.into(usr -> usr.toLowerCase() + ORG_EMAIL_SUFFIX));
     }
@@ -114,11 +104,11 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
 
     @Override
     public String getName() {
-        return username.assertion("Username not found");
+        return getUsername();
     }
 
     public String getEmail() {
-        return email.assertion("Email not found").toString();
+        return getEMailAddress().toString();
     }
 
     public @Nullable String getInternalEmail() {
