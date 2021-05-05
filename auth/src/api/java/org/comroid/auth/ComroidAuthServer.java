@@ -2,17 +2,17 @@ package org.comroid.auth;
 
 import org.apache.logging.log4j.LogManager;
 import org.comroid.api.ContextualProvider;
-import org.comroid.api.Rewrapper;
 import org.comroid.auth.service.Service;
+import org.comroid.mutatio.model.RefMap;
+import org.comroid.mutatio.ref.Reference;
+import org.comroid.mutatio.ref.ReferenceMap;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 public final class ComroidAuthServer {
     public static final String URL_BASE = "https://auth.comroid.org";
-    private static final Map<UUID, Service> serviceCache = new ConcurrentHashMap<>();
+    private static final RefMap<UUID, Service> serviceCache = new ReferenceMap<>();
 
     static {
         if (ContextualProvider.Base.ROOT.streamContextMembers(false).count() == 0)
@@ -27,11 +27,14 @@ public final class ComroidAuthServer {
         throw new UnsupportedOperationException();
     }
 
-    public static boolean addServiceToCache(Service service) {
+    public static boolean addServiceToCache(final Service service) {
         final UUID uuid = service.getUUID();
-        if (hasService(uuid))
-            getService(uuid).consume(it -> it.updateFrom(service));
-        else serviceCache.put(uuid, service);
+        getService(uuid).compute(cached -> {
+            if (cached == null)
+                return service;
+            cached.updateFrom(service);
+            return cached;
+        });
         return true;
     }
 
@@ -39,7 +42,7 @@ public final class ComroidAuthServer {
         return serviceCache.containsKey(uuid);
     }
 
-    public static Rewrapper<Service> getService(final UUID uuid) {
-        return () -> serviceCache.getOrDefault(uuid, null);
+    public static Reference<Service> getService(final UUID uuid) {
+        return serviceCache.getReference(uuid, true);
     }
 }
