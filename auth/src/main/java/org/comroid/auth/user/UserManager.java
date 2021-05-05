@@ -3,6 +3,7 @@ package org.comroid.auth.user;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
+import org.comroid.api.EMailAddress;
 import org.comroid.api.Rewrapper;
 import org.comroid.api.UncheckedCloseable;
 import org.comroid.auth.server.AuthServer;
@@ -87,6 +88,7 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
         if (accounts.values()
                 .stream()
                 .flatMap(usr -> usr.email.stream())
+                .map(EMailAddress::toString)
                 .anyMatch(email::equalsIgnoreCase))
             throw new IllegalArgumentException("E-Mail is already in use!");
 
@@ -96,7 +98,7 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
         return account;
     }
 
-    public UserSession loginUser(String email, String password) {
+    public UserSession loginUser(EMailAddress email, String password) {
         logger.info("User {} logging in...", email);
 
         return accounts.values()
@@ -154,7 +156,7 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
     }
 
     @Override
-    public Pair<Client, String> loginClient(String email, String login) {
+    public Pair<Client, String> loginClient(EMailAddress email, String login) {
         UserSession session = AuthServer.instance.getUserManager()
                 .loginUser(email, login);
         return new Pair<>(session.getAccount(), session.getCookie());
