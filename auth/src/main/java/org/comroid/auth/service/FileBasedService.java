@@ -6,36 +6,16 @@ import org.comroid.auth.server.AuthServer;
 import org.comroid.common.io.FileHandle;
 import org.comroid.mutatio.model.Ref;
 import org.comroid.uniform.node.UniObjectNode;
-import org.comroid.util.StandardValueType;
 import org.comroid.varbind.annotation.RootBind;
 import org.comroid.varbind.bind.GroupBind;
-import org.comroid.varbind.bind.VarBind;
 import org.comroid.varbind.container.DataContainerBase;
-import org.comroid.webkit.oauth.client.Client;
-import org.comroid.webkit.oauth.resource.Resource;
-import org.comroid.webkit.oauth.user.OAuthAuthorization;
-import org.java_websocket.util.Base64;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
-public final class Service extends DataContainerBase<Service> implements Resource {
+public final class FileBasedService extends DataContainerBase<Service> implements Service {
     @RootBind
-    public static final GroupBind<Service> Type = new GroupBind<>(AuthServer.MASTER_CONTEXT, "auth-service");
-    public static final VarBind<Service, String, UUID, UUID> ID
-            = Type.createBind("uuid")
-            .extractAs(StandardValueType.STRING)
-            .andRemap(UUID::fromString)
-            .onceEach()
-            .setRequired()
-            .build();
-    public static final VarBind<Service, String, String, String> NAME
-            = Type.createBind("name")
-            .extractAs(StandardValueType.STRING)
-            .asIdentities()
-            .onceEach()
-            .setRequired()
-            .build();
+    public static final GroupBind<Service> Type = Service.Type.subGroup("auth-service");
     public static final FileHandle DIR = AuthServer.DATA.createSubDir("services");
     public final Ref<UUID> id = getComputedReference(ID);
     public final Ref<String> name = getComputedReference(NAME);
@@ -43,21 +23,11 @@ public final class Service extends DataContainerBase<Service> implements Resourc
     private final FileHandle secretFile;
 
     @Override
-    public UUID getUUID() {
-        return id.assertion("ID");
-    }
-
-    @Override
-    public String getName() {
-        return name.assertion("Display Name");
-    }
-
-    @Override
     public String getSecret() {
         return secretFile.getContent();
     }
 
-    protected Service(ContextualProvider context, final FileHandle sourceDir) {
+    protected FileBasedService(ContextualProvider context, final FileHandle sourceDir) {
         super(context, obj -> {
             if (!sourceDir.isDirectory())
                 throw new IllegalArgumentException(String.format("File is not a directory: %s", sourceDir));
@@ -73,7 +43,7 @@ public final class Service extends DataContainerBase<Service> implements Resourc
         initiateSecret();
     }
 
-    protected Service(ContextualProvider context, @Nullable UniObjectNode initialData) {
+    protected FileBasedService(ContextualProvider context, @Nullable UniObjectNode initialData) {
         super(context, initialData);
         this.dir = DIR.createSubDir(id.toString());
         this.secretFile = dir.createSubFile("secret.cred");
@@ -85,14 +55,5 @@ public final class Service extends DataContainerBase<Service> implements Resourc
         String content = secretFile.getContent();
         if (content == null || content.isEmpty())
             secretFile.setContent(UUID.randomUUID().toString().replace("-", ""));
-    }
-
-    @Override
-    public String generateAccessToken(OAuthAuthorization authorization) {
-        Client client = authorization.getClient();
-        Resource resource = authorization.getResource();
-        String code = String.format("%s-%s-%s", client.getUUID(), resource.getUUID(), UUID.randomUUID());
-        code = Base64.encodeBytes(code.getBytes());
-        return code;
     }
 }

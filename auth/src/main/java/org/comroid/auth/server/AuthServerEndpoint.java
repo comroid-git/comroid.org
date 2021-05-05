@@ -3,6 +3,7 @@ package org.comroid.auth.server;
 import org.comroid.api.EMailAddress;
 import org.comroid.api.Polyfill;
 import org.comroid.api.StreamSupplier;
+import org.comroid.auth.service.FileBasedService;
 import org.comroid.auth.service.Service;
 import org.comroid.auth.service.ServiceManager;
 import org.comroid.auth.user.Permit;
@@ -196,7 +197,7 @@ public enum AuthServerEndpoint implements ServerEndpoint.This {
 
             context.getLogger().debug("POSTing Service with ID {} and body {}", uuid, body);
             UniObjectNode data = body.asObjectNode();
-            if (!Service.Type.isValidData(data))
+            if (!FileBasedService.Type.isValidData(data))
                 if (uuid == null) {
                     uuid = UUID.randomUUID();
                     data.put(Service.ID, uuid.toString());

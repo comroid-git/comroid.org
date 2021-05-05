@@ -46,7 +46,7 @@ public final class ServiceManager implements ContextualProvider.Underlying, Reso
                     }
                 })
                 .map(FileHandle::new)
-                .map(dir -> new Service(this, dir))
+                .map(dir -> new FileBasedService(this, dir))
                 .forEach(account -> services.put(account.getUUID(), account));
         logger.info("Loading finished; loaded {} services", services.size());
     }
@@ -57,7 +57,7 @@ public final class ServiceManager implements ContextualProvider.Underlying, Reso
     }
 
     public Service createService(UniObjectNode initialData) {
-        Service service = new Service(this, initialData);
+        Service service = new FileBasedService(this, initialData);
         services.put(service.getUUID(), service);
         return service;
     }
