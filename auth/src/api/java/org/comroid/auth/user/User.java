@@ -1,11 +1,10 @@
-package org.comroid.auth.model;
+package org.comroid.auth.user;
 
 import org.comroid.api.EMailAddress;
-import org.comroid.api.UUIDContainer;
+import org.comroid.auth.model.AuthEntity;
 import org.comroid.util.StandardValueType;
 import org.comroid.varbind.bind.GroupBind;
 import org.comroid.varbind.bind.VarBind;
-import org.comroid.varbind.container.DataContainer;
 
 import java.util.UUID;
 
