@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 
 
 public enum Permit implements BitmaskAttribute<Permit> {
-    EMAIL, DEV, ADMIN;
+    EMAIL, DEV, ADMIN, STORAGE;
 
     public static Set valueOf(int mask) {
         return new Set(BitmaskAttribute.valueOf(mask, Permit.class));

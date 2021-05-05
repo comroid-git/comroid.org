@@ -92,7 +92,7 @@ public final class UserAccount extends DataContainerBase<UserAccount> implements
         if (email.contentEquals("burdoto@outlook.com"))
             put(PERMIT, Bitmask.combine(Permit.values()));
         else if (permits.test(Set::isEmpty))
-            put(PERMIT, Permit.EMAIL.getValue());
+            put(PERMIT, Bitmask.combine(Permit.EMAIL, Permit.STORAGE));
 
         if (getPermits().contains(Permit.DEV))
             if (getEmail().endsWith(ORG_EMAIL_SUFFIX))
