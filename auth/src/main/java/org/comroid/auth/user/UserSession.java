@@ -2,6 +2,7 @@ package org.comroid.auth.user;
 
 import com.sun.net.httpserver.Headers;
 import org.comroid.api.os.OS;
+import org.comroid.auth.model.PermitCarrier;
 import org.comroid.auth.server.AuthConnection;
 import org.comroid.auth.server.AuthServer;
 import org.comroid.mutatio.model.Ref;
