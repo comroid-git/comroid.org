@@ -27,8 +27,12 @@ public final class ComroidAuthServer {
         throw new UnsupportedOperationException();
     }
 
-    public static void addServiceToCache(Service service) {
-        serviceCache.put(service.getUUID(), service);
+    public static boolean addServiceToCache(Service service) {
+        final UUID uuid = service.getUUID();
+        if (hasService(uuid))
+            getService(uuid).consume(it -> it.updateFrom(service));
+        else serviceCache.put(uuid, service);
+        return true;
     }
 
     public static boolean hasService(UUID uuid) {
