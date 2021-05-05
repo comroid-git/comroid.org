@@ -2,6 +2,7 @@ package org.comroid.auth.service;
 
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.Serializer;
+import org.comroid.auth.model.AuthEntity;
 import org.comroid.auth.server.AuthServer;
 import org.comroid.common.io.FileHandle;
 import org.comroid.mutatio.model.Ref;
@@ -13,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
-public final class FileBasedService extends DataContainerBase<Service> implements Service {
+public final class FileBasedService extends DataContainerBase<AuthEntity> implements Service {
     @RootBind
     public static final GroupBind<Service> Type = Service.Type.subGroup("auth-service");
     public static final FileHandle DIR = AuthServer.DATA.createSubDir("services");

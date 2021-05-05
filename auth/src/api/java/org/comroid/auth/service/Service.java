@@ -1,5 +1,6 @@
 package org.comroid.auth.service;
 
+import org.comroid.auth.model.AuthEntity;
 import org.comroid.util.StandardValueType;
 import org.comroid.varbind.annotation.RootBind;
 import org.comroid.varbind.bind.GroupBind;
@@ -12,16 +13,9 @@ import org.java_websocket.util.Base64;
 
 import java.util.UUID;
 
-public interface Service extends DataContainer<Service>, Resource {
+public interface Service extends Resource, AuthEntity {
     @RootBind
-    GroupBind<Service> Type = new GroupBind<>("org.comroid.auth-service");
-    VarBind<Service, String, UUID, UUID> ID
-            = Type.createBind("uuid")
-            .extractAs(StandardValueType.STRING)
-            .andRemap(UUID::fromString)
-            .onceEach()
-            .setRequired()
-            .build();
+    GroupBind<Service> Type = AuthEntity.Type.subGroup("org.comroid.auth-service");
     VarBind<Service, String, String, String> NAME
             = Type.createBind("name")
             .extractAs(StandardValueType.STRING)
@@ -29,11 +23,6 @@ public interface Service extends DataContainer<Service>, Resource {
             .onceEach()
             .setRequired()
             .build();
-
-    @Override
-    default UUID getUUID() {
-        return assertion(ID);
-    }
 
     @Override
     default String getName() {

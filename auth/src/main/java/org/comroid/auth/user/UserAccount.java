@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.comroid.api.EMailAddress;
 import org.comroid.api.Rewrapper;
 import org.comroid.api.Serializer;
+import org.comroid.auth.model.AuthEntity;
 import org.comroid.auth.model.PermitCarrier;
 import org.comroid.auth.model.User;
 import org.comroid.auth.server.AuthServer;
@@ -38,7 +39,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-public final class UserAccount extends DataContainerBase<User> implements PermitCarrier, Client, FileProcessor, User {
+public final class UserAccount extends DataContainerBase<AuthEntity> implements PermitCarrier, Client, FileProcessor, User {
     @RootBind
     public static final GroupBind<UserAccount> Type = User.Type.subGroup("user-account");
     public static final VarBind<UserAccount, Boolean, Boolean, Boolean> EMAIL_VERIFIED

@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.EMailAddress;
 import org.comroid.api.Polyfill;
+import org.comroid.auth.model.AuthEntity;
 import org.comroid.auth.model.User;
 import org.comroid.common.info.MessageSupplier;
 import org.comroid.mutatio.model.Ref;
@@ -34,7 +35,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
-public abstract class AuthorizationUser extends DataContainerBase<User> implements ValidityStage, CookieProvider, User {
+public abstract class AuthorizationUser extends DataContainerBase<AuthEntity> implements ValidityStage, CookieProvider, User {
     @RootBind
     public static final GroupBind<AuthorizationUser> Type = User.Type.subGroup("authorization-user");
     public static final VarBind<AuthorizationUser, String, String, String> AUTHORIZATION_CODE

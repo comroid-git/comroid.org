@@ -9,8 +9,8 @@ import org.comroid.varbind.container.DataContainer;
 
 import java.util.UUID;
 
-public interface User extends DataContainer<User>, UUIDContainer {
-    GroupBind<User> Type = new GroupBind<>("org.comroid.auth-user");
+public interface User extends AuthEntity {
+    GroupBind<User> Type = AuthEntity.Type.subGroup("org.comroid.auth-user");
     VarBind<User, String, UUID, UUID> ID
             = Type.createBind("uuid")
             .extractAs(StandardValueType.STRING)
