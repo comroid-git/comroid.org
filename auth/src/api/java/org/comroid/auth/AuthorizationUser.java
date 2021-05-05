@@ -109,6 +109,11 @@ public abstract class AuthorizationUser extends DataContainerBase<AuthorizationU
         return getUUID().toString();
     }
 
+    @Override
+    public String getPlainCookie() {
+        return cookie.assertion("cookie");
+    }
+
     public AuthorizationUser(ContextualProvider context, Consumer<UniObjectNode> initialDataBuilder) {
         super(context, initialDataBuilder);
     }
