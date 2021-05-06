@@ -93,7 +93,6 @@ public final class AuthConnection extends WebkitConnection {
                         UniArrayNode users = response.putArray("users");
                         requireFromContext(UserManager.class)
                                 .getUsers()
-                                .stream()
                                 .map(UUIDContainer::getUUID)
                                 .map(UUID::toString)
                                 .forEach(id -> users.add(StandardValueType.STRING, id));
