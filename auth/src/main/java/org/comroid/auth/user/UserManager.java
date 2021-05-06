@@ -36,7 +36,6 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
         SALTS.mkdir();
     }
 
-    private final Map<UUID, UserAccount> accounts = new ConcurrentHashMap<>();
     private final Map<String, UserSession> sessions = new ConcurrentHashMap<>();
     private final ContextualProvider context;
 

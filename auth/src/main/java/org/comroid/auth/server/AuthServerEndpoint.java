@@ -176,7 +176,6 @@ public enum AuthServerEndpoint implements ServerEndpoint.This {
             UniArrayNode array = context.createArrayNode();
             server.getServiceManager()
                     .getServices()
-                    .stream()
                     .map(service -> {
                         UniObjectNode data = service.toUniNode();
                         data.put("secret", service.getSecret());

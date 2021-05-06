@@ -27,8 +27,8 @@ public final class ServiceManager implements ContextualProvider.Underlying, Reso
         return context;
     }
 
-    public Collection<Service> getServices() {
-        return ComroidAuthServer.getServices();
+    public Stream<Service> getServices() {
+        return ComroidAuthServer.getServices().streamValues();
     }
 
     public ServiceManager(AuthServer server) {
