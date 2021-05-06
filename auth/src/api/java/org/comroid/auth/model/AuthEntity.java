@@ -1,7 +1,6 @@
 package org.comroid.auth.model;
 
 import org.comroid.api.UUIDContainer;
-import org.comroid.auth.service.Service;
 import org.comroid.util.StandardValueType;
 import org.comroid.varbind.annotation.RootBind;
 import org.comroid.varbind.bind.GroupBind;

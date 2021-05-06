@@ -2,14 +2,12 @@ package org.comroid.auth.service;
 
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.Serializer;
-import org.comroid.auth.model.AuthEntity;
 import org.comroid.auth.server.AuthServer;
 import org.comroid.common.io.FileHandle;
 import org.comroid.mutatio.model.Ref;
 import org.comroid.uniform.node.UniObjectNode;
 import org.comroid.varbind.annotation.RootBind;
 import org.comroid.varbind.bind.GroupBind;
-import org.comroid.varbind.container.DataContainerBase;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;

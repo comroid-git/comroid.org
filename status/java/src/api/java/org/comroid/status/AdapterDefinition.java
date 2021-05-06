@@ -12,18 +12,18 @@ public final class AdapterDefinition extends ContextualProvider.Base {
     public final SerializationAdapter<?, ?, ?> serialization;
     public final HttpAdapter http;
 
+    public static AdapterDefinition getInstance() {
+        return instance.get();
+    }
+
     private AdapterDefinition(SerializationAdapter<?, ?, ?> serialization, HttpAdapter http) {
-        super((Base) serialization, http);
+        super(serialization, http);
 
         this.serialization = serialization;
         this.http = http;
     }
 
-    public static AdapterDefinition getInstance() {
-        return instance.get();
-    }
-
-    public static AdapterDefinition initialize(SerializationAdapter<?,?,?> serialization, HttpAdapter http) {
+    public static AdapterDefinition initialize(SerializationAdapter<?, ?, ?> serialization, HttpAdapter http) {
         instance.set(new AdapterDefinition(serialization, http));
         return instance.get();
     }

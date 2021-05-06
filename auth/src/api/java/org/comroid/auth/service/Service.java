@@ -5,7 +5,6 @@ import org.comroid.util.StandardValueType;
 import org.comroid.varbind.annotation.RootBind;
 import org.comroid.varbind.bind.GroupBind;
 import org.comroid.varbind.bind.VarBind;
-import org.comroid.varbind.container.DataContainer;
 import org.comroid.webkit.oauth.client.Client;
 import org.comroid.webkit.oauth.resource.Resource;
 import org.comroid.webkit.oauth.user.OAuthAuthorization;

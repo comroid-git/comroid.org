@@ -7,14 +7,11 @@ import org.comroid.api.Rewrapper;
 import org.comroid.auth.ComroidAuthServer;
 import org.comroid.auth.server.AuthServer;
 import org.comroid.common.io.FileHandle;
-import org.comroid.webkit.oauth.resource.ResourceProvider;
 import org.comroid.uniform.node.UniObjectNode;
+import org.comroid.webkit.oauth.resource.ResourceProvider;
 
 import java.io.File;
-import java.util.Collection;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 public final class ServiceManager implements ContextualProvider.Underlying, ResourceProvider {

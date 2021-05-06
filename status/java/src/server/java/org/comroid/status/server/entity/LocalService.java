@@ -1,7 +1,6 @@
 package org.comroid.status.server.entity;
 
 import org.comroid.status.entity.Service;
-import org.comroid.varbind.annotation.Location;
 import org.comroid.varbind.annotation.RootBind;
 import org.comroid.varbind.bind.GroupBind;
 

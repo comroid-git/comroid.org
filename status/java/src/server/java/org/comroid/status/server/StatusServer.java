@@ -35,7 +35,6 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
     //http://localhost:42641/services
 
     public static final AdapterDefinition CONTEXT;
-    private static final Logger logger = LogManager.getLogger();
     public static final FileHandle PATH_BASE = new FileHandle("/home/comroid/srv_status/", true); // server path base
     public static final FileHandle DATA_DIR = PATH_BASE.createSubDir("data");
     public static final FileHandle BOT_TOKEN = DATA_DIR.createSubFile("discord.cred");
@@ -46,6 +45,7 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
     public static final ThreadGroup THREAD_GROUP = new ThreadGroup("comroid Status Server");
     //fixme public static final DiscordAPI DISCORD;
     public static final String ADMIN_TOKEN_NAME = "admin$access$token";
+    private static final Logger logger = LogManager.getLogger();
     public static StatusServer instance;
 
     static {
@@ -65,7 +65,7 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
     private final ScheduledExecutorService threadPool;
     private final FileCache<String, Entity> entityCache;
     private final RestServer server;
-   // private final DiscordBotBase bot;
+    // private final DiscordBotBase bot;
     //fixme  private final Reference<UserStatus> userStatusSupplier;
 
     public final FileCache<String, Entity> getEntityCache() {

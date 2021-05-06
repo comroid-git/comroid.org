@@ -1,7 +1,6 @@
 package org.comroid.status.server.rest;
 
 import org.comroid.restless.CommonHeaderNames;
-import org.comroid.restless.HTTPStatusCodes;
 import org.comroid.restless.REST;
 import org.comroid.restless.endpoint.AccessibleEndpoint;
 import org.comroid.restless.exception.RestEndpointException;

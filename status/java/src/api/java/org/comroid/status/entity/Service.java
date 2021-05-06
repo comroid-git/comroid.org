@@ -7,8 +7,8 @@ import org.comroid.restless.REST;
 import org.comroid.restless.body.BodyBuilderType;
 import org.comroid.status.StatusConnection;
 import org.comroid.status.rest.Endpoint;
-import org.comroid.util.StandardValueType;
 import org.comroid.uniform.node.UniObjectNode;
+import org.comroid.util.StandardValueType;
 import org.comroid.varbind.annotation.RootBind;
 import org.comroid.varbind.bind.GroupBind;
 import org.comroid.varbind.bind.VarBind;
@@ -25,6 +25,31 @@ import java.util.concurrent.CompletableFuture;
 public interface Service extends Entity, WrappedFormattable {
     @Language("RegExp")
     String NAME_REGEX = "\\w[\\w\\d-]+";
+    @RootBind
+    GroupBind<Service> Type
+            = Entity.Type.subGroup("service",
+            (connection, node) -> new Basic(connection.requireFromContext(StatusConnection.class), node.asObjectNode()));
+    VarBind<Service, String, String, String> DISPLAY_NAME
+            = Type.createBind("display_name")
+            .extractAs(StandardValueType.STRING)
+            .asIdentities()
+            .onceEach()
+            .setRequired(true)
+            .build();
+    VarBind<Service, Integer, Service.Status, Service.Status> STATUS
+            = Type.createBind("status")
+            .extractAs(StandardValueType.INTEGER)
+            .andRemap(Service.Status::valueOf)
+            .onceEach()
+            .setRequired(true)
+            .build();
+    VarBind<Service, String, URL, URL> URL
+            = Type.createBind("url")
+            .extractAs(StandardValueType.STRING)
+            .andRemap(Polyfill::url)
+            .onceEach()
+            .setRequired(false)
+            .build();
 
     default String getDisplayName() {
         return requireNonNull(DISPLAY_NAME);
@@ -51,7 +76,6 @@ public interface Service extends Entity, WrappedFormattable {
     CompletableFuture<Status> requestStatus();
 
     CompletableFuture<Service> updateStatus(Status status);
-
     enum Status implements IntegerAttribute {
         UNKNOWN(0),
 
@@ -87,33 +111,6 @@ public interface Service extends Entity, WrappedFormattable {
         }
     }
 
-        @RootBind
-        GroupBind<Service> Type
-                = Entity.Type.subGroup("service",
-                (connection, node) -> new Basic(connection.requireFromContext(StatusConnection.class), node.asObjectNode()));
-        VarBind<Service, String, String, String> DISPLAY_NAME
-                = Type.createBind("display_name")
-                .extractAs(StandardValueType.STRING)
-                .asIdentities()
-                .onceEach()
-                .setRequired(true)
-                .build();
-        VarBind<Service, Integer, Service.Status, Service.Status> STATUS
-                = Type.createBind("status")
-                .extractAs(StandardValueType.INTEGER)
-                .andRemap(Service.Status::valueOf)
-                .onceEach()
-                .setRequired(true)
-                .build();
-        VarBind<Service, String, URL, URL> URL
-                = Type.createBind("url")
-                .extractAs(StandardValueType.STRING)
-                .andRemap(Polyfill::url)
-                .onceEach()
-                .setRequired(false)
-                .build();
-
-
     final class Basic extends DataContainerBase<Entity> implements Service {
         private final StatusConnection connection;
 
@@ -144,11 +141,11 @@ public interface Service extends Entity, WrappedFormattable {
                 return CompletableFuture.completedFuture(this);
             if (!Objects.equals(put(STATUS, status), status.getValue()))
                 return connection.getRest()
-                    .request(Service.Type)
-                    .method(REST.Method.POST)
-                    .endpoint(Endpoint.UPDATE_SERVICE_STATUS.complete(getName()))
-                    .buildBody(BodyBuilderType.OBJECT, obj -> obj.put(STATUS, status))
-                    .execute$deserializeSingle();
+                        .request(Service.Type)
+                        .method(REST.Method.POST)
+                        .endpoint(Endpoint.UPDATE_SERVICE_STATUS.complete(getName()))
+                        .buildBody(BodyBuilderType.OBJECT, obj -> obj.put(STATUS, status))
+                        .execute$deserializeSingle();
             else return Polyfill.failedFuture(new RuntimeException("Unable to change status"));
         }
     }

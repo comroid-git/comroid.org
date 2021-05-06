@@ -7,8 +7,6 @@ import org.comroid.api.Rewrapper;
 import org.comroid.api.Serializer;
 import org.comroid.auth.model.AuthEntity;
 import org.comroid.auth.model.PermitCarrier;
-import org.comroid.auth.user.User;
-import org.comroid.auth.server.AuthServer;
 import org.comroid.auth.service.Service;
 import org.comroid.common.io.FileHandle;
 import org.comroid.common.io.FileProcessor;

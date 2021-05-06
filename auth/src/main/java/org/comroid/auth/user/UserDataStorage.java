@@ -6,11 +6,9 @@ import org.comroid.common.io.FileProcessor;
 import org.comroid.restless.MimeType;
 import org.comroid.uniform.Context;
 import org.comroid.uniform.node.UniNode;
-import org.comroid.uniform.node.UniValueNode;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
