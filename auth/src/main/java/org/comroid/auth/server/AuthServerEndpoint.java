@@ -28,6 +28,7 @@ import org.comroid.webkit.oauth.user.OAuthAuthorization;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.UUID;
@@ -99,6 +100,11 @@ public enum AuthServerEndpoint implements ServerEndpoint.This {
         public REST.Response executePOST(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             UserDataStorage dataStorage = obtainDataStorage(context, headers, UUID.fromString(urlParams[0]), UUID.fromString(urlParams[1]));
             UniNode storageData = dataStorage.putData(urlParams[1], body);
+            try {
+                dataStorage.storeData();
+            } catch (IOException e) {
+                throw new RestEndpointException(INTERNAL_SERVER_ERROR, "Could not write data");
+            }
             return new REST.Response(OK, storageData);
         }
 
