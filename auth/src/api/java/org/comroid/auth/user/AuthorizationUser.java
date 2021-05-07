@@ -277,7 +277,7 @@ public abstract class AuthorizationUser extends DataContainerBase<AuthEntity> im
                 .endpoint(AuthEndpoint.MODIFY_ACCOUNT_DATA_STORAGE, getUUID(), serviceId, storageName)
                 .addHeader(CommonHeaderNames.AUTHORIZATION, getToken())
                 .expect(true, HTTPStatusCodes.OK)
-                .execute()
+                .execute$deserializeSingle()
                 .thenApply(data -> cacheServiceData(serviceId, storageName, data));
     }
 
