@@ -26,6 +26,7 @@ import org.comroid.webkit.model.PagePropertiesProvider;
 import org.comroid.webkit.oauth.OAuth;
 import org.comroid.webkit.oauth.rest.OAuthEndpoint;
 import org.comroid.webkit.server.WebkitServer;
+import org.comroid.webkit.socket.WebkitConnection;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -157,7 +158,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
         Map<String, Object> map;
         try {
             UserSession session = UserSession.findSession(headers);
-            map = session.connection.<Map<String, Object>>map(conn -> conn.properties)
+            map = session.connection.<Map<String, Object>>map(WebkitConnection::getPageProperties)
                     .or(() -> {
                         Map<String, Object> o = new HashMap<>();
                         o.put("isValidSession", true);

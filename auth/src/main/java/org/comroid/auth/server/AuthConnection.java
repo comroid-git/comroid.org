@@ -53,7 +53,7 @@ public final class AuthConnection extends WebkitConnection {
         if (session != null) {
             // set session data reference
             UniObjectNode sessionData = this.session.getSessionData();
-            properties.put("sessionData", sessionData);
+            setProperty("sessionData", sessionData);
             /*
             properties.getReference("sessionData", true)
                     .rebind(this.session::getSessionData);
