@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 
 public enum AuthEndpoint implements AccessibleEndpoint {
     MODIFY_ACCOUNT("/account/%s", Polyfill.UUID_PATTERN),
-    MODIFY_ACCOUNT_DATA_STORAGE("/account/%s/data/%s", Polyfill.UUID_PATTERN, "[\\w][\\w\\d-_]+"),
+    MODIFY_ACCOUNT_DATA_STORAGE("/account/%s/service/%s/data/%s", Polyfill.UUID_PATTERN, Polyfill.UUID_PATTERN, "[\\w][\\w\\d-_]+"),
     SERVICES("/api/services"),
     SERVICE_API("/api/service/%s", Polyfill.UUID_PATTERN);
 

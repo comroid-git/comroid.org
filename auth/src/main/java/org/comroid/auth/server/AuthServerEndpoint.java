@@ -90,16 +90,32 @@ public enum AuthServerEndpoint implements ServerEndpoint.This {
     MODIFY_ACCOUNT_DATA_STORAGE(org.comroid.auth.rest.AuthEndpoint.MODIFY_ACCOUNT_DATA_STORAGE) {
         @Override
         public REST.Response executeGET(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            UserDataStorage dataStorage = obtainDataStorage(context, headers, UUID.fromString(urlParams[0]));
+            UserDataStorage dataStorage = obtainDataStorage(context, headers, UUID.fromString(urlParams[0]), UUID.fromString(urlParams[1]));
             UniNode storageData = dataStorage.getData(urlParams[1]);
             return new REST.Response(OK, storageData);
         }
 
         @Override
         public REST.Response executePOST(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
-            UserDataStorage dataStorage = obtainDataStorage(context, headers, UUID.fromString(urlParams[0]));
+            UserDataStorage dataStorage = obtainDataStorage(context, headers, UUID.fromString(urlParams[0]), UUID.fromString(urlParams[1]));
             UniNode storageData = dataStorage.putData(urlParams[1], body);
             return new REST.Response(OK, storageData);
+        }
+
+        private UserDataStorage obtainDataStorage(Context context, REST.Header.List headers, UUID clientId, UUID serviceId) {
+            ClientProvider clientProvider = context.requireFromContext(ClientProvider.class);
+            OAuthAuthorization.AccessToken accessToken = clientProvider.findAccessToken(headers);
+
+            if (!accessToken.getAuthorization().getResource().getUUID().equals(serviceId))
+                throw new RestEndpointException(UNAUTHORIZED, "Invalid Token for Resource " + serviceId);
+            if (!accessToken.getScopes().contains("storage"))
+                throw new RestEndpointException(UNAUTHORIZED, "Missing scope: storage");
+
+            UserAccount account = clientProvider.findClient(clientId).into(UserAccount.class);
+            if (account == null)
+                throw new RestEndpointException(INTERNAL_SERVER_ERROR, "Internal Server Error: Invalid Client type");
+
+            return account.getDataStorage();
         }
     },
     REGISTRATION("/api/register") {
@@ -287,20 +303,6 @@ public enum AuthServerEndpoint implements ServerEndpoint.This {
         this.extension = extension;
         this.regex = regex;
         this.pattern = buildUrlPattern();
-    }
-
-    private static UserDataStorage obtainDataStorage(Context context, REST.Header.List headers, UUID clientId) {
-        ClientProvider clientProvider = context.requireFromContext(ClientProvider.class);
-        OAuthAuthorization.AccessToken accessToken = clientProvider.findAccessToken(headers);
-
-        if (!accessToken.getScopes().contains("storage"))
-            throw new RestEndpointException(UNAUTHORIZED, "Missing scope: storage");
-
-        UserAccount account = clientProvider.findClient(clientId).into(UserAccount.class);
-        if (account == null)
-            throw new RestEndpointException(INTERNAL_SERVER_ERROR, "Internal Server Error: Invalid Client type");
-
-        return account.getDataStorage();
     }
 
     public static REST.Response discoveryResponse() {
