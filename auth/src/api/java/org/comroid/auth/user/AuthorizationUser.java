@@ -178,6 +178,7 @@ public abstract class AuthorizationUser extends DataContainerBase<AuthEntity> im
                 .thenApply(response -> {
                     if (response.getStatusCode() != 200)
                         throw response.toException();
+                    put(AUTHORIZATION_CODE, null);
                     invalidation.complete(null);
                     return this;
                 });
@@ -199,6 +200,7 @@ public abstract class AuthorizationUser extends DataContainerBase<AuthEntity> im
                 .thenApply(response -> {
                     if (response.getStatusCode() != 200)
                         throw response.toException();
+                    put(AUTHORIZATION_CODE, null);
                     return this;
                 });
     }
