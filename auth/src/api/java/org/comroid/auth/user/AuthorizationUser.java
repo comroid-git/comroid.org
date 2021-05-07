@@ -128,8 +128,12 @@ public abstract class AuthorizationUser extends DataContainerBase<AuthEntity> im
     public AuthorizationUser(ContextualProvider context, @Nullable Consumer<UniObjectNode> initialDataBuilder) {
         super(context, initialDataBuilder);
 
-        this.initialValidation = validateUserInfo().exceptionally(Polyfill
-                .exceptionLogger(logger, Level.FATAL, "Could not validate " + this));
+        this.initialValidation = validateUserInfo()
+                .exceptionally(t -> {
+                    logger.fatal("Could not validate " + this, t);
+                    invalidate();
+                    return null;
+                });
     }
 
     private static String createServiceDataKey(UUID serviceId, String storageName) {
@@ -149,7 +153,14 @@ public abstract class AuthorizationUser extends DataContainerBase<AuthEntity> im
 
     @Override
     public final boolean invalidate() {
-        return invalidateAuthorizationCode().join() == this;
+        if ((!invalidation.isDone() && invalidation.complete(null)) | invalidateAuthorizationCode().join() == this) {
+            onInvalidate();
+            return true;
+        }
+        return false;
+    }
+
+    protected void onInvalidate() {
     }
 
     public final CompletableFuture<? extends AuthorizationUser> invalidateAuthorizationCode() {
