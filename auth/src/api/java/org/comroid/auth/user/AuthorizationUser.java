@@ -235,35 +235,35 @@ public abstract class AuthorizationUser extends DataContainerBase<AuthEntity> im
                 }).thenApply(Collections::unmodifiableList);
     }
 
-    public final boolean hasServiceData(Service service, String storageName) {
-        return serviceDataCache.hasValue(createServiceDataKey(service, storageName));
+    public final boolean hasServiceData(UUID serviceId, String storageName) {
+        return serviceDataCache.hasValue(createServiceDataKey(serviceId, storageName));
     }
 
-    public final Ref<UniNode> getServiceData(Service service, String storageName) {
-        return serviceDataCache.getReference(createServiceDataKey(service, storageName), true);
+    public final Ref<UniNode> getServiceData(UUID serviceId, String storageName) {
+        return serviceDataCache.getReference(createServiceDataKey(serviceId, storageName), true);
     }
 
-    public final CompletableFuture<UniNode> requestServiceData(Service service, String storageName) {
+    public final CompletableFuture<UniNode> requestServiceData(UUID serviceId, String storageName) {
         if (!storageName.matches(User.STORAGE_NAME_PATTERN))
             throw new IllegalArgumentException(String.format("Invalid storage name '%s'; must match %s",
                     storageName, User.STORAGE_NAME_PATTERN));
         return upgrade(REST.class).request()
                 .method(REST.Method.GET)
-                .endpoint(AuthEndpoint.MODIFY_ACCOUNT_DATA_STORAGE, getUUID(), service.getUUID(), storageName)
+                .endpoint(AuthEndpoint.MODIFY_ACCOUNT_DATA_STORAGE, getUUID(), serviceId, storageName)
                 .addHeader(CommonHeaderNames.AUTHORIZATION, getToken())
                 .execute$deserializeSingle()
-                .thenApply(data -> cacheServiceData(service, storageName, data));
+                .thenApply(data -> cacheServiceData(serviceId, storageName, data));
     }
 
-    private UniNode cacheServiceData(Service service, String storageName, final UniNode data) {
-        return serviceDataCache.compute(createServiceDataKey(service, storageName), (k, cached) -> {
+    private UniNode cacheServiceData(UUID serviceId, String storageName, final UniNode data) {
+        return serviceDataCache.compute(createServiceDataKey(serviceId, storageName), (k, cached) -> {
             if (cached == null)
                 return data;
             return cached.copyFrom(data);
         });
     }
 
-    private String createServiceDataKey(Service service, String storageName) {
-        return service.getUUID() + storageName;
+    private String createServiceDataKey(UUID serviceId, String storageName) {
+        return serviceId + storageName;
     }
 }
