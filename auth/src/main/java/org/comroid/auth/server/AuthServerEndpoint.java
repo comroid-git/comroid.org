@@ -115,7 +115,7 @@ public enum AuthServerEndpoint implements ServerEndpoint.This {
             if (!accessToken.getAuthorization().getResource().getUUID().equals(serviceId))
                 throw new RestEndpointException(UNAUTHORIZED, "Invalid Token for Resource " + serviceId);
             if (!accessToken.getScopes().contains("storage"))
-                throw new RestEndpointException(UNAUTHORIZED, "Missing scope: storage");
+                throw new RestEndpointException(UNAUTHORIZED, "Missing storage scope in " + accessToken.getScopes());
 
             UserAccount account = clientProvider.findClient(clientId).into(UserAccount.class);
             if (account == null)
