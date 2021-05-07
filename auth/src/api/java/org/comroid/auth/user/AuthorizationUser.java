@@ -141,8 +141,7 @@ public abstract class AuthorizationUser extends DataContainerBase<AuthEntity> im
     public final CompletableFuture<? extends AuthorizationUser> invalidateAuthorizationCode() {
         if (!isValid())
             return CompletableFuture.completedFuture(this);
-        return getFromContext(REST.class)
-                .orElseGet(() -> new REST(this))
+        return upgrade(REST.class)
                 .request()
                 .method(REST.Method.POST)
                 .endpoint(OAuthEndpoint.TOKEN_REVOKE)
@@ -162,8 +161,7 @@ public abstract class AuthorizationUser extends DataContainerBase<AuthEntity> im
     public final CompletableFuture<? extends AuthorizationUser> invalidateToken() {
         if (!isValid())
             return CompletableFuture.completedFuture(this);
-        return getFromContext(REST.class)
-                .orElseGet(() -> new REST(this))
+        return upgrade(REST.class)
                 .request()
                 .method(REST.Method.POST)
                 .endpoint(OAuthEndpoint.TOKEN_REVOKE)
@@ -180,8 +178,7 @@ public abstract class AuthorizationUser extends DataContainerBase<AuthEntity> im
     }
 
     public final CompletableFuture<? extends AuthorizationUser> refreshAccessToken() {
-        return invalidateToken().thenCompose(it -> getFromContext(REST.class)
-                .orElseGet(() -> new REST(this))
+        return invalidateToken().thenCompose(it -> upgrade(REST.class)
                 .request((ctx, dat) -> new OAuthAuthorization.AccessToken(ctx, dat.asObjectNode()))
                 .method(REST.Method.POST)
                 .endpoint(OAuthEndpoint.TOKEN)
@@ -200,8 +197,7 @@ public abstract class AuthorizationUser extends DataContainerBase<AuthEntity> im
     }
 
     public final CompletableFuture<? extends AuthorizationUser> validateUserInfo() {
-        return getFromContext(REST.class)
-                .orElseGet(() -> new REST(this))
+        return upgrade(REST.class)
                 .request()
                 .method(REST.Method.GET)
                 .endpoint(OAuthEndpoint.USER_INFO)
@@ -217,8 +213,7 @@ public abstract class AuthorizationUser extends DataContainerBase<AuthEntity> im
     }
 
     public final CompletableFuture<List<Service>> requestServices() {
-        return getFromContext(REST.class)
-                .orElseGet(() -> new REST(this))
+        return upgrade(REST.class)
                 .request()
                 .method(REST.Method.GET)
                 .endpoint(AuthEndpoint.SERVICES)
