@@ -42,7 +42,6 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public abstract class AuthorizationUser extends DataContainerBase<AuthEntity> implements ValidityStage, CookieProvider, User {
     @RootBind
@@ -133,6 +132,17 @@ public abstract class AuthorizationUser extends DataContainerBase<AuthEntity> im
                 .exceptionLogger(logger, Level.FATAL, "Could not validate " + this));
     }
 
+    private static String createServiceDataKey(UUID serviceId, String storageName) {
+        return serviceId + validateStorageName(storageName);
+    }
+
+    private static String validateStorageName(String storageName) {
+        if (!storageName.matches(User.STORAGE_NAME_PATTERN))
+            throw new IllegalArgumentException(String.format("Invalid storage name '%s'; must match %s",
+                    storageName, User.STORAGE_NAME_PATTERN));
+        return storageName;
+    }
+
     private MessageSupplier unavailableMessage(String fieldName) {
         return MessageSupplier.format("Field '%s' unavailable; UserData was never validated", fieldName);
     }
@@ -145,8 +155,8 @@ public abstract class AuthorizationUser extends DataContainerBase<AuthEntity> im
     public final CompletableFuture<? extends AuthorizationUser> invalidateAuthorizationCode() {
         if (!isValid())
             return CompletableFuture.completedFuture(this);
-        return upgrade(REST.class)
-                .request()
+        logger.debug("Invalidating Authorization Code");
+        return upgrade(REST.class).request()
                 .method(REST.Method.POST)
                 .endpoint(OAuthEndpoint.TOKEN_REVOKE)
                 .buildBody(BodyBuilderType.OBJECT, obj -> {
@@ -165,6 +175,7 @@ public abstract class AuthorizationUser extends DataContainerBase<AuthEntity> im
     public final CompletableFuture<? extends AuthorizationUser> invalidateToken() {
         if (!isValid())
             return CompletableFuture.completedFuture(this);
+        logger.debug("Invalidating Authorization Token");
         return upgrade(REST.class)
                 .request()
                 .method(REST.Method.POST)
@@ -182,6 +193,7 @@ public abstract class AuthorizationUser extends DataContainerBase<AuthEntity> im
     }
 
     public final CompletableFuture<? extends AuthorizationUser> refreshAccessToken() {
+        logger.debug("Refreshing Authorization Token");
         return invalidateToken().thenCompose(it -> upgrade(REST.class)
                 .request((ctx, dat) -> new OAuthAuthorization.AccessToken(ctx, dat.asObjectNode()))
                 .method(REST.Method.POST)
@@ -201,6 +213,7 @@ public abstract class AuthorizationUser extends DataContainerBase<AuthEntity> im
     }
 
     public final CompletableFuture<? extends AuthorizationUser> validateUserInfo() {
+        logger.debug("Validating identity of {}", this);
         return upgrade(REST.class)
                 .request()
                 .method(REST.Method.GET)
@@ -217,6 +230,7 @@ public abstract class AuthorizationUser extends DataContainerBase<AuthEntity> im
     }
 
     public final CompletableFuture<List<Service>> requestServices() {
+        logger.debug("Requesting all Services");
         return upgrade(REST.class)
                 .request()
                 .method(REST.Method.GET)
@@ -246,6 +260,7 @@ public abstract class AuthorizationUser extends DataContainerBase<AuthEntity> im
 
     public final CompletableFuture<UniNode> requestServiceData(final UUID serviceId, final String storageName) {
         validateStorageName(storageName);
+        logger.debug("Requesting Service Storage {} of service {} ", storageName, serviceId);
         return upgrade(REST.class).request()
                 .method(REST.Method.GET)
                 .endpoint(AuthEndpoint.MODIFY_ACCOUNT_DATA_STORAGE, getUUID(), serviceId, storageName)
@@ -256,6 +271,8 @@ public abstract class AuthorizationUser extends DataContainerBase<AuthEntity> im
 
     public final CompletableFuture<UniNode> updateServiceData(final UUID serviceId, final String storageName, Serializable data) {
         validateStorageName(storageName);
+        logger.debug("Updating Service Storage {} of service {} ", storageName, serviceId);
+        logger.trace("New Content: {}", data.toSerializedString());
         return upgrade(REST.class).request()
                 .method(REST.Method.POST)
                 .endpoint(AuthEndpoint.MODIFY_ACCOUNT_DATA_STORAGE, getUUID(), serviceId, storageName)
@@ -271,16 +288,5 @@ public abstract class AuthorizationUser extends DataContainerBase<AuthEntity> im
                 return data;
             return cached.copyFrom(data);
         });
-    }
-
-    private static String createServiceDataKey(UUID serviceId, String storageName) {
-        return serviceId + validateStorageName(storageName);
-    }
-
-    private static String validateStorageName(String storageName) {
-        if (!storageName.matches(User.STORAGE_NAME_PATTERN))
-            throw new IllegalArgumentException(String.format("Invalid storage name '%s'; must match %s",
-                    storageName, User.STORAGE_NAME_PATTERN));
-        return storageName;
     }
 }
