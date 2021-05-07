@@ -45,7 +45,7 @@ public final class UserSession implements PermitCarrier, CookieProvider {
 
     @Override
     public @Nullable String getDefaultCookieDomain() {
-        return OS.isWindows ? null : ".comroid.org";
+        return OS.isWindows ? null : "auth.comroid.org";
     }
 
     @Override
