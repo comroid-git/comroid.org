@@ -70,7 +70,7 @@ public final class UserAccount extends DataContainerBase<AuthEntity> implements 
     private final FileHandle loginHashFile;
     private final HashSet<OAuthAuthorization> authorizationTokens;
     private final HashSet<OAuthAuthorization.AccessToken> accessTokens;
-    private final UserDataStorage dataStorage;
+    private final UserDataStorage.ServiceMap dataStorage;
 
     {
         // use Email as Username if no username is provided
@@ -140,8 +140,8 @@ public final class UserAccount extends DataContainerBase<AuthEntity> implements 
         return dir;
     }
 
-    public UserDataStorage getDataStorage() {
-        return dataStorage;
+    public UserDataStorage getDataStorage(UUID serviceId) {
+        return dataStorage.getForService(serviceId);
     }
 
     public boolean isEmailVerified() {
@@ -163,7 +163,7 @@ public final class UserAccount extends DataContainerBase<AuthEntity> implements 
         this.loginHashFile = dir.createSubFile("login.hash");
         this.authorizationTokens = new HashSet<>();
         this.accessTokens = new HashSet<>();
-        this.dataStorage = new UserDataStorage(this);
+        this.dataStorage = new UserDataStorage.ServiceMap(this);
         addChildren(dataStorage);
     }
 
@@ -179,7 +179,7 @@ public final class UserAccount extends DataContainerBase<AuthEntity> implements 
         this.loginHashFile.setContent(encrypt(email, password));
         this.authorizationTokens = new HashSet<>();
         this.accessTokens = new HashSet<>();
-        this.dataStorage = new UserDataStorage(this);
+        this.dataStorage = new UserDataStorage.ServiceMap(this);
         addChildren(dataStorage);
     }
 

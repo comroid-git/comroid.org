@@ -115,7 +115,7 @@ public enum AuthServerEndpoint implements ServerEndpoint.This {
             if (account == null)
                 throw new RestEndpointException(INTERNAL_SERVER_ERROR, "Internal Server Error: Invalid Client type");
 
-            return account.getDataStorage();
+            return account.getDataStorage(serviceId);
         }
     },
     REGISTRATION("/api/register") {
