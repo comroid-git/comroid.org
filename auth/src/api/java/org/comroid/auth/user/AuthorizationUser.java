@@ -235,6 +235,10 @@ public abstract class AuthorizationUser extends DataContainerBase<AuthEntity> im
                 }).thenApply(Collections::unmodifiableList);
     }
 
+    public final boolean hasServiceData(Service service, String storageName) {
+        return serviceDataCache.hasValue(createServiceDataKey(service, storageName));
+    }
+
     public final Ref<UniNode> getServiceData(Service service, String storageName) {
         return serviceDataCache.getReference(createServiceDataKey(service, storageName), true);
     }
