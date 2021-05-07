@@ -241,6 +241,7 @@ public abstract class AuthorizationUser extends DataContainerBase<AuthEntity> im
     }
 
     public final CompletableFuture<List<Service>> requestServices() {
+        checkPermits(Permit.ADMIN);
         logger.debug("Requesting all Services");
         return upgrade(REST.class)
                 .request()
@@ -270,6 +271,7 @@ public abstract class AuthorizationUser extends DataContainerBase<AuthEntity> im
     }
 
     public final CompletableFuture<UniNode> requestServiceData(final UUID serviceId, final String storageName) {
+        checkPermits(Permit.STORAGE);
         validateStorageName(storageName);
         logger.debug("Requesting Service Storage {} of service {} ", storageName, serviceId);
         return upgrade(REST.class).request()
@@ -282,6 +284,7 @@ public abstract class AuthorizationUser extends DataContainerBase<AuthEntity> im
     }
 
     public final CompletableFuture<UniNode> updateServiceData(final UUID serviceId, final String storageName, Serializable data) {
+        checkPermits(Permit.STORAGE);
         validateStorageName(storageName);
         logger.debug("Updating Service Storage {} of service {} ", storageName, serviceId);
         logger.trace("New Content: {}", data.toSerializedString());
