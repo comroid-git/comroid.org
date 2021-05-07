@@ -42,6 +42,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public abstract class AuthorizationUser extends DataContainerBase<AuthEntity> implements ValidityStage, CookieProvider, User {
     @RootBind
@@ -243,16 +244,25 @@ public abstract class AuthorizationUser extends DataContainerBase<AuthEntity> im
         return serviceDataCache.getReference(createServiceDataKey(serviceId, storageName), true);
     }
 
-    public final CompletableFuture<UniNode> requestServiceData(UUID serviceId, String storageName) {
-        if (!storageName.matches(User.STORAGE_NAME_PATTERN))
-            throw new IllegalArgumentException(String.format("Invalid storage name '%s'; must match %s",
-                    storageName, User.STORAGE_NAME_PATTERN));
+    public final CompletableFuture<UniNode> requestServiceData(final UUID serviceId, final String storageName) {
+        validateStorageName(storageName);
         return upgrade(REST.class).request()
                 .method(REST.Method.GET)
                 .endpoint(AuthEndpoint.MODIFY_ACCOUNT_DATA_STORAGE, getUUID(), serviceId, storageName)
                 .addHeader(CommonHeaderNames.AUTHORIZATION, getToken())
                 .execute$deserializeSingle()
                 .thenApply(data -> cacheServiceData(serviceId, storageName, data));
+    }
+
+    public final CompletableFuture<UniNode> updateServiceData(final UUID serviceId, final String storageName, Serializable data) {
+        validateStorageName(storageName);
+        return upgrade(REST.class).request()
+                .method(REST.Method.POST)
+                .endpoint(AuthEndpoint.MODIFY_ACCOUNT_DATA_STORAGE, getUUID(), serviceId, storageName)
+                .addHeader(CommonHeaderNames.AUTHORIZATION, getToken())
+                .body(data)
+                .execute$deserializeSingle()
+                .thenApply(newData -> cacheServiceData(serviceId, storageName, newData));
     }
 
     private UniNode cacheServiceData(UUID serviceId, String storageName, final UniNode data) {
@@ -263,7 +273,14 @@ public abstract class AuthorizationUser extends DataContainerBase<AuthEntity> im
         });
     }
 
-    private String createServiceDataKey(UUID serviceId, String storageName) {
-        return serviceId + storageName;
+    private static String createServiceDataKey(UUID serviceId, String storageName) {
+        return serviceId + validateStorageName(storageName);
+    }
+
+    private static String validateStorageName(String storageName) {
+        if (!storageName.matches(User.STORAGE_NAME_PATTERN))
+            throw new IllegalArgumentException(String.format("Invalid storage name '%s'; must match %s",
+                    storageName, User.STORAGE_NAME_PATTERN));
+        return storageName;
     }
 }
