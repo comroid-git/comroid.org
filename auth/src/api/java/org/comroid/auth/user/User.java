@@ -7,8 +7,10 @@ import org.comroid.varbind.bind.GroupBind;
 import org.comroid.varbind.bind.VarBind;
 
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 public interface User extends AuthEntity {
+    String STORAGE_NAME_PATTERN = "[\\w][\\w\\d-_]+";
     GroupBind<User> Type = AuthEntity.Type.subGroup("org.comroid.auth-user");
     VarBind<User, String, UUID, UUID> ID
             = Type.createBind("uuid")

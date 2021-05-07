@@ -13,7 +13,9 @@ import org.comroid.auth.service.DataBasedService;
 import org.comroid.auth.service.Service;
 import org.comroid.common.info.MessageSupplier;
 import org.comroid.mutatio.model.Ref;
+import org.comroid.mutatio.model.RefMap;
 import org.comroid.mutatio.ref.ReferenceList;
+import org.comroid.mutatio.ref.ReferenceMap;
 import org.comroid.restless.CommonHeaderNames;
 import org.comroid.restless.HTTPStatusCodes;
 import org.comroid.restless.REST;
@@ -75,6 +77,7 @@ public abstract class AuthorizationUser extends DataContainerBase<AuthEntity> im
     public final Ref<OAuthAuthorization.AccessToken> accessToken = getComputedReference(CURRENT_ACCESS_TOKEN);
     protected final CompletableFuture<Void> invalidation = new CompletableFuture<>();
     private final CompletableFuture<? extends AuthorizationUser> initialValidation;
+    private final RefMap<String, UniNode> serviceDataCache = new ReferenceMap<>();
 
     public CompletableFuture<? extends AuthorizationUser> getInitialValidation() {
         return initialValidation;
@@ -230,5 +233,33 @@ public abstract class AuthorizationUser extends DataContainerBase<AuthEntity> im
                             .filter(ComroidAuthServer::addServiceToCache)
                             .collect(Collectors.toList());
                 }).thenApply(Collections::unmodifiableList);
+    }
+
+    public final Ref<UniNode> getServiceData(Service service, String storageName) {
+        return serviceDataCache.getReference(createServiceDataKey(service, storageName), true);
+    }
+
+    public final CompletableFuture<UniNode> requestServiceData(Service service, String storageName) {
+        if (!storageName.matches(User.STORAGE_NAME_PATTERN))
+            throw new IllegalArgumentException(String.format("Invalid storage name '%s'; must match %s",
+                    storageName, User.STORAGE_NAME_PATTERN));
+        return upgrade(REST.class).request()
+                .method(REST.Method.GET)
+                .endpoint(AuthEndpoint.MODIFY_ACCOUNT_DATA_STORAGE, getUUID(), service.getUUID(), storageName)
+                .addHeader(CommonHeaderNames.AUTHORIZATION, getToken())
+                .execute$deserializeSingle()
+                .thenApply(data -> cacheServiceData(service, storageName, data));
+    }
+
+    private UniNode cacheServiceData(Service service, String storageName, final UniNode data) {
+        return serviceDataCache.compute(createServiceDataKey(service, storageName), (k, cached) -> {
+            if (cached == null)
+                return data;
+            return cached.copyFrom(data);
+        });
+    }
+
+    private String createServiceDataKey(Service service, String storageName) {
+        return service.getUUID() + storageName;
     }
 }
