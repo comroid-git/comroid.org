@@ -6,7 +6,6 @@ import org.comroid.api.EMailAddress;
 import org.comroid.api.Rewrapper;
 import org.comroid.api.Serializer;
 import org.comroid.auth.model.AuthEntity;
-import org.comroid.auth.model.PermitCarrier;
 import org.comroid.auth.service.Service;
 import org.comroid.common.io.FileHandle;
 import org.comroid.common.io.FileProcessor;
@@ -37,7 +36,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-public final class UserAccount extends DataContainerBase<AuthEntity> implements PermitCarrier, Client, FileProcessor, User {
+public final class UserAccount extends DataContainerBase<AuthEntity> implements Client, FileProcessor, User {
     @RootBind
     public static final GroupBind<UserAccount> Type = User.Type.subGroup("user-account");
     public static final VarBind<UserAccount, Boolean, Boolean, Boolean> EMAIL_VERIFIED
@@ -51,13 +50,6 @@ public final class UserAccount extends DataContainerBase<AuthEntity> implements 
             = Type.createBind("internal_email")
             .extractAs(StandardValueType.STRING)
             .build();
-    public static final VarBind<UserAccount, Integer, Permit.Set, Permit.Set> PERMIT
-            = Type.createBind("permit")
-            .extractAs(StandardValueType.INTEGER)
-            .andRemap(Permit::valueOf)
-            .onceEach()
-            .setDefaultValue(c -> new Permit.Set())
-            .build();
     public static final String ORG_EMAIL_SUFFIX = "@comroid.org";
     private static final Logger logger = LogManager.getLogger();
     public final Ref<UUID> id = getComputedReference(ID);
@@ -65,7 +57,7 @@ public final class UserAccount extends DataContainerBase<AuthEntity> implements 
     public final Ref<EMailAddress> email = getComputedReference(EMAIL);
     public final Ref<Boolean> emailVerified = getComputedReference(EMAIL_VERIFIED);
     public final Ref<String> internalEmail = getComputedReference(INTERNAL_EMAIL);
-    public final Ref<Permit.Set> permits = getComputedReference(PERMIT);
+    public final Ref<Permit.Set> permits = getComputedReference(User.PERMIT);
     private final FileHandle dir;
     private final FileHandle loginHashFile;
     private final HashSet<OAuthAuthorization> authorizationTokens;
@@ -78,9 +70,9 @@ public final class UserAccount extends DataContainerBase<AuthEntity> implements 
             username.rebind(email.map(EMailAddress::toString));
 
         if (email.contentEquals("burdoto@outlook.com"))
-            put(PERMIT, Bitmask.combine(Permit.values()));
+            put(User.PERMIT, Bitmask.combine(Permit.values()));
         else if (permits.test(Set::isEmpty))
-            put(PERMIT, Bitmask.combine(Permit.EMAIL, Permit.STORAGE));
+            put(User.PERMIT, Bitmask.combine(Permit.EMAIL, Permit.STORAGE));
 
         if (getPermits().contains(Permit.DEV))
             if (getEmail().endsWith(ORG_EMAIL_SUFFIX))
@@ -112,11 +104,6 @@ public final class UserAccount extends DataContainerBase<AuthEntity> implements 
 
     public @Nullable String getInternalEmail() {
         return internalEmail.get();
-    }
-
-    @Override
-    public Permit.Set getPermits() {
-        return permits.assertion("Permits not found");
     }
 
     @Override
