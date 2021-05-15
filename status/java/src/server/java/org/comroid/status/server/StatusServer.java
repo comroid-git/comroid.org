@@ -89,7 +89,7 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
         try {
             instance = this;
 
-            logger.info("Initialized Adapters");
+            logger.trace("Initialized Adapters");
 
         /*
         this.threadPool = ThreadPool.fixedSize(THREAD_GROUP, 8);
