@@ -35,7 +35,7 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
     //http://localhost:42641/services
 
     public static final AdapterDefinition CONTEXT;
-    public static final FileHandle PATH_BASE = new FileHandle("/home/comroid/srv_status/", true); // server path base
+    public static final FileHandle PATH_BASE = new FileHandle("/srv/status/", true); // server path base
     public static final FileHandle DATA_DIR = PATH_BASE.createSubDir("data");
     public static final FileHandle BOT_TOKEN = DATA_DIR.createSubFile("discord.cred");
     public static final FileHandle ADMIN_TOKEN = DATA_DIR.createSubFile("admin.cred");
