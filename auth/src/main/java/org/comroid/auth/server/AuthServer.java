@@ -133,6 +133,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
                     SOCKET_PORT,
                     AuthServerEndpoint.values.append(OAuthEndpoint.values)
             );
+            context.addToContext(server);
         } catch (UnknownHostException e) {
             logger.fatal("Unknown Host; Shutting down", e);
             System.exit(1);
