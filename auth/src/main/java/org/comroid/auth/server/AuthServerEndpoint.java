@@ -30,6 +30,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -40,13 +41,13 @@ import static org.comroid.restless.HTTPStatusCodes.*;
 public enum AuthServerEndpoint implements ServerEndpoint.This {
     FAVICON("/favicon.ico") {
         @Override
-        public REST.Response executeGET(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executeGET(Context context, URI requestURI, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             return new REST.Response(Polyfill.uri("https://cdn.comroid.org/favicon.ico"));
         }
     },
     WIDGET("/widget") {
         @Override
-        public REST.Response executeGET(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executeGET(Context context, URI requestURI, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             Map<String, Object> pageProperties = context.requireFromContext(PagePropertiesProvider.class)
                     .findPageProperties(headers);
             FrameBuilder frame = new FrameBuilder("widget", new REST.Header.List(), pageProperties, false);
@@ -56,7 +57,7 @@ public enum AuthServerEndpoint implements ServerEndpoint.This {
     },
     MODIFY_ACCOUNT(org.comroid.auth.rest.AuthEndpoint.MODIFY_ACCOUNT) {
         @Override
-        public REST.Response executePOST(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executePOST(Context context, URI requestURI, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             try {
                 UserSession session = UserSession.findSession(headers);
                 UserAccount account = session.getAccount();
@@ -90,14 +91,14 @@ public enum AuthServerEndpoint implements ServerEndpoint.This {
     },
     MODIFY_ACCOUNT_DATA_STORAGE(org.comroid.auth.rest.AuthEndpoint.MODIFY_ACCOUNT_DATA_STORAGE) {
         @Override
-        public REST.Response executeGET(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executeGET(Context context, URI requestURI, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             UserDataStorage dataStorage = obtainDataStorage(context, headers, UUID.fromString(urlParams[0]), UUID.fromString(urlParams[1]));
             UniNode storageData = dataStorage.getData(urlParams[1]);
             return new REST.Response(OK, storageData);
         }
 
         @Override
-        public REST.Response executePOST(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executePOST(Context context, URI requestURI, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             UserDataStorage dataStorage = obtainDataStorage(context, headers, UUID.fromString(urlParams[0]), UUID.fromString(urlParams[1]));
             UniNode storageData = dataStorage.putData(urlParams[1], body);
             try {
@@ -126,7 +127,7 @@ public enum AuthServerEndpoint implements ServerEndpoint.This {
     },
     REGISTRATION("/api/register") {
         @Override
-        public REST.Response executePOST(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executePOST(Context context, URI requestURI, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             try {
                 String email = body.use(EMAIL)
                         .map(UniNode::asString)
@@ -146,7 +147,7 @@ public enum AuthServerEndpoint implements ServerEndpoint.This {
     },
     LOGIN("/api/login") {
         @Override
-        public REST.Response executePOST(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executePOST(Context context, URI requestURI, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             try {
                 EMailAddress email = body.use(EMAIL)
                         .map(UniNode::asString)
@@ -167,13 +168,13 @@ public enum AuthServerEndpoint implements ServerEndpoint.This {
         }
 
         @Override
-        public REST.Response executeDELETE(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executeDELETE(Context context, URI requestURI, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             return new REST.Response(Polyfill.uri("logout"));
         }
     },
     LOGOUT("/logout") {
         @Override
-        public REST.Response executeGET(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executeGET(Context context, URI requestURI, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             try {
                 UserSession session = UserSession.findSession(headers);
                 AuthServer.instance.getUserManager().closeSession(session);
@@ -188,7 +189,7 @@ public enum AuthServerEndpoint implements ServerEndpoint.This {
     },
     SERVICES(AuthEndpoint.SERVICES) {
         @Override
-        public REST.Response executeGET(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executeGET(Context context, URI requestURI, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             AuthServer server = context.requireFromContext(AuthServer.class);
             if (!server.getUserManager()
                     .findAccessToken(headers)
@@ -208,7 +209,7 @@ public enum AuthServerEndpoint implements ServerEndpoint.This {
     },
     SERVICE_API(org.comroid.auth.rest.AuthEndpoint.SERVICE_API) {
         @Override
-        public REST.Response executeGET(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executeGET(Context context, URI requestURI, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             UUID uuid;
             try {
                 uuid = UUID.fromString(urlParams[0]);
@@ -232,7 +233,7 @@ public enum AuthServerEndpoint implements ServerEndpoint.This {
         }
 
         @Override
-        public REST.Response executePOST(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executePOST(Context context, URI requestURI, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             final AuthServer server = context.requireFromContext(AuthServer.class);
             final ServiceManager serviceManager = server.getServiceManager();
             UUID uuid = urlParams[0].equals("00000000-0000-0000-0000-000000000000") ? null : UUID.fromString(urlParams[0]);
@@ -265,13 +266,13 @@ public enum AuthServerEndpoint implements ServerEndpoint.This {
     },
     DISCOVERY_OAUTH("/.well-known/oauth-authorization-server") {
         @Override
-        public REST.Response executeGET(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executeGET(Context context, URI requestURI, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             return discoveryResponse();
         }
     },
     DISCOVERY_OPENID("/.well-known/openid-configuration") {
         @Override
-        public REST.Response executeGET(Context context, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
+        public REST.Response executeGET(Context context, URI requestURI, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             return discoveryResponse();
         }
     };
