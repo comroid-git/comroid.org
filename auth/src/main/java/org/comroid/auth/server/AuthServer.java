@@ -12,6 +12,7 @@ import org.comroid.auth.user.Permit;
 import org.comroid.auth.user.UserManager;
 import org.comroid.auth.user.UserSession;
 import org.comroid.common.io.FileHandle;
+import org.comroid.guardian.GuardianModule;
 import org.comroid.mutatio.model.RefContainer;
 import org.comroid.restless.HttpAdapter;
 import org.comroid.restless.REST;
@@ -22,7 +23,6 @@ import org.comroid.status.entity.Service;
 import org.comroid.uniform.Context;
 import org.comroid.uniform.SerializationAdapter;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
-import org.comroid.webkit.config.WebkitConfiguration;
 import org.comroid.webkit.model.ConnectionFactory;
 import org.comroid.webkit.model.PagePropertiesProvider;
 import org.comroid.webkit.oauth.OAuth;
@@ -40,7 +40,9 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-public final class AuthServer implements ContextualProvider.Underlying, UncheckedCloseable, PagePropertiesProvider, ConnectionFactory<AuthConnection>, ResourceLoader {
+public final class AuthServer
+        extends GuardianModule
+        implements ContextualProvider.Underlying, UncheckedCloseable, PagePropertiesProvider, ConnectionFactory<AuthConnection>, ResourceLoader {
     //http://localhost:42000
     public static final Logger logger = LogManager.getLogger();
     public static final ContextualProvider MASTER_CONTEXT;
@@ -91,6 +93,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
     }
 
     public AuthServer(ScheduledExecutorService executor, ResourceLoader resourceLoader) {
+        super(context);
         logger.info("Booting up");
         this.resourceLoader = resourceLoader;
         logger.debug("ResourceLoader: " + resourceLoader);
