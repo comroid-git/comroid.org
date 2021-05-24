@@ -22,11 +22,13 @@ import org.comroid.uniform.Context;
 import org.comroid.uniform.SerializationAdapter;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
 import org.comroid.webkit.config.WebkitConfiguration;
+import org.comroid.webkit.model.ConnectionFactory;
 import org.comroid.webkit.model.PagePropertiesProvider;
 import org.comroid.webkit.oauth.OAuth;
 import org.comroid.webkit.oauth.rest.OAuthEndpoint;
 import org.comroid.webkit.server.WebkitServer;
 import org.comroid.webkit.socket.WebkitConnection;
+import org.java_websocket.WebSocket;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,7 +40,7 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-public final class AuthServer implements ContextualProvider.Underlying, UncheckedCloseable, PagePropertiesProvider {
+public final class AuthServer implements ContextualProvider.Underlying, UncheckedCloseable, PagePropertiesProvider, ConnectionFactory<AuthConnection> {
     //http://localhost:42000
     public static final Logger logger = LogManager.getLogger();
     public static final ContextualProvider MASTER_CONTEXT;
@@ -123,15 +125,9 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
             logger.debug("Starting Webkit server");
             this.server = new WebkitServer(
                     context.upgrade(Context.class),
-                    this.executor,
                     URL_BASE,
-                    OS.isWindows
-                            ? InetAddress.getLoopbackAddress()
-                            : InetAddress.getLocalHost(),
                     PORT,
                     SOCKET_PORT,
-                    AuthConnection::new,
-                    this,
                     AuthServerEndpoint.values.append(OAuthEndpoint.values)
             );
         } catch (UnknownHostException e) {
@@ -201,6 +197,11 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
             logger.error("Could not shutdown UserManager gracefully", t);
         }
         logger.info("Goodbye!");
+    }
+
+    @Override
+    public AuthConnection apply(WebSocket webSocket, REST.Header.List headers) {
+        return new AuthConnection(webSocket, headers, context);
     }
 
     public static final class WebResources {
