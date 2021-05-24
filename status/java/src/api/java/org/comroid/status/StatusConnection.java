@@ -148,7 +148,7 @@ public final class StatusConnection implements ContextualProvider.Underlying {
                 .method(REST.Method.POST)
                 .endpoint(Endpoint.UPDATE_SERVICE_STATUS.complete(serviceName))
                 .addHeader(AUTHORIZATION, token)
-                .body(data.toString())
+                .body(data)
                 .execute$autoCache(Service.NAME, serviceCache)
                 .thenApply(RefOPs::getAny);
     }
