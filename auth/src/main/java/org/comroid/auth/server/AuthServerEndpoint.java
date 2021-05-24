@@ -21,6 +21,7 @@ import org.comroid.uniform.Context;
 import org.comroid.uniform.node.UniArrayNode;
 import org.comroid.uniform.node.UniNode;
 import org.comroid.uniform.node.UniObjectNode;
+import org.comroid.webkit.config.WebkitResourceLoader;
 import org.comroid.webkit.frame.FrameBuilder;
 import org.comroid.webkit.model.PagePropertiesProvider;
 import org.comroid.webkit.oauth.client.ClientProvider;
@@ -50,7 +51,7 @@ public enum AuthServerEndpoint implements ServerEndpoint.This {
         public REST.Response executeGET(Context context, URI requestURI, REST.Header.List headers, String[] urlParams, UniNode body) throws RestEndpointException {
             Map<String, Object> pageProperties = context.requireFromContext(PagePropertiesProvider.class)
                     .findPageProperties(headers);
-            FrameBuilder frame = new FrameBuilder("widget", new REST.Header.List(), pageProperties, false);
+            FrameBuilder frame = new FrameBuilder(context, "widget", new REST.Header.List(), false);
 
             return new REST.Response(OK, "text/html", frame.toReader());
         }
@@ -313,7 +314,7 @@ public enum AuthServerEndpoint implements ServerEndpoint.This {
     }
 
     public static REST.Response discoveryResponse() {
-        return new REST.Response(OK, MimeType.JSON, new InputStreamReader(FrameBuilder.getResource("oauth-discovery.json")));
+        return new REST.Response(OK, MimeType.JSON, new InputStreamReader(WebkitResourceLoader.getResource("oauth-discovery.json")));
     }
 
     @NotNull

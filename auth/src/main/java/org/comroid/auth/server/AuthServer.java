@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.Polyfill;
+import org.comroid.api.ResourceLoader;
 import org.comroid.api.UncheckedCloseable;
 import org.comroid.api.os.OS;
 import org.comroid.auth.service.ServiceManager;
@@ -33,14 +34,13 @@ import org.java_websocket.WebSocket;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-public final class AuthServer implements ContextualProvider.Underlying, UncheckedCloseable, PagePropertiesProvider, ConnectionFactory<AuthConnection> {
+public final class AuthServer implements ContextualProvider.Underlying, UncheckedCloseable, PagePropertiesProvider, ConnectionFactory<AuthConnection>, ResourceLoader {
     //http://localhost:42000
     public static final Logger logger = LogManager.getLogger();
     public static final ContextualProvider MASTER_CONTEXT;
@@ -61,11 +61,12 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
         SERI_LIB = FastJSONLib.fastJsonLib;
         HTTP_LIB = new JavaHttpAdapter();
         MASTER_CONTEXT = ContextualProvider.create(SERI_LIB, HTTP_LIB);
-        WebkitConfiguration.initialize(MASTER_CONTEXT);
+        //WebkitConfiguration.initialize(MASTER_CONTEXT);
         OAuth.URL_BASE = URL_BASE;
     }
 
     private final ScheduledExecutorService executor;
+    private final ResourceLoader resourceLoader;
     private final StatusConnection status;
     private final ContextualProvider context;
     private final UserManager userManager;
@@ -89,8 +90,10 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
         return server.getActiveConnections().flatMap(AuthConnection.class);
     }
 
-    public AuthServer(ScheduledExecutorService executor) {
+    public AuthServer(ScheduledExecutorService executor, ResourceLoader resourceLoader) {
         logger.info("Booting up");
+        this.resourceLoader = resourceLoader;
+        logger.debug("ResourceLoader: " + resourceLoader);
         try {
             this.executor = executor;
 
@@ -146,7 +149,10 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
     }
 
     public static void main(String[] args) {
-        instance = new AuthServer(Executors.newScheduledThreadPool(8));
+        instance = new AuthServer(
+                Executors.newScheduledThreadPool(8),
+                ResourceLoader.ofDirectory(DIR.createSubDir("resources"))
+        );
     }
 
     @Override
@@ -202,6 +208,11 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
     @Override
     public AuthConnection apply(WebSocket webSocket, REST.Header.List headers) {
         return new AuthConnection(webSocket, headers, context);
+    }
+
+    @Override
+    public InputStream getResource(String name) {
+        return resourceLoader.getResource(name);
     }
 
     public static final class WebResources {
