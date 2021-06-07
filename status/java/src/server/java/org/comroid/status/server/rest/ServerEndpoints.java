@@ -56,9 +56,9 @@ public enum ServerEndpoints implements ServerEndpoint {
             if (StatusServer.instance.getEntityCache().containsKey(urlParams[0]))
                 throw new RestEndpointException(BAD_REQUEST, "Service " + urlParams[0] + " already exists!");
 
-            checkAdminAuthorization(headers);
+            checkAdminAuthorization(request.getHeaders());
 
-            final LocalService service = StatusServer.instance.createService(urlParams[0], body.asObjectNode());
+            final LocalService service = StatusServer.instance.createService(urlParams[0], request.getBody().toUniNode().asObjectNode());
 
             return new REST.Response(OK, service.toObjectNode(StatusServer.CONTEXT));
         }
