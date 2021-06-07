@@ -18,6 +18,7 @@ import org.comroid.restless.REST;
 import org.comroid.restless.exception.RestEndpointException;
 import org.comroid.restless.server.ServerEndpoint;
 import org.comroid.uniform.Context;
+import org.comroid.uniform.model.Serializable;
 import org.comroid.uniform.node.UniArrayNode;
 import org.comroid.uniform.node.UniNode;
 import org.comroid.uniform.node.UniObjectNode;
@@ -50,7 +51,7 @@ public enum AuthServerEndpoint implements ServerEndpoint.This {
         @Override
         public REST.Response executeGET(Context context, URI requestURI, REST.Request<UniNode> request, String[] urlParams) throws RestEndpointException {
             Map<String, Object> pageProperties = context.requireFromContext(PagePropertiesProvider.class)
-                    .findPageProperties(headers);
+                    .findPageProperties(request.getHeaders());
             FrameBuilder frame = new FrameBuilder(context, "widget", new REST.Header.List(), false);
 
             return new REST.Response(OK, "text/html", frame.toReader());
@@ -60,12 +61,15 @@ public enum AuthServerEndpoint implements ServerEndpoint.This {
         @Override
         public REST.Response executePOST(Context context, URI requestURI, REST.Request<UniNode> request, String[] urlParams) throws RestEndpointException {
             try {
-                UserSession session = UserSession.findSession(headers);
+                UserSession session = UserSession.findSession(request.getHeaders());
                 UserAccount account = session.getAccount();
 
                 if (!account.getUUID().toString().equalsIgnoreCase(urlParams[0]))
                     throw new RestEndpointException(UNAUTHORIZED, "UUID Mismatch; Cookie Invalid");
 
+                UniNode body = request.wrapBody().ifPresentMap(Serializable::toUniNode);
+                if (body == null)
+                    throw new RestEndpointException(BAD_REQUEST, "Body cannot be empty");
                 if (body.has("new_password")) {
                     Ref<EMailAddress> email = account.email;
 
@@ -82,7 +86,7 @@ public enum AuthServerEndpoint implements ServerEndpoint.This {
                             .consume(account::putHash);
                 } else account.updateFrom(body.asObjectNode());
 
-                return AuthServerEndpoint.forwardToWidgetOr(headers, new REST.Header.List(), "../", "account");
+                return AuthServerEndpoint.forwardToWidgetOr(request.getHeaders(), new REST.Header.List(), "../", "account");
             } catch (RestEndpointException ex) {
                 if (ex.getStatusCode() == UNAUTHORIZED)
                     throw ex;
@@ -93,14 +97,17 @@ public enum AuthServerEndpoint implements ServerEndpoint.This {
     MODIFY_ACCOUNT_DATA_STORAGE(org.comroid.auth.rest.AuthEndpoint.MODIFY_ACCOUNT_DATA_STORAGE) {
         @Override
         public REST.Response executeGET(Context context, URI requestURI, REST.Request<UniNode> request, String[] urlParams) throws RestEndpointException {
-            UserDataStorage dataStorage = obtainDataStorage(context, headers, UUID.fromString(urlParams[0]), UUID.fromString(urlParams[1]));
+            UserDataStorage dataStorage = obtainDataStorage(context, request.getHeaders(), UUID.fromString(urlParams[0]), UUID.fromString(urlParams[1]));
             UniNode storageData = dataStorage.getData(urlParams[1]);
             return new REST.Response(OK, storageData);
         }
 
         @Override
         public REST.Response executePOST(Context context, URI requestURI, REST.Request<UniNode> request, String[] urlParams) throws RestEndpointException {
-            UserDataStorage dataStorage = obtainDataStorage(context, headers, UUID.fromString(urlParams[0]), UUID.fromString(urlParams[1]));
+            UserDataStorage dataStorage = obtainDataStorage(context, request.getHeaders(), UUID.fromString(urlParams[0]), UUID.fromString(urlParams[1]));
+            UniNode body = request.wrapBody().ifPresentMap(Serializable::toUniNode);
+            if (body == null)
+                throw new RestEndpointException(BAD_REQUEST, "Body cannot be empty");
             UniNode storageData = dataStorage.putData(urlParams[1], body);
             try {
                 dataStorage.storeData();
@@ -129,6 +136,9 @@ public enum AuthServerEndpoint implements ServerEndpoint.This {
     REGISTRATION("/api/register") {
         @Override
         public REST.Response executePOST(Context context, URI requestURI, REST.Request<UniNode> request, String[] urlParams) throws RestEndpointException {
+            UniNode body = request.wrapBody().ifPresentMap(Serializable::toUniNode);
+            if (body == null)
+                throw new RestEndpointException(BAD_REQUEST, "Body cannot be empty");
             try {
                 String email = body.use(EMAIL)
                         .map(UniNode::asString)
@@ -140,7 +150,7 @@ public enum AuthServerEndpoint implements ServerEndpoint.This {
 
                 UserAccount account = AuthServer.instance.getUserManager().createAccount(email, password);
 
-                return AuthServerEndpoint.forwardToWidgetOr(headers, new REST.Header.List(), "../", "account");
+                return AuthServerEndpoint.forwardToWidgetOr(request.getHeaders(), new REST.Header.List(), "../", "account");
             } catch (Throwable t) {
                 throw new RestEndpointException(INTERNAL_SERVER_ERROR, "Could not create user account", t);
             }
@@ -149,6 +159,9 @@ public enum AuthServerEndpoint implements ServerEndpoint.This {
     LOGIN("/api/login") {
         @Override
         public REST.Response executePOST(Context context, URI requestURI, REST.Request<UniNode> request, String[] urlParams) throws RestEndpointException {
+            UniNode body = request.wrapBody().ifPresentMap(Serializable::toUniNode);
+            if (body == null)
+                throw new RestEndpointException(BAD_REQUEST, "Body cannot be empty");
             try {
                 EMailAddress email = body.use(EMAIL)
                         .map(UniNode::asString)
@@ -162,7 +175,7 @@ public enum AuthServerEndpoint implements ServerEndpoint.This {
 
                 REST.Header.List resp = new REST.Header.List();
                 resp.add("Set-Cookie", session.getCookie());
-                return forwardToWidgetOr(headers, resp, "../", "account");
+                return forwardToWidgetOr(request.getHeaders(), resp, "../", "account");
             } catch (Throwable t) {
                 throw new RestEndpointException(INTERNAL_SERVER_ERROR, "Could not log in", t);
             }
@@ -177,12 +190,12 @@ public enum AuthServerEndpoint implements ServerEndpoint.This {
         @Override
         public REST.Response executeGET(Context context, URI requestURI, REST.Request<UniNode> request, String[] urlParams) throws RestEndpointException {
             try {
-                UserSession session = UserSession.findSession(headers);
+                UserSession session = UserSession.findSession(request.getHeaders());
                 AuthServer.instance.getUserManager().closeSession(session);
                 REST.Header.List response = new REST.Header.List();
                 response.add(CommonHeaderNames.CACHE_CONTROL, "no-cache");
                 response.add("Set-Cookie", UserSession.NULL_COOKIE);
-                return forwardToWidgetOr(headers, response, "", "home");
+                return forwardToWidgetOr(request.getHeaders(), response, "", "home");
             } catch (Throwable ignored) {
                 return new REST.Response(Polyfill.uri("home"));
             }
@@ -193,7 +206,7 @@ public enum AuthServerEndpoint implements ServerEndpoint.This {
         public REST.Response executeGET(Context context, URI requestURI, REST.Request<UniNode> request, String[] urlParams) throws RestEndpointException {
             AuthServer server = context.requireFromContext(AuthServer.class);
             if (!server.getUserManager()
-                    .findAccessToken(headers)
+                    .findAccessToken(request.getHeaders())
                     .getScopes()
                     .contains("admin"))
                 throw new RestEndpointException(UNAUTHORIZED, "Missing Permit: admin");
@@ -218,7 +231,7 @@ public enum AuthServerEndpoint implements ServerEndpoint.This {
                 throw new RestEndpointException(BAD_REQUEST, "Malformed ID: " + urlParams[0], e);
             }
             // validate permission
-            UserSession.findSession(headers).checkPermits(Permit.DEV);
+            UserSession.findSession(request.getHeaders()).checkPermits(Permit.DEV);
 
             // get service
             Service service = AuthServer.instance.getServiceManager()
@@ -239,7 +252,11 @@ public enum AuthServerEndpoint implements ServerEndpoint.This {
             final ServiceManager serviceManager = server.getServiceManager();
             UUID uuid = urlParams[0].equals("00000000-0000-0000-0000-000000000000") ? null : UUID.fromString(urlParams[0]);
 
-            UserSession.findSession(headers).checkPermits(Permit.ADMIN);
+            UserSession.findSession(request.getHeaders()).checkPermits(Permit.ADMIN);
+
+            UniNode body = request.wrapBody().ifPresentMap(Serializable::toUniNode);
+            if (body == null)
+                throw new RestEndpointException(BAD_REQUEST, "Body cannot be empty");
 
             context.getLogger().debug("POSTing Service with ID {} and body {}", uuid, body);
             UniObjectNode data = body.asObjectNode();
@@ -262,7 +279,7 @@ public enum AuthServerEndpoint implements ServerEndpoint.This {
                 service = serviceManager.createService(data);
                 context.getLogger().info("Service {} was created", service);
             }
-            return forwardToWidgetOr(headers, new REST.Header.List(), "../../", "service/" + uuid);
+            return forwardToWidgetOr(request.getHeaders(), new REST.Header.List(), "../../", "service/" + uuid);
         }
     },
     DISCOVERY_OAUTH("/.well-known/oauth-authorization-server") {

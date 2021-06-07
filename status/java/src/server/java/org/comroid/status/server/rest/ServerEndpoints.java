@@ -12,10 +12,11 @@ import org.comroid.status.server.auth.TokenCore;
 import org.comroid.status.server.entity.LocalService;
 import org.comroid.status.server.util.ResponseBuilder;
 import org.comroid.uniform.Context;
+import org.comroid.uniform.model.Serializable;
 import org.comroid.uniform.node.UniArrayNode;
 import org.comroid.uniform.node.UniNode;
+import org.comroid.uniform.node.UniObjectNode;
 
-import java.io.FileNotFoundException;
 import java.net.URI;
 
 import static org.comroid.restless.HTTPStatusCodes.*;
@@ -58,17 +59,20 @@ public enum ServerEndpoints implements ServerEndpoint {
 
             checkAdminAuthorization(request.getHeaders());
 
-            final LocalService service = StatusServer.instance.createService(urlParams[0], request.getBody().toUniNode().asObjectNode());
+            final LocalService service = StatusServer.instance.createService(urlParams[0], request.wrapBody().ifPresentMap(Serializable::toObjectNode));
 
             return new REST.Response(OK, service.toObjectNode(StatusServer.CONTEXT));
         }
 
         @Override
         public REST.Response executePATCH(Context context, URI requestURI, REST.Request<UniNode> request, String[] urlParams) throws RestEndpointException {
-            checkAdminAuthorization(headers);
+            checkAdminAuthorization(request.getHeaders());
 
             final LocalService service = requireLocalService(urlParams[0]);
-            service.updateFrom(body.asObjectNode());
+            UniObjectNode body = request.wrapBody().ifPresentMap(Serializable::toObjectNode);
+            if (body == null)
+                throw new RestEndpointException(BAD_REQUEST, "Body cannot be empty");
+            service.updateFrom(body);
 
             return new ResponseBuilder(body)
                     .setStatusCode(200)
@@ -78,7 +82,7 @@ public enum ServerEndpoints implements ServerEndpoint {
 
         @Override
         public REST.Response executeDELETE(Context context, URI requestURI, REST.Request<UniNode> request, String[] urlParams) throws RestEndpointException {
-            checkAdminAuthorization(headers);
+            checkAdminAuthorization(request.getHeaders());
 
             final LocalService service = requireLocalService(urlParams[0]);
 
@@ -94,13 +98,7 @@ public enum ServerEndpoints implements ServerEndpoint {
                     .map(Service::getStatus)
                     .map(StatusIcon::valueOf)
                     .map(StatusIcon::getIconFile)
-                    .map(icon -> {
-                        try {
-                            return new REST.Response(200, "image/png", icon);
-                        } catch (FileNotFoundException e) {
-                            throw new RestEndpointException(INTERNAL_SERVER_ERROR, e);
-                        }
-                    })
+                    .map(icon -> new REST.Response(200, "image/png", icon.toReader()))
                     .orElseThrow(() -> new RestEndpointException(NOT_FOUND, "No service found with name " + urlParams[0]));
         }
     },
@@ -108,17 +106,19 @@ public enum ServerEndpoints implements ServerEndpoint {
         @Override
         public REST.Response executePOST(Context context, URI requestURI, REST.Request<UniNode> request, String[] urlParams) throws RestEndpointException {
             final LocalService service = requireLocalService(urlParams[0]);
-            checkAuthorization(headers, service);
+            checkAuthorization(request.getHeaders(), service);
 
-            final Service.Status newStatus = body.process("status")
-                    .map(UniNode::asInt)
-                    .map(Service.Status::valueOf)
-                    .wrap()
-                    .orElseThrow(() -> new RestEndpointException(BAD_REQUEST, "No new status defined"));
+            final Service.Status newStatus = request.wrapBody()
+                    .ifPresentMap(node -> node.toObjectNode()
+                            .process("status")
+                            .map(UniNode::asInt)
+                            .map(Service.Status::valueOf)
+                            .wrap()
+                            .orElseThrow(() -> new RestEndpointException(BAD_REQUEST, "No new status defined")));
 
             service.setStatus(newStatus);
 
-            return new ResponseBuilder(body)
+            return new ResponseBuilder(request.wrapBody().ifPresentMap(Serializable::toObjectNode))
                     .setStatusCode(200)
                     .setBody(service)
                     .build();
@@ -129,8 +129,11 @@ public enum ServerEndpoints implements ServerEndpoint {
         @Override
         public REST.Response executePOST(Context context, URI requestURI, REST.Request<UniNode> request, String[] urlParams) throws RestEndpointException {
             final LocalService service = requireLocalService(urlParams[0]);
-            checkAuthorization(headers, service);
+            checkAuthorization(request.getHeaders(), service);
 
+            UniObjectNode body = request.wrapBody().ifPresentMap(Serializable::toObjectNode);
+            if (body == null)
+                throw new RestEndpointException(BAD_REQUEST, "Body cannot be empty");
             final Service.Status newStatus = body.process("status")
                     .map(UniNode::asInt)
                     .map(Service.Status::valueOf)
@@ -146,8 +149,11 @@ public enum ServerEndpoints implements ServerEndpoint {
         @Override
         public REST.Response executeDELETE(Context context, URI requestURI, REST.Request<UniNode> request, String[] urlParams) throws RestEndpointException {
             final LocalService service = requireLocalService(urlParams[0]);
-            checkAuthorization(headers, service);
+            checkAuthorization(request.getHeaders(), service);
 
+            UniObjectNode body = request.wrapBody().ifPresentMap(Serializable::toObjectNode);
+            if (body == null)
+                throw new RestEndpointException(BAD_REQUEST, "Body cannot be empty");
             final Service.Status newStatus = body.process("status")
                     .map(UniNode::asInt)
                     .map(Service.Status::valueOf)
