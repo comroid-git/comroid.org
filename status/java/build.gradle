@@ -1,3 +1,5 @@
+import java.util.concurrent.TimeUnit
+
 import static java.lang.System.getenv
 import static java.lang.System.getenv
 
@@ -11,8 +13,17 @@ allprojects {
     sourceCompatibility = 8
     targetCompatibility = 8
 
+    ext {
+        buildId = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis())
+    }
+    task tcBuildId {
+        doLast {
+            println "##teamcity[buildNumber '$buildId']"
+        }
+    }
+    tasks.named('jar').configure { dependsOn tcBuildId }
     group 'org.comroid'
-    version = '0.14.1-SNAPSHOT'
+    version = '0.14.1' + '.' + buildId
 
     compileJava{
         dependsOn ':dependencies'

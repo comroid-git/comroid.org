@@ -7,7 +7,7 @@ ext {
     userbase = 'comroid-git'
 
     projectDescription = 'The API for the comroid Status Server'
-    snapshot = project.version.endsWith('SNAPSHOT')
+    snapshot = project.version.toString().split('.').length == 3
 
     canSign = getenv().containsKey('GPG_KEYNAME') && getenv().containsKey('GPG_PASSPHRASE')
     canPublishToSpace = getenv().containsKey('SPACE_PASSWORD') && getenv().containsKey('SPACE_USERNAME')
