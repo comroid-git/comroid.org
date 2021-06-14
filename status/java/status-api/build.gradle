@@ -4,6 +4,13 @@ version = rootProject.version
 apply plugin: 'java-library'
 apply from: 'vars.gradle'
 
+task tcBuildId {
+    doLast {
+        println "##teamcity[buildNumber '$buildId']"
+    }
+}
+tasks.named('jar').configure { dependsOn tcBuildId }
+
 tasks.withType(Javadoc) {
     source = sourceSets.main.java
     options.encoding = 'UTF-8'
