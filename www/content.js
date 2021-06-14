@@ -28,7 +28,7 @@ const pages = {
     },
     'status': {
         'display_name': "Status Page",
-        'path': 'https://status.comroid.org/slim'
+        'path': 'https://status.comroid.org/slim/'
     },
     'github': {
         'display_name': "GitHub",
