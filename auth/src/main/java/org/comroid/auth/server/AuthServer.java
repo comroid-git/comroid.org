@@ -181,7 +181,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
             map.put("isValidSession", false);
             map.put("sessionData", null);
         }
-        map.put("wsPort", server.getSocket().getPort());
+        map.put("wsHost", server.getSocket().getAddress().getHostName() + "/websocket");
 
         return map;
     }
