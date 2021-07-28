@@ -1,2 +1,15 @@
 .idea/
 .gradle/
+auth/.classpath
+auth/.project
+*.prefs
+auth/auth-api/.classpath
+auth/auth-api/.project
+status/java/.classpath
+status/java/.project
+status/java/status-api/.classpath
+status/java/status-api/.project
+*.class
+status/java/status-server/.classpath
+status/java/status-server/.project
+status/java/status-server/bin/main/log4j2.xml
