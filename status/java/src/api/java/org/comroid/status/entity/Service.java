@@ -76,6 +76,7 @@ public interface Service extends Entity, WrappedFormattable {
     CompletableFuture<Status> requestStatus();
 
     CompletableFuture<Service> updateStatus(Status status);
+
     enum Status implements IntegerAttribute {
         UNKNOWN(0),
 

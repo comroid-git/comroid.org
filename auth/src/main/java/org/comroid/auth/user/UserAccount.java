@@ -127,10 +127,6 @@ public final class UserAccount extends DataContainerBase<AuthEntity> implements 
         return dir;
     }
 
-    public UserDataStorage getDataStorage(UUID serviceId) {
-        return dataStorage.getForService(serviceId);
-    }
-
     public boolean isEmailVerified() {
         return emailVerified.assertion("emailVerified");
     }
@@ -182,6 +178,10 @@ public final class UserAccount extends DataContainerBase<AuthEntity> implements 
         } catch (Throwable t) {
             throw new RuntimeException(t);
         }
+    }
+
+    public UserDataStorage getDataStorage(UUID serviceId) {
+        return dataStorage.getForService(serviceId);
     }
 
     @Override

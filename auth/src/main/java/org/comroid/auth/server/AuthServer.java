@@ -22,7 +22,6 @@ import org.comroid.status.entity.Service;
 import org.comroid.uniform.Context;
 import org.comroid.uniform.SerializationAdapter;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
-import org.comroid.webkit.config.WebkitConfiguration;
 import org.comroid.webkit.model.ConnectionFactory;
 import org.comroid.webkit.model.PagePropertiesProvider;
 import org.comroid.webkit.oauth.OAuth;

@@ -1,11 +1,9 @@
 package org.comroid.auth.user;
 
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.EMailAddress;
-import org.comroid.api.Polyfill;
 import org.comroid.auth.ComroidAuthServer;
 import org.comroid.auth.model.AuthEntity;
 import org.comroid.auth.rest.AuthEndpoint;
