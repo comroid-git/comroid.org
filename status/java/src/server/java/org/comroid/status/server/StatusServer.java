@@ -99,7 +99,6 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
 
             this.rest = new REST(CONTEXT, threadPool);
             logger.debug("REST Client created: {}", rest);
-
             this.entityCache = new FileCache<>(
                     CONTEXT,
                     StatusServer::resolveEntity,
