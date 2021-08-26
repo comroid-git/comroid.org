@@ -9,7 +9,7 @@ import org.comroid.common.io.FileHandle;
 import org.comroid.mutatio.ref.Reference;
 import org.comroid.restless.REST;
 import org.comroid.restless.adapter.okhttp.v4.OkHttp4Adapter;
-import org.comroid.restless.server.RestServer;
+import org.comroid.webkit.server.RestServer;
 import org.comroid.status.AdapterDefinition;
 import org.comroid.status.StatusConnection;
 import org.comroid.status.entity.Entity;
