@@ -31,7 +31,7 @@ body {
     }
 }
 
-code {
+code .code {
     text-align: left;
     background-color: #bbb;
     border: 5px solid #999;
