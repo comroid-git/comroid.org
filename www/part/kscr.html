@@ -1,0 +1,120 @@
+<base target="_parent">
+<meta charset="UTF-8">
+<link href="../partial.css" rel="stylesheet">
+<body>
+<div class="center">
+    <h2>The KScr intermediate language</h2>
+    <a href="https://github.com/comroid-git/KScr">GitHub Page</a>
+    <br/>
+    <p>
+        The KScr intermediate language aims at providing a very simplistic base syntax to aid with creating Streaming-API focused tasks.
+        With its unique way of implementing Providers and Handlers besides Expressions and Statements, it makes creating streaming-tasks easier than ever before.
+    </p>
+    <br/>
+    <img alt="KScr Icon" src="https://cdn.comroid.org/img/kscr-small.png">
+    <br/>
+    <h3>Syntax Elements</h3>
+    <h4>Variable Declaration</h4>
+    <p>
+        Every normal declaration, emitting and creating a value reference. The void type declares the absence of type in the reference.
+        <code>
+            // numeric variable declaration
+            num x;
+            // long variable declaration
+            num&lt;long&gt; x;
+
+            // string variable declaration
+            str a;
+
+            // variable declaration without type
+            void any;
+        </code>
+    </p>
+    <h4>Constant Expressions</h4>
+    <p>
+        Every literal symbol in KScr is compiled into a Constant Expression.
+        <code>
+            // int literal
+            5
+
+            // double literal
+            5.3d
+
+            // string literal
+            "hello world"
+
+            // null literal
+            null
+        </code>
+    </p>
+    <h4>Provider Expression</h4>
+    <p>
+        Basic exression components are compiled as Provider expressions.
+        A provider expression may be used as a normal value expression.
+        <code>
+            // value cast
+            (int) x
+
+            // member invoker
+            txt.length
+
+            // variable accessor
+            any
+        </code>
+    </p>
+    <h4>Pipe Declaration</h4>
+    <p>
+        Basic pipe variable declaration for chaining.
+        <code>
+            // pipe base node
+            pipe&lt;str&gt; stringPipe;
+
+            // invokes the pipe with the expression value
+            stringPipe &lt;== expression;
+
+            // reads from the provider and invokes the pipe with the return value
+            stringPipe &lt;== provider;
+        </code>
+    </p>
+    <h4>Pipe Value Provider</h4>
+    <p>
+        Constructs a pipe that is reading from the provided handler and invokes after the handler.
+        <code>
+            // links the handler to the stringPipe
+            stringPipe &lt;== handler;
+        </code>
+    </p>
+    <h4>Pipe Value Handler</h4>
+    <p>
+        Applies a handler to a pipe. The hanlder is invoked every time the pipe is invoked.
+        <code>
+            // constructs an emitting pipe out of stringPipe
+            stringPipe ==&gt; lambda;
+            
+            // SQL inspired filtering pipe operator
+            stringPipe select(lambda: bool)
+
+            // SQL inspired reformatting pipe operator
+            stringPipe where(lambda: TOut)
+        </code>
+    </p>
+    <h4>Lambda Pipe</h4>
+    <p>
+        A basic intermediate pipe operation that is used to produce output values.
+        <code>
+            // anonymous handler and reformatting Function
+            // static function lambda
+            Type::getTypes
+
+            // dynamic function lambda
+            any::toString
+
+            // basic expression lambda
+            it -&gt; it.length
+
+            // statement lambda
+            it -&gt; { }
+        </code>
+    </p>
+</div>
+</body>

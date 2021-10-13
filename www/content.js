@@ -26,6 +26,10 @@ const pages = {
         'display_name': "Guardian Framework",
         'path': 'part/guardian.html'
     },
+    'kscr': {
+        'display_name': "KScr Intermediate Language",
+        'path': 'part/kscr.html'
+    },
     'status': {
         'display_name': "Status Page",
         'path': 'https://status.comroid.org/slim/'
