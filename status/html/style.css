@@ -4,7 +4,7 @@ body {
     font-family: "Fira Mono", monospace;
     font-size: 18px;
     background-color: #004d99;
-    color: #e3e3e3;
+    color: #eee;
     overflow-x: hidden;
     display: flex;
     height: 100%;
@@ -24,7 +24,7 @@ header {
     background-color: #003366;
     font-family: 'Fira Mono', monospace;
     text-align: center;
-    color: #e3e3e3;
+    color: #eee;
     border-bottom: 5px solid #00274f;
 }
 
@@ -121,7 +121,7 @@ header h1 {
 }
 
 header a {
-	color: #e3e3e3;
+	color: #eee;
 	cursor: pointer;
 }
 
