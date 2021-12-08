@@ -8,6 +8,7 @@ import org.comroid.common.io.FileHandle;
 import org.comroid.mutatio.model.RefOPs;
 import org.comroid.mutatio.ref.FutureReference;
 import org.comroid.mutatio.ref.Reference;
+import org.comroid.restless.HTTPStatusCodes;
 import org.comroid.restless.REST;
 import org.comroid.restless.body.BodyBuilderType;
 import org.comroid.status.entity.Service;
@@ -129,6 +130,7 @@ public final class StatusConnection implements ContextualProvider.Underlying {
                 .method(REST.Method.POST)
                 .endpoint(Endpoint.POLL.complete(serviceName))
                 .addHeader(AUTHORIZATION, token)
+                .expect(HTTPStatusCodes.NO_CONTENT)
                 .buildBody(BodyBuilderType.OBJECT, obj -> {
                     obj.put(Service.STATUS, Service.Status.ONLINE);
                     obj.put("expected", refreshTimeout);
