@@ -42,6 +42,7 @@ import java.util.concurrent.ScheduledExecutorService;
 public final class AuthServer implements ContextualProvider.Underlying, UncheckedCloseable, PagePropertiesProvider, ConnectionFactory<AuthConnection>, ResourceLoader {
     //http://localhost:42000
     public static final Logger logger = LogManager.getLogger();
+    @Deprecated
     public static final ContextualProvider MASTER_CONTEXT;
     public static final String UUID_PATTERN = "\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b";
     public static final String URL_BASE = "https://auth.comroid.org";
@@ -50,7 +51,9 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
     public static final FileHandle DIR = new FileHandle("/srv/auth/", true);
     public static final FileHandle STATUS_CRED = DIR.createSubFile("status.cred");
     public static final FileHandle DATA = DIR.createSubDir("data");
+    @Deprecated
     public static final SerializationAdapter SERI_LIB;
+    @Deprecated
     public static final HttpAdapter HTTP_LIB;
     public static AuthServer instance;
 
