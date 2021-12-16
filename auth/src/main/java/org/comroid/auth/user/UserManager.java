@@ -103,7 +103,7 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
                 .flatMap(UserAccount.class)
                 .filter(usr -> usr.email.contentEquals(email))
                 .findAny()
-                .filter(usr -> usr.tryLogin(email, password))
+                .filter(usr -> usr.tryLogin(email, password)) // fixme: NPE somewhere here
                 .map(UserSession::new)
                 .filter(session -> sessions.put(session.getPlainCookie(), session) != session)
                 .orElseThrow(() -> new IllegalArgumentException("Could not authenticate"));
