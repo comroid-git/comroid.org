@@ -26,9 +26,17 @@ const pages = {
         'display_name': "Guardian Framework",
         'path': 'part/guardian.html'
     },
+    'crystalshard': {
+        'display_name': "CrystalShard",
+        'path': 'https://github.com/comroid-git/CrystalShard'
+    },
     'kscr': {
         'display_name': "KScr Intermediate Language",
         'path': 'part/kscr.html'
+    },
+    'dirlinker': {
+        'display_name': "DirLinker",
+        'path': 'https://gitub.com/comroid-git/DirLinker'
     },
     'status': {
         'display_name': "Status Page",
@@ -59,27 +67,37 @@ const navigation = [
         'name': 'home'
     },
     {
-        'type': 'box',
-        'name': 'auth'
+        'type': 'drop',
+        'name': 'sitemap',
+        'display': 'Sitemap',
+        'content': [
+            'auth',
+            'status'
+        ]
     },
     {
-        'type': 'box',
-        'name': 'status'
-    },
-    {
-        'type': 'box',
-        'name': 'projects'
+        'type': 'drop',
+        'name': 'projects',
+        'display': 'Projects',
+        'content': [
+            'kscr',
+            'dirlinker',
+            'guardian',
+            'crystalshard'
+        ]
     },
     {
         'type': 'box',
         'name': 'github'
     },
     {
-        'type': 'box',
-        'name': 'privacy'
-    },
-    {
-        'type': 'box',
-        'name': 'contact'
+        'type': 'drop',
+        'name': 'about',
+        'display': 'About',
+        'content': [
+            'privacy',
+            'tos',
+            'contact'
+        ]
     }
 ]

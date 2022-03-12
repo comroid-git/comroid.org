@@ -71,19 +71,21 @@ table, th, td {
     height: 0;
     display: none;
     color: #eee;
+    width: max-content;
 }
 
 .nav-dropdown-box {
     position: relative;
     display: block;
     top: 10px;
-    width: 100%;
+    left: -10.2px;
+    width: 110%;
     height: 22px;
 
     color: #eee;
     background-color: #003366;
     border-top: 2px solid #003366;
-    padding: 5px 10px 5px 10px;
+    padding: 5px 0px 5px 0px;
 }
 
 .nav-dropdown-box:hover {
