@@ -4,6 +4,9 @@
 <body>
 <div class="center">
     <h2>The KScr intermediate language</h2>
+    <br/>
+    <img alt="KScr Icon" src="https://raw.githubusercontent.com/comroid-git/KScr/master/docs/img/kscr-icon.png">
+    <br/>
     <a href="https://github.com/comroid-git/KScr">GitHub Page</a>
     <br/>
     <p>
@@ -11,155 +14,6 @@
         With its unique way of implementing Providers and Handlers besides Expressions and Statements, it makes creating streaming-tasks easier than ever before.
     </p>
     <br/>
-    <img alt="KScr Icon" src="https://cdn.comroid.org/img/kscr-small.png">
-    <br/>
-    <h3>Syntax Elements</h3>
-    <h4>Variable Declaration</h4>
-    <p>
-        Every normal declaration, emitting and creating a value reference. The void type declares the absence of type in the reference.
-    </p>
-    <code>
-        <br/>
-        // numeric variable declaration
-        <br/>
-        num x;
-        <br/>
-        // long variable declaration
-        <br/>
-        num&lt;long&gt; x;
-        <br/>
-        <br/>
-        // string variable declaration
-        <br/>
-        str a;
-        <br/>
-        <br/>
-        // variable declaration without type
-        <br/>
-        void any;
-    </code>
-    <h4>Constant Expressions</h4>
-    <p>
-        Every literal symbol in KScr is compiled into a Constant Expression.
-    </p>
-    <code>
-        <br/>
-        // int literal
-        <br/>
-        5
-        <br/>
-        <br/>
-        // double literal
-        <br/>
-        5.3d
-        <br/>
-        <br/>
-        // string literal
-        <br/>
-        "hello world"
-        <br/>
-        <br/>
-        // null literal
-        <br/>
-        null
-    </code>
-    <h4>Provider Expression</h4>
-    <p>
-        Basic exression components are compiled as Provider expressions.
-        A provider expression may be used as a normal value expression.
-    </p>
-    <code>
-        <br/>
-        // value cast
-        <br/>
-        (int) x
-        <br/>
-        <br/>
-        // member invoker
-        <br/>
-        txt.length
-        <br/>
-        <br/>
-        // variable accessor
-        <br/>
-        any
-    </code>
-    <h4>Pipe Declaration</h4>
-    <p>
-        Basic pipe variable declaration for chaining.
-    </p>
-    <code>
-        <br/>
-        // pipe base node
-        <br/>
-        pipe&lt;str&gt; stringPipe;
-        <br/>
-        <br/>
-        // invokes the pipe with the expression value
-        <br/>
-        stringPipe &lt;== expression;
-        <br/>
-        <br/>
-        // reads from the provider and invokes the pipe with the return value
-        <br/>
-        stringPipe &lt;== provider;
-    </code>
-    <h4>Pipe Value Provider</h4>
-    <p>
-        Constructs a pipe that is reading from the provided handler and invokes after the handler.
-    </p>
-    <code>
-        <br/>
-        // links the handler to the stringPipe
-        <br/>
-        stringPipe &lt;== handler;
-    </code>
-    <h4>Pipe Value Handler</h4>
-    <p>
-        Applies a handler to a pipe. The handler is invoked every time the pipe is invoked.
-    </p>
-    <code>
-        <br/>
-        // constructs an emitting pipe out of stringPipe
-        <br/>
-        stringPipe ==&gt; lambda;
-        <br/>
-        <br/>
-        // SQL inspired filtering pipe operator
-        <br/>
-        stringPipe select(lambda: bool)
-        <br/>
-        <br/>
-        // SQL inspired reformatting pipe operator
-        <br/>
-        stringPipe where(lambda: TOut)
-    </code>
-    <h4>Lambda Pipe</h4>
-    <p>
-        A basic intermediate pipe operation that is used to produce output values.
-    </p>
-    <code>
-        <br/>
-        // anonymous handler and reformatting Function
-        <br/>
-        // static function lambda
-        <br/>
-        Type::getTypes
-        <br/>
-        <br/>
-        // dynamic function lambda
-        <br/>
-        any::toString
-        <br/>
-        <br/>
-        // basic expression lambda
-        <br/>
-        it -&gt; it.length
-        <br/>
-        <br/>
-        // statement lambda
-        <br/>
-        it -&gt; { }
-    </code>
+    <a href="https://comroid-git.github.io/KScr/">Concept Documentation</a>
 </div>
 </body>
