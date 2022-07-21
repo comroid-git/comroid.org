@@ -72,11 +72,14 @@ const navigation = [
         'name': 'home'
     },
     {
+        'type': 'box',
+        'name': 'blog'
+    },
+    {
         'type': 'drop',
         'name': 'sitemap',
         'display': 'Sitemap',
         'content': [
-            'blog',
             'auth',
             'status'
         ]
