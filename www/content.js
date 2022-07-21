@@ -13,6 +13,11 @@ const pages = {
         'display_name': "Homepage",
         'path': 'part/homepage.html'
     },
+    'blog': {
+        'display_name': "Blog",
+        'path': 'https://blog.comroid.org',
+        'policy': policy['instant_redir']
+    },
     'auth': {
         'display_name': "Authentication Server",
         'path': 'https://auth.comroid.org',
@@ -71,6 +76,7 @@ const navigation = [
         'name': 'sitemap',
         'display': 'Sitemap',
         'content': [
+            'blog',
             'auth',
             'status'
         ]
