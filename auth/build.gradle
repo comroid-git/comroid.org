@@ -59,6 +59,9 @@ dependencies {
 
     // oauth2 helper dependencies
    // implementation 'org.zalando.stups:tokens:0.13.0'
+   
+   // nashorn dependency
+   implementation 'org.openjdk.nashorn:nashorn-core:15.0'
 
 /*
     // xml dependency
