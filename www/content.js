@@ -15,6 +15,10 @@ const pages = {
     },
     'blog': {
         'display_name': "Blog",
+        'path': 'https://blog.comroid.org/slim.html'
+    },
+    'blog-full': {
+        'display_name': "Blog",
         'path': 'https://blog.comroid.org'
     },
     'auth': {
@@ -79,6 +83,7 @@ const navigation = [
         'name': 'sitemap',
         'display': 'Sitemap',
         'content': [
+            'blog-full',
             'auth',
             'status'
         ]
