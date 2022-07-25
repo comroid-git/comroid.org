@@ -15,8 +15,7 @@ const pages = {
     },
     'blog': {
         'display_name': "Blog",
-        'path': 'https://blog.comroid.org',
-        'policy': policy['instant_redir']
+        'path': 'https://blog.comroid.org'
     },
     'auth': {
         'display_name': "Authentication Server",
