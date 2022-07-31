@@ -13,6 +13,14 @@ const pages = {
         'display_name': "Homepage",
         'path': 'part/homepage.html'
     },
+    'blog': {
+        'display_name': "Blog",
+        'path': 'https://blog.comroid.org/slim.html'
+    },
+    'blog-full': {
+        'display_name': "Blog",
+        'path': 'https://blog.comroid.org'
+    },
     'auth': {
         'display_name': "Authentication Server",
         'path': 'https://auth.comroid.org',
@@ -67,10 +75,15 @@ const navigation = [
         'name': 'home'
     },
     {
+        'type': 'box',
+        'name': 'blog'
+    },
+    {
         'type': 'drop',
         'name': 'sitemap',
         'display': 'Sitemap',
         'content': [
+            'blog-full',
             'auth',
             'status'
         ]

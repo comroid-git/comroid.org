@@ -154,6 +154,10 @@ nav ul li .nav-button {
     #discord_widget {
         width: 100%;
     }
+
+    .widget {
+        display: none;
+    }
 }
 
 /* Headlines, Fonts and Styling */
