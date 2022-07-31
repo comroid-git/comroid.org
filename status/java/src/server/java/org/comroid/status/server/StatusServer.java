@@ -9,7 +9,6 @@ import org.comroid.common.io.FileHandle;
 import org.comroid.mutatio.ref.Reference;
 import org.comroid.restless.REST;
 import org.comroid.restless.adapter.okhttp.v4.OkHttp4Adapter;
-import org.comroid.webkit.server.RestServer;
 import org.comroid.status.AdapterDefinition;
 import org.comroid.status.StatusConnection;
 import org.comroid.status.entity.Entity;
@@ -23,6 +22,7 @@ import org.comroid.uniform.node.UniObjectNode;
 import org.comroid.varbind.FileCache;
 import org.comroid.varbind.container.DataContainer;
 import org.comroid.varbind.container.DataContainerBuilder;
+import org.comroid.webkit.server.RestServer;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -39,8 +39,8 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
     public static final FileHandle DATA_DIR = PATH_BASE.createSubDir("data");
     public static final FileHandle BOT_TOKEN = DATA_DIR.createSubFile("discord.cred");
     public static final FileHandle ADMIN_TOKEN = DATA_DIR.createSubFile("admin.cred");
-    public static final FileHandle TOKEN_DIR = PATH_BASE.createSubDir("token");
     public static final FileHandle CACHE_FILE = DATA_DIR.createSubFile("cache.json");
+    public static final FileHandle TOKEN_DIR = PATH_BASE.createSubDir("token");
     public static final int PORT = 42641; // hardcoded in server, do not change
     public static final ThreadGroup THREAD_GROUP = new ThreadGroup("comroid Status Server");
     //fixme public static final DiscordAPI DISCORD;
