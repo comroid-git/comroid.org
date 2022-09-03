@@ -17,6 +17,7 @@ import org.comroid.status.server.auth.TokenCore;
 import org.comroid.status.server.entity.LocalService;
 import org.comroid.status.server.entity.LocalStoredService;
 import org.comroid.status.server.rest.ServerEndpoints;
+import org.comroid.status.server.util.PingService;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;
 import org.comroid.uniform.node.UniObjectNode;
 import org.comroid.varbind.FileCache;
@@ -27,6 +28,8 @@ import org.comroid.webkit.server.RestServer;
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -114,6 +117,11 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
                     entityCache.streamRefs()
                             .filter(ref -> ref.test(Service.class::isInstance))
                             .count());
+
+            entityCache.add(new PingService(CONTEXT, "comroid-eu", "comroid EU Server", "eu.comroid.org"));
+            entityCache.add(new PingService(CONTEXT, "comroid-us", "comroid US Server", "us.comroid.org"));
+            entityCache.add(new PingService(CONTEXT, "comroid-win", "comroid WIN Server", "win.comroid.org"));
+            logger.debug("Created {} pinging Services...", 3);
 
             logger.debug("Starting REST Server...");
             this.server = new RestServer(CONTEXT, executor, AdapterDefinition.URL_BASE, host, port, ServerEndpoints.values());
