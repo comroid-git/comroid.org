@@ -121,7 +121,10 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
             entityCache.add(new PingService(CONTEXT, "comroid-eu", "comroid EU Server", "eu.comroid.org"));
             entityCache.add(new PingService(CONTEXT, "comroid-us", "comroid US Server", "us.comroid.org"));
             entityCache.add(new PingService(CONTEXT, "comroid-win", "comroid WIN Server", "win.comroid.org"));
-            threadPool.scheduleWithFixedDelay(() -> entityCache.flatMap(PingService.class).forEach(PingService::requestStatus), 30, 30, TimeUnit.SECONDS);
+            threadPool.scheduleWithFixedDelay(() -> {
+                logger.debug("Pinging services...");
+                entityCache.flatMap(PingService.class).forEach(PingService::requestStatus);
+            }, 3, 30, TimeUnit.SECONDS);
             logger.debug("Created {} pinging Services...", 3);
 
             logger.debug("Starting REST Server...");

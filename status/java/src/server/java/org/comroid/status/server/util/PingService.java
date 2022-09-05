@@ -1,5 +1,7 @@
 package org.comroid.status.server.util;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.os.OS;
 import org.comroid.status.entity.Entity;
@@ -12,9 +14,11 @@ import org.comroid.varbind.container.DataContainerBase;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.NoSuchElementException;
 import java.util.concurrent.CompletableFuture;
 
 public class PingService extends DataContainerBase<Entity> implements Service {
+    private static final Logger logger = LogManager.getLogger();
     @RootBind
     GroupBind<Service> GROUP = Service.Type.subGroup("local_service", LocalStoredService::new);
     private final String address;
@@ -41,10 +45,12 @@ public class PingService extends DataContainerBase<Entity> implements Service {
                             InputStreamReader isr = new InputStreamReader(process.getInputStream());
                             BufferedReader reader = new BufferedReader(isr);
                             ) {
-                        return reader.lines()
+                        Status status = reader.lines()
                                 .map(String::toLowerCase)
-                                .filter(s -> s.contains("time="))
+                                .filter(s -> s.contains("time=") || s.contains("zeit="))
                                 .count() == attempts ? Status.ONLINE : Status.OFFLINE;
+                        logger.trace("Service " + getURL().orElseThrow(NoSuchElementException::new) + " is " + status.name());
+                        return status;
                     }
                 } catch (IOException | InterruptedException e) {
                     throw new RuntimeException("Could not ping service " + address, e);

@@ -9,6 +9,7 @@ import org.comroid.status.rest.Endpoint;
 import org.comroid.status.server.StatusServer;
 import org.comroid.status.server.auth.TokenCore;
 import org.comroid.status.server.entity.LocalService;
+import org.comroid.status.server.util.PingService;
 import org.comroid.status.server.util.ResponseBuilder;
 import org.comroid.uniform.Context;
 import org.comroid.uniform.model.Serializable;
@@ -18,6 +19,7 @@ import org.comroid.uniform.node.UniObjectNode;
 import org.comroid.webkit.server.ServerEndpoint;
 
 import java.net.URI;
+import java.util.Comparator;
 
 import static org.comroid.restless.HTTPStatusCodes.*;
 
@@ -31,6 +33,7 @@ public enum ServerEndpoints implements ServerEndpoint {
                     .getEntityCache()
                     .filterKey(name -> !name.equals("test-dummy"))
                     .flatMap(Service.class)
+                    .sorted(Comparator.comparingInt(srv -> srv instanceof PingService ? 0 : 1))
                     .forEach(service -> service.toObjectNode(services.addObject()));
 
             return new ResponseBuilder()
