@@ -8,7 +8,7 @@ import org.comroid.api.Rewrapper;
 import org.comroid.api.UncheckedCloseable;
 import org.comroid.auth.ComroidAuthServer;
 import org.comroid.auth.server.AuthServer;
-import org.comroid.common.io.FileHandle;
+import org.comroid.api.io.FileHandle;
 import org.comroid.restless.CommonHeaderNames;
 import org.comroid.restless.HTTPStatusCodes;
 import org.comroid.restless.REST;

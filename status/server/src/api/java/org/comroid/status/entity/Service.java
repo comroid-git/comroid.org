@@ -3,16 +3,8 @@ package org.comroid.status.entity;
 import org.comroid.api.IntegerAttribute;
 import org.comroid.api.Polyfill;
 import org.comroid.api.WrappedFormattable;
-import org.comroid.restless.REST;
-import org.comroid.restless.body.BodyBuilderType;
 import org.comroid.status.StatusConnection;
-import org.comroid.status.rest.Endpoint;
-import org.comroid.uniform.node.UniObjectNode;
 import org.comroid.util.StandardValueType;
-import org.comroid.varbind.annotation.RootBind;
-import org.comroid.varbind.bind.GroupBind;
-import org.comroid.varbind.bind.VarBind;
-import org.comroid.varbind.container.DataContainerBase;
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 
@@ -25,43 +17,12 @@ import java.util.concurrent.CompletableFuture;
 public interface Service extends Entity, WrappedFormattable {
     @Language("RegExp")
     String NAME_REGEX = "\\w[\\w\\d-]+";
-    @RootBind
-    GroupBind<Service> Type
-            = Entity.Type.subGroup("service",
-            (connection, node) -> new Basic(connection.requireFromContext(StatusConnection.class), node.asObjectNode()));
-    VarBind<Service, String, String, String> DISPLAY_NAME
-            = Type.createBind("display_name")
-            .extractAs(StandardValueType.STRING)
-            .asIdentities()
-            .onceEach()
-            .setRequired(true)
-            .build();
-    VarBind<Service, Integer, Service.Status, Service.Status> STATUS
-            = Type.createBind("status")
-            .extractAs(StandardValueType.INTEGER)
-            .andRemap(Service.Status::valueOf)
-            .onceEach()
-            .setRequired(true)
-            .build();
-    VarBind<Service, String, URL, URL> URL
-            = Type.createBind("url")
-            .extractAs(StandardValueType.STRING)
-            .andRemap(Polyfill::url)
-            .onceEach()
-            .setRequired(false)
-            .build();
 
-    default String getDisplayName() {
-        return requireNonNull(DISPLAY_NAME);
-    }
+    String getDisplayName();
 
-    default Status getStatus() {
-        return requireNonNull(STATUS);
-    }
+    Status getStatus();
 
-    default Optional<URL> getURL() {
-        return wrap(URL);
-    }
+    Optional<URL> getURL();
 
     @Override
     default String getPrimaryName() {
@@ -112,7 +73,7 @@ public interface Service extends Entity, WrappedFormattable {
         }
     }
 
-    final class Basic extends DataContainerBase<Entity> implements Service {
+    final class Basic implements Service {
         private final StatusConnection connection;
 
         public Basic(StatusConnection connection, UniObjectNode node) {

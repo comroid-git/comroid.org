@@ -6,7 +6,7 @@ import org.comroid.api.ContextualProvider;
 import org.comroid.api.Rewrapper;
 import org.comroid.auth.ComroidAuthServer;
 import org.comroid.auth.server.AuthServer;
-import org.comroid.common.io.FileHandle;
+import org.comroid.api.io.FileHandle;
 import org.comroid.uniform.node.UniObjectNode;
 import org.comroid.webkit.oauth.resource.ResourceProvider;
 

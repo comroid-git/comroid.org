@@ -4,12 +4,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.Junction;
-import org.comroid.common.exception.AssertionException;
-import org.comroid.common.io.FileHandle;
+import org.comroid.api.exception.AssertionException;
+import org.comroid.api.io.FileHandle;
 import org.comroid.mutatio.ref.Reference;
 import org.comroid.restless.REST;
 import org.comroid.restless.adapter.okhttp.v4.OkHttp4Adapter;
-import org.comroid.status.AdapterDefinition;
 import org.comroid.status.StatusConnection;
 import org.comroid.status.entity.Entity;
 import org.comroid.status.entity.Service;
@@ -24,16 +23,19 @@ import org.comroid.varbind.FileCache;
 import org.comroid.varbind.container.DataContainer;
 import org.comroid.varbind.container.DataContainerBuilder;
 import org.comroid.webkit.server.RestServer;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.context.annotation.ComponentScan;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class })
+@ComponentScan(basePackageClasses = ServiceController.class)
 public class StatusServer implements ContextualProvider.Underlying, Closeable {
     //http://localhost:42641/services
 

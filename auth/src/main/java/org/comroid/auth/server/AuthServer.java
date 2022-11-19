@@ -11,7 +11,7 @@ import org.comroid.auth.service.ServiceManager;
 import org.comroid.auth.user.Permit;
 import org.comroid.auth.user.UserManager;
 import org.comroid.auth.user.UserSession;
-import org.comroid.common.io.FileHandle;
+import org.comroid.api.io.FileHandle;
 import org.comroid.mutatio.model.RefContainer;
 import org.comroid.restless.HttpAdapter;
 import org.comroid.restless.REST;

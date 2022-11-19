@@ -61,17 +61,17 @@ if (!isAutoDeploy) {
 
 dependencies {
     if (isAutoDeploy) {
-        testImplementation project(':status-server')
-        testImplementation project(':status-api')
+        //testImplementation project(':status-server')
+        //testImplementation project(':status-api')
 
-        testImplementation 'org.comroid:restless:0.+'
+        //testImplementation 'org.comroid:restless:0.+'
      //   testImplementation 'org.comroid:CrystalShard:0.+'
     } else {
-        testImplementation project(':status:status-server')
-        testImplementation project(':status:status-api')
+        //testImplementation project(':status:status-server')
+        //testImplementation project(':status:status-api')
 
-        testImplementation project(':guardian:uniform').sourceSets.java8compat.output.classesDirs
-        testImplementation project(':guardian:restless').sourceSets.java8compat.output.classesDirs
+        //testImplementation project(':guardian:uniform').sourceSets.java8compat.output.classesDirs
+        //testImplementation project(':guardian:restless').sourceSets.java8compat.output.classesDirs
 
        // testImplementation project(':CrystalShard')
     }

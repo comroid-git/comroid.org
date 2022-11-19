@@ -1,6 +1,6 @@
 package org.comroid.status.server.rest;
 
-import org.comroid.common.io.FileHandle;
+import org.comroid.api.io.FileHandle;
 import org.comroid.status.entity.Service.Status;
 import org.comroid.status.server.StatusServer;
 

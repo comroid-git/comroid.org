@@ -53,9 +53,9 @@ dependencies {
     if (isAutoDeploy) {
         implementation 'org.comroid:restless:0.+'
     } else {
-        api project(':guardian:restless')
-        testImplementation project(':guardian:uniform').sourceSets.java8compat.output.classesDirs
-        testImplementation project(':guardian:restless').sourceSets.java8compat.output.classesDirs
+        api project(':guardian:mutatio')
+        //testImplementation project(':guardian:uniform').sourceSets.java8compat.output.classesDirs
+        //testImplementation project(':guardian:restless').sourceSets.java8compat.output.classesDirs
     }
 
     // logging dependencies

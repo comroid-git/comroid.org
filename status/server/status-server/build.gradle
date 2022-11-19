@@ -1,11 +1,15 @@
-apply plugin: 'application'
+plugins {
+    id 'application'
+    id 'org.springframework.boot' version '2.7.5'
+    id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+}
 
 group 'org.comroid'
 version = parent.version
 apply from: 'vars.gradle'
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = 15
+targetCompatibility = 15
 
 mainClassName = 'org.comroid.status.server.StatusServer'
 
@@ -30,12 +34,16 @@ dependencies {
     } else {
         implementation project(':status:status-api')
 
-        implementation project(':guardian:uniform').sourceSets.java8compat.output.classesDirs
-        implementation project(':guardian:restless').sourceSets.java8compat.output.classesDirs
-        implementation project(':guardian:webkit')
+        implementation project(':guardian:mutatio')
 
         //fixme implementation project(':CrystalShard')
     }
+
+    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
     // logging dependencies
     implementation 'org.apache.logging.log4j:log4j-api:2.14.1'

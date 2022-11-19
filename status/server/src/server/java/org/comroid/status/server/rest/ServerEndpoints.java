@@ -5,7 +5,6 @@ import org.comroid.restless.REST;
 import org.comroid.restless.endpoint.AccessibleEndpoint;
 import org.comroid.restless.exception.RestEndpointException;
 import org.comroid.status.entity.Service;
-import org.comroid.status.rest.Endpoint;
 import org.comroid.status.server.StatusServer;
 import org.comroid.status.server.auth.TokenCore;
 import org.comroid.status.server.entity.LocalService;

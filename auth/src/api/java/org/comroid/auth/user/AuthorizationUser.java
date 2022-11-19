@@ -9,7 +9,7 @@ import org.comroid.auth.model.AuthEntity;
 import org.comroid.auth.rest.AuthEndpoint;
 import org.comroid.auth.service.DataBasedService;
 import org.comroid.auth.service.Service;
-import org.comroid.common.info.MessageSupplier;
+import org.comroid.api.info.MessageSupplier;
 import org.comroid.mutatio.model.Ref;
 import org.comroid.mutatio.model.RefMap;
 import org.comroid.mutatio.ref.ReferenceList;

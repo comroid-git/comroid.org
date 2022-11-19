@@ -2,8 +2,8 @@ package org.comroid.auth.user;
 
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.UUIDContainer;
-import org.comroid.common.io.FileHandle;
-import org.comroid.common.io.FileProcessor;
+import org.comroid.api.io.FileHandle;
+import org.comroid.api.io.FileProcessor;
 import org.comroid.restless.MimeType;
 import org.comroid.uniform.Context;
 import org.comroid.uniform.node.UniNode;
