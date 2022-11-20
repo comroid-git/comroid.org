@@ -1,20 +1,66 @@
 package org.comroid.status.server.controller;
 
 import org.comroid.status.entity.Service;
+import org.comroid.status.server.auth.TokenCore;
 import org.comroid.status.server.db.ServiceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpStatusCodeException;
+
+import java.util.Optional;
 
 @Controller
 public class ServiceController {
     @Autowired
     private ServiceRepository serviceRepository;
 
-    @GetMapping("/services")
     @ResponseBody
+    @GetMapping("/services")
     public Iterable<Service> getServices() {
         return serviceRepository.findAll();
+    }
+
+    @ResponseBody
+    @GetMapping("/service/{id}")
+    public Optional<Service> getService(@PathVariable("id") String name) {
+        return serviceRepository.findById(name);
+    }
+
+    @ResponseBody
+    @PostMapping("/services")
+    public Service createService(@RequestParam Service service, @RequestHeader("Authorization") String authorization) {
+        if (!TokenCore.isValid(authorization))
+            throw new HttpStatusCodeException(HttpStatus.UNAUTHORIZED) {};
+        return serviceRepository.save(service);
+    }
+
+    @ResponseBody
+    @PutMapping("/service/{id}")
+    public Service updateService(@PathVariable("id") String name, @RequestParam Service service) {
+        var found = serviceRepository.findById(name);
+        if (found.isEmpty())
+            throw new HttpStatusCodeException(HttpStatus.NOT_FOUND) {};
+        if (!found.get().getName().equals(service.getName()))
+            throw new HttpStatusCodeException(HttpStatus.NOT_ACCEPTABLE) {
+                @Override
+                public String getMessage() {
+                    return "ID mismatch";
+                }
+            };
+        return serviceRepository.save(service);
+    }
+
+    @ResponseBody
+    @DeleteMapping("/service/{id}")
+    public Service deleteService(@PathVariable("id") String name, @RequestHeader("Authorization") String authorization) {
+        if (!TokenCore.isValid(authorization))
+            throw new HttpStatusCodeException(HttpStatus.UNAUTHORIZED) {};
+        Optional<Service> found = serviceRepository.findById(name);
+        if (found.isEmpty())
+            throw new HttpStatusCodeException(HttpStatus.NOT_FOUND) {};
+        serviceRepository.deleteById(name);
+        return found.get();
     }
 }
