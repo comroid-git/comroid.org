@@ -18,7 +18,6 @@ import org.comroid.restless.REST;
 import org.comroid.restless.adapter.java.JavaHttpAdapter;
 import org.comroid.restless.exception.RestEndpointException;
 import org.comroid.status.StatusConnection;
-import org.comroid.status.entity.Service;
 import org.comroid.uniform.Context;
 import org.comroid.uniform.SerializationAdapter;
 import org.comroid.uniform.adapter.json.fastjson.FastJSONLib;

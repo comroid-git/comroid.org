@@ -1,114 +1,83 @@
 package org.comroid.status.entity;
 
 import org.comroid.api.IntegerAttribute;
-import org.comroid.api.Polyfill;
-import org.comroid.api.WrappedFormattable;
-import org.comroid.status.StatusConnection;
-import org.comroid.util.StandardValueType;
-import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.web.client.RestTemplate;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.net.URL;
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-public interface Service extends Entity, WrappedFormattable {
-    @Language("RegExp")
-    String NAME_REGEX = "\\w[\\w\\d-]+";
+@Entity
+@Table(name = "services")
+public class Service {
+    private static final RestTemplate SpecificService = new RestTemplate();
+    private static final String EndpointSpecificService = "https://api.status.comroid.org/service/{}/status";
+    @Id
+    private String name;
+    @Column
+    private String displayName;
+    @Column
+    private URL url;
+    @Column
+    private Status status;
 
-    String getDisplayName();
-
-    Status getStatus();
-
-    Optional<URL> getURL();
-
-    @Override
-    default String getPrimaryName() {
-        return getDisplayName();
+    public String getName() {
+        return name;
     }
 
-    @Override
-    default String getAlternateName() {
-        return getName();
+    public String getDisplayName() {
+        return displayName;
     }
 
-    CompletableFuture<Status> requestStatus();
+    public Status getStatus() {
+        return status;
+    }
 
-    CompletableFuture<Service> updateStatus(Status status);
+    public Optional<URL> getURL() {
+        return Optional.ofNullable(url);
+    }
 
-    enum Status implements IntegerAttribute {
-        UNKNOWN(0),
+    public Service() {
 
-        OFFLINE(1),
-        CRASHED(2),
-        MAINTENANCE(3),
+    }
 
-        NOT_RESPONDING(4),
+    public CompletableFuture<Status> requestStatus() {
+        return CompletableFuture.supplyAsync(() -> SpecificService.getForObject(EndpointSpecificService, Status.class, getName()))
+                .thenApply(status -> this.status = status);
+    }
 
-        ONLINE(5);
+    public CompletableFuture<Service> updateStatus(Status status) {
+        return CompletableFuture.supplyAsync(() -> SpecificService.postForObject(EndpointSpecificService, status, Status.class, getName()))
+                .thenApply(newStatus -> {
+                    this.status = newStatus;
+                    return this;
+                });
+    }
 
-        private final int value;
+    public enum Status implements IntegerAttribute {
+        UNKNOWN,
 
-        @Override
-        public @NotNull Integer getValue() {
-            return value;
-        }
+        OFFLINE,
+        CRASHED,
+        MAINTENANCE,
 
-        Status(int value) {
-            this.value = value;
-        }
+        NOT_RESPONDING,
+
+        ONLINE;
 
         public static Status valueOf(int value) {
-            return Arrays.stream(values())
-                    .filter(it -> it.value == value)
-                    .findAny()
-                    .orElse(UNKNOWN);
+            return IntegerAttribute.valueOf(value, Status.class).assertion();
         }
 
         @Override
         public String toString() {
             return name();
-        }
-    }
-
-    final class Basic implements Service {
-        private final StatusConnection connection;
-
-        public Basic(StatusConnection connection, UniObjectNode node) {
-            super(connection, node);
-
-            this.connection = connection;
-        }
-
-        @Override
-        public CompletableFuture<Status> requestStatus() {
-            return connection.getRest()
-                    .request()
-                    .method(REST.Method.GET)
-                    .endpoint(Endpoint.SPECIFIC_SERVICE.complete(getName()))
-                    .execute$deserializeSingle()
-                    .thenApply(node -> node.get("status").asInt())
-                    .thenApply(Status::valueOf)
-                    .thenApply(status -> {
-                        put(STATUS, status.value);
-                        return status;
-                    });
-        }
-
-        @Override
-        public CompletableFuture<Service> updateStatus(Status status) {
-            if (getStatus() == status)
-                return CompletableFuture.completedFuture(this);
-            if (!Objects.equals(put(STATUS, status), status.getValue()))
-                return connection.getRest()
-                        .request(Service.Type)
-                        .method(REST.Method.POST)
-                        .endpoint(Endpoint.UPDATE_SERVICE_STATUS.complete(getName()))
-                        .buildBody(BodyBuilderType.OBJECT, obj -> obj.put(STATUS, status))
-                        .execute$deserializeSingle();
-            else return Polyfill.failedFuture(new RuntimeException("Unable to change status"));
         }
     }
 }
