@@ -6,8 +6,12 @@ import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.io.FileHandle;
 import org.comroid.status.entity.Service;
-import org.comroid.status.server.auth.TokenCore;
+import org.comroid.status.server.auth.Token;
+import org.comroid.status.server.repo.ServiceRepository;
+import org.comroid.status.server.auth.TokenProvider;
 import org.comroid.status.server.controller.ServiceController;
+import org.comroid.status.server.repo.TokenRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -18,14 +22,15 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
+import javax.persistence.PostLoad;
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class })
-@ComponentScan(basePackageClasses = ServiceController.class)
-@EntityScan(basePackageClasses = Service.class)
+@ComponentScan(basePackageClasses = {ServiceController.class, ServiceRepository.class, TokenRepository.class, TokenProvider.class})
+@EntityScan(basePackageClasses = {Service.class, Token.class})
 @EnableJpaRepositories
 @Configuration
 public class StatusServer implements ContextualProvider.Underlying {
@@ -43,12 +48,6 @@ public class StatusServer implements ContextualProvider.Underlying {
     public static final ThreadGroup THREAD_GROUP = new ThreadGroup("comroid Status Server");
     public static final String ADMIN_TOKEN_NAME = "admin$access$token";
     private static final Logger logger = LogManager.getLogger();
-    public static StatusServer instance;
-
-    static {
-        if (ADMIN_TOKEN.getContent().isEmpty())
-            ADMIN_TOKEN.setContent(TokenCore.generate(ADMIN_TOKEN_NAME));
-    }
 
     public static void main(String[] args) {
         SpringApplication.run(StatusServer.class);

@@ -63,4 +63,15 @@ public class ServiceController {
         serviceRepository.deleteById(name);
         return found.get();
     }
+
+    @ResponseBody
+    @PostMapping("/service/{id}/poll")
+    public Service pollService(@PathVariable("id") String name, @RequestHeader("Authorization") String authorization) {
+        Optional<Service> found = serviceRepository.findById(name);
+        if (found.isEmpty())
+            throw new HttpStatusCodeException(HttpStatus.NOT_FOUND) {};
+        if (!tokenProvider.isAuthorized(name, authorization))
+            throw new HttpStatusCodeException(HttpStatus.UNAUTHORIZED) {};
+        return found.get().poll();
+    }
 }

@@ -2,12 +2,11 @@ package org.comroid.status.entity;
 
 import org.comroid.api.IntegerAttribute;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.jsf.FacesContextUtils;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Optional;
@@ -58,6 +57,11 @@ public class Service {
                     this.status = newStatus;
                     return this;
                 });
+    }
+
+    public Service poll() {
+        // todo
+        return this;
     }
 
     public enum Status implements IntegerAttribute {

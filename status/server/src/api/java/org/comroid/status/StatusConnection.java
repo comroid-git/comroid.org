@@ -5,11 +5,9 @@ import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.Polyfill;
 import org.comroid.api.io.FileHandle;
-import org.comroid.mutatio.model.RefOPs;
-import org.comroid.mutatio.ref.FutureReference;
-import org.comroid.mutatio.ref.Reference;
 import org.comroid.status.entity.Service;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -25,8 +23,8 @@ public final class StatusConnection implements ContextualProvider.Underlying {
     private final String token;
     private final ScheduledExecutorService executor;
     //private final REST rest;
-    private final Map<String, Service> serviceCache;
-    private final Reference<Service> ownService;
+    //private final Map<String, Service> serviceCache;
+    //private final Reference<Service> ownService;
     public int refreshTimeout = 60; // seconds
     public int crashedTimeout = 120; // seconds
     private boolean polling = false;
@@ -39,19 +37,21 @@ public final class StatusConnection implements ContextualProvider.Underlying {
         return token;
     }
 
+    /*
     public Service getService() {
         return ownService.assertion();
     }
-
+     */
     /*
     public REST getRest() {
         return rest;
     }
      */
-
+    /*
     public Map<String, Service> getServiceCache() {
         return serviceCache;
     }
+     */
 
     public boolean isPolling() {
         return polling;
@@ -62,6 +62,17 @@ public final class StatusConnection implements ContextualProvider.Underlying {
         return CONTEXT;
     }
 
+    public StatusConnection(String serviceName, String token) {
+        this(serviceName, token, Executors.newScheduledThreadPool(4));
+    }
+
+    public StatusConnection(String serviceName, String token, ScheduledExecutorService executor) {
+        this.logger = serviceName == null ? Logger : LogManager.getLogger(String.format("StatusConnection(%s)", serviceName));
+        this.serviceName = serviceName;
+        this.token = token;
+        this.executor = executor;
+    }
+/*
     public StatusConnection(ContextualProvider context, FileHandle tokenFile) {
         this(context, null, tokenFile);
     }
@@ -79,13 +90,14 @@ public final class StatusConnection implements ContextualProvider.Underlying {
         this.serviceCache = new ConcurrentHashMap<>();//ProvidedCache<>(context, 250, ForkJoinPool.commonPool(), this::requestServiceByName);
         //this.rest = new REST(CONTEXT, executor);
         CONTEXT.addToContext(this, executor, serviceCache);
-        this.ownService = new FutureReference<>(requestServiceByName(serviceName)
-                .exceptionally(exceptionLogger("Could not request own service")));
+        //this.ownService = new FutureReference<>(requestServiceByName(serviceName)
+        //        .exceptionally(exceptionLogger("Could not request own service")));
     }
+    */
 
     @Override
     public String toString() {
-        return String.format("StatusConnection{serviceName='%s', service=%s}", serviceName, ownService == null ? "undefined" : ownService.get());
+        return String.format("StatusConnection{serviceName='%s', service=%s}", serviceName, "null");//, ownService == null ? "undefined" : ownService.get());
     }
 
     public boolean startPolling() {
@@ -159,7 +171,8 @@ public final class StatusConnection implements ContextualProvider.Underlying {
     }
 
     public CompletableFuture<Service> requestServiceByName(String name) {
-        return CompletableFuture.failedFuture(new Exception("unimplemented"));
+        return CompletableFuture.supplyAsync(() -> new RestTemplate().getForObject("http://localhost:42641/service/" + name, Service.class));
+        //return CompletableFuture.failedFuture(new Exception("unimplemented"));
         /*
         return rest.request(Service.class)
                 .method(REST.Method.GET)
