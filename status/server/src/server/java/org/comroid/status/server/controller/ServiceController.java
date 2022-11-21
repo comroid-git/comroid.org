@@ -1,20 +1,24 @@
 package org.comroid.status.server.controller;
 
 import org.comroid.status.entity.Service;
-import org.comroid.status.server.auth.TokenCore;
-import org.comroid.status.server.db.ServiceRepository;
+import org.comroid.status.server.StatusServer;
+import org.comroid.status.server.auth.TokenProvider;
+import org.comroid.status.server.repo.ServiceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpStatusCodeException;
 
+import javax.persistence.PostLoad;
 import java.util.Optional;
 
 @Controller
 public class ServiceController {
     @Autowired
     private ServiceRepository serviceRepository;
+    @Autowired
+    private TokenProvider tokenProvider;
 
     @ResponseBody
     @GetMapping("/services")
@@ -31,7 +35,7 @@ public class ServiceController {
     @ResponseBody
     @PostMapping("/services")
     public Service createService(@RequestParam Service service, @RequestHeader("Authorization") String authorization) {
-        if (!TokenCore.isValid(authorization))
+        if (!tokenProvider.isAuthorized(StatusServer.ADMIN_TOKEN_NAME, authorization))
             throw new HttpStatusCodeException(HttpStatus.UNAUTHORIZED) {};
         return serviceRepository.save(service);
     }
@@ -55,11 +59,11 @@ public class ServiceController {
     @ResponseBody
     @DeleteMapping("/service/{id}")
     public Service deleteService(@PathVariable("id") String name, @RequestHeader("Authorization") String authorization) {
-        if (!TokenCore.isValid(authorization))
-            throw new HttpStatusCodeException(HttpStatus.UNAUTHORIZED) {};
         Optional<Service> found = serviceRepository.findById(name);
         if (found.isEmpty())
             throw new HttpStatusCodeException(HttpStatus.NOT_FOUND) {};
+        if (!tokenProvider.isAuthorized(name, authorization))
+            throw new HttpStatusCodeException(HttpStatus.UNAUTHORIZED) {};
         serviceRepository.deleteById(name);
         return found.get();
     }

@@ -1,11 +1,31 @@
 package org.comroid.status.server.auth;
 
+import org.comroid.status.server.StatusServer;
+import org.comroid.status.server.repo.TokenRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.persistence.PostLoad;
 import java.util.Base64;
 import java.util.UUID;
 
-public final class TokenCore {
-    public static synchronized String generate(String entityName) {
-        String token = entityName + ':';
+@Service
+public final class TokenProvider {
+    @Autowired
+    private TokenRepository tokens;
+
+    @PostLoad
+    public void init() {
+        if (!hasToken(StatusServer.ADMIN_TOKEN_NAME))
+            generate(StatusServer.ADMIN_TOKEN_NAME);
+    }
+
+    public boolean hasToken(String name) {
+        return tokens.findById(name).isPresent();
+    }
+
+    public synchronized Token generate(String name) {
+        String token = name + ':';
 
         token += UUID.randomUUID().toString();
         token += ':';
@@ -17,11 +37,16 @@ public final class TokenCore {
         if (!isValid(yield))
             throw new AssertionError("Generated token is invalid");
 
-        return yield;
+        return tokens.save(new Token(name, yield));
+    }
+
+    public boolean isAuthorized(String name, String token) {
+        return isValid(token) && extractName(token).equals(name)
+                && tokens.findById(name).map(tk -> tk.getToken().equals(token)).orElse(false);
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    public static boolean isValid(String token) {
+    public boolean isValid(String token) {
         final Base64.Decoder decoder = Base64.getDecoder();
         final String decoded = new String(decoder.decode(token));
 
@@ -39,7 +64,7 @@ public final class TokenCore {
         return true;
     }
 
-    public static String extractName(String token) {
+    public String extractName(String token) {
         final Base64.Decoder decoder = Base64.getDecoder();
         final String decoded = new String(decoder.decode(token));
 
