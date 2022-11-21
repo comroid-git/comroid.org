@@ -1,6 +1,7 @@
 package org.comroid.status.entity;
 
 import org.comroid.api.IntegerAttribute;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.client.RestTemplate;
@@ -24,6 +25,8 @@ public class Service {
     @Column
     private URL url;
     @Column
+    private String pingHost;
+    @Column
     private Status status;
 
     public String getName() {
@@ -42,8 +45,9 @@ public class Service {
         return Optional.ofNullable(url);
     }
 
-    public Service() {
-
+    @ApiStatus.Internal
+    public void setStatus(Status status) {
+        this.status = status;
     }
 
     public CompletableFuture<Status> requestStatus() {
