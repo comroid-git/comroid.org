@@ -62,7 +62,12 @@ public class Service {
                 });
     }
 
-    public Service poll() {
+    public Service startPoll() {
+        // todo
+        return this;
+    }
+
+    public Service stopPoll() {
         // todo
         return this;
     }

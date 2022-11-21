@@ -93,6 +93,17 @@ public class ServiceController {
             throw new ServiceNotFoundException(name);
         if (!tokenProvider.isAuthorized(name, authorization))
             throw new InvalidTokenException();
-        return found.get().poll();
+        return found.get().startPoll();
+    }
+
+    @ResponseBody
+    @DeleteMapping("/service/{id}/poll")
+    public Service deletePollService(@PathVariable("id") String name, @RequestHeader("Authorization") String authorization) {
+        Optional<Service> found = serviceRepository.findById(name);
+        if (found.isEmpty())
+            throw new ServiceNotFoundException(name);
+        if (!tokenProvider.isAuthorized(name, authorization))
+            throw new InvalidTokenException();
+        return found.get().stopPoll();
     }
 }
