@@ -21,18 +21,18 @@ public class ServiceController {
     @Autowired
     private TokenProvider tokenProvider;
 
-    @ResponseBody
-    @GetMapping("/services")
-    public Iterable<Service> getServices() {
-        return serviceRepository.findAll();
-    }
-
     @PostConstruct
     private void init() {
         serviceRepository.findAll().forEach(srv -> {
             if (!tokenProvider.hasToken(srv.getName()))
                 tokenProvider.generate(srv.getName());
         });
+    }
+
+    @ResponseBody
+    @GetMapping("/services")
+    public Iterable<Service> getServices() {
+        return serviceRepository.findAll();
     }
 
     @ResponseBody
