@@ -5,6 +5,7 @@ import org.comroid.status.server.repo.TokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import javax.persistence.PostLoad;
 import java.util.Base64;
 import java.util.UUID;
@@ -14,7 +15,7 @@ public final class TokenProvider {
     @Autowired
     private TokenRepository tokens;
 
-    @PostLoad
+    @PostConstruct
     public void init() {
         if (!hasToken(StatusServer.ADMIN_TOKEN_NAME))
             generate(StatusServer.ADMIN_TOKEN_NAME);
@@ -28,8 +29,6 @@ public final class TokenProvider {
         String token = name + ':';
 
         token += UUID.randomUUID().toString();
-        token += ':';
-        token += UUID.randomUUID().toString();
 
         final Base64.Encoder encoder = Base64.getEncoder();
         final String yield = encoder.encodeToString(token.getBytes());
@@ -41,8 +40,10 @@ public final class TokenProvider {
     }
 
     public boolean isAuthorized(String name, String token) {
-        return isValid(token) && extractName(token).equals(name)
-                && tokens.findById(name).map(tk -> tk.getToken().equals(token)).orElse(false);
+        String insideName = extractName(token);
+        //noinspection SimplifiableConditionalExpression
+        return (isValid(token) && insideName.equals(name) && tokens.findById(name).map(tk -> tk.getToken().equals(token)).orElse(false))
+                || insideName.equals(StatusServer.ADMIN_TOKEN_NAME) ? false : isAuthorized(StatusServer.ADMIN_TOKEN_NAME, token);
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
@@ -52,11 +53,10 @@ public final class TokenProvider {
 
         final String[] parts = decoded.split(":");
 
-        if (parts.length != 3)
+        if (parts.length != 2)
             return false;
         try {
             UUID.fromString(parts[1]);
-            UUID.fromString(parts[2]);
         } catch (Throwable ignored) {
             return false;
         }
