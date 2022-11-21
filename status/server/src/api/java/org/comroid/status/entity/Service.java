@@ -2,14 +2,13 @@ package org.comroid.status.entity;
 
 import org.comroid.api.IntegerAttribute;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.jsf.FacesContextUtils;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -41,13 +40,13 @@ public class Service {
         return status;
     }
 
-    public Optional<URL> getURL() {
-        return Optional.ofNullable(url);
-    }
-
     @ApiStatus.Internal
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+    public Optional<URL> getURL() {
+        return Optional.ofNullable(url);
     }
 
     public CompletableFuture<Status> requestStatus() {

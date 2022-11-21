@@ -4,14 +4,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.Polyfill;
-import org.comroid.api.io.FileHandle;
 import org.comroid.status.entity.Service;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 public final class StatusConnection implements ContextualProvider.Underlying {

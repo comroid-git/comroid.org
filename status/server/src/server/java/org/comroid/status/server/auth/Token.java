@@ -6,7 +6,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="tokens")
+@Table(name = "tokens")
 public final class Token {
     @Id
     private String name;
