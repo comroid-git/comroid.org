@@ -20,6 +20,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -36,13 +37,7 @@ public class StatusServer implements ContextualProvider.Underlying {
 
     //public static final AdapterDefinition CONTEXT;
     public static final FileHandle PATH_BASE = new FileHandle("/srv/status/", true); // server path base
-    public static final FileHandle DATA_DIR = PATH_BASE.createSubDir("data");
-    public static final FileHandle BOT_TOKEN = DATA_DIR.createSubFile("discord.cred");
-    public static final FileHandle CACHE_FILE = DATA_DIR.createSubFile("cache.json");
-    public static final FileHandle DB_FILE = DATA_DIR.createSubFile("db.json");
-    public static final FileHandle TOKEN_DIR = PATH_BASE.createSubDir("token");
-    public static final int PORT = 42641; // hardcoded in server, do not change
-    public static final ThreadGroup THREAD_GROUP = new ThreadGroup("comroid Status Server");
+    public static final FileHandle DB_FILE = PATH_BASE.createSubFile("db.json");
     public static final String ADMIN_TOKEN_NAME = "admin$access$token";
     private static final Logger logger = LogManager.getLogger();
 
