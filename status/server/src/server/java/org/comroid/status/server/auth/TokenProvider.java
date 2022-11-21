@@ -1,6 +1,7 @@
 package org.comroid.status.server.auth;
 
 import org.comroid.status.server.StatusServer;
+import org.comroid.status.server.exception.InvalidTokenException;
 import org.comroid.status.server.repo.TokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,10 +41,22 @@ public final class TokenProvider {
     }
 
     public boolean isAuthorized(String name, String token) {
+        try {
+            return isAuthorized(name, token, false);
+        } catch (Exception e) {
+            throw new InvalidTokenException();
+        }
+    }
+
+    private boolean isAuthorized(String name, String token, boolean recursive) {
         String insideName = extractName(token);
-        //noinspection SimplifiableConditionalExpression
-        return (isValid(token) && insideName.equals(name) && tokens.findById(name).map(tk -> tk.getToken().equals(token)).orElse(false))
-                || insideName.equals(StatusServer.ADMIN_TOKEN_NAME) ? false : isAuthorized(StatusServer.ADMIN_TOKEN_NAME, token);
+        if (!recursive && insideName.equals(StatusServer.ADMIN_TOKEN_NAME))
+            return isAuthorized(StatusServer.ADMIN_TOKEN_NAME, token, true);
+        if (!isValid(token))
+            return false;
+        if (!insideName.equals(name))
+            return false;
+        return tokens.findById(name).map(tk -> tk.getToken().equals(token)).orElse(true);
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
