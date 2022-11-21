@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.Junction;
+import org.comroid.api.os.OS;
 import org.comroid.common.exception.AssertionException;
 import org.comroid.common.io.FileHandle;
 import org.comroid.mutatio.ref.Reference;
@@ -218,7 +219,7 @@ public class StatusServer implements ContextualProvider.Underlying, Closeable {
 
     public static void main(String... args) throws IOException {
         logger.info("Starting comroid Status Server...");
-        new StatusServer(Executors.newScheduledThreadPool(4), InetAddress.getByAddress(new byte[]{0, 0, 0, 0}), PORT);
+        new StatusServer(Executors.newScheduledThreadPool(4), OS.isWindows ? InetAddress.getLocalHost() : InetAddress.getByAddress(new byte[]{0, 0, 0, 0}), PORT);
 
         Runtime.getRuntime().addShutdownHook(new Thread(instance::close));
         instance.threadPool.scheduleAtFixedRate(() -> {
