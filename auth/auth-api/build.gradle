@@ -45,7 +45,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'org.jetbrains:annotations:20.1.0'
+    compileOnly 'org.jetbrains:annotations:23.0.0'
 
     if (isAutoDeploy) {
         api 'org.comroid:webkit-oauth:0.+'

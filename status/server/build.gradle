@@ -49,6 +49,7 @@ allprojects {
         maven { url 'https://maven.comroid.org' }
         mavenLocal()
         jcenter()
+        mavenCentral()
         maven { url 'https://www.jitpack.io' }
     }
 }
