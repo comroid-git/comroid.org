@@ -26,6 +26,8 @@ import javax.sql.DataSource;
 import java.io.IOException;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 @ComponentScan(basePackageClasses = {ServiceController.class, ServiceRepository.class, TokenRepository.class, TokenProvider.class})
@@ -50,6 +52,11 @@ public class StatusServer implements ContextualProvider.Underlying {
                 .username(dbInfo.username)
                 .password(dbInfo.password)
                 .build();
+    }
+
+    @Bean
+    public ScheduledExecutorService getExecutor() {
+        return Executors.newScheduledThreadPool(4);
     }
 
     public static void main(String[] args) {

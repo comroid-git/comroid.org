@@ -6,8 +6,15 @@ import org.comroid.api.ContextualProvider;
 import org.comroid.api.Polyfill;
 import org.comroid.status.entity.Service;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
@@ -16,18 +23,16 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 public final class StatusConnection implements ContextualProvider.Underlying {
+    public static final String SERVER = "https://api.status.comroid.org";
     public static final Logger Logger = LogManager.getLogger("StatusConnection");
     public static ContextualProvider CONTEXT;
     private final Logger logger;
     @Nullable
     private final String serviceName;
+    private final Service service;
     private final String token;
     private final ScheduledExecutorService executor;
-    //private final REST rest;
-    //private final Map<String, Service> serviceCache;
-    //private final Reference<Service> ownService;
-    public int refreshTimeout = 60; // seconds
-    public int crashedTimeout = 120; // seconds
+    public int rate = 60; // seconds
     private boolean polling = false;
 
     public String getServiceName() {
@@ -38,21 +43,9 @@ public final class StatusConnection implements ContextualProvider.Underlying {
         return token;
     }
 
-    /*
     public Service getService() {
-        return ownService.assertion();
+        return service;
     }
-     */
-    /*
-    public REST getRest() {
-        return rest;
-    }
-     */
-    /*
-    public Map<String, Service> getServiceCache() {
-        return serviceCache;
-    }
-     */
 
     public boolean isPolling() {
         return polling;
@@ -69,32 +62,11 @@ public final class StatusConnection implements ContextualProvider.Underlying {
 
     public StatusConnection(String serviceName, String token, ScheduledExecutorService executor) {
         this.logger = serviceName == null ? Logger : LogManager.getLogger(String.format("StatusConnection(%s)", serviceName));
+        this.service = requestServiceByName(serviceName).join();
         this.serviceName = serviceName;
         this.token = token;
         this.executor = executor;
     }
-/*
-    public StatusConnection(ContextualProvider context, FileHandle tokenFile) {
-        this(context, null, tokenFile);
-    }
-
-    public StatusConnection(ContextualProvider context, @Nullable String serviceName, FileHandle tokenFile) {
-        this(context, serviceName, tokenFile.getContent(), Executors.newScheduledThreadPool(4));
-    }
-
-    public StatusConnection(ContextualProvider context, @Nullable String serviceName, String token, ScheduledExecutorService executor) {
-        this.logger = serviceName == null ? Logger : LogManager.getLogger(String.format("StatusConnection(%s)", serviceName));
-        this.serviceName = serviceName;
-        this.token = token;
-        this.executor = executor;
-        logger.debug("Building Cache...");
-        this.serviceCache = new ConcurrentHashMap<>();//ProvidedCache<>(context, 250, ForkJoinPool.commonPool(), this::requestServiceByName);
-        //this.rest = new REST(CONTEXT, executor);
-        CONTEXT.addToContext(this, executor, serviceCache);
-        //this.ownService = new FutureReference<>(requestServiceByName(serviceName)
-        //        .exceptionally(exceptionLogger("Could not request own service")));
-    }
-    */
 
     @Override
     public String toString() {
@@ -104,31 +76,28 @@ public final class StatusConnection implements ContextualProvider.Underlying {
     public boolean startPolling() {
         if (polling)
             return false;
-        executor.scheduleAtFixedRate(() -> {
+        executor.schedule(() -> {
             try {
                 sendPoll();
+                startPolling();
             } catch (Throwable t) {
                 logger.error("Error while executing Poll", t);
             }
-        }, 0, refreshTimeout, TimeUnit.SECONDS);
+        }, rate, TimeUnit.SECONDS);
         return (polling = true);
     }
 
-    public CompletableFuture<?> stopPolling(Service.Status newStatus) {
+    public CompletableFuture<?> stopPolling() {
         if (!polling)
             return Polyfill.failedFuture(new RuntimeException("Connection is not polling!"));
         if (serviceName == null)
             throw new NoSuchElementException("No service name defined");
-        return CompletableFuture.failedFuture(new Exception("unimplemented"));
-        /*
-        return rest.request()
-                .method(REST.Method.DELETE)
-                .endpoint(Endpoint.POLL.complete(serviceName))
-                .addHeader(AUTHORIZATION, token)
-                .buildBody(BodyBuilderType.OBJECT, obj -> obj.put(Service.STATUS, newStatus))
-                .execute()
-                .thenAccept(services -> polling = false);
-         */
+        return CompletableFuture.supplyAsync(() -> new RestTemplate().exchange(
+                        String.format("%s/service/%s/poll", SERVER, serviceName),
+                        HttpMethod.DELETE,
+                        new HttpEntity<>(rate, createHeaders("Authorization", token)),
+                        Service.class))
+                .thenApply(ResponseEntity::getBody);
     }
 
     private CompletableFuture<?> sendPoll() {
@@ -136,57 +105,47 @@ public final class StatusConnection implements ContextualProvider.Underlying {
 
         if (serviceName == null)
             throw new NoSuchElementException("No service name defined");
-        return CompletableFuture.failedFuture(new Exception("unimplemented"));
-        /*
-        return rest.request()
-                .method(REST.Method.POST)
-                .endpoint(Endpoint.POLL.complete(serviceName))
-                .addHeader(AUTHORIZATION, token)
-                .expect(HTTPStatusCodes.NO_CONTENT)
-                .buildBody(BodyBuilderType.OBJECT, obj -> {
-                    obj.put(Service.STATUS, Service.Status.ONLINE);
-                    obj.put("expected", refreshTimeout);
-                    obj.put("timeout", crashedTimeout);
-                }).execute();
-         */
+        return CompletableFuture.supplyAsync(() -> new RestTemplate().exchange(
+                        String.format("%s/service/%s/poll", SERVER, serviceName),
+                        HttpMethod.POST,
+                        new HttpEntity<>(rate, createHeaders("Authorization", token)),
+                        Service.class))
+                .thenApply(ResponseEntity::getBody);
     }
 
     public CompletableFuture<Service> updateStatus(Service.Status status) {
         if (serviceName == null)
             throw new NoSuchElementException("No service name defined");
-        return CompletableFuture.failedFuture(new Exception("unimplemented"));
-        /*
-        final UniObjectNode data = rest.requireFromContext(SerializationAdapter.class)
-                .createObjectNode();
+        return CompletableFuture.supplyAsync(() -> new RestTemplate().exchange(
+                String.format("%s/service/%s/status", SERVER, serviceName),
+                        HttpMethod.POST,
+                        new HttpEntity<>(status, createHeaders("Authorization", token)),
+                        Service.class))
+                .thenApply(ResponseEntity::getBody);
+    }
 
-        data.put(Service.STATUS, status);
-
-        return rest.request(Service.class)
-                .method(REST.Method.POST)
-                .endpoint(Endpoint.UPDATE_SERVICE_STATUS.complete(serviceName))
-                .addHeader(AUTHORIZATION, token)
-                .body(data)
-                .execute$autoCache(Service.NAME, serviceCache)
-                .thenApply(RefOPs::getAny);
-         */
+    public CompletableFuture<Collection<Service>> requestServices() {
+        return CompletableFuture.supplyAsync(() -> new RestTemplate().exchange(
+                        String.format("%s/services", SERVER),
+                        HttpMethod.GET,
+                        HttpEntity.EMPTY,
+                        new ParameterizedTypeReference<List<Service>>(){}))
+                .thenApply(ResponseEntity::getBody);
     }
 
     public CompletableFuture<Service> requestServiceByName(String name) {
-        return CompletableFuture.supplyAsync(() -> new RestTemplate().getForObject("http://localhost:42641/service/" + name, Service.class));
-        //return CompletableFuture.failedFuture(new Exception("unimplemented"));
-        /*
-        return rest.request(Service.class)
-                .method(REST.Method.GET)
-                .endpoint(Endpoint.SPECIFIC_SERVICE.complete(name))
-                .execute$autoCache(Service.NAME, serviceCache)
-                .thenApply(RefOPs::getAny);
-         */
+        return CompletableFuture.supplyAsync(() -> new RestTemplate().exchange(
+                        String.format("%s/service/%s", SERVER, serviceName),
+                        HttpMethod.GET,
+                        HttpEntity.EMPTY,
+                        Service.class))
+                .thenApply(ResponseEntity::getBody);
     }
 
-    private <T> Function<Throwable, T> exceptionLogger(String message) {
-        return t -> {
-            logger.error(message, t);
-            return null;
-        };
+    private HttpHeaders createHeaders(String... keyValuePairs) {
+        HttpHeaders headers = new HttpHeaders();
+        for (int i = 0; i < keyValuePairs.length; i++)
+            headers.add(keyValuePairs[i], keyValuePairs[++i]);
+        return headers;
     }
 }

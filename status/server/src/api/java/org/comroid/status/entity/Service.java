@@ -2,6 +2,9 @@ package org.comroid.status.entity;
 
 import org.comroid.api.IntegerAttribute;
 import org.jetbrains.annotations.ApiStatus;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.client.RestTemplate;
 
 import javax.persistence.Column;
@@ -60,16 +63,6 @@ public class Service {
                     this.status = newStatus;
                     return this;
                 });
-    }
-
-    public Service startPoll() {
-        // todo
-        return this;
-    }
-
-    public Service stopPoll() {
-        // todo
-        return this;
     }
 
     public enum Status implements IntegerAttribute {

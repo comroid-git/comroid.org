@@ -8,11 +8,18 @@ import org.comroid.status.server.exception.InvalidTokenException;
 import org.comroid.status.server.exception.ServiceNotFoundException;
 import org.comroid.status.server.repo.ServiceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Controller
 public class ServiceController {
@@ -20,6 +27,8 @@ public class ServiceController {
     private ServiceRepository serviceRepository;
     @Autowired
     private TokenProvider tokenProvider;
+    @Autowired
+    private ScheduledExecutorService scheduler;
 
     @PostConstruct
     private void init() {
@@ -50,7 +59,7 @@ public class ServiceController {
     }
 
     @ResponseBody
-    @PutMapping("/service/{id}")
+    @PostMapping("/service/{id}")
     public Service updateService(@PathVariable("id") String name, @RequestBody Service service) {
         var found = serviceRepository.findById(name);
         if (found.isEmpty())
@@ -61,16 +70,14 @@ public class ServiceController {
     }
 
     @ResponseBody
-    @PutMapping("/service/{id}/status")
+    @PostMapping("/service/{id}/status")
     public Service updateStatus(@PathVariable("id") String name, @RequestBody Service.Status status, @RequestHeader("Authorization") String authorization) {
         var found = serviceRepository.findById(name);
         if (found.isEmpty())
             throw new ServiceNotFoundException(name);
         if (!tokenProvider.isAuthorized(name, authorization))
             throw new InvalidTokenException();
-        var srv = found.get();
-        srv.setStatus(status);
-        return serviceRepository.save(srv);
+        return updateStatus(found.get(), status);
     }
 
     @ResponseBody
@@ -87,23 +94,50 @@ public class ServiceController {
 
     @ResponseBody
     @PostMapping("/service/{id}/poll")
-    public Service pollService(@PathVariable("id") String name, @RequestHeader("Authorization") String authorization) {
+    public Service pollService(@PathVariable("id") String name, @RequestHeader("Authorization") String authorization, @RequestBody long rate) {
         Optional<Service> found = serviceRepository.findById(name);
         if (found.isEmpty())
             throw new ServiceNotFoundException(name);
         if (!tokenProvider.isAuthorized(name, authorization))
             throw new InvalidTokenException();
-        return found.get().startPoll();
+        Service srv = found.get();
+        handlePoll(srv, rate);
+        return srv;
     }
 
     @ResponseBody
     @DeleteMapping("/service/{id}/poll")
-    public Service deletePollService(@PathVariable("id") String name, @RequestHeader("Authorization") String authorization) {
+    public void deletePollService(@PathVariable("id") String name, @RequestHeader("Authorization") String authorization) {
         Optional<Service> found = serviceRepository.findById(name);
         if (found.isEmpty())
             throw new ServiceNotFoundException(name);
         if (!tokenProvider.isAuthorized(name, authorization))
             throw new InvalidTokenException();
-        return found.get().stopPoll();
+        Service srv = found.get();
+        stopPoll(srv);
+    }
+
+    private final Map<String, Runnable> pollCancellation = new ConcurrentHashMap<>();
+
+    private Service updateStatus(Service service, Service.Status status) {
+        service.setStatus(status);
+        return serviceRepository.save(service);
+    }
+
+    private void handlePoll(Service service, long rate) {
+        stopPoll(service);
+        updateStatus(service, Service.Status.ONLINE);
+        final var close1 = scheduler.schedule(() -> updateStatus(service, Service.Status.NOT_RESPONDING), rate * 2, TimeUnit.SECONDS);
+        final var close2 = scheduler.schedule(() -> updateStatus(service, Service.Status.CRASHED), rate * 3, TimeUnit.SECONDS);
+        pollCancellation.put(service.getName(), () -> {
+            close1.cancel(true);
+            close2.cancel(true);
+        });
+    }
+
+    private void stopPoll(Service service) {
+        if (!pollCancellation.containsKey(service.getName()))
+            return;
+        pollCancellation.get(service.getName()).run();
     }
 }
