@@ -1,65 +1,57 @@
-import java.util.concurrent.TimeUnit
+plugins {
+    id 'application'
+    id 'org.springframework.boot' version '2.7.5'
+    id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+}
 
-import static java.lang.System.getenv
 import static java.lang.System.getenv
 
 ext {
     isAutoDeploy = (rootProject.name != 'repo' && rootProject.name != 'java') || getenv().containsKey("TEAMCITY") || getenv().containsKey("JITPACK")
 }
 
-allprojects {
-    apply plugin: 'java'
+group 'org.comroid'
+version = parent.version
+apply from: 'gradle/vars.gradle'
 
-    sourceCompatibility = 11
-    targetCompatibility = 11
+sourceCompatibility = 17
+targetCompatibility = 17
 
-    ext {
-        buildId = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis())
-    }
-    group 'org.comroid'
-    version = '0.41.' + buildId
+mainClassName = 'org.comroid.auth.AuthServer'
 
-    compileJava{
-        dependsOn ':dependencies'
-        options.encoding = 'UTF-8'
-    }
+repositories {
+    maven { url 'https://maven.comroid.org' }
+    mavenLocal()
+    jcenter()
+    mavenCentral()
+    maven { url 'https://www.jitpack.io' }
+}
 
-    tasks.withType(Javadoc) {
-        options {
-            encoding = 'UTF-8'
-            /*
-            links = [
-                    "https://docs.oracle.com/javase/8/docs/api/",
-                    "https://docs.oracle.com/javaee/7/api/",
-                    "https://mewna.github.io/catnip/docs/",
-                    //"https://www.javadoc.io/doc/com.discord4j/discord4j-core/3.0.9", // broken
-                    "https://docs.javacord.org/api/v/3.0.4/"//,
-                    //"https://ci.dv8tion.net/job/JDA/javadoc/" // broken
-            ]
-            */
-        }
-    }
-
-    System.out.println("deps " +name != 'status' )
-    if (name != 'auth') {
-        apply from: 'vars.gradle'
-    }
-
-    repositories {
-        maven { url 'https://maven.comroid.org' }
-        mavenLocal()
-        jcenter()
-        mavenCentral()
-        maven { url 'https://www.jitpack.io' }
+dependencyManagement {
+    imports {
+        mavenBom 'org.springframework.session:spring-session-bom:2021.1.1'
     }
 }
 
 dependencies {
-    testImplementation 'junit:junit:4.13'
-    testImplementation 'org.easymock:easymock:4.1'
-}
+    compileOnly 'org.jetbrains:annotations:23.0.0'
 
-tasks.findByName('wrapper')?.configure {
-    gradleVersion = '6.2'
-    distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
+    if (isAutoDeploy) {
+        implementation 'org.comroid:status-api:0.+'
+    } else {
+        implementation project(':status:status-api')
+    }
+
+    // db dependencies
+    implementation 'org.mariadb.jdbc:mariadb-java-client:3.0.+'
+
+    // spring
+    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.session:spring-session-jdbc'
+    implementation 'org.springframework.security:spring-security-oauth2-authorization-server:1.+'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
