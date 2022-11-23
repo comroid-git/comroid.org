@@ -1,71 +1,65 @@
-apply plugin: 'application'
+import java.util.concurrent.TimeUnit
 
-group 'org.comroid'
-version '0.41-SNAPSHOT'
+import static java.lang.System.getenv
+import static java.lang.System.getenv
 
-apply from: 'gradle/vars.gradle'
-
-mainClassName = 'org.comroid.auth.server.AuthServer'
-
-sourceCompatibility = 11
-targetCompatibility = 11
-
-tasks.findByName('wrapper')?.configure {
-    gradleVersion = '7.5'
-    distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
+ext {
+    isAutoDeploy = (rootProject.name != 'repo' && rootProject.name != 'java') || getenv().containsKey("TEAMCITY") || getenv().containsKey("JITPACK")
 }
 
-compileJava.options.encoding = 'UTF-8'
+allprojects {
+    apply plugin: 'java'
 
-repositories {
-    maven { url 'https://maven.comroid.org' }
-    mavenLocal()
-    jcenter()
-}
+    sourceCompatibility = 11
+    targetCompatibility = 11
 
-if (!isAutoDeploy) {
-    evaluationDependsOn ':guardian:uniform'
-    evaluationDependsOn ':guardian:restless'
+    ext {
+        buildId = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis())
+    }
+    group 'org.comroid'
+    version = '0.41.' + buildId
+
+    compileJava{
+        dependsOn ':dependencies'
+        options.encoding = 'UTF-8'
+    }
+
+    tasks.withType(Javadoc) {
+        options {
+            encoding = 'UTF-8'
+            /*
+            links = [
+                    "https://docs.oracle.com/javase/8/docs/api/",
+                    "https://docs.oracle.com/javaee/7/api/",
+                    "https://mewna.github.io/catnip/docs/",
+                    //"https://www.javadoc.io/doc/com.discord4j/discord4j-core/3.0.9", // broken
+                    "https://docs.javacord.org/api/v/3.0.4/"//,
+                    //"https://ci.dv8tion.net/job/JDA/javadoc/" // broken
+            ]
+            */
+        }
+    }
+
+    System.out.println("deps " +name != 'status' )
+    if (name != 'auth') {
+        apply from: 'vars.gradle'
+    }
+
+    repositories {
+        maven { url 'https://maven.comroid.org' }
+        mavenLocal()
+        jcenter()
+        mavenCentral()
+        maven { url 'https://www.jitpack.io' }
+    }
 }
 
 dependencies {
-    compileOnly 'org.jetbrains:annotations:23.0.0'
+    testImplementation 'junit:junit:4.13'
+    testImplementation 'org.easymock:easymock:4.1'
+}
 
-    // command line parser
-
-    if (isAutoDeploy) {
-        implementation project(':auth-api')
-
-        implementation 'org.comroid:status-api:0.+'
-        implementation 'org.comroid:webkit:0.+'
-        implementation 'org.comroid:webkit-oauth:0.+'
-    } else {
-        implementation project(':auth:auth-api')
-
-        implementation project(':status:status-api')
-
-        implementation project(':guardian:uniform').sourceSets.java8compat.output.classesDirs
-        implementation project(':guardian:restless').sourceSets.java11compat.output.classesDirs
-        implementation project(':guardian:webkit')
-        implementation project(':guardian:webkit:oauth')
-    }
-
-    // logging dependencies
-    implementation 'org.apache.logging.log4j:log4j-api:2.11.0'
-
-    // json dependency
-    implementation 'com.alibaba:fastjson:1.2.76'
-    //implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.0'
-
-    // oauth2 helper dependencies
-   // implementation 'org.zalando.stups:tokens:0.13.0'
-   
-   // nashorn dependency
-   implementation 'org.openjdk.nashorn:nashorn-core:15.0'
-
-/*
-    // xml dependency
-    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.11.2'
-    testImplementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.11.2'
- */
+tasks.findByName('wrapper')?.configure {
+    gradleVersion = '6.2'
+    distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
 }

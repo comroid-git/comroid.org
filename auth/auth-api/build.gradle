@@ -48,14 +48,10 @@ dependencies {
     compileOnly 'org.jetbrains:annotations:23.0.0'
 
     if (isAutoDeploy) {
-        api 'org.comroid:webkit-oauth:0.+'
+        api 'org.comroid:api:0.+'
     } else {
-        api project(':guardian:webkit:oauth')
+        api project(':api')
     }
-
-    // logging dependencies
-    implementation 'org.apache.logging.log4j:log4j-api:2.11.0'
-    testImplementation 'org.apache.logging.log4j:log4j-core:2.11.0'
 }
 
 apply from: "${parent.projectDir}/gradle/publishing.gradle"

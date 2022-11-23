@@ -193,7 +193,7 @@ public final class AuthServer implements ContextualProvider.Underlying, Unchecke
         logger.info("Shutting down");
         try {
             if (status != null && status.isPolling())
-                status.stopPolling(Service.Status.OFFLINE)
+                status.stopPolling()
                         .exceptionally(Polyfill.exceptionLogger(logger, "Could not stop Polling"));
             server.close();
         } catch (Throwable t) {

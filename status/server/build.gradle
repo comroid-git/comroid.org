@@ -4,7 +4,7 @@ import static java.lang.System.getenv
 import static java.lang.System.getenv
 
 ext {
-    isAutoDeploy = rootProject.name != 'repo' || rootProject.name != 'java' || getenv().containsKey("TEAMCITY") || getenv().containsKey("JITPACK")
+    isAutoDeploy = (rootProject.name != 'repo' && rootProject.name != 'java') || getenv().containsKey("TEAMCITY") || getenv().containsKey("JITPACK")
 }
 
 allprojects {

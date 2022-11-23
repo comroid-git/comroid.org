@@ -1,7 +1,7 @@
 package org.comroid.auth.rest;
 
 import org.comroid.api.Polyfill;
-import org.comroid.auth.ComroidAuthServer;
+import org.comroid.auth.AuthServer;
 import org.comroid.auth.user.User;
 import org.comroid.restless.endpoint.AccessibleEndpoint;
 import org.intellij.lang.annotations.Language;
@@ -20,7 +20,7 @@ public enum AuthEndpoint implements AccessibleEndpoint {
 
     @Override
     public String getUrlBase() {
-        return ComroidAuthServer.URL_BASE;
+        return AuthServer.URL_BASE;
     }
 
     @Override

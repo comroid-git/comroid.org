@@ -6,8 +6,7 @@ import org.comroid.api.ContextualProvider;
 import org.comroid.api.EMailAddress;
 import org.comroid.api.Rewrapper;
 import org.comroid.api.UncheckedCloseable;
-import org.comroid.auth.ComroidAuthServer;
-import org.comroid.auth.server.AuthServer;
+import org.comroid.auth.AuthServer;
 import org.comroid.api.io.FileHandle;
 import org.comroid.restless.CommonHeaderNames;
 import org.comroid.restless.HTTPStatusCodes;
@@ -26,8 +25,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 public final class UserManager implements ContextualProvider.Underlying, UncheckedCloseable, ClientProvider {
-    public static final FileHandle DIR = AuthServer.DATA.createSubDir("users");
-    public static final FileHandle SALTS = AuthServer.DATA.createSubDir("salts");
+    public static final FileHandle DIR = org.comroid.auth.server.AuthServer.DATA.createSubDir("users");
+    public static final FileHandle SALTS = org.comroid.auth.server.AuthServer.DATA.createSubDir("salts");
     private static final Logger logger = LogManager.getLogger();
     private static final Map<String, byte[]> salts = new ConcurrentHashMap<>();
 
@@ -45,12 +44,12 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
     }
 
     public Stream<UserAccount> getUsers() {
-        return ComroidAuthServer.getUsers()
+        return AuthServer.getUsers()
                 .flatMap(UserAccount.class)
                 .streamValues();
     }
 
-    public UserManager(AuthServer server) {
+    public UserManager(org.comroid.auth.server.AuthServer server) {
         this.context = server.plus("UserManager", this);
 
         int added = (int) Stream.of(DIR.listFiles())
@@ -66,7 +65,7 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
                 })
                 .map(FileHandle::new)
                 .map(dir -> new UserAccount(this, dir))
-                .filter(ComroidAuthServer::addUserToCache)
+                .filter(AuthServer::addUserToCache)
                 .count();
         logger.info("Loading finished; loaded {} user accounts", added);
     }
@@ -87,19 +86,19 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
     public UserAccount createAccount(String email, String password) {
         logger.info("Creating new user account with email " + email);
 
-        if (ComroidAuthServer.findUserByEmail(EMailAddress.parse(email)).isNonNull())
+        if (AuthServer.findUserByEmail(EMailAddress.parse(email)).isNonNull())
             throw new IllegalArgumentException("E-Mail is already in use!");
 
         UUID uuid = UUID.randomUUID();
         UserAccount account = new UserAccount(this, uuid, email, password);
-        ComroidAuthServer.addUserToCache(account);
+        AuthServer.addUserToCache(account);
         return account;
     }
 
     public UserSession loginUser(EMailAddress email, String password) {
         logger.info("User {} logging in...", email);
 
-        return ComroidAuthServer.getUsers()
+        return AuthServer.getUsers()
                 .flatMap(UserAccount.class)
                 .filter(usr -> usr.email.contentEquals(email))
                 .findAny()
@@ -120,7 +119,7 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
     public OAuthAuthorization findAuthorization(final String authorizationCode) throws RestEndpointException {
         if (authorizationCode == null)
             throw new IllegalArgumentException("authorization code cannot be null");
-        return ComroidAuthServer.getUsers()
+        return AuthServer.getUsers()
                 .flatMap(UserAccount.class)
                 .flatMap(account -> account.findAuthorization(authorizationCode))
                 .findAny()
@@ -131,7 +130,7 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
     public OAuthAuthorization.AccessToken findAccessToken(final String token) throws RestEndpointException {
         if (token == null)
             throw new IllegalArgumentException("token cannot be null");
-        return ComroidAuthServer.getUsers()
+        return AuthServer.getUsers()
                 .flatMap(UserAccount.class)
                 .flatMap(account -> account.findAccessToken(token))
                 .findAny()
@@ -140,7 +139,7 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
 
     @Override
     public boolean hasClient(UUID uuid) {
-        return ComroidAuthServer.hasUser(uuid);
+        return AuthServer.hasUser(uuid);
     }
 
     @Override
@@ -150,19 +149,19 @@ public final class UserManager implements ContextualProvider.Underlying, Uncheck
 
     @Override
     public Rewrapper<UserAccount> findClient(UUID uuid) {
-        return ComroidAuthServer.getUser(uuid).flatMap(UserAccount.class);
+        return AuthServer.getUser(uuid).flatMap(UserAccount.class);
     }
 
     @Override
     public Pair<Client, String> loginClient(EMailAddress email, String login) {
-        UserSession session = AuthServer.instance.getUserManager()
+        UserSession session = org.comroid.auth.server.AuthServer.instance.getUserManager()
                 .loginUser(email, login);
         return new Pair<>(session.getAccount(), session.getCookie());
     }
 
     @Override
     public ValidityStage findValidityStage(String token) {
-        return ComroidAuthServer.getUsers()
+        return AuthServer.getUsers()
                 .flatMap(UserAccount.class)
                 .flatMapStream(acc -> acc.findToken(token))
                 .findAny()

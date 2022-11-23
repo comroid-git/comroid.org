@@ -1,0 +1,42 @@
+plugins {
+    id 'application'
+    id 'org.springframework.boot' version '2.7.5'
+    id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+}
+
+group 'org.comroid'
+version = parent.version
+apply from: 'vars.gradle'
+
+sourceCompatibility = 17
+targetCompatibility = 17
+
+mainClassName = 'org.comroid.auth.server.AuthServer'
+
+sourceSets {
+    main.java.srcDirs = [file("$parent.projectDir/src/server/java")]
+    main.resources.srcDirs = [file("$parent.projectDir/src/server/resources")]
+}
+
+dependencies {
+    compileOnly 'org.jetbrains:annotations:23.0.0'
+
+    if (isAutoDeploy) {
+        implementation 'org.comroid:status-api:0.+'
+        implementation project(':auth-api')
+    } else {
+        implementation project(':status:status-api')
+        implementation project(':auth:auth-api')
+    }
+
+    // db dependencies
+    implementation 'org.mariadb.jdbc:mariadb-java-client:3.0.+'
+
+    // spring
+    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}

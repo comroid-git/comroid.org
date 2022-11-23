@@ -6,14 +6,10 @@ import org.comroid.api.EMailAddress;
 import org.comroid.api.Rewrapper;
 import org.comroid.auth.service.Service;
 import org.comroid.auth.user.User;
-import org.comroid.mutatio.model.RefContainer;
-import org.comroid.mutatio.model.RefMap;
-import org.comroid.mutatio.ref.Reference;
-import org.comroid.mutatio.ref.ReferenceMap;
 
 import java.util.UUID;
 
-public final class ComroidAuthServer {
+public final class AuthServer {
     public static final String URL_BASE = "https://auth.comroid.org";
     private static final RefMap<UUID, Service> serviceCache = new ReferenceMap<>();
     private static final RefMap<UUID, User> userCache = new ReferenceMap<>();
@@ -31,7 +27,7 @@ public final class ComroidAuthServer {
         return userCache.immutable();
     }
 
-    private ComroidAuthServer() {
+    private AuthServer() {
         throw new UnsupportedOperationException();
     }
 

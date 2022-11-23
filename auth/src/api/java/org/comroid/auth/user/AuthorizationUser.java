@@ -4,7 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.EMailAddress;
-import org.comroid.auth.ComroidAuthServer;
+import org.comroid.auth.AuthServer;
 import org.comroid.auth.model.AuthEntity;
 import org.comroid.auth.rest.AuthEndpoint;
 import org.comroid.auth.service.DataBasedService;
@@ -257,7 +257,7 @@ public abstract class AuthorizationUser extends DataContainerBase<AuthEntity> im
                             .stream()
                             .map(UniNode::asObjectNode)
                             .map(data -> new DataBasedService(this, data))
-                            .filter(ComroidAuthServer::addServiceToCache)
+                            .filter(AuthServer::addServiceToCache)
                             .collect(Collectors.toList());
                 }).thenApply(Collections::unmodifiableList);
     }
