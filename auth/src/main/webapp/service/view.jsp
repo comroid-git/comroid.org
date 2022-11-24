@@ -3,7 +3,7 @@
 <html>
 <head>
     <title>View Books</title>
-    <link href="/style.css" rel="stylesheet" type="text/css">
+    <link href="/static/style.css" rel="stylesheet" type="text/css">
 </head>
 <body>
 <table>
