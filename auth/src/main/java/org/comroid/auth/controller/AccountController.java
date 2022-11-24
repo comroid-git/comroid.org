@@ -20,7 +20,7 @@ public class AccountController {
     public String viewAccount(Model model, @CookieValue("SESSION") String sessionId) {
         var account = accounts.findBySessionId(sessionId);
         model.addAttribute("loggedIn", account.isPresent());
-        model.addAttribute("account", account.get());
+        model.addAttribute("account", account.orElse(null));
         return "account/view";
     }
 }
