@@ -1,2 +1,6 @@
 :root {
 }
+
+#error-text {
+    color: darkred;
+}

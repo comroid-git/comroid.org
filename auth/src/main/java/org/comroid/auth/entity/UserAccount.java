@@ -27,6 +27,10 @@ public class UserAccount implements AuthEntity {
         return uuid;
     }
 
+    public UUID getId() {
+        return uuid;
+    }
+
     public String getUsername() {
         return username;
     }
