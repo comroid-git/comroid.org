@@ -5,18 +5,16 @@ import org.comroid.api.io.FileHandle;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.autoconfigure.integration.IntegrationDataSourceScriptDatabaseInitializer;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.jdbc.DataSourceBuilder;
+import org.springframework.boot.sql.init.DatabaseInitializationSettings;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -43,7 +41,7 @@ public class AuthServer extends SpringBootServletInitializer implements WebMvcCo
     }
 
     @Bean
-    public DataSource getDataSource() throws SQLException, IOException {
+    public DataSource dataSource() throws SQLException, IOException {
         DBInfo dbInfo = new ObjectMapper().readValue(DB_FILE.openReader(), DBInfo.class);
         return DataSourceBuilder.create()
                 .driverClassName(DriverManager.getDriver(dbInfo.url).getClass().getName())
@@ -54,8 +52,14 @@ public class AuthServer extends SpringBootServletInitializer implements WebMvcCo
     }
 
     @Bean
-    public ScheduledExecutorService getExecutor() {
+    public ScheduledExecutorService executor() {
         return Executors.newScheduledThreadPool(4);
+    }
+
+    @Bean
+    public IntegrationDataSourceScriptDatabaseInitializer customIntegrationDataSourceInitializer(DataSource dataSource) {
+        // workaround from https://github.com/spring-projects/spring-boot/issues/28897#issuecomment-985389508
+        return new IntegrationDataSourceScriptDatabaseInitializer(dataSource, new DatabaseInitializationSettings());
     }
 
     private static class DBInfo {

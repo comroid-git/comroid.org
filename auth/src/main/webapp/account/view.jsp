@@ -4,7 +4,7 @@
 <html>
 <head>
     <title>View Books</title>
-    <link href="<c:url value="/static/style.css"/>" rel="stylesheet" type="text/css">
+    <link href="<c:url value="/style.css"/>" rel="stylesheet" type="text/css">
 </head>
 <body>
 <c:if test="!loggedIn">

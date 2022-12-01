@@ -8,8 +8,6 @@ import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.util.stream.StreamSupport;
-
 @Controller
 @RequestMapping("/account")
 public class AccountController {
