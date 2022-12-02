@@ -27,7 +27,6 @@ import java.util.concurrent.ScheduledExecutorService;
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 @EntityScan(basePackages = "org.comroid.auth.entity")
 @EnableJpaRepositories
-@EnableTransactionManagement
 @Configuration
 public class AuthServer extends SpringBootServletInitializer implements WebMvcConfigurer {
     public static final FileHandle PATH_BASE = new FileHandle("/srv/auth/", true); // server path base
