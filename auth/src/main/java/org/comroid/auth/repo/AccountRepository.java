@@ -20,6 +20,7 @@ public interface AccountRepository extends CrudRepository<UserAccount, UUID> {
     Optional<UserAccount> findByEmail(String email);
 
     @Modifying
+    @Transactional
     @Query("update UserAccount u set u.sessionId = ?2 where u.uuid = ?1")
     void setSessionId(UUID id, String sessionId);
 }
