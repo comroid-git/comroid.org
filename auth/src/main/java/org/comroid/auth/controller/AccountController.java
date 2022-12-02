@@ -19,6 +19,6 @@ public class AccountController {
         var account = accounts.findBySessionId(sessionId);
         model.addAttribute("loggedIn", account.isPresent());
         model.addAttribute("account", account.orElse(null));
-        return "account/view_account";
+        return "account/view";
     }
 }
