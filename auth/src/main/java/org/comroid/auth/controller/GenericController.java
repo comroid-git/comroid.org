@@ -16,4 +16,9 @@ public class GenericController {
     public String logout() {
         return null; // todo
     }
+
+    @GetMapping("/register")
+    public String register() {
+        return null; // todo
+    }
 }
