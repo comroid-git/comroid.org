@@ -38,10 +38,13 @@ dependencyManagement {
 dependencies {
     compileOnly 'org.jetbrains:annotations:23.0.0'
 
-    if (isAutoDeploy) {
-        implementation 'org.comroid:status-api:0.+'
+    // todo: use status api again
+    if (findProject(':api') == null) {
+        //implementation 'org.comroid:status-api:0.+'
+        implementation 'org.comroid:api:0.+'
     } else {
-        implementation project(':status:status-api')
+        //implementation project(':status:status-api')
+        implementation project(':api')
     }
 
     // db dependencies
