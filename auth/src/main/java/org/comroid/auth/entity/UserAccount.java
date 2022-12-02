@@ -16,7 +16,7 @@ import java.util.UUID;
 @Table(name = "user_accounts")
 public class UserAccount implements AuthEntity, UserDetails {
     @Id
-    private UUID uuid;
+    private String uuid;
     @Column(unique = true)
     private String username;
     @Column
@@ -40,10 +40,10 @@ public class UserAccount implements AuthEntity, UserDetails {
 
     @Override
     public UUID getUUID() {
-        return uuid;
+        return UUID.fromString(uuid);
     }
 
-    public UUID getId() {
+    public String getId() {
         return uuid;
     }
 
@@ -138,7 +138,7 @@ public class UserAccount implements AuthEntity, UserDetails {
     }
 
     public UserAccount(String username, String email, String passwordHash) {
-        this.uuid = UUID.randomUUID();
+        this.uuid = UUID.randomUUID().toString();
         this.username = username;
         this.email = email;
         this.passwordHash = passwordHash;

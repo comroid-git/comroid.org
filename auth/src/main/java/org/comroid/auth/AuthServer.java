@@ -14,6 +14,7 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import javax.sql.DataSource;
@@ -26,6 +27,7 @@ import java.util.concurrent.ScheduledExecutorService;
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 @EntityScan(basePackages = "org.comroid.auth.entity")
 @EnableJpaRepositories
+@EnableTransactionManagement
 @Configuration
 public class AuthServer extends SpringBootServletInitializer implements WebMvcConfigurer {
     public static final FileHandle PATH_BASE = new FileHandle("/srv/auth/", true); // server path base

@@ -28,7 +28,7 @@ public class AccountController {
     }
 
     @GetMapping("/{id}")
-    public String view(Model model, @PathVariable("id") UUID id) {
+    public String view(Model model, @PathVariable("id") String id) {
         var account = accounts.findById(id);
         if (account.isEmpty())
             return new WebPagePreparator(model, "account/not_found")
