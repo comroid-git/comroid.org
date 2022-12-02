@@ -5,33 +5,33 @@
 <%--@elvariable id="registerData" type="org.comroid.auth.dto.RegisterData"--%>
 <%--suppress RegExpRedundantEscape --%>
 <h3>Register for an Account</h3>
-<form id="registration" method="post" action="<c:url value="/register" />>">
+<form id="registration" method="post" action="<c:url value="/register" />">
     <c:if test="${registerData.invalidUsername}">
         <h4 class="error-text">Username already taken</h4>
     </c:if>
     <label for="username">Username:</label>
-    <input type="text" id="username" placeholder="Username" value="${registerData.username}" />
+    <input type="text" id="username" name="username" placeholder="Username" value="${registerData.username}" />
     <br/>
     <br/>
     <c:if test="${registerData.invalidEmail}">
         <h4 class="error-text">E-Mail Address already in use</h4>
     </c:if>
     <label for="email">E-Mail Address:</label>
-    <input type="email" id="email" placeholder="E-Mail Address" value="${registerData.email}" />
+    <input type="email" id="email" name="email" placeholder="E-Mail Address" value="${registerData.email}" />
     <br/>
     <br/>
     <label for="password">Password:</label>
-    <input type="password" id="password" placeholder="Password" />
+    <input type="password" id="password" name="password" placeholder="Password" />
     <br/>
     <label for="confirm-password">Confirm Password:</label>
     <input type="password" id="confirm-password" placeholder="Password" />
     <br/>
     <br/>
-    <label for="tos">I agree to the <a href="https://comroid.org/#tos">Terms of Service</a></label>
     <input type="checkbox" id="tos" />
+    <label for="tos">I agree to the <a href="https://comroid.org/#tos">Terms of Service</a></label>
     <br/>
-    <label for="dpp">I agree to the <a href="https://comroid.org/#privacy">Data Protection Policy</a></label>
     <input type="checkbox" id="dpp" />
+    <label for="dpp">I agree to the <a href="https://comroid.org/#privacy">Data Protection Policy</a></label>
     <br/>
     <br/>
     <input type="button" value="Confirm" onclick="validateForm()" />

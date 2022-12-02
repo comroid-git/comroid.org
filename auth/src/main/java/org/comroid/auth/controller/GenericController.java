@@ -63,19 +63,18 @@ public class GenericController {
     public String doLogin(
             Model model,
             HttpSession session,
-            @RequestParam("username") String username,
+            @RequestParam("email") String email,
             @RequestParam("password") String password,
             @Autowired BCryptPasswordEncoder encoder
     ) {
-        Optional<UserAccount> byUsername = accounts.findByUsername(username);
+        Optional<UserAccount> byUsername = accounts.findByEmail(email);
         if (byUsername.map(account -> !encoder.matches(password, account.getPassword())).orElse(true)) {
             return new WebPagePreparator(model, "generic/login")
-                    .setAttribute("username", username)
+                    .setAttribute("email", email)
                     .needLogin(false)
                     .complete();
         }
-        var account = byUsername.get();
-        accounts.setSessionId(account.getId(), session.getId());
+        accounts.setSessionId(byUsername.get().getId(), session.getId());
         return "redirect:/account";
     }
 

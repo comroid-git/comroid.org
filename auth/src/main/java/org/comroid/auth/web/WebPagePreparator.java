@@ -48,7 +48,8 @@ public class WebPagePreparator {
     public String complete() {
         setAttribute("page", page);
         setAttribute("widget", widget);
-        setAttribute("loggedIn", !needLogin || model.getAttribute("account") != null);
+        setAttribute("needLogin", needLogin);
+        setAttribute("loggedIn", model.getAttribute("account") != null);
         return "page/frame";
     }
 }
