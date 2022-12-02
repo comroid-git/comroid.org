@@ -1,6 +1,5 @@
 package org.comroid.auth.web;
 
-import org.comroid.auth.dto.LoginData;
 import org.comroid.auth.entity.AuthService;
 import org.comroid.auth.entity.UserAccount;
 import org.comroid.auth.dto.RegisterData;

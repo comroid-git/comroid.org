@@ -1,6 +1,5 @@
 package org.comroid.auth.controller;
 
-import org.comroid.auth.dto.LoginData;
 import org.comroid.auth.dto.RegisterData;
 import org.comroid.auth.entity.UserAccount;
 import org.comroid.auth.repo.AccountRepository;
@@ -10,7 +9,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
