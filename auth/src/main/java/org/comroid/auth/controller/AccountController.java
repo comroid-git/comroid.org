@@ -14,7 +14,7 @@ public class AccountController {
     @Autowired
     private AccountRepository accounts;
 
-    @GetMapping("/view")
+    @GetMapping("/")
     public String viewAccount(Model model, @CookieValue("SESSION") String sessionId) {
         var account = accounts.findBySessionId(sessionId);
         model.addAttribute("loggedIn", account.isPresent());
