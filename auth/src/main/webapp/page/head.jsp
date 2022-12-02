@@ -14,6 +14,7 @@
 
 <link href="https://cdn.comroid.org/favicon.ico" rel="icon">
 <link href="https://comroid.org/style.css" rel="stylesheet">
+<link href="<c:url value="/style.css"/>" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css?family=Fira+Mono" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Fira+Sans&display=swap" rel="stylesheet">
 

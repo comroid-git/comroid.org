@@ -1,12 +1,15 @@
 package org.comroid.auth.controller;
 
 import org.comroid.auth.repo.AccountRepository;
+import org.comroid.auth.web.WebPagePreparator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.ServletForwardingController;
+
+import javax.servlet.http.HttpSession;
+import java.util.UUID;
 
 @Controller
 @RequestMapping("/account")
@@ -15,10 +18,49 @@ public class AccountController {
     private AccountRepository accounts;
 
     @GetMapping("/")
-    public String viewAccount(Model model, @CookieValue("SESSION") String sessionId) {
-        var account = accounts.findBySessionId(sessionId);
-        model.addAttribute("loggedIn", account.isPresent());
-        model.addAttribute("account", account.orElse(null));
-        return "account/view";
+    public String index(@Autowired(required = false) HttpSession session) {
+        if (session == null)
+            return "redirect:/login";
+        var account = accounts.findBySessionId(session.getId());
+        if (account.isEmpty())
+            return "redirect:/login";
+        return "redirect:/account/" + account.get().getId();
+    }
+
+    @GetMapping("/{id}")
+    public String view(Model model, @PathVariable("id") UUID id) {
+        var account = accounts.findById(id);
+        if (account.isEmpty())
+            return new WebPagePreparator(model, "account/not_found")
+                    .complete();
+        return new WebPagePreparator(model, "account/view")
+                .userAccount(account.get())
+                .complete();
+    }
+
+    @GetMapping("/edit")
+    public String edit(Model model, @Autowired(required = false) HttpSession session) {
+        if (session == null)
+            return "redirect:/login";
+        var account = accounts.findBySessionId(session.getId());
+        if (account.isEmpty())
+            return new WebPagePreparator(model, "account/not_found")
+                    .complete();
+        return new WebPagePreparator(model, "account/edit")
+                .userAccount(account.orElse(null))
+                .complete();
+    }
+
+    @GetMapping("/change_password")
+    public String changePassword(Model model, @Autowired(required = false) HttpSession session) {
+        if (session == null)
+            return "redirect:/login";
+        var account = accounts.findBySessionId(session.getId());
+        if (account.isEmpty())
+            return new WebPagePreparator(model, "account/not_found")
+                    .complete();
+        return new WebPagePreparator(model, "account/change_password")
+                .userAccount(account.orElse(null))
+                .complete();
     }
 }

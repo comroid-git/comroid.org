@@ -1,5 +1,8 @@
 package org.comroid.auth.entity;
 
+import org.comroid.api.BitmaskAttribute;
+import org.comroid.util.Bitmask;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -21,6 +24,8 @@ public class UserAccount implements AuthEntity {
     private boolean emailVerified;
     @Column
     private String sessionId;
+    @Column
+    private Permit permit;
 
     @Override
     public UUID getUUID() {
@@ -49,5 +54,20 @@ public class UserAccount implements AuthEntity {
 
     public String getSessionId() {
         return sessionId;
+    }
+
+    public Permit getPermit() {
+        return permit;
+    }
+
+    public boolean hasPermission(Permit permission) {
+        return Bitmask.isFlagSet(getPermit(), permission);
+    }
+
+    public enum Permit implements BitmaskAttribute<Permit> {
+        None,
+        Hub,
+        Services,
+        Admin
     }
 }
