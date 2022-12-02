@@ -1,5 +1,6 @@
 package org.comroid.auth.web;
 
+import org.comroid.auth.dto.LoginData;
 import org.comroid.auth.entity.AuthService;
 import org.comroid.auth.entity.UserAccount;
 import org.comroid.auth.dto.RegisterData;
@@ -9,6 +10,7 @@ public class WebPagePreparator {
     private final Model model;
     private final String page;
     private boolean widget;
+    private boolean needLogin;
 
     public WebPagePreparator(Model model, String page) {
         this.model = model;
@@ -39,10 +41,15 @@ public class WebPagePreparator {
         return this;
     }
 
+    public WebPagePreparator needLogin(boolean needLogin) {
+        this.needLogin = needLogin;
+        return this;
+    }
+
     public String complete() {
         setAttribute("page", page);
         setAttribute("widget", widget);
-        setAttribute("loggedIn", model.getAttribute("account") != null);
+        setAttribute("loggedIn", !needLogin || model.getAttribute("account") != null);
         return "page/frame";
     }
 }

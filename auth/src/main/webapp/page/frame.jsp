@@ -2,6 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
 <%--@elvariable id="widget" type="boolean"--%>
+<%--@elvariable id="loggedIn" type="boolean"--%>
 <%--@elvariable id="page" type="java.lang.String"--%>
 <html>
 <head>
@@ -14,7 +15,7 @@
 </header>
 <div id="content">
     <c:choose>
-        <c:when test="loggedIn">
+        <c:when test="${loggedIn}">
             <c:import url="/${page}.jsp" />
         </c:when>
         <c:otherwise>

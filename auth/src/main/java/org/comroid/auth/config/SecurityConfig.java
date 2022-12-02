@@ -25,7 +25,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements User
     @Override
     protected void configure(HttpSecurity security) throws Exception {
         security.userDetailsService(this)
-                .formLogin().loginPage("/login");
+                .formLogin().disable()
+                .csrf().disable()
+        ;
     }
 
     @Override

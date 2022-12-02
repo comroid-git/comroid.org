@@ -1,49 +1,84 @@
 package org.comroid.auth.controller;
 
+import org.comroid.auth.dto.LoginData;
 import org.comroid.auth.dto.RegisterData;
 import org.comroid.auth.entity.UserAccount;
 import org.comroid.auth.repo.AccountRepository;
 import org.comroid.auth.web.WebPagePreparator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
+import java.util.Optional;
 
 @Controller
-@RequestMapping("/")
 public class GenericController {
     @Autowired
     private AccountRepository accounts;
 
     @GetMapping("/")
     public String index(HttpSession session) {
-        if (session == null)
+        if (session == null || accounts.findBySessionId(session.getId()).isEmpty())
             return "redirect:/login";
         return "redirect:/account";
     }
 
     @GetMapping("/register")
     public String register(Model model) {
-        return new WebPagePreparator(model, "generic/register").complete();
+        return new WebPagePreparator(model, "generic/register")
+                .needLogin(false)
+                .complete();
     }
 
-    @PostMapping("/register")
-    public String doRegister(Model model, @RequestBody RegisterData data, @Autowired BCryptPasswordEncoder encoder) {
-        boolean invalidUsername = accounts.findByUsername(data.username).isPresent();
-        boolean invalidEmail = accounts.findByEmail(data.email).isPresent();
-        if (invalidUsername || invalidEmail) {
-            data.invalidUsername = invalidUsername;
-            data.invalidEmail = invalidEmail;
+    @PostMapping(value = "/register", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public String doRegister(
+            Model model,
+            @RequestParam("username") String username,
+            @RequestParam("email") String email,
+            @RequestParam("password") String password,
+            @Autowired BCryptPasswordEncoder encoder
+    ) {
+        boolean invalidUsername = accounts.findByUsername(username).isPresent();
+        boolean invalidEmail = accounts.findByEmail(email).isPresent();
+        if (invalidUsername || invalidEmail)
             return new WebPagePreparator(model, "generic/register")
-                    .registerData(data)
-                    .complete();
-        }
-        var account = new UserAccount(data.username, data.email, encoder.encode(data.password));
+                .registerData(new RegisterData(username, email, invalidUsername, invalidEmail))
+                .complete();
+        var account = new UserAccount(username, email, encoder.encode(password));
         accounts.save(account);
         return "redirect:/login";
+    }
+
+    @GetMapping("/login")
+    public String login(Model model) {
+        return new WebPagePreparator(model, "generic/login")
+                .needLogin(false)
+                .complete();
+    }
+
+    @PostMapping(value = "/login", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public String doLogin(
+            Model model,
+            HttpSession session,
+            @RequestParam("username") String username,
+            @RequestParam("password") String password,
+            @Autowired BCryptPasswordEncoder encoder
+    ) {
+        Optional<UserAccount> byUsername = accounts.findByUsername(username);
+        if (byUsername.map(account -> !encoder.matches(password, account.getPassword())).orElse(true)) {
+            return new WebPagePreparator(model, "generic/login")
+                    .setAttribute("username", username)
+                    .needLogin(false)
+                    .complete();
+        }
+        var account = byUsername.get();
+        accounts.setSessionId(account.getId(), session.getId());
+        return "redirect:/account";
     }
 
     @GetMapping("/logout")
