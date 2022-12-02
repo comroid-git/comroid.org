@@ -17,7 +17,7 @@ public class AccountController {
     @Autowired
     private AccountRepository accounts;
 
-    @GetMapping("/")
+    @GetMapping
     public String index(HttpSession session) {
         if (session == null)
             return "redirect:/login";
