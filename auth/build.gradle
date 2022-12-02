@@ -29,6 +29,14 @@ repositories {
     maven { url 'https://www.jitpack.io' }
 }
 
+task simplifyWar(type: Copy, dependsOn: 'bootWar') {
+    from bootWar.outputs.files.singleFile
+    def target = file("$buildDir/dist")
+    into target
+    rename { String filename -> return "auth.war" }
+    System.out.printf("Simplifying file name to: %s/auth.war\n", target.getAbsolutePath())
+}
+
 dependencyManagement {
     imports {
         mavenBom 'org.springframework.session:spring-session-bom:2021.1.1'
