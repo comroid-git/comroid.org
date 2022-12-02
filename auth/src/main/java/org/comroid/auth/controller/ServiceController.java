@@ -28,7 +28,7 @@ public class ServiceController {
 
     @GetMapping("/{id}")
     @SuppressWarnings("OptionalGetWithoutIsPresent")
-    public String view(Model model, @PathVariable("id") UUID id, @Autowired(required = false) HttpSession session) {
+    public String view(Model model, @PathVariable("id") UUID id, HttpSession session) {
         if (session == null)
             return "redirect:/login";
         var account = accounts.findBySessionId(session.getId());
@@ -44,7 +44,7 @@ public class ServiceController {
 
     @GetMapping("/{id}/edit")
     @SuppressWarnings("OptionalGetWithoutIsPresent")
-    public String edit(Model model, @PathVariable("id") UUID id, @Autowired(required = false) HttpSession session) {
+    public String edit(Model model, @PathVariable("id") UUID id, HttpSession session) {
         if (session == null)
             return "redirect:/login";
         var account = accounts.findBySessionId(session.getId());
@@ -60,7 +60,7 @@ public class ServiceController {
 
     @GetMapping("/{id}/delete")
     @SuppressWarnings("OptionalGetWithoutIsPresent")
-    public String delete(Model model, @PathVariable("id") UUID id, @Autowired(required = false) HttpSession session) {
+    public String delete(Model model, @PathVariable("id") UUID id, HttpSession session) {
         if (session == null)
             return "redirect:/login";
         var account = accounts.findBySessionId(session.getId());
@@ -78,7 +78,7 @@ public class ServiceController {
         if (account.isEmpty())
             return "redirect:/login";
         if (!account.get().hasPermission(UserAccount.Permit.Services))
-            return new WebPagePreparator(model, "account/no_permission")
+            return new WebPagePreparator(model, "generic/unauthorized")
                     .userAccount(account.get())
                     .complete();
         if (service.isEmpty())

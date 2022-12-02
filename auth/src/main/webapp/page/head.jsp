@@ -4,6 +4,7 @@
 <%--@elvariable id="widget" type="boolean"--%>
 <%--@elvariable id="loggedIn" type="boolean"--%>
 <%--@elvariable id="account" type="org.comroid.auth.entity.UserAccount"--%>
+<%--@elvariable id="service" type="org.comroid.auth.entity.AuthService"--%>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1.0" name="viewport">
 <meta content="comroid, account" name="keywords"/>

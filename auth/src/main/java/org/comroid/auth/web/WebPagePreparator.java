@@ -2,6 +2,7 @@ package org.comroid.auth.web;
 
 import org.comroid.auth.entity.AuthService;
 import org.comroid.auth.entity.UserAccount;
+import org.comroid.auth.dto.RegisterData;
 import org.springframework.ui.Model;
 
 public class WebPagePreparator {
@@ -22,6 +23,10 @@ public class WebPagePreparator {
 
     public WebPagePreparator authService(AuthService service) {
         return setAttribute("service", service);
+    }
+
+    public WebPagePreparator registerData(RegisterData data) {
+        return setAttribute("registerData", data);
     }
 
     public WebPagePreparator setAttribute(String name, Object value) {

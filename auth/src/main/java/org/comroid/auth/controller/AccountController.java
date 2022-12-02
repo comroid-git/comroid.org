@@ -18,7 +18,7 @@ public class AccountController {
     private AccountRepository accounts;
 
     @GetMapping("/")
-    public String index(@Autowired(required = false) HttpSession session) {
+    public String index(HttpSession session) {
         if (session == null)
             return "redirect:/login";
         var account = accounts.findBySessionId(session.getId());
@@ -39,7 +39,7 @@ public class AccountController {
     }
 
     @GetMapping("/edit")
-    public String edit(Model model, @Autowired(required = false) HttpSession session) {
+    public String edit(Model model, HttpSession session) {
         if (session == null)
             return "redirect:/login";
         var account = accounts.findBySessionId(session.getId());
@@ -52,12 +52,12 @@ public class AccountController {
     }
 
     @GetMapping("/change_password")
-    public String changePassword(Model model, @Autowired(required = false) HttpSession session) {
+    public String changePassword(Model model, HttpSession session) {
         if (session == null)
             return "redirect:/login";
         var account = accounts.findBySessionId(session.getId());
         if (account.isEmpty())
-            return new WebPagePreparator(model, "account/not_found")
+            return new WebPagePreparator(model, "generic/unauthorized")
                     .complete();
         return new WebPagePreparator(model, "account/change_password")
                 .userAccount(account.orElse(null))
