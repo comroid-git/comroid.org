@@ -138,10 +138,8 @@ public class ServiceController {
         var redirect = performChecks(model, account, service);
         if (redirect != null)
             return redirect;
-        return new WebPagePreparator(model, "service/delete")
-                .userAccount(account.get())
-                .authService(service.get())
-                .complete();
+        services.delete(service.get());
+        return "redirect:/services";
     }
 
     @GetMapping("/bulk_delete")
