@@ -56,7 +56,7 @@ dependencies {
     }
 
     // db dependencies
-    implementation 'org.mariadb.jdbc:mariadb-java-client:3.0.+'
+    implementation 'org.mariadb.jdbc:mariadb-java-client'
 
     // JSTL stuff
     implementation 'javax.servlet:jstl'
@@ -71,7 +71,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.session:spring-session-jdbc'
-    implementation 'org.springframework.security:spring-security-oauth2-authorization-server:1.+'
+    implementation 'org.springframework.security:spring-security-oauth2-authorization-server'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
