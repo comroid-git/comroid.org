@@ -17,6 +17,8 @@ public class AuthService implements AuthEntity {
     private String url;
     @Column
     private String callbackUrl;
+    @Column
+    private String requiredScope;
 
     @Override
     public UUID getUUID() {
@@ -37,5 +39,20 @@ public class AuthService implements AuthEntity {
 
     public String getCallbackUrl() {
         return callbackUrl;
+    }
+
+    public String getRequiredScope() {
+        return requiredScope;
+    }
+
+    public AuthService() {
+    }
+
+    public AuthService(String name, String url, String callbackUrl, String requiredScope) {
+        this.uuid = UUID.randomUUID().toString();
+        this.name = name;
+        this.url = url;
+        this.callbackUrl = callbackUrl;
+        this.requiredScope = requiredScope;
     }
 }

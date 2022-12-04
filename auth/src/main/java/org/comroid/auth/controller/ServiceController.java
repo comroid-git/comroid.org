@@ -41,6 +41,38 @@ public class ServiceController {
                 .complete();
     }
 
+    @GetMapping("/add")
+    public String add(Model model, HttpSession session) {
+        if (session == null)
+            return "redirect:/login";
+        var account = accounts.findBySessionId(session.getId());
+        var redirect = performChecks(model, account);
+        if (redirect != null)
+            return redirect;
+        return new WebPagePreparator(model, "service/add")
+                .userAccount(account.get())
+                .complete();
+    }
+
+    @PostMapping(value = "/add", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public String add(
+            Model model,
+            HttpSession session,
+            @RequestParam("name") String name,
+            @RequestParam("url") String url,
+            @RequestParam("callbackUrl") String callbackUrl,
+            @RequestParam("requiredScope") String requiredScope
+    ) {
+        if (session == null)
+            return "redirect:/login";
+        var account = accounts.findBySessionId(session.getId());
+        var redirect = performChecks(model, account);
+        if (redirect != null)
+            return redirect;
+        services.save(new AuthService(name, url, callbackUrl, requiredScope));
+        return "redirect:/services";
+    }
+
     @GetMapping("/{id}")
     public String view(Model model, @PathVariable("id") String id, HttpSession session) {
         if (session == null)
@@ -127,7 +159,7 @@ public class ServiceController {
     private @Nullable String performChecks(Model model, Optional<UserAccount> account, Optional<AuthService> service, boolean requiresService) {
         if (account.isEmpty())
             return "redirect:/login";
-        if (!account.get().hasPermission(UserAccount.Permit.Services))
+        if (!account.get().hasPermission(UserAccount.Permit.AdminServices))
             return new WebPagePreparator(model, "generic/unauthorized")
                     .userAccount(account.get())
                     .complete();

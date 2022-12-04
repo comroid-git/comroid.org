@@ -156,10 +156,9 @@ public class UserAccount implements AuthEntity, UserDetails {
     }
 
     public enum Permit implements BitmaskAttribute<Permit>, GrantedAuthority {
-        None,
         Hub,
-        Services,
-        Admin;
+        AdminServices,
+        AdminAccounts;
 
         @Override
         public String getAuthority() {

@@ -21,8 +21,8 @@ public class WebPagePreparator {
     public WebPagePreparator userAccount(UserAccount account) {
         setAttribute("account", account);
         setAttribute("hubAccess", account.hasPermission(UserAccount.Permit.Hub));
-        setAttribute("admin", account.hasPermission(UserAccount.Permit.Admin));
-        setAttribute("serviceAdmin", account.hasPermission(UserAccount.Permit.Services));
+        setAttribute("serviceAdmin", account.hasPermission(UserAccount.Permit.AdminServices));
+        setAttribute("accountAdmin", account.hasPermission(UserAccount.Permit.AdminAccounts));
         return this;
     }
 

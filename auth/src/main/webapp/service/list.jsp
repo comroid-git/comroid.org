@@ -8,31 +8,30 @@
 <%--@elvariable id="account" type="org.comroid.auth.entity.UserAccount"--%>
 <%--@elvariable id="services" type="java.util.List<org.comroid.auth.entity.AuthService>"--%>
 <h3>Services</h3>
+<input type="button" value="Add" onclick="gotoAdd()">
 <table>
     <tr>
-        <th><input type="checkbox" id="selectAll" onclick="selectAll()"></th>
-        <th>ID</th>
+        <th style="width: 1px;"><input type="checkbox" id="selectAll" onclick="selectAll()"></th>
         <th>Name</th>
-        <th><input type="button" value="Add" onclick="gotoAdd()"></th>
-        <th><!-- row for edit --></th>
-        <th><input type="button" value="Delete" id="deleteSelection" onclick="deleteSelection()" disabled></th>
+        <th style="width: 1px;"><!-- row for details --></th>
+        <th style="width: 1px;"><!-- row for edit --></th>
+        <th style="width: 1px;"><input type="button" value="Delete" id="deleteSelection" onclick="deleteSelection()" disabled></th>
     </tr>
     <c:forEach items="${services}" var="service">
         <tr>
             <td><input type="checkbox" id="select${service.UUID}" onclick="select(${service.UUID})"></td>
-            <td>${service.UUID}</td>
             <td>${service.name}</td>
-            <td>
-                <input type="button" value="Details" onclick="gotoDetails(${service.UUID})">
-                <input type="button" value="Edit" onclick="gotoEdit(${service.UUID})">
-                <input type="button" value="Delete" onclick="gotoDelete(${service.UUID})">
-            </td>
+            <td><input type="button" value="Details" onclick="gotoDetails(${service.UUID})"></td>
+            <td><input type="button" value="Edit" onclick="gotoEdit(${service.UUID})"></td>
+            <td><input type="button" value="Delete" onclick="gotoDelete(${service.UUID})"></td>
         </tr>
     </c:forEach>
 </table>
 <%--suppress JSPrimitiveTypeWrapperUsage --%>
 <script type="application/javascript">
-    const baseUrl = window.location.protocol + "//" + window.location.hostname;
+    let baseUrl = window.location.protocol + "//" + window.location.hostname;
+    if (location.port !== '')
+        baseUrl += ':' + location.port;
     let bulkSelection = false;
     let selected = [];
 
