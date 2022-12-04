@@ -31,12 +31,22 @@ public class UserAccount implements AuthEntity, UserDetails {
     private boolean enabled = true;
     @Column
     private boolean emailVerified = false;
+    @Column(unique = true)
+    private String emailVerifyCode;
     @Column
     private boolean locked = false;
     @Column
     private boolean expired = false;
     @Column
     private boolean credentialsExpired = false;
+
+    public String getEmailVerifyCode() {
+        return emailVerifyCode;
+    }
+
+    public void setEmailVerifyCode(String emailVerifyCode) {
+        this.emailVerifyCode = emailVerifyCode;
+    }
 
     @Override
     public UUID getUUID() {
