@@ -4,6 +4,7 @@ import org.comroid.auth.entity.UserAccount;
 import org.comroid.auth.repo.AccountRepository;
 import org.comroid.auth.web.WebPagePreparator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -37,6 +38,7 @@ public class AccountController {
         var account = accounts.findBySessionId(session.getId());
         if (account.isEmpty() || !account.get().hasPermission(UserAccount.Permit.AdminAccounts))
             return new WebPagePreparator(model, "generic/unauthorized")
+                    .userAccount(account.orElse(null))
                     .complete();
         return new WebPagePreparator(model, "account/list")
                 .userAccount(account.get())
@@ -48,8 +50,7 @@ public class AccountController {
     public String view(Model model, @PathVariable("id") String id) {
         var account = accounts.findById(id);
         if (account.isEmpty())
-            return new WebPagePreparator(model, "account/not_found")
-                    .complete();
+            return "redirect:/login";
         return new WebPagePreparator(model, "account/view")
                 .userAccount(account.get())
                 .complete();
@@ -61,11 +62,85 @@ public class AccountController {
             return "redirect:/login";
         var account = accounts.findBySessionId(session.getId());
         if (account.isEmpty())
-            return new WebPagePreparator(model, "account/not_found")
+            return "redirect:/login";
+        return new WebPagePreparator(model, "account/edit")
+                .userAccount(account.get())
+                .setAttribute("editing", account.get())
+                .setAttribute("self", true)
+                .complete();
+    }
+
+    @PostMapping(value = "/edit", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public String edit(
+            @RequestParam("username") String username,
+            @RequestParam("email") String email,
+            HttpSession session
+    ) {
+        if (session == null)
+            return "redirect:/login";
+        var account = accounts.findBySessionId(session.getId());
+        if (account.isEmpty())
+            return "redirect:/login";
+        var found = account.get();
+        found.setUsername(username);
+        var prev = found.getEmail();
+        if (!prev.equals(email))
+            found.setEmailVerified(false);
+        found.setEmail(email);
+        accounts.save(found);
+        return "redirect:/account";
+    }
+
+    @GetMapping("/{id}/edit")
+    public String edit(Model model, @PathVariable("id") String id, HttpSession session) {
+        if (session == null)
+            return "redirect:/login";
+        var account = accounts.findBySessionId(session.getId());
+        var editing = accounts.findById(id);
+        if (account.isEmpty() || editing.isEmpty() || !account.get().hasPermission(UserAccount.Permit.AdminAccounts))
+            return new WebPagePreparator(model, "generic/unauthorized")
+                    .userAccount(account.orElse(null))
                     .complete();
         return new WebPagePreparator(model, "account/edit")
-                .userAccount(account.orElse(null))
+                .userAccount(account.get())
+                .setAttribute("editing", editing.get())
+                .setAttribute("self", false)
                 .complete();
+    }
+
+    @PostMapping(value = "/{id}/edit", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public String edit(
+            Model model,
+            @PathVariable("id") String id,
+            @RequestParam("username") String username,
+            @RequestParam("email") String email,
+            @RequestParam("permit") int permit,
+            @RequestParam(value = "enabled", required = false, defaultValue = "false") boolean enabled,
+            @RequestParam(value = "locked", required = false, defaultValue = "false") boolean locked,
+            @RequestParam(value = "expired", required = false, defaultValue = "false") boolean expired,
+            @RequestParam(value = "credentialsExpired", required = false, defaultValue = "false") boolean credentialsExpired,
+            HttpSession session
+    ) {
+        if (session == null)
+            return "redirect:/login";
+        var account = accounts.findBySessionId(session.getId());
+        var editing = accounts.findById(id);
+        if (account.isEmpty() || editing.isEmpty())
+            return "redirect:/login";
+        if (!account.get().hasPermission(UserAccount.Permit.AdminAccounts))
+            return new WebPagePreparator(model, "generic/unauthorized")
+                    .userAccount(account.orElse(null))
+                    .complete();
+        var found = editing.get();
+        found.setUsername(username);
+        found.setEmail(email);
+        found.setPermit(permit);
+        found.setEnabled(enabled);
+        found.setLocked(locked);
+        found.setExpired(expired);
+        found.setCredentialsExpired(credentialsExpired);
+        accounts.save(found);
+        return "redirect:/account/list";
     }
 
     @GetMapping("/change_password")
@@ -74,10 +149,9 @@ public class AccountController {
             return "redirect:/login";
         var account = accounts.findBySessionId(session.getId());
         if (account.isEmpty())
-            return new WebPagePreparator(model, "generic/unauthorized")
-                    .complete();
+            return "redirect:/login";
         return new WebPagePreparator(model, "account/change_password")
-                .userAccount(account.orElse(null))
+                .userAccount(account.get())
                 .complete();
     }
 }

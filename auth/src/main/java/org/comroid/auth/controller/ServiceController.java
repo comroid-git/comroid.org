@@ -103,7 +103,7 @@ public class ServiceController {
                 .complete();
     }
 
-    @PostMapping("/{id}/edit")
+    @PostMapping(value = "/{id}/edit", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public String edit(
             Model model,
             @PathVariable("id") String id,

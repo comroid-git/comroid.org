@@ -109,6 +109,10 @@ public class UserAccount implements AuthEntity, UserDetails {
         return emailVerified;
     }
 
+    public void setEmailVerified(boolean emailVerified) {
+        this.emailVerified = emailVerified;
+    }
+
     public String getSessionId() {
         return sessionId;
     }
