@@ -26,6 +26,10 @@ public class WebPagePreparator {
         return this;
     }
 
+    public WebPagePreparator userAccountList(List<UserAccount> accounts) {
+        return setAttribute("accounts", accounts);
+    }
+
     public WebPagePreparator authService(AuthService service) {
         return setAttribute("service", service);
     }

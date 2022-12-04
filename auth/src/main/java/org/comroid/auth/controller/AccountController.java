@@ -1,5 +1,6 @@
 package org.comroid.auth.controller;
 
+import org.comroid.auth.entity.UserAccount;
 import org.comroid.auth.repo.AccountRepository;
 import org.comroid.auth.web.WebPagePreparator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,8 @@ import org.springframework.web.servlet.mvc.ServletForwardingController;
 
 import javax.servlet.http.HttpSession;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Controller
 @RequestMapping("/account")
@@ -25,6 +28,20 @@ public class AccountController {
         if (account.isEmpty())
             return "redirect:/login";
         return "redirect:/account/" + account.get().getId();
+    }
+
+    @GetMapping("/list")
+    public String list(Model model, HttpSession session) {
+        if (session == null)
+            return "redirect:/login";
+        var account = accounts.findBySessionId(session.getId());
+        if (account.isEmpty() || !account.get().hasPermission(UserAccount.Permit.AdminAccounts))
+            return new WebPagePreparator(model, "generic/unauthorized")
+                    .complete();
+        return new WebPagePreparator(model, "account/list")
+                .userAccount(account.get())
+                .userAccountList(StreamSupport.stream(accounts.findAll().spliterator(), false).toList())
+                .complete();
     }
 
     @GetMapping("/{id}")
