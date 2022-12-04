@@ -28,7 +28,7 @@ task simplifyDist(type: Copy, dependsOn: 'bootJar') {
     from bootWar.outputs.files.singleFile
     def target = file("$buildDir/dist")
     into target
-    rename { String filename -> return "auth.jar" }
+    rename { String filename -> return "status.jar" }
     System.out.printf("Simplifying file name to: %s/auth.jar\n", target.getAbsolutePath())
 }
 
