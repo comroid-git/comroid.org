@@ -7,12 +7,12 @@ import org.junit.Test;
 public class ConnectionTest {
     private StatusConnection connection;
 
-    @Before
+    //@Before
     public void setup() {
         connection = new StatusConnection("test-dummy", "null");
     }
 
-    @Test
+    //@Test
     public void testRequestService() {
         var srv = connection.requestServiceByName("test-dummy").join();
 
