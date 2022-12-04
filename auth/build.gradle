@@ -71,7 +71,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.session:spring-session-jdbc'
-    implementation 'org.springframework.security:spring-security-oauth2-authorization-server'
+    implementation 'org.springframework.security:spring-security-oauth2-authorization-server:1.+' // needs specified version for some reason
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
