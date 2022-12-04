@@ -6,6 +6,7 @@ import org.comroid.auth.repo.AccountRepository;
 import org.comroid.auth.web.WebPagePreparator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -20,6 +21,8 @@ import java.util.Optional;
 public class GenericController {
     @Autowired
     private AccountRepository accounts;
+    @Autowired
+    private JavaMailSender mailSender;
 
     @GetMapping("/")
     public String index(HttpSession session) {
@@ -51,6 +54,7 @@ public class GenericController {
                     .complete();
         var account = new UserAccount(username, email, encoder.encode(password));
         accounts.save(account);
+        AccountController.initiateEmailVerification(accounts, mailSender, account);
         return "redirect:/login";
     }
 

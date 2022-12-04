@@ -88,7 +88,7 @@ public class AccountController {
         found.setUsername(username);
         var prev = found.getEmail();
         if (!prev.equals(email))
-            initiateEmailVerification(found);
+            initiateEmailVerification(accounts, mailSender, found);
         found.setEmail(email);
         accounts.save(found);
         return "redirect:/account";
@@ -165,7 +165,7 @@ public class AccountController {
         var account = accounts.findBySessionId(session.getId());
         if (account.isEmpty())
             return "redirect:/login";
-        initiateEmailVerification(account.get());
+        initiateEmailVerification(accounts, mailSender, account.get());
         return "redirect:/account";
     }
 
@@ -183,7 +183,7 @@ public class AccountController {
         return "redirect:/account";
     }
 
-    private void initiateEmailVerification(UserAccount account) {
+    public static void initiateEmailVerification(AccountRepository accounts, JavaMailSender mailSender, UserAccount account) {
         String code;
         do {
             code = UUID.randomUUID().toString();
