@@ -36,8 +36,8 @@ public class Service {
         return displayName;
     }
 
-    public Status getStatus() {
-        return status;
+    public int getStatus() {
+        return status.getAsInt();
     }
 
     @ApiStatus.Internal
