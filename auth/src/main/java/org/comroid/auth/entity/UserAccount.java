@@ -28,7 +28,7 @@ public class UserAccount implements AuthEntity, UserDetails {
     @Column
     private int permit;
     @Column
-    private boolean enabled = false;
+    private boolean enabled = true;
     @Column
     private boolean emailVerified = false;
     @Column
