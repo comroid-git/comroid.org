@@ -19,5 +19,5 @@
     <label for="requiredScope">Required Scope for Access</label>
     <input type="text" id="requiredScope" name="requiredScope">
     <br/>
-    <input type="submit">
+    <input type="submit" value="Save Service">
 </form>
