@@ -13,7 +13,7 @@
         <th><input type="checkbox" id="selectAll" onclick="selectAll()"></th>
         <th>ID</th>
         <th>Name</th>
-        <th><input type="button" value="Add"></th>
+        <th><input type="button" value="Add" onclick="gotoAdd()"></th>
         <th><!-- row for edit --></th>
         <th><input type="button" value="Delete" id="deleteSelection" onclick="deleteSelection()" disabled></th>
     </tr>
@@ -66,18 +66,22 @@
         let query = '?ids=';
         for (let id of selected)
             query += id + ';';
-        window.location.assign(baseUrl + "/service/bulk_delete" + query);
+        window.location.assign(baseUrl + "/services/bulk_delete" + query);
+    }
+
+    function gotoAdd() {
+        window.location.assign(baseUrl + "/services/add");
     }
 
     function gotoDetails(uuid) {
-        window.location.assign(baseUrl + "/service/" + uuid);
+        window.location.assign(baseUrl + "/services/" + uuid);
     }
 
     function gotoEdit(uuid) {
-        window.location.assign(baseUrl + "/service/" + uuid + "/edit");
+        window.location.assign(baseUrl + "/services/" + uuid + "/edit");
     }
 
     function gotoDelete(uuid) {
-        window.location.assign(baseUrl + "/service/" + uuid + "/delete");
+        window.location.assign(baseUrl + "/services/" + uuid + "/delete");
     }
 </script>

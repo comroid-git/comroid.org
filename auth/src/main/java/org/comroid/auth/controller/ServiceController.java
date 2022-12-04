@@ -15,12 +15,11 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpSession;
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.StreamSupport;
 
 @Controller
-@RequestMapping("/service")
+@RequestMapping("/services")
 @SuppressWarnings("OptionalGetWithoutIsPresent")
 public class ServiceController {
     @Autowired
@@ -114,7 +113,7 @@ public class ServiceController {
         Arrays.stream(ids.split(";"))
                 .filter(Predicate.not(String::isBlank))
                 .forEach(services::deleteById);
-        return "redirect:/service";
+        return "redirect:/services";
     }
 
     private @Nullable String performChecks(Model model, Optional<UserAccount> account) {
