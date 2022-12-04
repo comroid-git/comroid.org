@@ -4,14 +4,13 @@ import static java.lang.System.getenv
 import static java.lang.System.getenv
 
 ext {
-    isAutoDeploy = rootProject.name != 'repo' || getenv().containsKey("TEAMCITY") || getenv().containsKey("JITPACK")
+    isAutoDeploy = (rootProject.name != 'repo' && rootProject.name != 'java') || getenv().containsKey("TEAMCITY") || getenv().containsKey("JITPACK")
 }
 
 allprojects {
     apply plugin: 'java'
-
-    sourceCompatibility = 8
-    targetCompatibility = 8
+    sourceCompatibility = 17
+    targetCompatibility = 17
 
     ext {
         buildId = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis())
@@ -54,32 +53,9 @@ allprojects {
     }
 }
 
-if (!isAutoDeploy) {
-    evaluationDependsOn ':guardian:uniform'
-    evaluationDependsOn ':guardian:restless'
-}
-
 dependencies {
-    if (isAutoDeploy) {
-        testImplementation project(':status-server')
-        testImplementation project(':status-api')
-
-        testImplementation 'org.comroid:restless:0.+'
-     //   testImplementation 'org.comroid:CrystalShard:0.+'
-    } else {
-        testImplementation project(':status:status-server')
-        testImplementation project(':status:status-api')
-
-        testImplementation project(':guardian:uniform').sourceSets.java8compat.output.classesDirs
-        testImplementation project(':guardian:restless').sourceSets.java8compat.output.classesDirs
-
-       // testImplementation project(':CrystalShard')
-    }
-
     testImplementation 'junit:junit:4.13'
     testImplementation 'org.easymock:easymock:4.1'
-    testRuntimeOnly 'com.squareup.okhttp3:okhttp:4.7.2'
-    testRuntimeOnly 'com.alibaba:fastjson:1.2.76'
 }
 
 tasks.findByName('wrapper')?.configure {

@@ -2,4 +2,6 @@ import static java.lang.System.getenv
 
 ext {
     isAutoDeploy = rootProject.name != 'repo' || getenv().containsKey("TEAMCITY") || getenv().containsKey("JITPACK")
+
+    userbase = 'comroid-git'
 }

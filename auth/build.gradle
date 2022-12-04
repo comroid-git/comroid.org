@@ -1,71 +1,77 @@
-apply plugin: 'application'
-
-group 'org.comroid'
-version '0.41-SNAPSHOT'
-
-apply from: 'gradle/vars.gradle'
-
-mainClassName = 'org.comroid.auth.server.AuthServer'
-
-sourceCompatibility = 11
-targetCompatibility = 11
-
-tasks.findByName('wrapper')?.configure {
-    gradleVersion = '7.5'
-    distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
+plugins {
+    id 'war'
+    id 'idea'
+    id 'application'
+    id 'org.springframework.boot' version '2.7.5'
+    id 'io.spring.dependency-management' version '1.0.15.RELEASE'
 }
 
-compileJava.options.encoding = 'UTF-8'
+import static java.lang.System.getenv
+
+ext {
+    isAutoDeploy = (rootProject.name != 'repo' && rootProject.name != 'java') || getenv().containsKey("TEAMCITY") || getenv().containsKey("JITPACK")
+}
+
+group 'org.comroid'
+version = '0.5-SNAPSHOT'
+apply from: 'gradle/vars.gradle'
+
+sourceCompatibility = 17
+targetCompatibility = 17
+
+mainClassName = 'org.comroid.auth.AuthServer'
 
 repositories {
     maven { url 'https://maven.comroid.org' }
     mavenLocal()
     jcenter()
+    mavenCentral()
+    maven { url 'https://www.jitpack.io' }
 }
 
-if (!isAutoDeploy) {
-    evaluationDependsOn ':guardian:uniform'
-    evaluationDependsOn ':guardian:restless'
+task simplifyWar(type: Copy, dependsOn: 'bootWar') {
+    from bootWar.outputs.files.singleFile
+    def target = file("$buildDir/dist")
+    into target
+    rename { String filename -> return "auth.war" }
+    System.out.printf("Simplifying file name to: %s/auth.war\n", target.getAbsolutePath())
+}
+
+dependencyManagement {
+    imports {
+        mavenBom 'org.springframework.session:spring-session-bom:2021.1.1'
+    }
 }
 
 dependencies {
     compileOnly 'org.jetbrains:annotations:23.0.0'
 
-    // command line parser
-
-    if (isAutoDeploy) {
-        implementation project(':auth-api')
-
-        implementation 'org.comroid:status-api:0.+'
-        implementation 'org.comroid:webkit:0.+'
-        implementation 'org.comroid:webkit-oauth:0.+'
+    // todo: use status api again
+    if (findProject(':api') == null) {
+        //implementation 'org.comroid:status-api:0.+'
+        implementation 'org.comroid:api:0.+'
     } else {
-        implementation project(':auth:auth-api')
-
-        implementation project(':status:status-api')
-
-        implementation project(':guardian:uniform').sourceSets.java8compat.output.classesDirs
-        implementation project(':guardian:restless').sourceSets.java11compat.output.classesDirs
-        implementation project(':guardian:webkit')
-        implementation project(':guardian:webkit:oauth')
+        //implementation project(':status:status-api')
+        implementation project(':api')
     }
 
-    // logging dependencies
-    implementation 'org.apache.logging.log4j:log4j-api:2.11.0'
+    // db dependencies
+    implementation 'org.mariadb.jdbc:mariadb-java-client:3.0.+'
 
-    // json dependency
-    implementation 'com.alibaba:fastjson:1.2.76'
-    //implementation 'com.fasterxml.jackson.core:jackson-databind:2.11.0'
+    // JSTL stuff
+    implementation 'javax.servlet:jstl'
+    implementation 'org.apache.tomcat.embed:tomcat-embed-jasper'
+    implementation 'jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api'
+    implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl'
+    providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
 
-    // oauth2 helper dependencies
-   // implementation 'org.zalando.stups:tokens:0.13.0'
-   
-   // nashorn dependency
-   implementation 'org.openjdk.nashorn:nashorn-core:15.0'
-
-/*
-    // xml dependency
-    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.11.2'
-    testImplementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.11.2'
- */
+    // spring
+    implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.session:spring-session-jdbc'
+    implementation 'org.springframework.security:spring-security-oauth2-authorization-server:1.+'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
