@@ -20,7 +20,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 
 public final class StatusConnection implements ContextualProvider.Underlying {
     public static final String SERVER = "https://api.status.comroid.org";
@@ -117,7 +116,7 @@ public final class StatusConnection implements ContextualProvider.Underlying {
         if (serviceName == null)
             throw new NoSuchElementException("No service name defined");
         return CompletableFuture.supplyAsync(() -> new RestTemplate().exchange(
-                String.format("%s/service/%s/status", SERVER, serviceName),
+                        String.format("%s/service/%s/status", SERVER, serviceName),
                         HttpMethod.POST,
                         new HttpEntity<>(status, createHeaders("Authorization", token)),
                         Service.class))
@@ -129,7 +128,8 @@ public final class StatusConnection implements ContextualProvider.Underlying {
                         String.format("%s/services", SERVER),
                         HttpMethod.GET,
                         HttpEntity.EMPTY,
-                        new ParameterizedTypeReference<List<Service>>(){}))
+                        new ParameterizedTypeReference<List<Service>>() {
+                        }))
                 .thenApply(ResponseEntity::getBody);
     }
 

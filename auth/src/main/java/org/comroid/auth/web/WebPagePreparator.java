@@ -1,8 +1,8 @@
 package org.comroid.auth.web;
 
+import org.comroid.auth.dto.RegisterData;
 import org.comroid.auth.entity.AuthService;
 import org.comroid.auth.entity.UserAccount;
-import org.comroid.auth.dto.RegisterData;
 import org.springframework.ui.Model;
 
 import java.util.List;
@@ -12,6 +12,11 @@ public class WebPagePreparator {
     private final String page;
     private boolean widget;
     private boolean needLogin;
+
+    public WebPagePreparator setWidget(boolean widget) {
+        this.widget = widget;
+        return this;
+    }
 
     public WebPagePreparator(Model model, String page) {
         this.model = model;
@@ -44,11 +49,6 @@ public class WebPagePreparator {
 
     public WebPagePreparator setAttribute(String name, Object value) {
         model.addAttribute(name, value);
-        return this;
-    }
-
-    public WebPagePreparator setWidget(boolean widget) {
-        this.widget = widget;
         return this;
     }
 

@@ -7,7 +7,6 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
-import java.util.UUID;
 
 public interface AccountRepository extends CrudRepository<UserAccount, String> {
     @Query("select u from UserAccount u where u.sessionId = ?1")

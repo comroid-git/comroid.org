@@ -8,13 +8,10 @@ import org.comroid.status.server.exception.InvalidTokenException;
 import org.comroid.status.server.exception.ServiceNotFoundException;
 import org.comroid.status.server.repo.ServiceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
-import java.io.Closeable;
-import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 
 @Controller
 public class ServiceController {
+    private final Map<String, Runnable> pollCancellation = new ConcurrentHashMap<>();
     @Autowired
     private ServiceRepository serviceRepository;
     @Autowired
@@ -30,18 +28,18 @@ public class ServiceController {
     @Autowired
     private ScheduledExecutorService scheduler;
 
+    @ResponseBody
+    @GetMapping("/services")
+    public Iterable<Service> getServices() {
+        return serviceRepository.findAll();
+    }
+
     @PostConstruct
     private void init() {
         serviceRepository.findAll().forEach(srv -> {
             if (!tokenProvider.hasToken(srv.getName()))
                 tokenProvider.generate(srv.getName());
         });
-    }
-
-    @ResponseBody
-    @GetMapping("/services")
-    public Iterable<Service> getServices() {
-        return serviceRepository.findAll();
     }
 
     @ResponseBody
@@ -116,8 +114,6 @@ public class ServiceController {
         Service srv = found.get();
         stopPoll(srv);
     }
-
-    private final Map<String, Runnable> pollCancellation = new ConcurrentHashMap<>();
 
     private Service updateStatus(Service service, Service.Status status) {
         service.setStatus(status);

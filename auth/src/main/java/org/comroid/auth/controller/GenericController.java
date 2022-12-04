@@ -9,7 +9,9 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpSession;
 import java.util.Optional;
@@ -45,8 +47,8 @@ public class GenericController {
         boolean invalidEmail = accounts.findByEmail(email).isPresent();
         if (invalidUsername || invalidEmail)
             return new WebPagePreparator(model, "generic/register")
-                .registerData(new RegisterData(username, email, invalidUsername, invalidEmail))
-                .complete();
+                    .registerData(new RegisterData(username, email, invalidUsername, invalidEmail))
+                    .complete();
         var account = new UserAccount(username, email, encoder.encode(password));
         accounts.save(account);
         return "redirect:/login";
