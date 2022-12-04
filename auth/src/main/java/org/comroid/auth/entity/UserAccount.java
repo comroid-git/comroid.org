@@ -19,7 +19,7 @@ public class UserAccount implements AuthEntity, UserDetails {
     private String uuid;
     @Column(unique = true)
     private String username;
-    @Column
+    @Column(unique = true)
     private String email;
     @Column
     private String passwordHash;

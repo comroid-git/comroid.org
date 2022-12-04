@@ -40,7 +40,7 @@ public class AuthServer extends SpringBootServletInitializer implements WebMvcCo
 
     @Bean
     public DataSource dataSource() throws IOException {
-        DBInfo dbInfo = new ObjectMapper().readValue(DB_FILE.openReader(), DBInfo.class);
+        var dbInfo = new ObjectMapper().readValue(DB_FILE.openReader(), DBInfo.class);
         return DataSourceBuilder.create()
                 .url(dbInfo.url)
                 .username(dbInfo.username)
