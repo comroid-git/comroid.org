@@ -23,15 +23,15 @@ if (isAutoDeploy) {
 } else {
     evaluationDependsOn ':status:status-api'
 }
-/*
-task simplifyWar(type: Copy, dependsOn: 'bootWar') {
+
+task simplifyDist(type: Copy, dependsOn: 'bootJar') {
     from bootWar.outputs.files.singleFile
     def target = file("$buildDir/dist")
     into target
-    rename { String filename -> return "auth.war" }
-    System.out.printf("Simplifying file name to: %s/auth.war\n", target.getAbsolutePath())
+    rename { String filename -> return "auth.jar" }
+    System.out.printf("Simplifying file name to: %s/auth.jar\n", target.getAbsolutePath())
 }
-*/
+
 dependencies {
     compileOnly 'org.jetbrains:annotations:23.0.0'
 

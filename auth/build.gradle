@@ -29,7 +29,7 @@ repositories {
     maven { url 'https://www.jitpack.io' }
 }
 
-task simplifyWar(type: Copy, dependsOn: 'bootWar') {
+task simplifyDist(type: Copy, dependsOn: 'bootWar') {
     from bootWar.outputs.files.singleFile
     def target = file("$buildDir/dist")
     into target
