@@ -201,7 +201,7 @@ public class AccountController {
                 This is an automated E-Mail asking you to verify the email for your comroid Account.
                                         
                 Please click on the following link to verify your email:
-                https://auth.comroid.org/verify_email?code=%s
+                https://auth.comroid.org/account/verify_email?code=%s
                 Do not reply to this email.
                                         
                 Kind regards,
