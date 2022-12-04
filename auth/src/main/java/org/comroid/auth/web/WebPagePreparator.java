@@ -3,6 +3,7 @@ package org.comroid.auth.web;
 import org.comroid.auth.dto.RegisterData;
 import org.comroid.auth.entity.AuthService;
 import org.comroid.auth.entity.UserAccount;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.ui.Model;
 
 import java.util.List;
@@ -23,11 +24,11 @@ public class WebPagePreparator {
         this.page = page;
     }
 
-    public WebPagePreparator userAccount(UserAccount account) {
+    public WebPagePreparator userAccount(@Nullable UserAccount account) {
         setAttribute("account", account);
-        setAttribute("hubAccess", account.hasPermission(UserAccount.Permit.Hub));
-        setAttribute("serviceAdmin", account.hasPermission(UserAccount.Permit.AdminServices));
-        setAttribute("accountAdmin", account.hasPermission(UserAccount.Permit.AdminAccounts));
+        setAttribute("hubAccess", account != null && account.hasPermission(UserAccount.Permit.Hub));
+        setAttribute("serviceAdmin", account != null && account.hasPermission(UserAccount.Permit.AdminServices));
+        setAttribute("accountAdmin", account != null && account.hasPermission(UserAccount.Permit.AdminAccounts));
         return this;
     }
 
