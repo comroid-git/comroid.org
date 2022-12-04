@@ -32,7 +32,7 @@ public class ServiceController {
         if (session == null)
             return "redirect:/login";
         var account = accounts.findBySessionId(session.getId());
-        var redirect = performChecks(model, account, Optional.empty(), false);
+        var redirect = performChecks(model, account);
         if (redirect != null)
             return redirect;
         return new WebPagePreparator(model, "service/list")
@@ -48,7 +48,7 @@ public class ServiceController {
             return "redirect:/login";
         var account = accounts.findBySessionId(session.getId());
         var service = services.findById(id);
-        var redirect = performChecks(model, account, service, true);
+        var redirect = performChecks(model, account, service);
         if (redirect != null)
             return redirect;
         return new WebPagePreparator(model, "service/view")
@@ -64,7 +64,7 @@ public class ServiceController {
             return "redirect:/login";
         var account = accounts.findBySessionId(session.getId());
         var service = services.findById(id);
-        var redirect = performChecks(model, account, service, true);
+        var redirect = performChecks(model, account, service);
         if (redirect != null)
             return redirect;
         return new WebPagePreparator(model, "service/edit")
@@ -80,7 +80,7 @@ public class ServiceController {
             return "redirect:/login";
         var account = accounts.findBySessionId(session.getId());
         var service = services.findById(id);
-        var redirect = performChecks(model, account, service, true);
+        var redirect = performChecks(model, account, service);
         if (redirect != null)
             return redirect;
         return new WebPagePreparator(model, "service/delete")
@@ -95,7 +95,7 @@ public class ServiceController {
         if (session == null)
             return "redirect:/login";
         var account = accounts.findBySessionId(session.getId());
-        var redirect = performChecks(model, account, Optional.empty(), false);
+        var redirect = performChecks(model, account);
         if (redirect != null)
             return redirect;
         return new WebPagePreparator(model, "generic/confirm")
@@ -111,13 +111,21 @@ public class ServiceController {
         if (session == null)
             return "redirect:/login";
         var account = accounts.findBySessionId(session.getId());
-        var redirect = performChecks(model, account, Optional.empty(), false);
+        var redirect = performChecks(model, account);
         if (redirect != null)
             return redirect;
         Arrays.stream(ids.split(";"))
                 .filter(Predicate.not(String::isBlank))
                 .forEach(services::deleteById);
         return "redirect:/service";
+    }
+
+    private @Nullable String performChecks(Model model, Optional<UserAccount> account) {
+        return performChecks(model, account, Optional.empty(), false);
+    }
+
+    private @Nullable String performChecks(Model model, Optional<UserAccount> account, Optional<AuthService> service) {
+        return performChecks(model, account, service, true);
     }
 
     private @Nullable String performChecks(Model model, Optional<UserAccount> account, Optional<AuthService> service, boolean requiresService) {
