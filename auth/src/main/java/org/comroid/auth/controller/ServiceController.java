@@ -7,6 +7,7 @@ import org.comroid.auth.repo.ServiceRepository;
 import org.comroid.auth.web.WebPagePreparator;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +21,7 @@ import java.util.stream.StreamSupport;
 
 @Controller
 @RequestMapping("/service")
+@SuppressWarnings("OptionalGetWithoutIsPresent")
 public class ServiceController {
     @Autowired
     private AccountRepository accounts;
@@ -27,7 +29,6 @@ public class ServiceController {
     private ServiceRepository services;
 
     @GetMapping
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
     public String index(Model model, HttpSession session) {
         if (session == null)
             return "redirect:/login";
@@ -42,7 +43,6 @@ public class ServiceController {
     }
 
     @GetMapping("/{id}")
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
     public String view(Model model, @PathVariable("id") String id, HttpSession session) {
         if (session == null)
             return "redirect:/login";
@@ -58,7 +58,6 @@ public class ServiceController {
     }
 
     @GetMapping("/{id}/edit")
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
     public String edit(Model model, @PathVariable("id") String id, HttpSession session) {
         if (session == null)
             return "redirect:/login";
@@ -74,7 +73,6 @@ public class ServiceController {
     }
 
     @GetMapping("/{id}/delete")
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
     public String delete(Model model, @PathVariable("id") String id, HttpSession session) {
         if (session == null)
             return "redirect:/login";
@@ -90,7 +88,6 @@ public class ServiceController {
     }
 
     @GetMapping("/bulk_delete")
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
     public String bulkDelete(Model model, @RequestParam("ids") String ids, HttpSession session) {
         if (session == null)
             return "redirect:/login";
