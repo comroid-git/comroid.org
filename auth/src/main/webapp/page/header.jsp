@@ -15,7 +15,7 @@
             <a href="https://hub.comroid.org">Hub</a> |
         </c:if>
         <c:if test="${serviceAdmin}">
-            <a href="<c:url value="/service" />">Services</a> |
+            <a href="<c:url value="/services" />">Services</a> |
         </c:if>
         <c:if test="${accountAdmin}">
             <a href="<c:url value="/account/list" />">Accounts</a> |

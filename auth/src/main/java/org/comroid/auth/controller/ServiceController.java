@@ -103,6 +103,32 @@ public class ServiceController {
                 .complete();
     }
 
+    @PostMapping("/{id}/edit")
+    public String edit(
+            Model model,
+            @PathVariable("id") String id,
+            @RequestParam("name") String name,
+            @RequestParam("url") String url,
+            @RequestParam("callbackUrl") String callbackUrl,
+            @RequestParam("requiredScope") String requiredScope,
+            HttpSession session
+    ) {
+        if (session == null)
+            return "redirect:/login";
+        var account = accounts.findBySessionId(session.getId());
+        var service = services.findById(id);
+        var redirect = performChecks(model, account, service);
+        if (redirect != null)
+            return redirect;
+        var found = service.get();
+        found.setName(name);
+        found.setUrl(url);
+        found.setCallbackUrl(callbackUrl);
+        found.setRequiredScope(requiredScope);
+        services.save(found);
+        return "redirect:/services";
+    }
+
     @GetMapping("/{id}/delete")
     public String delete(Model model, @PathVariable("id") String id, HttpSession session) {
         if (session == null)

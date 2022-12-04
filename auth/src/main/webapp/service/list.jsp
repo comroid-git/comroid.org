@@ -19,11 +19,11 @@
     </tr>
     <c:forEach items="${services}" var="service">
         <tr>
-            <td><input type="checkbox" id="select${service.UUID}" onclick="select(${service.UUID})"></td>
-            <td>${service.name}</td>
-            <td><input type="button" value="Details" onclick="gotoDetails(${service.UUID})"></td>
-            <td><input type="button" value="Edit" onclick="gotoEdit(${service.UUID})"></td>
-            <td><input type="button" value="Delete" onclick="gotoDelete(${service.UUID})"></td>
+            <td><input type="checkbox" id="select${service.UUID}" onclick="select('${service.UUID}')"></td>
+            <td><a href="${service.url}" style="text-decoration: underline">${service.name}</a></td>
+            <td><input type="button" value="Details" onclick="gotoDetails('${service.UUID}')"></td>
+            <td><input type="button" value="Edit" onclick="gotoEdit('${service.UUID}')"></td>
+            <td><input type="button" value="Delete" onclick="gotoDelete('${service.UUID}')"></td>
         </tr>
     </c:forEach>
 </table>

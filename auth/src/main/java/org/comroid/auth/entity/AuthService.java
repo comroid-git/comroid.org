@@ -33,16 +33,32 @@ public class AuthService implements AuthEntity {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getUrl() {
         return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     public String getCallbackUrl() {
         return callbackUrl;
     }
 
+    public void setCallbackUrl(String callbackUrl) {
+        this.callbackUrl = callbackUrl;
+    }
+
     public String getRequiredScope() {
         return requiredScope;
+    }
+
+    public void setRequiredScope(String requiredScope) {
+        this.requiredScope = requiredScope;
     }
 
     public AuthService() {
