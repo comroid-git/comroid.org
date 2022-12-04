@@ -5,5 +5,5 @@ import org.springframework.data.repository.CrudRepository;
 
 import java.util.UUID;
 
-public interface ServiceRepository extends CrudRepository<AuthService, UUID> {
+public interface ServiceRepository extends CrudRepository<AuthService, String> {
 }

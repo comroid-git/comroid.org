@@ -83,5 +83,4 @@ public class GenericController {
         session.invalidate();
         return "redirect:/login";
     }
-
 }

@@ -10,7 +10,7 @@ import java.util.UUID;
 @Table(name = "services")
 public class AuthService implements AuthEntity {
     @Id
-    private UUID uuid;
+    private String uuid;
     @Column
     private String name;
     @Column
@@ -20,6 +20,10 @@ public class AuthService implements AuthEntity {
 
     @Override
     public UUID getUUID() {
+        return UUID.fromString(uuid);
+    }
+
+    public String getId() {
         return uuid;
     }
 

@@ -5,6 +5,8 @@ import org.comroid.auth.entity.UserAccount;
 import org.comroid.auth.dto.RegisterData;
 import org.springframework.ui.Model;
 
+import java.util.List;
+
 public class WebPagePreparator {
     private final Model model;
     private final String page;
@@ -24,6 +26,10 @@ public class WebPagePreparator {
 
     public WebPagePreparator authService(AuthService service) {
         return setAttribute("service", service);
+    }
+
+    public WebPagePreparator authServiceList(List<AuthService> services) {
+        return setAttribute("services", services);
     }
 
     public WebPagePreparator registerData(RegisterData data) {

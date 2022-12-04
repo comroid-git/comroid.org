@@ -9,14 +9,14 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Predicate;
+import java.util.stream.StreamSupport;
 
 @Controller
 @RequestMapping("/service")
@@ -26,14 +26,29 @@ public class ServiceController {
     @Autowired
     private ServiceRepository services;
 
+    @GetMapping
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    public String index(Model model, HttpSession session) {
+        if (session == null)
+            return "redirect:/login";
+        var account = accounts.findBySessionId(session.getId());
+        var redirect = performChecks(model, account, Optional.empty(), false);
+        if (redirect != null)
+            return redirect;
+        return new WebPagePreparator(model, "service/list")
+                .userAccount(account.get())
+                .authServiceList(StreamSupport.stream(services.findAll().spliterator(), false).toList())
+                .complete();
+    }
+
     @GetMapping("/{id}")
     @SuppressWarnings("OptionalGetWithoutIsPresent")
-    public String view(Model model, @PathVariable("id") UUID id, HttpSession session) {
+    public String view(Model model, @PathVariable("id") String id, HttpSession session) {
         if (session == null)
             return "redirect:/login";
         var account = accounts.findBySessionId(session.getId());
         var service = services.findById(id);
-        var redirect = performChecks(model, account, service);
+        var redirect = performChecks(model, account, service, true);
         if (redirect != null)
             return redirect;
         return new WebPagePreparator(model, "service/view")
@@ -44,12 +59,12 @@ public class ServiceController {
 
     @GetMapping("/{id}/edit")
     @SuppressWarnings("OptionalGetWithoutIsPresent")
-    public String edit(Model model, @PathVariable("id") UUID id, HttpSession session) {
+    public String edit(Model model, @PathVariable("id") String id, HttpSession session) {
         if (session == null)
             return "redirect:/login";
         var account = accounts.findBySessionId(session.getId());
         var service = services.findById(id);
-        var redirect = performChecks(model, account, service);
+        var redirect = performChecks(model, account, service, true);
         if (redirect != null)
             return redirect;
         return new WebPagePreparator(model, "service/edit")
@@ -60,12 +75,12 @@ public class ServiceController {
 
     @GetMapping("/{id}/delete")
     @SuppressWarnings("OptionalGetWithoutIsPresent")
-    public String delete(Model model, @PathVariable("id") UUID id, HttpSession session) {
+    public String delete(Model model, @PathVariable("id") String id, HttpSession session) {
         if (session == null)
             return "redirect:/login";
         var account = accounts.findBySessionId(session.getId());
         var service = services.findById(id);
-        var redirect = performChecks(model, account, service);
+        var redirect = performChecks(model, account, service, true);
         if (redirect != null)
             return redirect;
         return new WebPagePreparator(model, "service/delete")
@@ -74,14 +89,45 @@ public class ServiceController {
                 .complete();
     }
 
-    private @Nullable String performChecks(Model model, Optional<UserAccount> account, Optional<AuthService> service) {
+    @GetMapping("/bulk_delete")
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    public String bulkDelete(Model model, @RequestParam("ids") String ids, HttpSession session) {
+        if (session == null)
+            return "redirect:/login";
+        var account = accounts.findBySessionId(session.getId());
+        var redirect = performChecks(model, account, Optional.empty(), false);
+        if (redirect != null)
+            return redirect;
+        return new WebPagePreparator(model, "generic/confirm")
+                .setAttribute("action", "delete all selected Services")
+                .setAttribute("actionConfirm", "/service/bulk_delete/confirm?ids=" + ids)
+                .setAttribute("actionCancel", "/service")
+                .userAccount(account.get())
+                .complete();
+    }
+
+    @PostMapping("/bulk_delete")
+    public String bulkDeleteConfirm(Model model, @RequestParam("ids") String ids, HttpSession session) {
+        if (session == null)
+            return "redirect:/login";
+        var account = accounts.findBySessionId(session.getId());
+        var redirect = performChecks(model, account, Optional.empty(), false);
+        if (redirect != null)
+            return redirect;
+        Arrays.stream(ids.split(";"))
+                .filter(Predicate.not(String::isBlank))
+                .forEach(services::deleteById);
+        return "redirect:/service";
+    }
+
+    private @Nullable String performChecks(Model model, Optional<UserAccount> account, Optional<AuthService> service, boolean requiresService) {
         if (account.isEmpty())
             return "redirect:/login";
         if (!account.get().hasPermission(UserAccount.Permit.Services))
             return new WebPagePreparator(model, "generic/unauthorized")
                     .userAccount(account.get())
                     .complete();
-        if (service.isEmpty())
+        if (requiresService && service.isEmpty())
             return new WebPagePreparator(model, "service/not_found").complete();
         return null;
     }
