@@ -190,6 +190,7 @@ public class AccountController {
                     .userAccount(account.orElse(null))
                     .complete();
         found.setChangePasswordCode(null);
+        found.setCredentialsExpired(false);
         found.setPasswordHash(encoder.encode(password));
         found.setSessionId(null);
         accounts.save(found);

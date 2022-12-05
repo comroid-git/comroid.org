@@ -80,7 +80,14 @@ public class GenericController {
                     .needLogin(false)
                     .complete();
         }
-        accounts.setSessionId(byUsername.get().getId(), session.getId());
+        var found = byUsername.get();
+        if (!found.isEnabled() || !found.isAccountNonLocked() || !found.isAccountNonExpired())
+            // todo: unauthorized account error page
+            return "redirect:/login";
+        if (!found.isCredentialsNonExpired())
+            // todo: ask for password change
+            return "redirect:/account/start_change_password";
+        accounts.setSessionId(found.getId(), session.getId());
         return "redirect:/account";
     }
 
