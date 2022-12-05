@@ -31,14 +31,24 @@ public class UserAccount implements AuthEntity, UserDetails {
     private boolean enabled = true;
     @Column
     private boolean emailVerified = false;
-    @Column(unique = true)
-    private String emailVerifyCode;
     @Column
     private boolean locked = false;
     @Column
     private boolean expired = false;
     @Column
     private boolean credentialsExpired = false;
+    @Column(unique = true)
+    private String emailVerifyCode;
+    @Column(unique = true)
+    private String changePasswordCode;
+
+    public String getChangePasswordCode() {
+        return changePasswordCode;
+    }
+
+    public void setChangePasswordCode(String changePasswordCode) {
+        this.changePasswordCode = changePasswordCode;
+    }
 
     public String getEmailVerifyCode() {
         return emailVerifyCode;

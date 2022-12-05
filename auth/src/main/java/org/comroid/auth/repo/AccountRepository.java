@@ -21,6 +21,9 @@ public interface AccountRepository extends CrudRepository<UserAccount, String> {
     @Query("select u from UserAccount u where u.emailVerifyCode = ?1")
     Optional<UserAccount> findByEmailVerificationCode(String code);
 
+    @Query("select u from UserAccount u where u.changePasswordCode = ?1")
+    Optional<UserAccount> findByPasswordUpdateCode(String code);
+
     @Modifying(clearAutomatically = true)
     @Transactional
     @Query("update UserAccount u set u.sessionId = ?2 where u.uuid = ?1")

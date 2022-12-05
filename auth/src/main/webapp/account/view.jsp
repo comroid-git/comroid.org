@@ -20,5 +20,5 @@
     </c:if>
     <a href="<c:url value="/account/edit" />" style="text-decoration: underline">Edit Account</a>
     <br/>
-    <a href="<c:url value="/account/change_password" />" style="text-decoration: underline">Change Password</a>
+    <a href="<c:url value="/account/start_change_password" />" style="text-decoration: underline">Change Password</a>
 </c:if>

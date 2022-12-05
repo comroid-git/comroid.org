@@ -148,20 +148,56 @@ public class AccountController {
         return "redirect:/account/list";
     }
 
-    @GetMapping("/change_password")
-    public String changePassword(Model model, HttpSession session) {
+    @GetMapping("/start_change_password")
+    public String startChangePassword(HttpSession session) {
         if (session == null)
             return "redirect:/login";
         var account = accounts.findBySessionId(session.getId());
         if (account.isEmpty())
             return "redirect:/login";
+        initiateChangePassword(accounts, mailSender, account.get());
+        return "redirect:/login";
+    }
+
+    @GetMapping("/change_password")
+    public String changePassword(Model model, @RequestParam("code") String code) {
+        var account = accounts.findByPasswordUpdateCode(code);
+        if (account.isEmpty())
+            return new WebPagePreparator(model, "generic/unauthorized")
+                    .complete();
         return new WebPagePreparator(model, "account/change_password")
                 .userAccount(account.get())
+                .setAttribute("code", code)
                 .complete();
     }
 
+    @PostMapping(value = "/change_password", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    public String changePassword(
+            Model model,
+            @RequestParam("code") String code,
+            @RequestParam("password") String password,
+            @Autowired BCryptPasswordEncoder encoder
+    ) {
+        var account = accounts.findByPasswordUpdateCode(code);
+        if (account.isEmpty() || !account.get().getChangePasswordCode().equals(code))
+            return new WebPagePreparator(model, "generic/unauthorized")
+                    .userAccount(account.orElse(null))
+                    .complete();
+        var found = account.get();
+        if (encoder.matches(password, found.getPassword()))
+            // todo: Add error page for 'password cannot match old password'
+            return new WebPagePreparator(model, "generic/unauthorized")
+                    .userAccount(account.orElse(null))
+                    .complete();
+        found.setChangePasswordCode(null);
+        found.setPasswordHash(encoder.encode(password));
+        found.setSessionId(null);
+        accounts.save(found);
+        return "redirect:/login";
+    }
+
     @GetMapping("/email_verification")
-    public String initiateEmailVerification(Model model, HttpSession session) {
+    public String initiateEmailVerification(HttpSession session) {
         if (session == null)
             return "redirect:/login";
         var account = accounts.findBySessionId(session.getId());
@@ -206,6 +242,33 @@ public class AccountController {
                 https://auth.comroid.org/account/verify_email?code=%s
                 Do not reply to this email.
                                         
+                Kind regards,
+                comroid Team
+                """, code));
+        mailSender.send(mail);
+    }
+
+    public static void initiateChangePassword(AccountRepository accounts, JavaMailSender mailSender, UserAccount account) {
+        String code;
+        do {
+            code = Base64.encode(UUID.randomUUID().toString());
+        } while (accounts.findByEmailVerificationCode(code).isPresent());
+        account.setChangePasswordCode(code);
+        accounts.save(account);
+        var mail = new SimpleMailMessage();
+        mail.setFrom("noreply@comroid.org");
+        mail.setTo(account.getEmail());
+        mail.setSubject("comroid Account Password change request");
+        mail.setText(String.format("""
+                Hello,
+                
+                This is an automated E-Mail because you are trying to change your password.
+                
+                Please click on the following link to change your password:
+                https://auth.comroid.org/account/change_password?code=%s.
+                Wasn't you? Change it anyways.
+                Do not reply to this email.
+                
                 Kind regards,
                 comroid Team
                 """, code));
