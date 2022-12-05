@@ -15,7 +15,7 @@
         <c:if test="${not empty message}">
             <span>${message}</span>
         </c:if>
-        <textarea rows="999" style="white-space: pre-wrap; line-break: auto; width: 100%; height: 35%; resize: vertical;" inputmode="none">${stacktrace}</textarea>
+        <textarea rows="999" style="white-space: pre-wrap; line-break: auto; width: 100%; height: 35%; resize: vertical;" readonly>${stacktrace}</textarea>
     </div>
     <br/>
 </c:if>
