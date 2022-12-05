@@ -3,6 +3,7 @@ package org.comroid.auth.controller;
 import org.comroid.auth.entity.UserAccount;
 import org.comroid.auth.repo.AccountRepository;
 import org.comroid.auth.web.WebPagePreparator;
+import org.comroid.util.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.mail.SimpleMailMessage;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @Controller
@@ -45,7 +47,7 @@ public class AccountController {
                     .complete();
         return new WebPagePreparator(model, "account/list")
                 .userAccount(account.get())
-                .userAccountList(StreamSupport.stream(accounts.findAll().spliterator(), false).toList())
+                .userAccountList(StreamSupport.stream(accounts.findAll().spliterator(), false).collect(Collectors.toList()))
                 .complete();
     }
 
@@ -186,7 +188,7 @@ public class AccountController {
     public static void initiateEmailVerification(AccountRepository accounts, JavaMailSender mailSender, UserAccount account) {
         String code;
         do {
-            code = UUID.randomUUID().toString();
+            code = Base64.encode(UUID.randomUUID().toString());
         } while (accounts.findByEmailVerificationCode(code).isPresent());
         account.setEmailVerified(false);
         account.setEmailVerifyCode(code);
