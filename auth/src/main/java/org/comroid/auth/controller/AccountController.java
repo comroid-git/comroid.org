@@ -266,7 +266,7 @@ public class AccountController {
                 This is an automated E-Mail because you are trying to change your password.
                 
                 Please click on the following link to change your password:
-                https://auth.comroid.org/account/change_password?code=%s.
+                https://auth.comroid.org/account/change_password?code=%s
                 Wasn't you? Change it anyways.
                 Do not reply to this email.
                 
