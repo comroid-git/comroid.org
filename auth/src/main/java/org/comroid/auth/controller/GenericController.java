@@ -5,6 +5,8 @@ import org.comroid.auth.entity.UserAccount;
 import org.comroid.auth.repo.AccountRepository;
 import org.comroid.auth.web.WebPagePreparator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.servlet.error.ErrorController;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -13,12 +15,17 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.util.NestedServletException;
 
+import javax.servlet.RequestDispatcher;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Optional;
 
 @Controller
-public class GenericController {
+public class GenericController implements ErrorController {
     @Autowired
     private AccountRepository accounts;
     @Autowired
@@ -29,6 +36,31 @@ public class GenericController {
         if (session == null || accounts.findBySessionId(session.getId()).isEmpty())
             return "redirect:/login";
         return "redirect:/account";
+    }
+
+    @GetMapping("/error")
+    public String error(Model model, HttpSession session, HttpServletRequest request) {
+        var ex = (Throwable) request.getAttribute(RequestDispatcher.ERROR_EXCEPTION);
+        var sw = new StringWriter();
+        var pw = new PrintWriter(sw);
+        if (ex instanceof NestedServletException) {
+            ex = ex.getCause();
+            ex.printStackTrace(pw);
+        }
+        int code = (int)request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
+        String codeMessage = code + " - ";
+        HttpStatus status = HttpStatus.resolve(code);
+        if (status == null)
+            codeMessage += "Internal Server Error";
+        else codeMessage += status.getReasonPhrase();
+        if (code == 404)
+            codeMessage += ": " + request.getAttribute(RequestDispatcher.ERROR_REQUEST_URI);
+        return new WebPagePreparator(model, "generic/error")
+                .userAccount(accounts.findBySessionId(session.getId()).orElse(null))
+                .setAttribute("code", codeMessage)
+                .setAttribute("message", request.getAttribute(RequestDispatcher.ERROR_MESSAGE))
+                .setAttribute("stacktrace", sw.toString().replace("\r\n", "\n"))
+                .complete();
     }
 
     @GetMapping("/register")
