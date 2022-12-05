@@ -23,6 +23,7 @@ public class GenericController {
     private AccountRepository accounts;
     @Autowired
     private JavaMailSender mailSender;
+    private CaptchaService
 
     @GetMapping("/")
     public String index(HttpSession session) {

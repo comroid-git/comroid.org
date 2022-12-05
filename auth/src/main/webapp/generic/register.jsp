@@ -34,8 +34,10 @@
     <label for="dpp">I agree to the <a href="https://comroid.org/#privacy">Data Protection Policy</a></label>
     <br/>
     <br/>
+    <button class="g-recaptcha" data-sitekey="6LfWf1kjAAAAAEfwyRWsWLQyyppu2U7FixaROEgf" data-callback='onSubmit' data-action='submit'>Submit</button>
     <input type="button" value="Confirm" onclick="validateForm()" />
 </form>
+<script src="https://www.google.com/recaptcha/api.js"></script>
 <script type="application/javascript">
     function validateEmail() {
         if (!/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(document.getElementById('email').value)) {
@@ -68,5 +70,9 @@
     function validateForm() {
         if (validateEmail() && validatePasswordsMatch() && validateAgreement())
             document.getElementById('registration').submit();
+    }
+
+    function onSubmit(token) {
+        document.getElementById("demo-form").submit();
     }
 </script>
