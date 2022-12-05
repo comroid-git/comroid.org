@@ -137,6 +137,9 @@ public class AccountController {
                     .userAccount(account.orElse(null))
                     .complete();
         var found = editing.get();
+        var prev = found.getEmail();
+        if (!prev.equals(email))
+            initiateEmailVerification(accounts, mailSender, found);
         found.setUsername(username);
         found.setEmail(email);
         found.setPermit(permit);
