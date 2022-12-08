@@ -5,6 +5,7 @@
 <%--@elvariable id="loggedIn" type="boolean"--%>
 <%--@elvariable id="needLogin" type="boolean"--%>
 <%--@elvariable id="page" type="java.lang.String"--%>
+<!DOCTYPE html>
 <html>
 <head>
     <title>comroid Auth Server</title>
