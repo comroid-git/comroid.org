@@ -1,22 +1,29 @@
 package org.comroid.auth.entity;
 
+import org.comroid.auth.repo.ServiceRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.annotation.PostConstruct;
+import javax.persistence.*;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.StreamSupport;
 
 @Entity
 @Table(name = "services")
 public class AuthService extends RegisteredClient implements AuthEntity {
+    private static final ClientSettings clientSettings = ClientSettings.builder().build();
+    private static final TokenSettings tokenSettings = TokenSettings.builder().build();
     @Id
     private String uuid;
     @Column
@@ -27,6 +34,10 @@ public class AuthService extends RegisteredClient implements AuthEntity {
     private String callbackUrl;
     @Column
     private String requiredScope;
+    @Column
+    private String secret;
+    @Column
+    private long secretExpiry;
 
     @Override
     public UUID getUUID() {
@@ -50,12 +61,12 @@ public class AuthService extends RegisteredClient implements AuthEntity {
     @Column
     @Override
     public String getClientSecret() {
-        return super.getClientSecret();
+        return secret;
     }
 
     @Override
     public Instant getClientSecretExpiresAt() {
-        return super.getClientSecretExpiresAt();
+        return Instant.ofEpochMilli(secretExpiry);
     }
 
     @Override
@@ -65,12 +76,12 @@ public class AuthService extends RegisteredClient implements AuthEntity {
 
     @Override
     public Set<ClientAuthenticationMethod> getClientAuthenticationMethods() {
-        return super.getClientAuthenticationMethods();
+        return Set.of(ClientAuthenticationMethod.CLIENT_SECRET_BASIC);
     }
 
     @Override
     public Set<AuthorizationGrantType> getAuthorizationGrantTypes() {
-        return super.getAuthorizationGrantTypes();
+        return Set.of(AuthorizationGrantType.AUTHORIZATION_CODE);
     }
 
     @Override
@@ -85,12 +96,12 @@ public class AuthService extends RegisteredClient implements AuthEntity {
 
     @Override
     public ClientSettings getClientSettings() {
-        return super.getClientSettings();
+        return clientSettings;
     }
 
     @Override
     public TokenSettings getTokenSettings() {
-        return super.getTokenSettings();
+        return tokenSettings;
     }
 
     public String getName() {
@@ -134,5 +145,11 @@ public class AuthService extends RegisteredClient implements AuthEntity {
         this.url = url;
         this.callbackUrl = callbackUrl;
         this.requiredScope = requiredScope;
+        regenerateSecret();
+    }
+
+    public void regenerateSecret() {
+        secret = new BCryptPasswordEncoder().encode(UUID.randomUUID().toString());
+        secretExpiry = Long.MAX_VALUE;
     }
 }

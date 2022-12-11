@@ -12,6 +12,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.PostConstruct;
+import javax.persistence.PostLoad;
 import javax.servlet.http.HttpSession;
 import java.util.Arrays;
 import java.util.Optional;
@@ -26,6 +28,15 @@ public class ServiceController {
     private AccountRepository accounts;
     @Autowired
     private ServiceRepository services;
+
+    @PostConstruct
+    public void migrateDB() {
+        services.migrateDB();
+        StreamSupport.stream(services.findAll().spliterator(), false)
+                .filter(it -> it.getClientSecret() == null)
+                .peek(AuthService::regenerateSecret)
+                .forEach(services::save);
+    }
 
     @GetMapping
     public String index(Model model, HttpSession session) {
@@ -111,6 +122,7 @@ public class ServiceController {
             @RequestParam("url") String url,
             @RequestParam("callbackUrl") String callbackUrl,
             @RequestParam("requiredScope") String requiredScope,
+            @RequestParam(value = "regenerateSecret", required = false, defaultValue = "false") boolean regenerateSecret,
             HttpSession session
     ) {
         if (session == null)
@@ -125,6 +137,8 @@ public class ServiceController {
         found.setUrl(url);
         found.setCallbackUrl(callbackUrl);
         found.setRequiredScope(requiredScope);
+        if (regenerateSecret)
+            found.regenerateSecret();
         services.save(found);
         return "redirect:/services";
     }

@@ -1,3 +1,4 @@
+<%--suppress HtmlFormInputWithoutLabel --%>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags"%>
@@ -26,5 +27,9 @@
     <tr>
         <td>Required Scope for Access</td>
         <td>${service.requiredScope}</td>
+    </tr>
+    <tr>
+        <td>Secret</td>
+        <td><textarea style="width: 100%; resize: none;" rows="1" readonly>${service.clientSecret}</textarea></td>
     </tr>
 </table>
