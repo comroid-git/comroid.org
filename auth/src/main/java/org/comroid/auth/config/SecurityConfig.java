@@ -46,7 +46,7 @@ import java.util.UUID;
 @Configuration
 @EnableWebSecurity
 @Import(OAuth2AuthorizationServerConfiguration.class)
-public class SecurityConfig implements UserDetailsService, AuthenticationManager {
+public class SecurityConfig implements UserDetailsService, AuthenticationProvider, AuthenticationManager {
     @Autowired
     private AccountRepository accounts;
     @Autowired
@@ -56,7 +56,7 @@ public class SecurityConfig implements UserDetailsService, AuthenticationManager
     @Order(Ordered.HIGHEST_PRECEDENCE)
     public SecurityFilterChain authServerSecurityFilterChain(HttpSecurity security) throws Exception {
         OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(security);
-        security//.authenticationProvider(this)
+        security.authenticationProvider(this)
                 .authenticationManager(this)
                 .userDetailsService(this)
                 .formLogin().disable()
@@ -139,7 +139,6 @@ public class SecurityConfig implements UserDetailsService, AuthenticationManager
         return new BCryptPasswordEncoder();
     }
 
-    @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         System.out.println("authentication.isAuthenticated() = " + authentication.isAuthenticated());
         System.out.println("authentication.getAuthorities() = " + Arrays.toString(authentication.getAuthorities().toArray()));
@@ -147,5 +146,11 @@ public class SecurityConfig implements UserDetailsService, AuthenticationManager
         System.out.println("authentication.getPrincipal() = " + authentication.getPrincipal());
         System.out.println("authentication.getDetails() = " + authentication.getDetails());
         return authentication;
+    }
+
+    @Override
+    public boolean supports(Class<?> authentication) {
+        System.out.println("supports authentication = " + authentication);
+        return false;
     }
 }
