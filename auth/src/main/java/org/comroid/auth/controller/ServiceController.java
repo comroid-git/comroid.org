@@ -18,6 +18,7 @@ import javax.servlet.http.HttpSession;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 @Controller
@@ -33,7 +34,7 @@ public class ServiceController {
     public void migrateDB() {
         services.migrateDB();
         StreamSupport.stream(services.findAll().spliterator(), false)
-                .filter(it -> it.getClientSecret() == null)
+                .filter(it -> it.getClient().getClientSecret() == null)
                 .peek(AuthService::regenerateSecret)
                 .forEach(services::save);
     }
@@ -48,7 +49,7 @@ public class ServiceController {
             return redirect;
         return new WebPagePreparator(model, "service/list")
                 .userAccount(account.get())
-                .authServiceList(StreamSupport.stream(services.findAll().spliterator(), false).toList())
+                .authServiceList(StreamSupport.stream(services.findAll().spliterator(), false).collect(Collectors.toList()))
                 .complete();
     }
 

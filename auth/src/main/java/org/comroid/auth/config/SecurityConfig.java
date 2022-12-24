@@ -14,9 +14,15 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.ProviderNotFoundException;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -39,7 +45,7 @@ import java.util.UUID;
 @Configuration
 @EnableWebSecurity
 @Import(OAuth2AuthorizationServerConfiguration.class)
-public class SecurityConfig implements UserDetailsService {
+public class SecurityConfig implements UserDetailsService, AuthenticationProvider {
     @Autowired
     private AccountRepository accounts;
     @Autowired
@@ -52,7 +58,6 @@ public class SecurityConfig implements UserDetailsService {
         security.userDetailsService(this)
                 .formLogin().disable()
                 .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
-                .oauth2Login().and()
                 .csrf().disable();
         return security.build();
     }
@@ -62,19 +67,19 @@ public class SecurityConfig implements UserDetailsService {
         return new RegisteredClientRepository() {
             @Override
             public void save(RegisteredClient registeredClient) {
-                if (!(registeredClient instanceof AuthService))
-                    throw new AssertionException();
-                services.save((AuthService) registeredClient);
+                var service = services.findById(registeredClient.getId()).orElseThrow(() -> new ProviderNotFoundException(registeredClient.getId()));
+                // todo update the service
+                services.save(service);
             }
 
             @Override
             public RegisteredClient findById(String id) {
-                return services.findById(id).orElseThrow(NoSuchElementException::new);
+                return services.findById(id).map(AuthService::getClient).orElseThrow(NoSuchElementException::new);
             }
 
             @Override
             public RegisteredClient findByClientId(String clientId) {
-                return services.findById(clientId).orElseThrow(NoSuchElementException::new);
+                return services.findById(clientId).map(AuthService::getClient).orElseThrow(NoSuchElementException::new);
             }
         };
     }
@@ -129,5 +134,23 @@ public class SecurityConfig implements UserDetailsService {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationManager authManager(HttpSecurity http) throws Exception {
+        AuthenticationManagerBuilder authenticationManagerBuilder =
+                http.getSharedObject(AuthenticationManagerBuilder.class);
+        authenticationManagerBuilder.authenticationProvider(this);
+        return authenticationManagerBuilder.build();
+    }
+
+    @Override
+    public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+        return null;
+    }
+
+    @Override
+    public boolean supports(Class<?> authentication) {
+        return false;
     }
 }

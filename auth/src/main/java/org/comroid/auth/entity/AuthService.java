@@ -21,7 +21,7 @@ import java.util.stream.StreamSupport;
 
 @Entity
 @Table(name = "services")
-public class AuthService extends RegisteredClient implements AuthEntity {
+public class AuthService implements AuthEntity {
     private static final ClientSettings clientSettings = ClientSettings.builder().build();
     private static final TokenSettings tokenSettings = TokenSettings.builder().build();
     @Id
@@ -38,6 +38,11 @@ public class AuthService extends RegisteredClient implements AuthEntity {
     private String secret;
     @Column
     private long secretExpiry;
+    private RegisteredClient client;
+
+    public RegisteredClient getClient() {
+        return client;
+    }
 
     @Override
     public UUID getUUID() {
@@ -46,62 +51,6 @@ public class AuthService extends RegisteredClient implements AuthEntity {
 
     public String getId() {
         return uuid;
-    }
-
-    @Override
-    public String getClientId() {
-        return getId();
-    }
-
-    @Override
-    public Instant getClientIdIssuedAt() {
-        return Instant.ofEpochMilli(getUUID().timestamp());
-    }
-
-    @Column
-    @Override
-    public String getClientSecret() {
-        return secret;
-    }
-
-    @Override
-    public Instant getClientSecretExpiresAt() {
-        return Instant.ofEpochMilli(secretExpiry);
-    }
-
-    @Override
-    public String getClientName() {
-        return getName();
-    }
-
-    @Override
-    public Set<ClientAuthenticationMethod> getClientAuthenticationMethods() {
-        return Set.of(ClientAuthenticationMethod.CLIENT_SECRET_BASIC);
-    }
-
-    @Override
-    public Set<AuthorizationGrantType> getAuthorizationGrantTypes() {
-        return Set.of(AuthorizationGrantType.AUTHORIZATION_CODE);
-    }
-
-    @Override
-    public Set<String> getRedirectUris() {
-        return Set.of(getCallbackUrl());
-    }
-
-    @Override
-    public Set<String> getScopes() {
-        return Set.of(getRequiredScope());
-    }
-
-    @Override
-    public ClientSettings getClientSettings() {
-        return clientSettings;
-    }
-
-    @Override
-    public TokenSettings getTokenSettings() {
-        return tokenSettings;
     }
 
     public String getName() {
@@ -146,10 +95,25 @@ public class AuthService extends RegisteredClient implements AuthEntity {
         this.callbackUrl = callbackUrl;
         this.requiredScope = requiredScope;
         regenerateSecret();
+        init();
+    }
+
+    @PostLoad
+    public void init() {
+        client = RegisteredClient.withId(getId())
+                .clientId(getId())
+                .clientName(name)
+                .redirectUri(callbackUrl)
+                .clientSecret(secret)
+                .clientSecretExpiresAt(Instant.ofEpochMilli(secretExpiry))
+                .clientAuthenticationMethods(mtd -> mtd.add(ClientAuthenticationMethod.CLIENT_SECRET_BASIC))
+                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                .build();
     }
 
     public void regenerateSecret() {
         secret = new BCryptPasswordEncoder().encode(UUID.randomUUID().toString());
         secretExpiry = Long.MAX_VALUE;
+        init();
     }
 }
