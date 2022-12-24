@@ -17,6 +17,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -55,6 +56,7 @@ public class SecurityConfig implements UserDetailsService {
         OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(security);
         security.userDetailsService(this)
                 .formLogin().disable()
+                .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
                 .csrf().disable();
         return security.build();
     }
