@@ -30,6 +30,10 @@
             <td><input type="text" id="requiredScope" name="requiredScope" value="${service.requiredScope}" style="width: 100%"></td>
         </tr>
         <tr>
+            <td>Secret</td>
+            <td><textarea style="width: 100%; resize: none;" rows="1" readonly>${service.clientSecret}</textarea></td>
+        </tr>
+        <tr>
             <td>Regenerate Secret</td>
             <td><input type="checkbox" id="regenerateSecret" name="regenerateSecret" style="width: 100%"></td>
         </tr>
