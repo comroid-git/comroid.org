@@ -148,10 +148,4 @@ public class SecurityConfig implements UserDetailsService, AuthenticationManager
         System.out.println("authentication.getDetails() = " + authentication.getDetails());
         return authentication;
     }
-
-    @Override
-    public boolean supports(Class<?> authentication) {
-        System.out.println("supports authentication = " + authentication.getCanonicalName());
-        return false;
-    }
 }
