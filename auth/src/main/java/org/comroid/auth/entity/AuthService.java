@@ -106,6 +106,7 @@ public class AuthService implements AuthEntity {
                 .redirectUri(callbackUrl)
                 .clientSecret(secret)
                 .clientSecretExpiresAt(Instant.ofEpochMilli(secretExpiry))
+                .scope(requiredScope)
                 .clientAuthenticationMethods(mtd -> mtd.add(ClientAuthenticationMethod.CLIENT_SECRET_BASIC))
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .build();
