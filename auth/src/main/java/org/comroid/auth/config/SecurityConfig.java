@@ -139,14 +139,6 @@ public class SecurityConfig implements UserDetailsService, AuthenticationProvide
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public AuthenticationManager authManager(HttpSecurity http) throws Exception {
-        AuthenticationManagerBuilder authenticationManagerBuilder =
-                http.getSharedObject(AuthenticationManagerBuilder.class);
-        authenticationManagerBuilder.authenticationProvider(this);
-        return authenticationManagerBuilder.build();
-    }
-
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         System.out.println("authentication.isAuthenticated() = " + authentication.isAuthenticated());
