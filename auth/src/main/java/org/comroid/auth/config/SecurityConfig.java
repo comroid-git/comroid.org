@@ -46,7 +46,7 @@ import java.util.UUID;
 @Configuration
 @EnableWebSecurity
 @Import(OAuth2AuthorizationServerConfiguration.class)
-public class SecurityConfig implements UserDetailsService, AuthenticationProvider, AuthenticationManager {
+public class SecurityConfig implements UserDetailsService, AuthenticationManager {
     @Autowired
     private AccountRepository accounts;
     @Autowired
@@ -56,7 +56,7 @@ public class SecurityConfig implements UserDetailsService, AuthenticationProvide
     @Order(Ordered.HIGHEST_PRECEDENCE)
     public SecurityFilterChain authServerSecurityFilterChain(HttpSecurity security) throws Exception {
         OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(security);
-        security.authenticationProvider(this)
+        security//.authenticationProvider(this)
                 .authenticationManager(this)
                 .userDetailsService(this)
                 .formLogin().disable()
