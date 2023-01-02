@@ -74,8 +74,7 @@ public class GenericController implements ErrorController {
             @RequestParam("username") String username,
             @RequestParam("email") String email,
             @RequestParam("password") String password,
-            @Autowired BCryptPasswordEncoder encoder,
-            @Autowired JavaMailSender mailSender
+            @Autowired BCryptPasswordEncoder encoder//, @Autowired JavaMailSender mailSender
     ) {
         boolean invalidUsername = accounts.findByUsername(username).isPresent();
         boolean invalidEmail = accounts.findByEmail(email).isPresent();
@@ -85,7 +84,7 @@ public class GenericController implements ErrorController {
                     .complete();
         var account = new UserAccount(username, email, encoder.encode(password));
         accounts.save(account);
-        AccountController.initiateEmailVerification(accounts, mailSender, account);
+       // AccountController.initiateEmailVerification(accounts, mailSender, account);
         return "redirect:/login";
     }
 
@@ -118,7 +117,8 @@ public class GenericController implements ErrorController {
         if (!found.isCredentialsNonExpired())
             // todo: ask for password change
             return "redirect:/account/start_change_password";
-        accounts.setSessionId(found.getId(), session.getId());
+        found.setSessionId(session.getId());
+        accounts.save(found);
         return "redirect:/account";
     }
 

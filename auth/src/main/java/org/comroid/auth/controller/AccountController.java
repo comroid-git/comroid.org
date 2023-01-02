@@ -52,7 +52,7 @@ public class AccountController {
     }
 
     @GetMapping("/{id}")
-    public String view(Model model, @PathVariable("id") String id) {
+    public String view(Model model, @PathVariable("id") UUID id) {
         var account = accounts.findById(id);
         if (account.isEmpty())
             return "redirect:/login";
@@ -97,7 +97,7 @@ public class AccountController {
     }
 
     @GetMapping("/{id}/edit")
-    public String edit(Model model, @PathVariable("id") String id, HttpSession session) {
+    public String edit(Model model, @PathVariable("id") UUID id, HttpSession session) {
         if (session == null)
             return "redirect:/login";
         var account = accounts.findBySessionId(session.getId());
@@ -116,7 +116,7 @@ public class AccountController {
     @PostMapping(value = "/{id}/edit", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
     public String edit(
             Model model,
-            @PathVariable("id") String id,
+            @PathVariable("id") UUID id,
             @RequestParam("username") String username,
             @RequestParam("email") String email,
             @RequestParam("permit") int permit,

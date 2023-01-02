@@ -7,8 +7,9 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+import java.util.UUID;
 
-public interface AccountRepository extends CrudRepository<UserAccount, String> {
+public interface AccountRepository extends CrudRepository<UserAccount, UUID> {
     @Query("select u from UserAccount u where u.sessionId = ?1")
     Optional<UserAccount> findBySessionId(String sessionId);
 
@@ -27,5 +28,5 @@ public interface AccountRepository extends CrudRepository<UserAccount, String> {
     @Modifying(clearAutomatically = true)
     @Transactional
     @Query("update UserAccount u set u.sessionId = ?2 where u.uuid = ?1")
-    void setSessionId(String id, String sessionId);
+    void setSessionId(UUID id, String sessionId);
 }
