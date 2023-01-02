@@ -28,6 +28,8 @@ import java.util.Optional;
 public class GenericController implements ErrorController {
     @Autowired
     private AccountRepository accounts;
+    @Autowired
+    private JavaMailSender mailSender;
 
     @GetMapping("/")
     public String index(HttpSession session) {
@@ -74,8 +76,7 @@ public class GenericController implements ErrorController {
             @RequestParam("username") String username,
             @RequestParam("email") String email,
             @RequestParam("password") String password,
-            @Autowired BCryptPasswordEncoder encoder,
-            @Autowired JavaMailSender mailSender
+            @Autowired BCryptPasswordEncoder encoder
     ) {
         boolean invalidUsername = accounts.findByUsername(username).isPresent();
         boolean invalidEmail = accounts.findByEmail(email).isPresent();
