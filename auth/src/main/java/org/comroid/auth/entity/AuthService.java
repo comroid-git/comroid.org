@@ -38,6 +38,7 @@ public class AuthService implements AuthEntity {
     private String secret;
     @Column
     private long secretExpiry;
+    @Transient
     private RegisteredClient client;
 
     public RegisteredClient getClient() {
