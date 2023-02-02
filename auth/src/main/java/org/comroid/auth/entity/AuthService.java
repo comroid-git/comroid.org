@@ -66,6 +66,10 @@ public class AuthService implements AuthEntity {
         return url;
     }
 
+    public String getSecret() {
+        return secret;
+    }
+
     public void setUrl(String url) {
         this.url = url;
     }

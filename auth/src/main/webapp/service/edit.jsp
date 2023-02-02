@@ -31,7 +31,7 @@
         </tr>
         <tr>
             <td>Secret</td>
-            <td><textarea style="width: 100%; resize: none;" rows="1" readonly>${service.clientSecret}</textarea></td>
+            <td><textarea style="width: 100%; resize: none;" rows="1" readonly>${service.secret}</textarea></td>
         </tr>
         <tr>
             <td>Regenerate Secret</td>
