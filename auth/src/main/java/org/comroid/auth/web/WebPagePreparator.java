@@ -13,6 +13,7 @@ public class WebPagePreparator {
     private final String page;
     private boolean widget;
     private boolean needLogin;
+    private String frame = "page/frame";
 
     public WebPagePreparator setWidget(boolean widget) {
         this.widget = widget;
@@ -22,6 +23,11 @@ public class WebPagePreparator {
     public WebPagePreparator(Model model, String page) {
         this.model = model;
         this.page = page;
+    }
+
+    public WebPagePreparator frame(String frame) {
+        this.frame = frame;
+        return this;
     }
 
     public WebPagePreparator userAccount(@Nullable UserAccount account) {
@@ -63,6 +69,6 @@ public class WebPagePreparator {
         setAttribute("widget", widget);
         setAttribute("needLogin", needLogin);
         setAttribute("loggedIn", model.getAttribute("account") != null);
-        return "page/frame";
+        return frame;
     }
 }

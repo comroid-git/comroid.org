@@ -2,9 +2,6 @@ package org.comroid.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.comroid.api.io.FileHandle;
-import org.comroid.auth.entity.AuthService;
-import org.comroid.auth.repo.ServiceRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -16,22 +13,24 @@ import org.springframework.boot.sql.init.DatabaseInitializationSettings;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.stream.StreamSupport;
 
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 @EntityScan(basePackages = "org.comroid.auth.entity")
 @EnableJpaRepositories
+@ControllerAdvice
 @Configuration
 public class AuthServer extends SpringBootServletInitializer implements WebMvcConfigurer {
     public static final FileHandle PATH_BASE = new FileHandle("/srv/auth/", true); // server path base
@@ -55,6 +54,14 @@ public class AuthServer extends SpringBootServletInitializer implements WebMvcCo
                 .username(dbInfo.username)
                 .password(dbInfo.password)
                 .build();
+    }
+
+    @Bean
+    public RoleHierarchy roleHierarchy() {
+        RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
+        String hierarchy = "ROLE_ADMIN > ROLE_STAFF \n ROLE_STAFF > ROLE_USER";
+        roleHierarchy.setHierarchy(hierarchy);
+        return roleHierarchy;
     }
 
     @Bean
@@ -89,10 +96,16 @@ public class AuthServer extends SpringBootServletInitializer implements WebMvcCo
         return new IntegrationDataSourceScriptDatabaseInitializer(dataSource, new DatabaseInitializationSettings());
     }
 
+    @ExceptionHandler
+    public void handleException(Exception e) {
+        e.printStackTrace();
+    }
+
     private static class DBInfo {
         public String url;
         public String username;
         public String password;
+
     }
 
     private static class MailerInfo {
@@ -100,5 +113,6 @@ public class AuthServer extends SpringBootServletInitializer implements WebMvcCo
         public int port;
         public String username;
         public String password;
+
     }
 }

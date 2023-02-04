@@ -1,5 +1,6 @@
 package org.comroid.auth.controller;
 
+import org.comroid.api.BitmaskAttribute;
 import org.comroid.auth.entity.UserAccount;
 import org.comroid.auth.repo.AccountRepository;
 import org.comroid.auth.web.WebPagePreparator;
@@ -142,7 +143,8 @@ public class AccountController {
             initiateEmailVerification(accounts, mailSender, found);
         found.setUsername(username);
         found.setEmail(email);
-        found.setPermit(permit);
+        for (UserAccount.Permit each : BitmaskAttribute.valueOf(permit, UserAccount.Permit.class))
+            found.setPermit(each, true);
         found.setEnabled(enabled);
         found.setLocked(locked);
         found.setExpired(expired);

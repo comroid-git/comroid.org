@@ -2,13 +2,18 @@ package org.comroid.auth.entity;
 
 import org.comroid.api.BitmaskAttribute;
 import org.comroid.util.Bitmask;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Collection;
 import java.util.UUID;
 
@@ -145,10 +150,6 @@ public class UserAccount implements AuthEntity, UserDetails {
         return permit;
     }
 
-    public void setPermit(int permit) {
-        this.permit = permit;
-    }
-
     public void setLocked(boolean locked) {
         this.locked = locked;
     }
@@ -166,20 +167,77 @@ public class UserAccount implements AuthEntity, UserDetails {
         this.username = username;
         this.email = email;
         this.passwordHash = passwordHash;
+        this.permit = Permit.User.getValue();
     }
 
     public UserAccount() {
     }
 
-    public void changePermit(Permit permission, boolean state) {
-        setPermit(Bitmask.modifyFlag(permit, permission.getValue(), state));
+    public void setPermit(Permit permission, boolean state) {
+        this.permit = Bitmask.modifyFlag(permit, permission.getValue(), state);
     }
 
     public boolean hasPermission(Permit permission) {
         return Bitmask.isFlagSet(getPermit(), permission.getValue());
     }
 
+    public Authentication createAuthentication(PasswordEncoder encoder, Duration validDuration) {
+        return new AuthImpl(encoder, validDuration);
+    }
+
+    private final class AuthImpl implements Authentication {
+        private final PasswordEncoder encoder;
+        private final String token;
+        private final Instant validUntil;
+
+        private AuthImpl(PasswordEncoder encoder, Duration validDuration) {
+            this.encoder = encoder;
+            this.token = encoder.encode(composePassword());
+            this.validUntil = Instant.now().plus(validDuration);
+        }
+
+        private String composePassword() {
+            return getId() + ':' + getSessionId();
+        }
+
+        @Override
+        public Collection<? extends GrantedAuthority> getAuthorities() {
+            return BitmaskAttribute.valueOf(getPermit(), Permit.class);
+        }
+
+        @Override
+        public Object getCredentials() {
+            return token;
+        }
+
+        @Override
+        public Object getDetails() {
+            return UserAccount.this;
+        }
+
+        @Override
+        public Object getPrincipal() {
+            return UserAccount.this;
+        }
+
+        @Override
+        public boolean isAuthenticated() {
+            return validUntil.isBefore(Instant.now()) && encoder.matches(composePassword(), token);
+        }
+
+        @Override
+        public String getName() {
+            return getEmail();
+        }
+
+        @Override
+        public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
+            throw new UnsupportedOperationException();
+        }
+    }
+
     public enum Permit implements BitmaskAttribute<Permit>, GrantedAuthority {
+        User,
         Hub,
         AdminServices,
         AdminAccounts;

@@ -4,12 +4,14 @@ import org.comroid.auth.dto.RegisterData;
 import org.comroid.auth.entity.UserAccount;
 import org.comroid.auth.repo.AccountRepository;
 import org.comroid.auth.web.WebPagePreparator;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,6 +24,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Map;
 import java.util.Optional;
 
 @Controller
@@ -105,17 +108,36 @@ public class GenericController implements ErrorController {
             @RequestParam("password") String password,
             @Autowired BCryptPasswordEncoder encoder
     ) {
+        var redir = tryLogin(accounts, model, session, email, password, encoder, null);
+        if (redir == null)
+            redir = "redirect:/login";
+        return redir;
+    }
+
+    public static String tryLogin(
+            AccountRepository accounts,
+            @Nullable Model model,
+            HttpSession session,
+            String email,
+            String password,
+            PasswordEncoder encoder,
+            @Nullable Map<String, Object> additionalAttributes
+    ) {
         Optional<UserAccount> byUsername = accounts.findByEmail(email);
-        if (byUsername.map(account -> !encoder.matches(password, account.getPassword())).orElse(true)) {
-            return new WebPagePreparator(model, "generic/login")
+        if (model != null && byUsername.map(account -> !encoder.matches(password, account.getPassword())).orElse(true)) {
+            WebPagePreparator wpp = new WebPagePreparator(model, "generic/login");
+            if (additionalAttributes != null)
+                additionalAttributes.forEach(wpp::setAttribute);
+            return wpp
                     .setAttribute("email", email)
                     .needLogin(false)
                     .complete();
         }
+        if (byUsername.isEmpty())
+            return null;
         var found = byUsername.get();
         if (!found.isEnabled() || !found.isAccountNonLocked() || !found.isAccountNonExpired())
-            // todo: unauthorized account error page
-            return "redirect:/login";
+            return null;
         if (!found.isCredentialsNonExpired())
             // todo: ask for password change
             return "redirect:/account/start_change_password";
