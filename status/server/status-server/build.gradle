@@ -1,8 +1,8 @@
 plugins {
     id 'war'
     id 'application'
-    id 'org.springframework.boot' version '2.7.5'
-    id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+    id 'org.springframework.boot' version '3.0.0'
+    id 'io.spring.dependency-management' version '1.1.0'
 }
 
 group 'org.comroid'
@@ -50,7 +50,7 @@ dependencies {
     implementation 'org.mariadb.jdbc:mariadb-java-client'
 
     // JSTL stuff
-    implementation 'javax.servlet:jstl'
+    implementation 'javax.servlet:jstl:1.2'
     implementation 'org.apache.tomcat.embed:tomcat-embed-jasper'
     implementation 'jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api'
     implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl'

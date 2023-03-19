@@ -2,8 +2,8 @@ plugins {
     id 'war'
     id 'idea'
     id 'application'
-    id 'org.springframework.boot' version '2.7.5'
-    id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+    id 'org.springframework.boot' version '3.0.0'
+    id 'io.spring.dependency-management' version '1.1.0'
 }
 
 import static java.lang.System.getenv
@@ -59,11 +59,12 @@ dependencies {
     implementation 'org.mariadb.jdbc:mariadb-java-client'
 
     // JSTL stuff
-    implementation 'javax.servlet:jstl'
+    implementation 'javax.servlet:jstl:1.2'
     implementation 'org.apache.tomcat.embed:tomcat-embed-jasper'
+    implementation 'jakarta.servlet:jakarta.servlet-api'
     implementation 'jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api'
     implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl'
-    providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+    implementation 'org.springframework.boot:spring-boot-starter-tomcat'
 
     // spring
     implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
@@ -71,8 +72,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
-    implementation 'org.springframework.session:spring-session-jdbc'
-    implementation 'org.springframework.security:spring-security-oauth2-authorization-server:0.4.+'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.session:spring-session-core'
+    implementation 'org.springframework.security:spring-security-oauth2-authorization-server:1.0.1'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
