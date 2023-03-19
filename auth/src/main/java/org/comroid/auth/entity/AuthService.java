@@ -5,6 +5,9 @@ import org.comroid.auth.repo.ServiceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.core.AuthorizationGrantType;
+import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -30,6 +33,8 @@ public class AuthService implements AuthEntity {
     private String secret;
     @Column
     private long secretExpiry;
+    @Transient
+    private RegisteredClient client;
 
     @Override
     public UUID getUUID() {
@@ -91,5 +96,23 @@ public class AuthService implements AuthEntity {
     public void regenerateSecret() {
         secret = new BCryptPasswordEncoder().encode(UUID.randomUUID().toString());
         secretExpiry = Long.MAX_VALUE;
+    }
+
+    @PostLoad
+    public void postLoad() {
+        client = RegisteredClient.withId(getId())
+            .clientId(getId())
+            .clientName(name)
+            .redirectUri(callbackUrl)
+            .clientSecret(secret)
+            .clientSecretExpiresAt(Instant.ofEpochMilli(secretExpiry))
+            .scope(requiredScope)
+            .clientAuthenticationMethods(mtd -> mtd.add(ClientAuthenticationMethod.CLIENT_SECRET_BASIC))
+            .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+            .build();
+    }
+
+    public RegisteredClient getClient() {
+        return client;
     }
 }

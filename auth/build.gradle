@@ -70,6 +70,8 @@ dependencies {
     // security
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.session:spring-session-jdbc'
+    implementation 'org.springframework.security:spring-security-oauth2-core'
+    implementation "org.springframework.security:spring-security-oauth2-authorization-server:1.0.1"
 
     // utility
     compileOnly 'org.projectlombok:lombok'
