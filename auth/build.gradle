@@ -62,6 +62,7 @@ dependencies {
 
     // jstl
     compileOnly 'jstl:jstl:1.2'
+    implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl'
     implementation 'jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api'
     providedRuntime 'org.apache.tomcat.embed:tomcat-embed-jasper'
     providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
