@@ -23,6 +23,7 @@ import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import javax.sql.DataSource;
@@ -37,6 +38,7 @@ import java.util.concurrent.ScheduledExecutorService;
 @EnableJpaRepositories
 @ControllerAdvice
 @Configuration
+@EnableWebMvc
 public class AuthServer extends SpringBootServletInitializer implements WebMvcConfigurer {
     public static final FileHandle PATH_BASE = new FileHandle("/srv/auth/", true); // server path base
     public static final FileHandle DB_FILE = PATH_BASE.createSubFile("db.json");
