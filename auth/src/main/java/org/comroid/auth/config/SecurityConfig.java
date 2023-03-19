@@ -201,11 +201,11 @@ public class SecurityConfig extends AbstractAuthenticationProcessingFilter imple
     }
 
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        log.log(Level.INFO, "authentication.isAuthenticated() = " + authentication.isAuthenticated());
-        log.log(Level.INFO, "authentication.getAuthorities() = " + Arrays.toString(authentication.getAuthorities().toArray()));
-        log.log(Level.INFO, "authentication.getCredentials() = " + authentication.getCredentials());
-        log.log(Level.INFO, "authentication.getPrincipal() = " + authentication.getPrincipal());
-        log.log(Level.INFO, "authentication.getDetails() = " + authentication.getDetails());
+        var byUsername = accounts.findByUsername(authentication.getPrincipal().toString());
+        if (byUsername.isEmpty())
+            return authentication;
+        var user = byUsername.get();
+        authentication.setAuthenticated(encoder().matches(authentication.getCredentials().toString(), user.getPasswordHash()));
         return authentication;
     }
 
