@@ -11,7 +11,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.comroid.auth.controller.FlowController;
 import org.comroid.auth.controller.GenericController;
 import org.comroid.auth.entity.AuthService;
-import org.comroid.auth.entity.UserAccount;
 import org.comroid.auth.model.AuthorizationRequest;
 import org.comroid.auth.repo.AccountRepository;
 import org.comroid.auth.repo.ServiceRepository;
@@ -22,10 +21,8 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderNotFoundException;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.ObjectPostProcessor;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.resource.OAuth2ResourceServerConfigurer;
@@ -43,27 +40,27 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
-import org.springframework.security.web.DefaultRedirectStrategy;
-import org.springframework.security.web.RedirectStrategy;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.ForwardAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.session.security.web.authentication.SpringSessionRememberMeServices;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 
-import java.io.IOException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.*;
-import java.util.logging.Level;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 @Component
 @Configuration
@@ -101,24 +98,6 @@ public class SecurityConfig {
                 .orElseThrow();
     }
 
-    private class TestProvider implements AuthenticationProvider {
-        @Override
-        public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-            return authentication;
-        }
-
-        @Override
-        public boolean supports(Class<?> authentication) {
-            return false;
-        }
-    }
-
-    @Bean
-    @Order(Ordered.HIGHEST_PRECEDENCE)
-    public AuthenticationProvider authenticationProvider() {
-        return new TestProvider();
-    }
-
     @Bean
     public RememberMeServices rememberMeServices() {
         return new SpringSessionRememberMeServices();
@@ -135,13 +114,16 @@ public class SecurityConfig {
         http
                 // Redirect to the login page when not authenticated from the
                 // authorization endpoint
-                .exceptionHandling().authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login")).and()
+                .exceptionHandling()
+                .accessDeniedHandler(
+                        (request, response, accessDeniedException) -> accessDeniedException.printStackTrace())
+                .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login")).and()
                 // Accept access tokens for User Info and/or Client Registration
                 .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
                 .userDetailsService(userDetailsService())
                 .authenticationManager(authenticationManager())
-                .authenticationProvider(authenticationProvider())
-                .rememberMe().rememberMeServices(rememberMeServices()).alwaysRemember(true).and()
+                .rememberMe()
+                .rememberMeServices(rememberMeServices()).alwaysRemember(true).and()
                 .formLogin()
         ;
 
@@ -153,15 +135,21 @@ public class SecurityConfig {
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http)
             throws Exception {
         http
-                .authorizeHttpRequests((authorize) -> authorize
-                        .requestMatchers("/login**", "/logout**", "/register**", "/error**", "/favicon.ico").permitAll()
-                        .anyRequest().fullyAuthenticated())
-                .exceptionHandling().authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login")).and()
+                .authorizeHttpRequests()
+                .requestMatchers(Stream.of("/login**", "/logout**", "/register**", "/error**", "/favicon.ico**")
+                        .map(AntPathRequestMatcher::new)
+                        .toArray(AntPathRequestMatcher[]::new)).permitAll()
+                .anyRequest().fullyAuthenticated().and()
+                .exceptionHandling()
+                .accessDeniedHandler(
+                        (request, response, accessDeniedException) -> accessDeniedException.printStackTrace())
+                .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login")).and()
                 .userDetailsService(userDetailsService())
                 .authenticationManager(authenticationManager())
-                .authenticationProvider(authenticationProvider())
-                .rememberMe().rememberMeServices(rememberMeServices()).alwaysRemember(true).and()
-                .formLogin().successHandler(new SimpleUrlAuthenticationSuccessHandler("/account"));
+                .rememberMe()
+                .rememberMeServices(rememberMeServices()).alwaysRemember(true).and()
+                .formLogin()
+                .successHandler(new SimpleUrlAuthenticationSuccessHandler("/account"));
                         //(request, response, authentication) -> accounts.setSessionId(((UserAccount)authentication.getPrincipal()).getId(),request.getSession(true).getId()));
         return http.build();
     }
