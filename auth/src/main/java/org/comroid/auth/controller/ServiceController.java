@@ -1,5 +1,7 @@
 package org.comroid.auth.controller;
 
+import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpSession;
 import org.comroid.auth.entity.AuthService;
 import org.comroid.auth.entity.UserAccount;
 import org.comroid.auth.repo.AccountRepository;
@@ -12,9 +14,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.PostConstruct;
-import javax.persistence.PostLoad;
-import javax.servlet.http.HttpSession;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -34,7 +33,7 @@ public class ServiceController {
     public void migrateDB() {
         services.migrateDB();
         StreamSupport.stream(services.findAll().spliterator(), false)
-                .filter(it -> it.getClient().getClientSecret() == null)
+                .filter(it -> it.getSecret() == null)
                 .peek(AuthService::regenerateSecret)
                 .forEach(services::save);
     }

@@ -1,5 +1,6 @@
 package org.comroid.auth.controller;
 
+import jakarta.servlet.http.HttpSession;
 import org.comroid.api.BitmaskAttribute;
 import org.comroid.auth.entity.UserAccount;
 import org.comroid.auth.repo.AccountRepository;
@@ -14,7 +15,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpSession;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;

@@ -2,6 +2,7 @@ package org.comroid.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.comroid.api.io.FileHandle;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -13,6 +14,7 @@ import org.springframework.boot.sql.init.DatabaseInitializationSettings;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
@@ -29,6 +31,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 @EntityScan(basePackages = "org.comroid.auth.entity")
+@ImportResource("classpath:beans.xml")
 @EnableJpaRepositories
 @ControllerAdvice
 @Configuration
@@ -47,8 +50,8 @@ public class AuthServer extends SpringBootServletInitializer implements WebMvcCo
     }
 
     @Bean
-    public DataSource dataSource() throws IOException {
-        var dbInfo = new ObjectMapper().readValue(DB_FILE.openReader(), DBInfo.class);
+    public DataSource dataSource(@Autowired ObjectMapper objectMapper) throws IOException {
+        var dbInfo = objectMapper.readValue(DB_FILE.openReader(), DBInfo.class);
         return DataSourceBuilder.create()
                 .url(dbInfo.url)
                 .username(dbInfo.username)
@@ -56,6 +59,7 @@ public class AuthServer extends SpringBootServletInitializer implements WebMvcCo
                 .build();
     }
 
+    /*
     @Bean
     public RoleHierarchy roleHierarchy() {
         RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
@@ -63,6 +67,7 @@ public class AuthServer extends SpringBootServletInitializer implements WebMvcCo
         roleHierarchy.setHierarchy(hierarchy);
         return roleHierarchy;
     }
+     */
 
     @Bean
     public JavaMailSender mailSender() throws IOException {

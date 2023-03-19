@@ -1,5 +1,6 @@
 package org.comroid.auth.controller;
 
+import jakarta.servlet.http.HttpSession;
 import org.comroid.auth.model.AuthorizationRequest;
 import org.comroid.auth.repo.AccountRepository;
 import org.comroid.auth.web.WebPagePreparator;
@@ -11,8 +12,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;

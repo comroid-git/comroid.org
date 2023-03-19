@@ -1,17 +1,11 @@
 package org.comroid.auth.entity;
 
+import jakarta.persistence.*;
 import org.comroid.auth.repo.ServiceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.oauth2.core.AuthorizationGrantType;
-import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
-import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
-import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 
-import javax.annotation.PostConstruct;
-import javax.persistence.*;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Set;
@@ -22,8 +16,6 @@ import java.util.stream.StreamSupport;
 @Entity
 @Table(name = "services")
 public class AuthService implements AuthEntity {
-    private static final ClientSettings clientSettings = ClientSettings.builder().build();
-    private static final TokenSettings tokenSettings = TokenSettings.builder().build();
     @Id
     private String uuid;
     @Column
@@ -38,12 +30,6 @@ public class AuthService implements AuthEntity {
     private String secret;
     @Column
     private long secretExpiry;
-    @Transient
-    private RegisteredClient client;
-
-    public RegisteredClient getClient() {
-        return client;
-    }
 
     @Override
     public UUID getUUID() {
@@ -100,26 +86,10 @@ public class AuthService implements AuthEntity {
         this.callbackUrl = callbackUrl;
         this.requiredScope = requiredScope;
         regenerateSecret();
-        init();
-    }
-
-    @PostLoad
-    public void init() {
-        client = RegisteredClient.withId(getId())
-                .clientId(getId())
-                .clientName(name)
-                .redirectUri(callbackUrl)
-                .clientSecret(secret)
-                .clientSecretExpiresAt(Instant.ofEpochMilli(secretExpiry))
-                .scope(requiredScope)
-                .clientAuthenticationMethods(mtd -> mtd.add(ClientAuthenticationMethod.CLIENT_SECRET_BASIC))
-                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                .build();
     }
 
     public void regenerateSecret() {
         secret = new BCryptPasswordEncoder().encode(UUID.randomUUID().toString());
         secretExpiry = Long.MAX_VALUE;
-        init();
     }
 }

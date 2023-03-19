@@ -1,9 +1,8 @@
 package org.comroid.auth.config;
 
-import com.nimbusds.jose.jwk.JWKSet;
-import com.nimbusds.jose.jwk.RSAKey;
-import com.nimbusds.jose.jwk.source.JWKSource;
-import com.nimbusds.jose.proc.SecurityContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.comroid.auth.controller.FlowController;
 import org.comroid.auth.controller.GenericController;
 import org.comroid.auth.entity.AuthService;
@@ -29,21 +28,11 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.core.OAuth2AccessToken;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.server.authorization.authentication.OAuth2AccessTokenAuthenticationToken;
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
-import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
-import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpStatusCodeException;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
@@ -55,17 +44,19 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @Component
 @Configuration
 @EnableWebSecurity
 @Order(Ordered.HIGHEST_PRECEDENCE)
-@Import(OAuth2AuthorizationServerConfiguration.class)
 public class SecurityConfig extends AbstractAuthenticationProcessingFilter implements UserDetailsService, AuthenticationManager {
     @Autowired
     private AccountRepository accounts;
     @Autowired
     private ServiceRepository services;
+    private Logger log = Logger.getLogger("SecurityConfig");
 
     protected SecurityConfig() {
         super(request -> "/oauth2/authorize".equals(request.getRequestURI()));
@@ -75,15 +66,20 @@ public class SecurityConfig extends AbstractAuthenticationProcessingFilter imple
     @Bean
     @Order(Ordered.HIGHEST_PRECEDENCE)
     public SecurityFilterChain authServerSecurityFilterChain(HttpSecurity security) throws Exception {
-        OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(security);
         security.formLogin().disable()
                 .userDetailsService(this)
                 .authenticationManager(this)
-                .oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
+                //.oauth2ResourceServer(OAuth2ResourceServerConfigurer::jwt)
                 .csrf().disable();
         return security.build();
     }
 
+    @Bean
+    public UserDetailsService users() {
+        return username -> accounts.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Username " + username + " not found"));
+    }
+
+    /*
     @Bean
     public RegisteredClientRepository clients() {
         return new RegisteredClientRepository() {
@@ -105,11 +101,6 @@ public class SecurityConfig extends AbstractAuthenticationProcessingFilter imple
                 return services.findById(clientId).map(AuthService::getClient).orElse(null);
             }
         };
-    }
-
-    @Bean
-    public UserDetailsService users() {
-        return username -> accounts.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Username " + username + " not found"));
     }
 
     @Bean
@@ -135,6 +126,7 @@ public class SecurityConfig extends AbstractAuthenticationProcessingFilter imple
         return AuthorizationServerSettings.builder()
                 .build();
     }
+     */
 
     private static KeyPair generateRsaKey() {
         KeyPair keyPair;
@@ -159,11 +151,11 @@ public class SecurityConfig extends AbstractAuthenticationProcessingFilter imple
     }
 
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
-        System.out.println("authentication.isAuthenticated() = " + authentication.isAuthenticated());
-        System.out.println("authentication.getAuthorities() = " + Arrays.toString(authentication.getAuthorities().toArray()));
-        System.out.println("authentication.getCredentials() = " + authentication.getCredentials());
-        System.out.println("authentication.getPrincipal() = " + authentication.getPrincipal());
-        System.out.println("authentication.getDetails() = " + authentication.getDetails());
+        log.log(Level.INFO,"authentication.isAuthenticated() = " + authentication.isAuthenticated());
+        log.log(Level.INFO,"authentication.getAuthorities() = " + Arrays.toString(authentication.getAuthorities().toArray()));
+        log.log(Level.INFO,"authentication.getCredentials() = " + authentication.getCredentials());
+        log.log(Level.INFO,"authentication.getPrincipal() = " + authentication.getPrincipal());
+        log.log(Level.INFO,"authentication.getDetails() = " + authentication.getDetails());
         return authentication;
     }
 
@@ -195,6 +187,8 @@ public class SecurityConfig extends AbstractAuthenticationProcessingFilter imple
         else if (account.isPresent()) {
             var validDuration = Duration.ofDays(30);
             var auth = account.get().createAuthentication(encoder(), validDuration);
+            return auth;
+            /*
             var accessToken = new OAuth2AccessToken(OAuth2AccessToken.TokenType.BEARER,
                     encoder().encode(account.get().getId() + ':' + service.get().getId() + ':' + sessionId),
                     Instant.now(),
@@ -204,6 +198,7 @@ public class SecurityConfig extends AbstractAuthenticationProcessingFilter imple
                     .or(() -> Optional.ofNullable(request.getParameter("redirect_uri")))
                     .ifPresent(redirectUri -> forwardResponse(response, redirectUri));
             return new OAuth2AccessTokenAuthenticationToken(service.get().getClient(), auth, accessToken);
+            */
         } else {
             FlowController.pendingAuthorizations.remove(sessionId);
             FlowController.pendingAuthorizations.put(sessionId, new AuthorizationRequest(

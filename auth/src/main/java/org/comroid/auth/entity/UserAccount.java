@@ -1,5 +1,9 @@
 package org.comroid.auth.entity;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import org.comroid.api.BitmaskAttribute;
 import org.comroid.util.Bitmask;
 import org.springframework.security.core.Authentication;
@@ -8,10 +12,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Collection;

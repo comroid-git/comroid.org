@@ -1,8 +1,7 @@
 plugins {
-    id 'war'
-    id 'idea'
     id 'application'
-    id 'org.springframework.boot' version '3.0.0'
+    id 'war'
+    id 'org.springframework.boot' version '3.0.4'
     id 'io.spring.dependency-management' version '1.1.0'
 }
 
@@ -37,12 +36,6 @@ task simplifyDist(type: Copy, dependsOn: 'bootWar') {
     System.out.printf("Simplifying file name to: %s/auth.war\n", target.getAbsolutePath())
 }
 
-dependencyManagement {
-    imports {
-        mavenBom 'org.springframework.session:spring-session-bom:2021.1.1'
-    }
-}
-
 dependencies {
     compileOnly 'org.jetbrains:annotations:23.0.0'
 
@@ -55,26 +48,35 @@ dependencies {
         implementation project(':api')
     }
 
-    // db dependencies
-    implementation 'org.mariadb.jdbc:mariadb-java-client'
+    // db
+    runtimeOnly 'com.mysql:mysql-connector-j'
 
-    // JSTL stuff
-    implementation 'javax.servlet:jstl:1.2'
-    implementation 'org.apache.tomcat.embed:tomcat-embed-jasper'
-    implementation 'jakarta.servlet:jakarta.servlet-api'
-    implementation 'jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api'
-    implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl'
-    implementation 'org.springframework.boot:spring-boot-starter-tomcat'
-
-    // spring
+    // data
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+
+    // web
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-mail'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+    // jstl
+    compileOnly 'jstl:jstl:1.2'
+    implementation 'jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api'
+    providedRuntime 'org.apache.tomcat.embed:tomcat-embed-jasper'
+    providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+
+    // security
     implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.session:spring-session-core'
-    implementation 'org.springframework.security:spring-security-oauth2-authorization-server:1.0.1'
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    implementation 'org.springframework.session:spring-session-jdbc'
+
+    // utility
+    compileOnly 'org.projectlombok:lombok'
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'io.projectreactor:reactor-test'
 }

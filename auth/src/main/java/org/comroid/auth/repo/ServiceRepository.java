@@ -1,12 +1,11 @@
 package org.comroid.auth.repo;
 
+import jakarta.annotation.PostConstruct;
 import org.comroid.auth.entity.AuthService;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.transaction.annotation.Transactional;
-
-import javax.annotation.PostConstruct;
 
 public interface ServiceRepository extends CrudRepository<AuthService, String> {
     @PostConstruct
