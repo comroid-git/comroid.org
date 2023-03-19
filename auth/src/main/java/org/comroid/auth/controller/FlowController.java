@@ -11,8 +11,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.ModelAndView;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,7 +25,8 @@ public class FlowController {
     private AccountRepository accounts;
 
     @GetMapping(value = "/login/{pending}")
-    public String flowLogin(
+    @ResponseBody
+    public ModelAndView flowLogin(
             Model model,
             @PathVariable("pending") String pending
     ) {
@@ -37,7 +38,8 @@ public class FlowController {
     }
 
     @PostMapping(value = "/login", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public String doFlowLogin(
+    @ResponseBody
+    public ModelAndView doFlowLogin(
             Model model,
             HttpSession session,
             @RequestParam("email") String email,
@@ -49,8 +51,8 @@ public class FlowController {
                 "pending", pending,
                 "action", "/flow/login"
         ));
-        if ("redirect:/account".equals(redir)) {
-            return "redirect:" + pendingAuthorizations.get(pending).externalForm();
+        if (redir != null && "redirect:/account".equals(redir.getViewName())) {
+            return new ModelAndView("redirect:" + pendingAuthorizations.get(pending).externalForm());
         }
         if (redir != null)
             return redir;

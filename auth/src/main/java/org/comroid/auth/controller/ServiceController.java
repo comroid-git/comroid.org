@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -39,9 +40,10 @@ public class ServiceController {
     }
 
     @GetMapping
-    public String index(Model model, HttpSession session) {
+    @ResponseBody
+    public ModelAndView index(Model model, HttpSession session) {
         if (session == null)
-            return "redirect:/login";
+            return new ModelAndView("redirect:/login");
         var account = accounts.findBySessionId(session.getId());
         var redirect = performChecks(model, account);
         if (redirect != null)
@@ -53,9 +55,10 @@ public class ServiceController {
     }
 
     @GetMapping("/add")
-    public String add(Model model, HttpSession session) {
+    @ResponseBody
+    public ModelAndView add(Model model, HttpSession session) {
         if (session == null)
-            return "redirect:/login";
+            return new ModelAndView("redirect:/login");
         var account = accounts.findBySessionId(session.getId());
         var redirect = performChecks(model, account);
         if (redirect != null)
@@ -66,7 +69,8 @@ public class ServiceController {
     }
 
     @PostMapping(value = "/add", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public String add(
+    @ResponseBody
+    public ModelAndView add(
             Model model,
             HttpSession session,
             @RequestParam("name") String name,
@@ -75,19 +79,20 @@ public class ServiceController {
             @RequestParam("requiredScope") String requiredScope
     ) {
         if (session == null)
-            return "redirect:/login";
+            return new ModelAndView("redirect:/login");
         var account = accounts.findBySessionId(session.getId());
         var redirect = performChecks(model, account);
         if (redirect != null)
             return redirect;
         services.save(new AuthService(name, url, callbackUrl, requiredScope));
-        return "redirect:/services";
+        return new ModelAndView("redirect:/services");
     }
 
     @GetMapping("/{id}")
-    public String view(Model model, @PathVariable("id") String id, HttpSession session) {
+    @ResponseBody
+    public ModelAndView view(Model model, @PathVariable("id") String id, HttpSession session) {
         if (session == null)
-            return "redirect:/login";
+            return new ModelAndView("redirect:/login");
         var account = accounts.findBySessionId(session.getId());
         var service = services.findById(id);
         var redirect = performChecks(model, account, service);
@@ -100,9 +105,10 @@ public class ServiceController {
     }
 
     @GetMapping("/{id}/edit")
-    public String edit(Model model, @PathVariable("id") String id, HttpSession session) {
+    @ResponseBody
+    public ModelAndView edit(Model model, @PathVariable("id") String id, HttpSession session) {
         if (session == null)
-            return "redirect:/login";
+            return new ModelAndView("redirect:/login");
         var account = accounts.findBySessionId(session.getId());
         var service = services.findById(id);
         var redirect = performChecks(model, account, service);
@@ -115,7 +121,8 @@ public class ServiceController {
     }
 
     @PostMapping(value = "/{id}/edit", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public String edit(
+    @ResponseBody
+    public ModelAndView edit(
             Model model,
             @PathVariable("id") String id,
             @RequestParam("name") String name,
@@ -126,7 +133,7 @@ public class ServiceController {
             HttpSession session
     ) {
         if (session == null)
-            return "redirect:/login";
+            return new ModelAndView("redirect:/login");
         var account = accounts.findBySessionId(session.getId());
         var service = services.findById(id);
         var redirect = performChecks(model, account, service);
@@ -140,26 +147,28 @@ public class ServiceController {
         if (regenerateSecret)
             found.regenerateSecret();
         services.save(found);
-        return "redirect:/services";
+        return new ModelAndView("redirect:/services");
     }
 
     @GetMapping("/{id}/delete")
-    public String delete(Model model, @PathVariable("id") String id, HttpSession session) {
+    @ResponseBody
+    public ModelAndView delete(Model model, @PathVariable("id") String id, HttpSession session) {
         if (session == null)
-            return "redirect:/login";
+            return new ModelAndView("redirect:/login");
         var account = accounts.findBySessionId(session.getId());
         var service = services.findById(id);
         var redirect = performChecks(model, account, service);
         if (redirect != null)
             return redirect;
         services.delete(service.get());
-        return "redirect:/services";
+        return new ModelAndView("redirect:/services");
     }
 
     @GetMapping("/bulk_delete")
-    public String bulkDelete(Model model, @RequestParam("ids") String ids, HttpSession session) {
+    @ResponseBody
+    public ModelAndView bulkDelete(Model model, @RequestParam("ids") String ids, HttpSession session) {
         if (session == null)
-            return "redirect:/login";
+            return new ModelAndView("redirect:/login");
         var account = accounts.findBySessionId(session.getId());
         var redirect = performChecks(model, account);
         if (redirect != null)
@@ -173,9 +182,10 @@ public class ServiceController {
     }
 
     @PostMapping("/bulk_delete")
-    public String bulkDeleteConfirm(Model model, @RequestParam("ids") String ids, HttpSession session) {
+    @ResponseBody
+    public ModelAndView bulkDeleteConfirm(Model model, @RequestParam("ids") String ids, HttpSession session) {
         if (session == null)
-            return "redirect:/login";
+            return new ModelAndView("redirect:/login");
         var account = accounts.findBySessionId(session.getId());
         var redirect = performChecks(model, account);
         if (redirect != null)
@@ -183,20 +193,20 @@ public class ServiceController {
         Arrays.stream(ids.split(";"))
                 .filter(Predicate.not(String::isBlank))
                 .forEach(services::deleteById);
-        return "redirect:/services";
+        return new ModelAndView("redirect:/services");
     }
 
-    private @Nullable String performChecks(Model model, Optional<UserAccount> account) {
+    private @Nullable ModelAndView performChecks(Model model, Optional<UserAccount> account) {
         return performChecks(model, account, Optional.empty(), false);
     }
 
-    private @Nullable String performChecks(Model model, Optional<UserAccount> account, Optional<AuthService> service) {
+    private @Nullable ModelAndView performChecks(Model model, Optional<UserAccount> account, Optional<AuthService> service) {
         return performChecks(model, account, service, true);
     }
 
-    private @Nullable String performChecks(Model model, Optional<UserAccount> account, Optional<AuthService> service, boolean requiresService) {
+    private @Nullable ModelAndView performChecks(Model model, Optional<UserAccount> account, Optional<AuthService> service, boolean requiresService) {
         if (account.isEmpty())
-            return "redirect:/login";
+            return new ModelAndView("redirect:/login");
         if (!account.get().hasPermission(UserAccount.Permit.AdminServices))
             return new WebPagePreparator(model, "generic/unauthorized")
                     .userAccount(account.get())

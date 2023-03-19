@@ -14,6 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -28,19 +29,21 @@ public class AccountController {
     private JavaMailSender mailSender;
 
     @GetMapping
-    public String index(HttpSession session) {
+    @ResponseBody
+    public ModelAndView index(HttpSession session) {
         if (session == null)
-            return "redirect:/login";
+            return new ModelAndView("redirect:/login");
         var account = accounts.findBySessionId(session.getId());
         if (account.isEmpty())
-            return "redirect:/login";
-        return "redirect:/account/" + account.get().getId();
+            return new ModelAndView("redirect:/login");
+        return new ModelAndView("redirect:/account/" + account.get().getId());
     }
 
     @GetMapping("/list")
-    public String list(Model model, HttpSession session) {
+    @ResponseBody
+    public ModelAndView list(Model model, HttpSession session) {
         if (session == null)
-            return "redirect:/login";
+            return new ModelAndView("redirect:/login");
         var account = accounts.findBySessionId(session.getId());
         if (account.isEmpty() || !account.get().hasPermission(UserAccount.Permit.AdminAccounts))
             return new WebPagePreparator(model, "generic/unauthorized")
@@ -53,40 +56,28 @@ public class AccountController {
     }
 
     @GetMapping("/{id}")
-    public String view(Model model, @PathVariable("id") String id) {
+    @ResponseBody
+    public ModelAndView view(Model model, @PathVariable("id") String id) {
         var account = accounts.findById(id);
         if (account.isEmpty())
-            return "redirect:/login";
+            return new ModelAndView("redirect:/login");
         return new WebPagePreparator(model, "account/view")
                 .userAccount(account.get())
                 .complete();
     }
 
-    @GetMapping("/edit")
-    public String edit(Model model, HttpSession session) {
-        if (session == null)
-            return "redirect:/login";
-        var account = accounts.findBySessionId(session.getId());
-        if (account.isEmpty())
-            return "redirect:/login";
-        return new WebPagePreparator(model, "account/edit")
-                .userAccount(account.get())
-                .setAttribute("editing", account.get())
-                .setAttribute("self", true)
-                .complete();
-    }
-
     @PostMapping(value = "/edit", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public String edit(
+    @ResponseBody
+    public ModelAndView edit(
             @RequestParam("username") String username,
             @RequestParam("email") String email,
             HttpSession session
     ) {
         if (session == null)
-            return "redirect:/login";
+            return new ModelAndView("redirect:/login");
         var account = accounts.findBySessionId(session.getId());
         if (account.isEmpty())
-            return "redirect:/login";
+            return new ModelAndView("redirect:/login");
         var found = account.get();
         found.setUsername(username);
         var prev = found.getEmail();
@@ -94,13 +85,29 @@ public class AccountController {
             initiateEmailVerification(accounts, mailSender, found);
         found.setEmail(email);
         accounts.save(found);
-        return "redirect:/account";
+        return new ModelAndView("redirect:/account");
+    }
+
+    @GetMapping("/edit")
+    @ResponseBody
+    public ModelAndView edit(Model model, HttpSession session) {
+        if (session == null)
+            return new ModelAndView("redirect:/login");
+        var account = accounts.findBySessionId(session.getId());
+        if (account.isEmpty())
+            return new ModelAndView("redirect:/login");
+        return new WebPagePreparator(model, "account/edit")
+                .userAccount(account.get())
+                .setAttribute("editing", account.get())
+                .setAttribute("self", true)
+                .complete();
     }
 
     @GetMapping("/{id}/edit")
-    public String edit(Model model, @PathVariable("id") String id, HttpSession session) {
+    @ResponseBody
+    public ModelAndView edit(Model model, @PathVariable("id") String id, HttpSession session) {
         if (session == null)
-            return "redirect:/login";
+            return new ModelAndView("redirect:/login");
         var account = accounts.findBySessionId(session.getId());
         var editing = accounts.findById(id);
         if (account.isEmpty() || editing.isEmpty() || !account.get().hasPermission(UserAccount.Permit.AdminAccounts))
@@ -115,7 +122,8 @@ public class AccountController {
     }
 
     @PostMapping(value = "/{id}/edit", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public String edit(
+    @ResponseBody
+    public ModelAndView edit(
             Model model,
             @PathVariable("id") String id,
             @RequestParam("username") String username,
@@ -128,11 +136,11 @@ public class AccountController {
             HttpSession session
     ) {
         if (session == null)
-            return "redirect:/login";
+            return new ModelAndView("redirect:/login");
         var account = accounts.findBySessionId(session.getId());
         var editing = accounts.findById(id);
         if (account.isEmpty() || editing.isEmpty())
-            return "redirect:/login";
+            return new ModelAndView("redirect:/login");
         if (!account.get().hasPermission(UserAccount.Permit.AdminAccounts))
             return new WebPagePreparator(model, "generic/unauthorized")
                     .userAccount(account.orElse(null))
@@ -150,22 +158,24 @@ public class AccountController {
         found.setExpired(expired);
         found.setCredentialsExpired(credentialsExpired);
         accounts.save(found);
-        return "redirect:/account/list";
+        return new ModelAndView("redirect:/account/list");
     }
 
     @GetMapping("/start_change_password")
-    public String startChangePassword(HttpSession session) {
+    @ResponseBody
+    public ModelAndView startChangePassword(HttpSession session) {
         if (session == null)
-            return "redirect:/login";
+            return new ModelAndView("redirect:/login");
         var account = accounts.findBySessionId(session.getId());
         if (account.isEmpty())
-            return "redirect:/login";
+            return new ModelAndView("redirect:/login");
         initiateChangePassword(accounts, mailSender, account.get());
-        return "redirect:/login";
+        return new ModelAndView("redirect:/login");
     }
 
     @GetMapping("/change_password")
-    public String changePassword(Model model, @RequestParam("code") String code) {
+    @ResponseBody
+    public ModelAndView changePassword(Model model, @RequestParam("code") String code) {
         var account = accounts.findByPasswordUpdateCode(code);
         if (account.isEmpty())
             return new WebPagePreparator(model, "generic/unauthorized")
@@ -177,7 +187,8 @@ public class AccountController {
     }
 
     @PostMapping(value = "/change_password", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    public String changePassword(
+    @ResponseBody
+    public ModelAndView changePassword(
             Model model,
             @RequestParam("code") String code,
             @RequestParam("password") String password,
@@ -199,22 +210,24 @@ public class AccountController {
         found.setPasswordHash(encoder.encode(password));
         found.setSessionId(null);
         accounts.save(found);
-        return "redirect:/login";
+        return new ModelAndView("redirect:/login");
     }
 
     @GetMapping("/email_verification")
-    public String initiateEmailVerification(HttpSession session) {
+    @ResponseBody
+    public ModelAndView initiateEmailVerification(HttpSession session) {
         if (session == null)
-            return "redirect:/login";
+            return new ModelAndView("redirect:/login");
         var account = accounts.findBySessionId(session.getId());
         if (account.isEmpty())
-            return "redirect:/login";
+            return new ModelAndView("redirect:/login");
         initiateEmailVerification(accounts, mailSender, account.get());
-        return "redirect:/account";
+        return new ModelAndView("redirect:/account");
     }
 
     @GetMapping("/verify_email")
-    public String verifyEmail(Model model, @RequestParam("code") String code) {
+    @ResponseBody
+    public ModelAndView verifyEmail(Model model, @RequestParam("code") String code) {
         var account = accounts.findByEmailVerificationCode(code);
         if (account.isEmpty() || account.get().isEmailVerified())
             return new WebPagePreparator(model, "generic/unauthorized")
@@ -224,7 +237,7 @@ public class AccountController {
         found.setEmailVerified(true);
         found.setEmailVerifyCode(null);
         accounts.save(found);
-        return "redirect:/account";
+        return new ModelAndView("redirect:/account");
     }
 
     public static void initiateEmailVerification(AccountRepository accounts, JavaMailSender mailSender, UserAccount account) {

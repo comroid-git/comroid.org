@@ -5,6 +5,7 @@ import org.comroid.auth.entity.AuthService;
 import org.comroid.auth.entity.UserAccount;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.ui.Model;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.util.List;
 
@@ -64,11 +65,11 @@ public class WebPagePreparator {
         return this;
     }
 
-    public String complete() {
+    public ModelAndView complete() {
         setAttribute("page", page);
         setAttribute("widget", widget);
         setAttribute("needLogin", needLogin);
         setAttribute("loggedIn", model.getAttribute("account") != null);
-        return frame;
+        return new ModelAndView(frame, model.asMap());
     }
 }
