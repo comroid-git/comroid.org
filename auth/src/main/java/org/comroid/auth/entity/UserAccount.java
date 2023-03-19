@@ -181,18 +181,14 @@ public class UserAccount implements AuthEntity, UserDetails {
         return Bitmask.isFlagSet(getPermit(), permission.getValue());
     }
 
-    public Authentication createAuthentication(PasswordEncoder encoder, Duration validDuration) {
-        return new AuthImpl(encoder, validDuration);
+    public Authentication createAuthentication(Duration validDuration) {
+        return new AuthImpl(validDuration);
     }
 
     private final class AuthImpl implements Authentication {
-        private final PasswordEncoder encoder;
-        private final String token;
         private final Instant validUntil;
 
-        private AuthImpl(PasswordEncoder encoder, Duration validDuration) {
-            this.encoder = encoder;
-            this.token = encoder.encode(composePassword());
+        private AuthImpl(Duration validDuration) {
             this.validUntil = Instant.now().plus(validDuration);
         }
 
@@ -207,7 +203,7 @@ public class UserAccount implements AuthEntity, UserDetails {
 
         @Override
         public Object getCredentials() {
-            return token;
+            return getPasswordHash();
         }
 
         @Override
@@ -222,7 +218,7 @@ public class UserAccount implements AuthEntity, UserDetails {
 
         @Override
         public boolean isAuthenticated() {
-            return validUntil.isBefore(Instant.now()) && encoder.matches(composePassword(), token);
+            return validUntil.isAfter(Instant.now());
         }
 
         @Override

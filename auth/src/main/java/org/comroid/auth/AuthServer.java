@@ -31,7 +31,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
-@ComponentScan(basePackages = "org.comroid.auth.controller")
+@ComponentScan(basePackages = {"org.comroid.auth.controller","org.comroid.auth.config"})
 @EntityScan(basePackages = "org.comroid.auth.entity")
 @ImportResource("classpath:beans.xml")
 @EnableJpaRepositories
