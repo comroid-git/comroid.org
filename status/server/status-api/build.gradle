@@ -58,7 +58,7 @@ compileJava.options.encoding = 'UTF-8'
 dependencies {
     if (findProject(':api') != null)
         api project(':api')
-    else api 'org.comroid:api:1.0'
+    else api 'org.comroid:api:1.+'
 
     // data
     api 'org.springframework.boot:spring-boot-starter-data-jpa'
