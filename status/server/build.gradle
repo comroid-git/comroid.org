@@ -13,7 +13,7 @@ allprojects {
     targetCompatibility = 17
 
     ext {
-        buildId = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis())
+        buildId = TimeUnit.MILLISECONDS.toMinutes(System.currentTimeMillis())
     }
     group 'org.comroid'
     version = '0.14.1' + '.' + buildId
