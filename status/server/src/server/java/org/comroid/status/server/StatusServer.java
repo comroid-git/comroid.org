@@ -1,14 +1,11 @@
 package org.comroid.status.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.io.FileHandle;
 import org.comroid.spring.pushover.PushoverConfig;
-import org.comroid.spring.pushover.PushoverService;
 import org.comroid.status.entity.Service;
 import org.comroid.status.server.auth.Token;
 import org.comroid.status.server.auth.TokenProvider;
@@ -24,7 +21,6 @@ import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import javax.sql.DataSource;
@@ -48,6 +44,10 @@ public class StatusServer implements ContextualProvider.Underlying {
     public static final FileHandle PUSHOVER_FILE = PATH_BASE.createSubFile("pushover.json");
     public static final String ADMIN_TOKEN_NAME = "admin$access$token";
     private static final Logger logger = LogManager.getLogger();
+
+    public static void main(String[] args) {
+        SpringApplication.run(StatusServer.class);
+    }
 
     @Bean
     public DataSource getDataSource(@Autowired ObjectMapper objectMapper) throws SQLException, IOException {
@@ -73,24 +73,6 @@ public class StatusServer implements ContextualProvider.Underlying {
     @Bean
     public ScheduledExecutorService getExecutor() {
         return Executors.newScheduledThreadPool(4);
-    }
-
-    public static void main(String[] args) {
-        SpringApplication.run(StatusServer.class);
-    }
-
-    @Lazy
-    @Autowired
-    private PushoverService pushover;
-
-    @PostConstruct
-    private void init() {
-        pushover.send("Status Server came online!");
-    }
-
-    @PreDestroy
-    private void shutdown() {
-        pushover.send("Status Server going offline!");
     }
 
     private static class DBInfo {

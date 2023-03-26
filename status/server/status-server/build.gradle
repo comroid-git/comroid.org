@@ -1,6 +1,5 @@
 plugins {
-    id 'war'
-    id 'application'
+     id 'application'
     id 'org.springframework.boot' version '3.0.5'
     id 'io.spring.dependency-management' version '1.1.0'
 }
@@ -25,18 +24,6 @@ if (isAutoDeploy) {
     evaluationDependsOn ':status:status-api'
 }
 
-war {
-    webAppDirectory = file("$parent.projectDir/src/server/webapp")
-}
-
-task simplifyDist(type: Copy, dependsOn: 'bootWar') {
-    from bootWar.outputs.files.singleFile
-    def target = file("$buildDir/dist")
-    into target
-    rename { String filename -> return "status.jar" }
-    System.out.printf("Simplifying file name to: %s/auth.jar\n", target.getAbsolutePath())
-}
-
 dependencies {
     compileOnly 'org.jetbrains:annotations:23.0.0'
 
@@ -58,20 +45,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
-    // jstl
-    compileOnly 'jstl:jstl:1.2'
-    implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl'
-    implementation 'jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api'
-    providedRuntime 'org.apache.tomcat.embed:tomcat-embed-jasper'
-    providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
-
     // notifier
     if (findProject(':spring-pushover') != null)
         implementation project(':spring-pushover')
     else implementation 'org.comroid:spring-pushover:0.+'
 
     // utility
-    implementation 'org.springframework.boot:spring-boot-starter-mail'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'

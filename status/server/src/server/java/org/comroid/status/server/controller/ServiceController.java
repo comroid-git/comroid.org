@@ -1,5 +1,6 @@
 package org.comroid.status.server.controller;
 
+import jakarta.annotation.PreDestroy;
 import org.comroid.spring.pushover.PushoverService;
 import org.comroid.status.entity.Service;
 import org.comroid.status.server.StatusServer;
@@ -41,12 +42,20 @@ public class ServiceController {
     }
 
     @PostConstruct
-    private void init() {
+    public void init() {
         serviceRepository.findAll().forEach(srv -> {
             if (!tokenProvider.hasToken(srv.getName()))
                 tokenProvider.generate(srv.getName());
         });
+
+        pushover.send("Status Server came online!");
     }
+
+    @PreDestroy
+    public void shutdown() {
+        pushover.send("Status Server going offline!");
+    }
+
 
     @ResponseBody
     @GetMapping("/service/{id}")
