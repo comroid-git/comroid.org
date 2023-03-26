@@ -1,5 +1,6 @@
 plugins {
-     id 'application'
+    id 'war'
+    id 'application'
     id 'org.springframework.boot' version '3.0.5'
     id 'io.spring.dependency-management' version '1.1.0'
 }
@@ -22,6 +23,14 @@ if (isAutoDeploy) {
     evaluationDependsOn ':status-api'
 } else {
     evaluationDependsOn ':status:status-api'
+}
+
+task simplifyDist(type: Copy, dependsOn: 'bootWar') {
+    from bootWar.outputs.files.singleFile
+    def target = file("$buildDir/dist")
+    into target
+    rename { String filename -> return "status.war" }
+    System.out.printf("Simplifying file name to: %s/status.war\n", target.getAbsolutePath())
 }
 
 dependencies {
