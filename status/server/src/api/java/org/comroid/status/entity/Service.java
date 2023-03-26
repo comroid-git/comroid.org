@@ -1,13 +1,13 @@
 package org.comroid.status.entity;
 
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import org.comroid.api.IntegerAttribute;
 import org.jetbrains.annotations.ApiStatus;
 import org.springframework.web.client.RestTemplate;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
 import java.net.URL;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;

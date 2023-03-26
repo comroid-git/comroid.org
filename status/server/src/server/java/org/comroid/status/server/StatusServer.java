@@ -5,6 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.comroid.api.ContextualProvider;
 import org.comroid.api.io.FileHandle;
+import org.comroid.spring.pushover.PushoverConfig;
 import org.comroid.status.entity.Service;
 import org.comroid.status.server.auth.Token;
 import org.comroid.status.server.auth.TokenProvider;
@@ -50,6 +51,15 @@ public class StatusServer implements ContextualProvider.Underlying {
                 .url(dbInfo.url)
                 .username(dbInfo.username)
                 .password(dbInfo.password)
+                .build();
+    }
+
+    @Bean
+    public PushoverConfig getPushoverConfig() {
+        return PushoverConfig.builder()
+                .token("a5ub3uhggeikz4tjc2xfbuqss3vpyc3h")
+                .user("uxrcbzbruyjjm8yutf3699bey53d73")
+                .title("status.comroid.org")
                 .build();
     }
 

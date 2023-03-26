@@ -40,27 +40,44 @@ task simplifyDist(type: Copy, dependsOn: 'bootWar') {
 dependencies {
     compileOnly 'org.jetbrains:annotations:23.0.0'
 
-    if (isAutoDeploy) {
-        implementation project(':status-api')
-    } else {
+    if (findProject(':status:status-api') != null)
         implementation project(':status:status-api')
-    }
+    else if (findProject(':status-api') != null)
+        implementation project(':status-api')
+    else implementation 'org.comroid:status-api:1.+'
 
-    // db dependencies
-    implementation 'org.mariadb.jdbc:mariadb-java-client'
+    // db
+    runtimeOnly 'com.mysql:mysql-connector-j'
 
-    // JSTL stuff
-    implementation 'javax.servlet:jstl:1.2'
-    implementation 'org.apache.tomcat.embed:tomcat-embed-jasper'
-    implementation 'jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api'
-    implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl'
-    providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
-
-    // spring
+    // data
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-data-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+
+    // web
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+    // jstl
+    compileOnly 'jstl:jstl:1.2'
+    implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl'
+    implementation 'jakarta.servlet.jsp.jstl:jakarta.servlet.jsp.jstl-api'
+    providedRuntime 'org.apache.tomcat.embed:tomcat-embed-jasper'
+    providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+
+    // notifier
+    if (findProject(':spring-pushover') != null)
+        implementation project(':spring-pushover')
+    else implementation 'org.comroid:spring-pushover:0.+'
+
+    // utility
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    // test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'io.projectreactor:reactor-test'
 }

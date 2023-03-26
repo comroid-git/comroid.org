@@ -1,5 +1,6 @@
 package org.comroid.status.server.controller;
 
+import org.comroid.spring.pushover.PushoverService;
 import org.comroid.status.entity.Service;
 import org.comroid.status.server.StatusServer;
 import org.comroid.status.server.auth.TokenProvider;
@@ -8,10 +9,12 @@ import org.comroid.status.server.exception.InvalidTokenException;
 import org.comroid.status.server.exception.ServiceNotFoundException;
 import org.comroid.status.server.repo.ServiceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,6 +22,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @Controller
+@ComponentScan(basePackageClasses = PushoverService.class)
 public class ServiceController {
     private final Map<String, Runnable> pollCancellation = new ConcurrentHashMap<>();
     @Autowired
@@ -27,6 +31,8 @@ public class ServiceController {
     private TokenProvider tokenProvider;
     @Autowired
     private ScheduledExecutorService scheduler;
+    @Autowired
+    private PushoverService pushover;
 
     @ResponseBody
     @GetMapping("/services")
@@ -116,6 +122,7 @@ public class ServiceController {
     }
 
     private Service updateStatus(Service service, Service.Status status) {
+        pushover.send("Service %s went %s!".formatted(service, status));
         service.setStatus(status);
         return serviceRepository.save(service);
     }

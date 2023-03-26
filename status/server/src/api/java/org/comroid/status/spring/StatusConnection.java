@@ -1,10 +1,9 @@
 package org.comroid.status.spring;
 
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
 
 @Component
 @ConfigurationPropertiesScan(basePackageClasses = StatusConnectionConfig.class)
