@@ -6,5 +6,5 @@ if (!filter_var($url, FILTER_VALIDATE_URL)) {
     die('Invalid URL');
 }
 
-echo shell_exec('curl -q -H "CacheControl: no-cache" '.$url.' | md5sum | grep -Po \'\\K\\w*(?=\\s)\'');
+echo shell_exec('curl -q -H "Cache-Control: no-cache" '.$url.' | md5sum | grep -Po \'\\K\\w*(?=\\s)\'');
 ?>
